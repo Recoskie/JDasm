@@ -1,0 +1,477 @@
+4D5A = signatrue
+
+9000 = size of last page
+
+0300 = number of 512 pages
+
+0000 = number of relocations
+
+0400 = header size in 512*number the value of these hex digets is 4 so 512*4=2048
+
+0000 = minimum ram memory to load program instructions in is 0
+
+FFFF = maxinum amount of memory program can posably use is 65535 bytes of a segment
+
+0000 = the Stack segment for stack memory
+
+B800 = the stack pointer the offset across the selected segment
+
+0000 = check sum
+
+0000 = the offset of the instructions across the code segment lowcation that the cpu will carry out
+
+0000 = the code sgement lowcation
+
+4000 = offset within header of reoactions entarys start
+
+0000 = overlay number
+
+0000000000000000 = reserved
+
+0000 = process ID
+
+0000 = INFO
+
+0000000000000000000000000000000000000000 = Resurved
+
+E0000000 = pe header lowcation it use to be reserved in the old com systems
+
+old 8086 cpu instuction set mmx binary
+
+0E = push cs
+1F = pop ds 
+BA0E00 = mov dX,00E0
+B409 = MOV AH,09
+CD21 = int 21
+B8014C = mov AX,4C01
+CD21 = int 21 = end program
+
+A=1 B=2 C=3 D=4 E=5 F=6
+G=7 H=8 I=9 J=A K=B L=C
+M=D N=E O=F P=10 Q=11 R=12
+S=13 T=14 U=15 V=16 W=17 X=18
+Y=19 Z=1A
+
+54 68 69 73 = This
+20 = space
+70 72 6F 67 72 61 6D = program 
+20 = space
+63 61 6E 6E 6F 74 = cannot
+20 = space
+62 65 = be
+20 = space
+72 75 6E = ran 
+20 = space
+69 6E = in
+20 = space
+44 4F 53 = DOS 
+20 = space
+6D 6F 64 65 2E = mode.
+24=end
+
+
+lowcate to PE header at E0=224
+
+50450000 = signatrue
+4C01 = porcessor instruction set type X80 mmx
+
+0400 = number of sections = 4
+
+56AD4945 = time date stamp
+
+00000000 = pointer to simbol table
+00000000 = number of simbols
+E000 = Size of op header
+0221 = chaicteristics 2102 0010000100000010
+
+0B01 = op signatrue
+
+0800 = linker version 8.0
+
+00600400 = size of code
+
+00800000 = size of intralize data
+00000000 = size of unintrlize data
+5CA60200 = address of entary point
+00100000 = base of code
+00700400 = base of data
+00000061 = image base
+00100000 = section alingment
+00020000 = file alingment
+0600 = major operating system = 6.0
+0000 = minor operating system = 0.0
+0600 = major image version = V6.0
+0000 = minor image version = V0.0
+0500 = major sub system version 5.0
+0000 = minor sub system version 0.0
+00000000 = win 32 version value
+00100500 = size of image
+00040000 = size of headers
+
+12D60500 = check sum
+0200 = sub system = V2.0
+4001 = dll caricteristices = 0000000101000000 = normal
+00000400 = size of stack resurve
+00100000 = size of stack comment
+00001000 = size of heap reserve
+00100000 = size of heap comment
+00000000 = load in flag registers in cpu all set 0
+
+10000000 = size of data array = 16
+
+export table
+
+006E0400 = address = 46E00
+BC010000 = size = 1BC
+
+import table
+
+44580400 = Ram address = 45844
+B4000000 = size = B4
+
+ends at Ram Address 45844-458F8
+
+resource files
+
+00B00400
+D0060000
+
+exceptions are not used set 0
+
+00000000
+00000000
+
+
+
+00C40400
+E01B0000
+
+00C00400
+C42A0000
+
+C0130000
+1C000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+40C40000
+40000000
+
+00000000
+00000000
+
+00100000
+78030000
+
+00000000
+00000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+Sections dumped to ram memory
+
+A=1 B=2 C=3 D=4 E=5 F=6
+G=7 H=8 I=9 J=A K=B L=C
+M=D N=E O=F P=10 Q=11 R=12
+S=13 T=14 U=15 V=16 W=17 X=18
+Y=19 Z=1A
+
+2E74657874000000 = .text
+
+BC5F0400 = dump size to ram = 45FBC
+00100000 = ram position to start dump = 1000
+00600400 = data read to dump to ram lowcation 00046000
+00040000 = data start position 00000400
+
+disk=400-46000
+
+ram text=1000-46FBC
+
+000000000000000000000000 = resurved
+20000060 = flag registeres set
+
+2E64617461000000 = .data
+A4330000
+00700400 = 47000
+00140000
+00640400
+000000000000000000000000 = resurved
+400000C0
+
+2E72737263000000 = .rsrc
+D0060000
+00B00400 = 4B000
+00080000
+00780400
+000000000000000000000000 = resurved
+40000040
+
+2E72656C6F630000 = .reloc
+40420000
+00C00400 = 4C000
+00440000
+00800400
+000000000000000000000000 = resurved
+40000042
+
+text=1000-46FBC
+
+dll-import=45844-458F8
+
+disk=400-46000
+
+we nead to figure out the starting position in disk drive relative to where the ram position would had ben
+
+loads in text data at position 1000 in ram the dll import starts at 45844 ram subtract the dump position 45844-1000=44844
+
+now we have our start position without the ram starting position then we add it to our disk start position that is 400
+
+44844+400=44C44 and ends at 44C44+B4=44CF8 meaning 44C44-44CF8
+
+i did it
+
+{485C0400
+00000000
+00000000
+925C0400
+50130000}=this is the dll my program messed up on it sould be NTDDLL.DLL
+
+uggg i forgot how to decode the array of five 32 bit numbers for the dll so now i have to look back at my old notes for the microsoft format
+
+this is how the dll gets it's ame from my decoder program DefaultMutableTreeNode I=new DefaultMutableTreeNode(ReadASCII(b,namepos));
+
+it creates a new tree nobe but it uses the "IO" program i made for reading diffrent types of string data from binary strems
+
+ReadASCII from my IO program uses in this case the string data is stoped from rendering when it reaches a 00 byte 8 bits of 8 binary stops the 2d graphics
+
+printing of carictes compeared by mathmatical 2d matics for the font of the selected font type each 8 bits are compeared and starts ploting the matrix at x and y on the monitor
+
+for the text data to display on monitor in pixles each 8 bits are compeared by the cpu by the rendereing program for the font containg the matrixes for the 2d font
+
+normaly 00 isa null chaicter it has no matrix refrenced to it to print the charicter in normal standard fonts so when 00 is compeared the bytes are sent to the rendere
+
+and plots the caricters inside the math drawing area of the window positioning enought about that now lets see B is the IO steam that reads the tructures of the
+
+files and the time date staps and atbrutes to a file the sucirty is usaly a compersion statment to the atrubtes set to a file a atrubte could easly
+
+be changes manualy to stop the io reading program from giving a access denide message plot out box in graphics mostly everything is math
+
+namepos is most likly the position the name for the dll should decode at and name pos is calculated by
+
+int namepos=(int)RVA2PA(ArrayDataDec[3]);
+
+if i remeber corectly RVA to PA stands for Ramm Addess to disk drive addrress i implmented the subtraction trick with it to find where to read in the disk drive relative t the ram dump address of the sections of the program
+
+ArrayDataDec[3] if i remeber corectly this is i whas rong i was thinking of some thing else
+
+long ArrayDataDec[]=new long[]{ReadDWORD(b,(int)pos),ReadDWORD(b,(int)(pos+4)),
+ReadDWORD(b,(int)(pos+8)),ReadDWORD(b,(int)(pos+12)),ReadDWORD(b,(int)(pos+16))};
+
+it creates an array holding the 5 32 bit numbers because java used sinigifyed numbers only half of a 32 bit integer could be used so i used longs that are 64 bit singnifyed numberbs but the first 32 bits of the 64 bis below half the number for singnifiyed
+
+so the thered number is the lowcation to the names of the dll lets see it is actuly 4 because arrays start at 0 it would be the secont from the last nuber
+
+{485C0400
+00000000
+00000000
+925C0400 = name byte position = 45C92 now i have to find whaT SECTION THIS ALINGS IN IN THE RAM DUMP OF THE PROGRAMS SECTIONS
+
+text=1000-46FBC is it less than or exceadsthe section
+
+it dose not excead the section cool
+
+so we move it back 1000
+
+45C92-1000=44C92
+
+so now if i move to byte position 44C92 it should contain the dll import name in acsii text rendering oh crud i forct to add 400 for the section position in the disk where it started reading it before dumping the data at 1000 hex in ram
+
+44C92+400=45092
+
+now lets test this at byte offset 45092 = 6E74646C6C2E646C6C00
+
+right at the first 00 byte that is the end of the dll name
+
+6E74646C6C2E646C6C=ntddll.dll
+
+omg it is ntddll.dll
+
+the only other error i can think of doing this is a io error in my io program in calculating this position because it gves back 0 when it calculates the position on disk
+
+so it loads the tow first letters of the dll program that are MZ for the dll signature the polish giy mota zoiskey that created the exe format i do not think i spelt his name corectly
+
+but i am all so polish my last name is polish because my dad is polish the polish last name RECOSKIE my first name is Damian
+
+now i know whiy the secont array had the corect functions of the dll because it did load the corect position it is just because it is reaching out side boundarys of the sections
+
+then what should i use as the boundarys the length it readsoff the disk or the load in size to ram ???????????????
+
+i am going to check a few values to see what value it moved out of range of for my io program to return position 0
+
+disk position 45092 is it outside the disk position of the text section ?
+
+
+2E74657874000000 = .text
+
+BC5F0400 = dump size to ram = 45FBC
+00100000 = ram position to start dump = 1000
+00600400 = data read to dump to ram lowcation = 46000
+00040000 = data start position = 400
+
+it is not outside any of the lowcation but the program decoded the value 925C0400 as E9610453 which is defently incorect
+
+but the rest where decoded perfectly fine ? so what i am going to do is add a print out of the io program converting the number 925C0400 in order to see the steps of what happened
+
+
+public long ReadDWORD(BufferedInputStream b,int pos){//position of dword to read
+byte b2[]=GetData(b,pos,4);String s1=B2H(b2[0]),s2=B2H(b2[1]),s3=B2H(b2[2]),s4=B2H(b2[3]);
+long l=Long.parseLong((s4+s3+s2+s1),16);
+
+//if((s4+s3+s2+s1).equals("00000000")){try{Thread.sleep(1000);}catch(Exception e){}}
+
+return(l);}
+
+
+that is exactly where the problem comes from and i think i had a coversion problem there before now what i am going to do is puse the progam as soon as it calculates any value that is
+
+E9610453
+
+and i am going to have the program print out a message to me when it reaches the first import element of the dll and i am going to have it show the before and after
+
+public long ReadDWORD(BufferedInputStream b,int pos){//position of dword to read
+byte b2[]=GetData(b,pos,4);String s1=B2H(b2[0]),s2=B2H(b2[1]),s3=B2H(b2[2]),s4=B2H(b2[3]);
+
+System.out.println("Before = "+(s4+s3+s2+s1));
+
+long l=Long.parseLong((s4+s3+s2+s1),16);
+
+System.out.println("Affter = "+Long.toHexString(l).toUpperCase());
+
+try{System.in.read();}catch(Exception e){}
+
+return(l);}
+
+006c0061 = 61006C00
+
+{485C0400 = 45C48
+00000000 = 0
+00000000 = 0
+925C0400 = 45C92
+50130000}=dll data import
+
+Dll Element Decode DEC conversion
+
+Before = 00490020
+Affter = 490020 = wrong
+
+Before = 8b55ff8b
+Affter = 8B55FF8B = wrong
+
+Before = 00043384
+Affter = 43384 = wrong
+
+Before = e9610453
+Affter = E9610453 = wrong
+
+Before = 00001350
+Affter = 1350 = wrong
+
+Dll Element Decode HEX
+Before = 00905a4d
+Affter = 905A4D = wrong
+
+Before = 00000003
+Affter = 3
+
+Before = 00000004
+Affter = 4
+Before = 0000ffff
+Affter = FFFF
+
+Before = 000000b8
+Affter = B8
+Before = 00045c86
+Affter = 45C86
+
+Before = 00046d5a
+Affter = 46D5A
+Before = 00045c70
+Affter = 45C70
+
+i think i know what the problem is now
+
+text=1000-46FBC
+
+45C48-1000=44C48
+
+44C48+400=45048
+
+45048=282696
+
+865C0400
+5A6D0400
+705C0400
+00000000 = end
+
+it works now yay
+
+50130000}
+
+6C590400
+00000000
+00000000
+90640400
+74100000
+
+2C5C0400
+00000000
+00000000
+C0640400
+34130000
+
+505B0400
+00000000
+00000000
+3A6A0400
+58120000
+
+F8580400
+00000000
+00000000
+046C0400
+00100000
+
+585C0400
+00000000
+00000000
+6A6C0400
+60130000
+
+3C5C0400
+00000000
+00000000
+DC6C0400
+44130000
+
+58590400
+00000000
+00000000
+4E6D0400
+60100000
+
+00000000
+00000000
+00000000
+00000000
+00000000 = array 0 terminated

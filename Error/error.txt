@@ -1,0 +1,124 @@
+Error well reading DIFxAPI.DLL
+
+the import table is tow reading the first element of the import table corectly that should end up beaing NTDLL.DLL it reads the signtrue at the start of the EXE "MZ"
+
+in order to fix this error i nead to decode DIFxAPI.DLL by hand in hex to see if i can lowcate NTDLL.DLL
+
+affter fixing the error in the read sections text document i now have another reading error
+
+this error happened with a lzw compresed exe but i am going to tempt to decode the sections by hand to find what
+
+messed up the program
+
+affter doing a closer decoding i now know it is not the sections that are being decoded inproperly it is most likly that there is other confliting sections
+
+with a size that reaches disk position 1600 and the sections went from smalest to bigest in decoding i found the problem
+
+it is time to see what Decode.DataDirPhisical=Decode.PhisicalDir(); is converting the addresses to
+
+//*****************************Converts Ram Address To Phisical File Address*****************************
+
+public long RVA2PA(long RVA)
+{long end=0;
+
+for(int i=0;i<Map.length;i+=4)
+{
+end=Map[i]+Map[i+1]; //= this adds the ram address starting position and the length of bytes to dump to ram lowcation giving me the ending of the position 
+
+if(Map[i+1]>=RVA&RVA<=end) //if the ram position is with in the size of this section  
+{
+return((RVA-Map[i+1])+Map[i+3]); //then convert it to a disk position form the starting read position of bytes in exe before thay where dumped at that ram position
+}
+}
+
+return(0);}
+
+now i am going to add print outs of wat this part of the code is converting the sections to
+
+there is one problem if the specifyed disk size read is smaler than the ram size then the section is smaler thanthe ram size this will take tow compersions
+
+public long RVA2PA(long RVA){long end=0;
+for(int i=0;i<Map.length;i+=4){if(Map[i]>Map[i+2])
+{end=Map[i]+Map[i+2];}else{end=Map[i]+Map[i+1];}
+if(Map[i+1]>=RVA&RVA<=end){return((RVA-Map[i+1])+Map[i+3]);}};return(0);}
+
+if this dose not work then i do not know what the problem is and i am going to have to back track agen oh i get it now
+
+if i had to dump each section and some ran in to each other thay would be overwiten instead of positiong some where else to all so get this affect i will have to have it check
+
+all dump pushistions that come affter and pic the one that is the farthest in and writes over with it's section
+
+in order to get this to work corectly i am going to have to remap the sections to where there starting and ending points are in ram only and the starting disk position
+
+but i am going to have to make splice-able so if one section writes over the midel of one section and data remains it splices the sections in to more sections
+
+uggg this gives me an headake because i have to make the algritham act just like ram memory well trying to make it as light wight as posable the easeist whay is to reconstruct wherethe exact end and start positions are
+
+now right here is where it converts each one in to the phisical disk positions
+
+//*******************recreates the Data Dir Array with The Physical Addresses of the file****************
+
+public long[] PhisicalDir(){long out[]=new long[DataDir.length];
+for(int i=0;i<DataDir.length;i+=2){out[i]=RVA2PA(DataDir[i]);out[i+1]=DataDir[i+1];}return(out);}
+
+but right after it dose this i am going to add a algritham at the end that finds what writes over top what
+
+ok lets think about how the exe algritham dumps the sections to ram
+
+00900000 = dump size
+00100000 = ram pos
+00000000 = read size
+00040000 = byte position
+
+first is the write size to ram and the position to start writing bytes
+
+if the selected size to read the exe file is smaler than the ram dump the rest of the ram size dump are 0 bytes so it is posable to overwite a section with 0 binary
+
+the read position is the position to read the exe at the size is how meny bytes will be read and dumped to ram if the ram dump size is bigger the rest of the data is null and is 00 hex bytesmeaing nuthing
+
+since the read size o the section is 00 the section writes out all 00 byte data so i have to make shere that my code outputs 00 bytes if such a thing hapens
+
+so section UPX0 clears the section for the UPX1 encoding what i should do is have it return -1 so i cn compeare that position in the section stage if theram position carrys a 0 value
+
+public long RVA2PA(long RVA)
+{
+long end=0;
+
+for(int i=0;i<Map.length;i+=4)
+{
+
+if(Map[i]>Map[i+2]){end=Map[i]+Map[i+2];}
+else{end=Map[i]+Map[i+1];}
+
+if(Map[i+1]>=RVA&RVA<=end){return((RVA-Map[i+1])+Map[i+3]);} //give back the disk position of the byte data
+
+}
+
+//section position cuntains no data it depends on the dump size atrbutes
+
+return(-1);}
+
+but now because of all these extra actrubutes it is vary important for me to create a new format for reading the sections i am going to create a sorting algritham
+
+here is a example
+
+00 90 00 78 00 66 45
+
+that is a section it dumps this section first then it dumps a nother section form a nother random position in the file and writes the bytes in ram over top
+
+in a sertant section like this
+
+00 99 99 99 99 66 45
+
+new bytes overwite the last from a diffrent position in the exe in order to make reading the exe as simple as posable i am going to have to create an array with the nesacary data to read it properly as if the sections where dumped to ram but whas not saving on ram memory
+
+the format of the positiong reading array will be the length of the bytes readable before a rewrite and the disk position the bytes started at and the ram position that thay sit at so it can convert the ram address to the disk read position
+
+disk starting position
+
+long FilePos=0;
+long ReadLength=0;
+long RamAddressPos=0;
+
+this is the new array type for reading as if i am reading from ram memory but i did not dump the sections it is time for me to update the io functions i made for my decoder
+

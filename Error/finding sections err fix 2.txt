@@ -1,0 +1,125 @@
+Data Drectory array
+
+00000000
+00000000
+
+import table
+
+98E90000 = E998 = ram pos
+38010000 = 138 = size
+
+resouce files dirs
+
+00C00000 = C000
+98290000
+
+00000000
+00000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+Load Configuration
+
+50B00000
+48000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+00000000
+00000000
+
+sections
+
+5550583000000000 = UPX0
+00900000 = dump size
+00100000 = ram pos
+00000000 = read size
+00040000 = byte position
+
+00900000 = 9000
+00100000 = 1000
+00000000 = 0 oh no
+00040000 = 400
+
+000000000000000000000000
+800000E0
+
+5550583100000000 = UPX1
+00200000
+00A00000
+00120000
+00040000
+000000000000000000000000
+400000E0
+
+2E72737263000000 = .rsrc
+00300000
+00C00000 = C000
+002C0000
+00160000 = 1600 = resouce position
+
+000000000000000000000000
+400000C0
+
+ok from how my program run during decodng i think it was the resource decoder that messed up and the resounce actual position is 1600 on disk because both
+
+the virtual address and the section dump match ram position C000 so there is no delta well diffrence.
+
+my porgram got the corect virtual address but i do not know whiy it got the wrong disk lowcation i might hav to have my program
+
+print out the sections as it decodes them so i can see if it decoded the sections of the exe corectly
+
+all the sections decoded corectly it is just how thay over lap
+
+to achive the over laping affect i will start with the last array element of the last section dumped to ram and go backwords this will let me adjust the positions that
+
+where over writen anything dumped to ram that eaceads te section size read on the disk drive will result in 00 byte data so the gaping betweAN THE SECTIONS VARY
+
+BETWEAN THE RAM DUMP SIZE SO LETS START WITH THE IF COMPERSION STAMENTS
+
+var RamPos=700;
+var RamDump=90;
+
+var DiskPos=10;
+var ReadLength=45;
+
+in this case the ram position is 700 we read the data at the position 10 off the disk drive and only read 45 of the bytes so only 45 bytes will be wrote to ram in the section 700 in ram the rest of the 90 is size will resault in bytes that are 00 hex this can all so posably over write a previous dumped section with 00 bytes
+
+this is where i create a new array type but these numbers space them selves in the reading boundarys as long as it has the corect disk read position
+
+in order to rewite the old sections overlaped by the previous ones i read the sections backwords i read the last section first and rewite the last ones around the boundarys
+of the first wait i just got a idea
+
+read the sections backwords compeare the section that matches to that section check for matching sections
+
+affter creating my new Algritham it fixed the problem but now i am planing on createing a new IO class all together that can work with ram addresses without dumping information to ram i call it
+
+VraFileReader
+
+it's propuse is to work with both ram addresses and normal addresses by seting "Vra mode" = VRA = Vertual Ram Address "mode".
