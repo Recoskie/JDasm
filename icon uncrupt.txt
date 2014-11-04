@@ -1,3 +1,0 @@
-00 00 01 00 01 00 30 30 00 00 01 00 00 00 XX XX XX XX 16 00 00 00
-
-X=32 bit reverser order number of color data size
