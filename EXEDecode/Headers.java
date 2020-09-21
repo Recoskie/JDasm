@@ -83,46 +83,50 @@ public class Headers extends Data
     return( new JTable( ( new Object[][]{ {"ERROR READING MZ Header"} } ), ( new Object[]{"ERR"} ) ) );
   }
 
-//*********************************creates the nicely styled data of the PE header***********************************
+  //*********************************creates the nicely styled data of the PE header***********************************
 
-/*public JTable ReadPE(RandomAccessFileV b)
-{
-String PES=b.ReadHEX((int)PE,4);
+  public JTable ReadPE(RandomAccessFileV b) throws IOException
+  {
+    Object RowData[][] = {
+      {"SIGNATRUE","",""}, //4
+      {"Machine","",""},   //2
+      {"Number Of Sections","",""}, //2
+      {"Time Date Stamp","",""},    //4
+      {"Pointer To Symbol Table","",""}, //4
+      {"Number Of Symbols","",""},       //4
+      {"Size Of OP Header","",""}, //2
+      {"Characteristics","",""}    //2
+    };
+    Object columnNames[] = {"Useage","Hex","Dec"};
 
-Object RowData[][]={
-{"SIGNATRUE","",""}, //4
-{"Machine","",""},   //2
-{"Number Of Sections","",""}, //2
-{"Time Date Stamp","",""},    //4
-{"Pointer To Symbol Table","",""}, //4
-{"Number Of Symbols","",""},       //4
-{"Size Of OP Header","",""}, //2
-{"Characteristics","",""}    //2
-};
-Object columnNames[]={"Useage","Hex","Dec"};
+    //data decode to table
 
-//data decode to table
+    byte[] bd = new byte[4]; b.read(bd); String PES = toHex(bd); RowData[0][1] = PES;
+  
+    bd = new byte[2]; b.read(bd); RowData[1][1] = toHex( bd );
+    b.read(bd); RowData[2][1] = toHex(bd); NOS = toShort( bd ); RowData[2][2] = NOS + "";
+    bd = new byte[4]; b.read(bd); RowData[3][1] = toHex( bd ); RowData[3][2] = toInt(bd) + "";
+    b.read(bd); RowData[4][1] = toHex( bd ); RowData[4][2] = toInt(bd) + "";
+    b.read(bd); RowData[5][1] = toHex( bd ); RowData[5][2] = toInt(bd) + "";
+    bd = new byte[2]; b.read(bd); RowData[6][1] = toHex( bd ); RowData[6][2] = toShort(bd) + "";
+    b.read(bd); RowData[7][1] = toHex( bd );
 
-NOS=b.ReadWORD((int)PE+6);
+    //return the output
 
-RowData[0][1]=PES;
-RowData[1][1]=b.ReadHEX((int)PE+4,2);
-RowData[2][1]=b.ReadHEX((int)PE+6,2);RowData[2][2]=NOS;
-RowData[3][1]=b.ReadHEX((int)PE+8,4);RowData[3][2]=b.ReadDWORD((int)PE+8);
-RowData[4][1]=b.ReadHEX((int)PE+12,4);RowData[4][2]=b.ReadDWORD((int)PE+12);
-RowData[5][1]=b.ReadHEX((int)PE+16,4);RowData[5][2]=b.ReadDWORD((int)PE+16);
-RowData[6][1]=b.ReadHEX((int)PE+20,2);RowData[6][2]=b.ReadWORD((int)PE+20);
-RowData[7][1]=b.ReadHEX((int)PE+22,2);
+    JTable T=new JTable(RowData,columnNames);
 
-//return the output
+    //Test if PE header was read correctly.
 
-JTable T=new JTable(RowData,columnNames);
+    if( PES.equals("50 45 00 00 ") ) { return(T); }
+    
+    //Else error.
 
-if(PES.equals("50 45 00 00 ")){return(T);}return(new JTable((new Object[][]{{"ERROR READING PE Header"}}),(new Object[]{"ERR"})));}
+    return( new JTable( ( new Object[][]{ {"ERROR READING PE Header"} } ), ( new Object[]{"ERR"} ) ) );
+  }
 
 //************************************************READ OP HEADER********************************************
 
-public JTable ReadOP(RandomAccessFileV b)
+/*public JTable ReadOP(RandomAccessFileV b)
 {
 PE+=24;
 String OPS=b.ReadHEX((int)PE,2);
