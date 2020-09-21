@@ -162,9 +162,13 @@ public class Headers extends Data
     };
     Object columnNames[]={"Usage","Hex","Dec"};
 
-    //data decode to table
+    //The OP header has different signature meanings.
+    //OP = 0B 01 is a 32 bit program, and 0B 02 is a 64 bit one. Additional 01 07 is a ROM image.
+    //Note I could compare numbers 267 for 32 bit, 523 for 64 bit, and 263 for a ROM image.
 
     b.read(b2); String OPS = toHex(b2); RowData[0][1] = OPS;
+
+    is64bit = OPS.equals("0B 02 ");
 
     b.read(b1); RowData[1][1] = toHex(b1); RowData[1][2] = ((int)b1[0]) + "";
     b.read(b1); RowData[2][1] = toHex(b1); RowData[2][2] = ((int)b1[0]) + "";
@@ -195,10 +199,26 @@ public class Headers extends Data
     b.read(b2); RowData[22][1] = toHex(b2);
     b.read(b2); RowData[23][1] = toHex(b2); RowData[23][2] = toShort(b2);
 
-    b.read(b4); RowData[24][1] = toHex(b4); RowData[24][2] = toInt(b4);
-    b.read(b4); RowData[25][1] = toHex(b4); RowData[25][2] = toInt(b4);
-    b.read(b4); RowData[26][1] = toHex(b4); RowData[26][2] = toInt(b4);
-    b.read(b4); RowData[27][1] = toHex(b4); RowData[27][2] = toInt(b4);
+    //64 bit.
+
+    if(is64bit)
+    {
+      b.read(b8); RowData[24][1] = toHex(b8); RowData[24][2] = toLong(b8);
+      b.read(b8); RowData[25][1] = toHex(b8); RowData[25][2] = toLong(b8);
+      b.read(b8); RowData[26][1] = toHex(b8); RowData[26][2] = toLong(b8);
+      b.read(b8); RowData[27][1] = toHex(b8); RowData[27][2] = toLong(b8);
+    }
+
+    //32 bit.
+
+    else
+    {
+      b.read(b4); RowData[24][1] = toHex(b4); RowData[24][2] = toInt(b4);
+      b.read(b4); RowData[25][1] = toHex(b4); RowData[25][2] = toInt(b4);
+      b.read(b4); RowData[26][1] = toHex(b4); RowData[26][2] = toInt(b4);
+      b.read(b4); RowData[27][1] = toHex(b4); RowData[27][2] = toInt(b4);
+    }
+
     b.read(b4); RowData[28][1] = toHex(b4); RowData[28][2] = toInt(b4);
     b.read(b4); DDS = toInt(b4); RowData[29][1] = toHex(b4); RowData[29][2] = DDS;
   
@@ -210,7 +230,7 @@ public class Headers extends Data
 
     //If op header was read properly.
 
-    if(OPS.equals("0B 01 ")) { return(T); }
+    if( OPS.equals("0B 01 ") || is64bit ) { return(T); }
   
     //Else error.
 
@@ -218,7 +238,7 @@ public class Headers extends Data
   }
 
   //************************************************READ Data Directory Array********************************************
-  //Each section is given in virtual address position if used.
+  //Each section is given in virtual address position if used. Sections that are not used have a virtual address of 0.
   //The next header defines the sections that are to be read and placed in ram memory.
 
   public JTable ReadDataDrectory(RandomAccessFileV b) throws IOException

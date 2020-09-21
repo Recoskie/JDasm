@@ -9,6 +9,10 @@ public class Data
   public static String DLLName[] = new String[0];
   public static JTable DLLTable[] = new JTable[0];
 
+  //The PE header changes format if program is 64 bit.
+
+  public static boolean is64bit = false;
+
   //PE Header Location.
 
   public static long PE = 0;
