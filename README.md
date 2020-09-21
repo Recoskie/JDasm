@@ -20,3 +20,4 @@ I thought it was cool to write it in JavaScript. I will be changing it to java a
 <a href="https://github.com/Recoskie/X86-64-CPU-Binary-Code-Disassembler-JS">Disassembler</a>
 
 I could see this as being an fun online tool. I plan on building a java branch.
+..
