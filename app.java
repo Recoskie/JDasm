@@ -317,8 +317,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
       }
       catch(Exception e)
       {
-        System.out.println(e.getCause()+"");
-        JOptionPane.showMessageDialog(null,"Unable to Load Decode Program For This File Format");
+        JOptionPane.showMessageDialog(null,"Unable to Load Decode Program For This File Format!");
       }
 
       try
@@ -326,7 +325,10 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
         file = new RandomAccessFileV( Path + "\\" + f, "rw" );
         ((ExploerEventListener)UsedDecoder).Read( Path + "\\" + f, file );
       }
-      catch(Exception er) { System.out.println("cant read file!"); }
+      catch(Exception er)
+      {
+        JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file"); Reset();
+      }
     }
 
     else if( !Debug )
