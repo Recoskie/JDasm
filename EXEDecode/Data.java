@@ -37,6 +37,10 @@ public class Data
 
   public static String FDLL[][] = new String[0][0];
 
+  //Different lengths of byte buffers for reading different data types.
+
+  public static final byte[] b1 = new byte[1], b2 = new byte[2], b4 = new byte[4], b8 = new byte[8];
+
   //Methods to convert bytes to different data types.
 
   public String toHex( byte[] b )

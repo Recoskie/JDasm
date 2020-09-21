@@ -36,39 +36,33 @@ public class Headers extends Data
     
     Object columnNames[]={"Usage","Hex","Dec"};
 
-    byte[] bd = new byte[2]; b.read(bd);
+    b.read(b2); String MZ = toHex( b2 ); rowData[0][1] = MZ;
 
-    String MZ = toHex( bd ); rowData[0][1] = MZ;
+    b.read(b2); rowData[1][1] = toHex(b2); rowData[1][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[2][1] = toHex(b2); rowData[2][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[3][1] = toHex(b2); rowData[3][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[4][1] = toHex(b2); rowData[4][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[5][1] = toHex(b2); rowData[5][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[6][1] = toHex(b2); rowData[6][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[7][1] = toHex(b2); rowData[7][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[8][1] = toHex(b2); rowData[8][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[9][1] = toHex(b2); rowData[9][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[10][1] = toHex(b2); rowData[10][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[11][1] = toHex(b2); rowData[11][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[12][1] = toHex(b2); rowData[12][2] = Short.toUnsignedInt( toShort(b2) ) + "";
+    b.read(b2); rowData[13][1] = toHex(b2); rowData[13][2] = Short.toUnsignedInt( toShort(b2) ) + "";
 
-    //String.format( "%1$02X", ); Convert number to hex sting.
-
-    b.read(bd); rowData[1][1] = toHex(bd); rowData[1][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[2][1] = toHex(bd); rowData[2][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[3][1] = toHex(bd); rowData[3][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[4][1] = toHex(bd); rowData[4][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[5][1] = toHex(bd); rowData[5][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[6][1] = toHex(bd); rowData[6][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[7][1] = toHex(bd); rowData[7][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[8][1] = toHex(bd); rowData[8][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[9][1] = toHex(bd); rowData[9][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[10][1] = toHex(bd); rowData[10][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[11][1] = toHex(bd); rowData[11][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[12][1] = toHex(bd); rowData[12][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-    b.read(bd); rowData[13][1] = toHex(bd); rowData[13][2] = Short.toUnsignedInt( toShort(bd) ) + "";
-
-    bd = new byte[8]; b.read(bd); rowData[14][1] = toHex(bd);
+    b.read(b8); rowData[14][1] = toHex(b8);
     
-    bd = new byte[2]; b.read(bd); rowData[15][1] = toHex(bd); rowData[15][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(b2); rowData[15][1] = toHex(b2); rowData[15][2] = Short.toUnsignedInt( toShort(b2) ) + "";
 
-    b.read(bd); rowData[16][1] = toHex(bd); rowData[16][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(b2); rowData[16][1] = toHex(b2); rowData[16][2] = Short.toUnsignedInt( toShort(b2) ) + "";
 
-    bd = new byte[20]; b.read(bd); rowData[17][1] = toHex(bd);
+    byte[] bd = new byte[20]; b.read(bd); rowData[17][1] = toHex(bd);
 
     //Location to the PE header.
 
-    bd = new byte[4]; b.read(bd);
-    
-    rowData[18][1] = toHex(bd); PE = toInt(bd); rowData[18][2] = PE + "";
+    b.read(b4); rowData[18][1] = toHex(b4); PE = toInt(b4); rowData[18][2] = PE + "";
 
     //The section before the PE header is the small MZ dos program.
     
@@ -101,15 +95,15 @@ public class Headers extends Data
 
     //data decode to table
 
-    byte[] bd = new byte[4]; b.read(bd); String PES = toHex(bd); RowData[0][1] = PES;
+    b.read(b4); String PES = toHex(b4); RowData[0][1] = PES;
   
-    bd = new byte[2]; b.read(bd); RowData[1][1] = toHex( bd );
-    b.read(bd); RowData[2][1] = toHex(bd); NOS = toShort( bd ); RowData[2][2] = NOS + "";
-    bd = new byte[4]; b.read(bd); RowData[3][1] = toHex( bd ); RowData[3][2] = toInt(bd) + "";
-    b.read(bd); RowData[4][1] = toHex( bd ); RowData[4][2] = toInt(bd) + "";
-    b.read(bd); RowData[5][1] = toHex( bd ); RowData[5][2] = toInt(bd) + "";
-    bd = new byte[2]; b.read(bd); RowData[6][1] = toHex( bd ); RowData[6][2] = toShort(bd) + "";
-    b.read(bd); RowData[7][1] = toHex( bd );
+    b.read(b2); RowData[1][1] = toHex( b2 );
+    b.read(b2); RowData[2][1] = toHex(b2); NOS = toShort( b2 ); RowData[2][2] = NOS + "";
+    b.read(b4); RowData[3][1] = toHex( b4 ); RowData[3][2] = toInt(b4) + "";
+    b.read(b4); RowData[4][1] = toHex( b4 ); RowData[4][2] = toInt(b4) + "";
+    b.read(b4); RowData[5][1] = toHex( b4 ); RowData[5][2] = toInt(b4) + "";
+    b.read(b2); RowData[6][1] = toHex( b2 ); RowData[6][2] = toShort(b2) + "";
+    b.read(b2); RowData[7][1] = toHex( b2 );
 
     //return the output
 
@@ -124,111 +118,112 @@ public class Headers extends Data
     return( new JTable( ( new Object[][]{ {"ERROR READING PE Header"} } ), ( new Object[]{"ERR"} ) ) );
   }
 
-//************************************************READ OP HEADER********************************************
+  //************************************************READ OP HEADER********************************************
 
-/*public JTable ReadOP(RandomAccessFileV b)
-{
-PE+=24;
-String OPS=b.ReadHEX((int)PE,2);
+  public JTable ReadOP(RandomAccessFileV b) throws IOException
+  {
+    Object RowData[][] = {
+      {"SIGNATRUE","",""}, //2
 
-Object RowData[][]={
-{"SIGNATRUE","",""}, //2
+      {"Major Linker Version","",""},   //1
+      {"Minor Linker Version","",""}, //1
 
-{"Major Linker Version","",""},   //1
-{"Minor Linker Version","",""}, //1
+      {"Size Of Code","",""},    //4
+      {"Size Of Initialized Data","",""}, //4
+      {"Size Of Uninitialized Data","",""},       //4
+      {"Address Of Entry Point","",""}, //4
+      {"Base Of Code","",""},    //4
+      {"Base Of Data","",""},    //4
+      {"Image Base","",""},    //4
+      {"Section Alignment","",""},    //4
+      {"File Alignment","",""},    //4
 
-{"Size Of Code","",""},    //4
-{"Size Of Initialized Data","",""}, //4
-{"Size Of Uninitialized Data","",""},       //4
-{"Address Of Entry Point","",""}, //4
-{"Base Of Code","",""},    //4
-{"Base Of Data","",""},    //4
-{"Image Base","",""},    //4
-{"Section Alignment","",""},    //4
-{"File Alignment","",""},    //4
+      {"Major Operating System Version","",""},    //2
+      {"Minor Operating System Version","",""},    //2
+      {"Major Image Version","",""},    //2
+      {"Minor Image Version","",""},    //2
+      {"Major Sub system Version","",""},    //2
+      {"Minor Sub system Version","",""},    //2
 
-{"Major Operating System Version","",""},    //2
-{"Minor Operating System Version","",""},    //2
-{"Major Image Version","",""},    //2
-{"Minor Image Version","",""},    //2
-{"Major Sub system Version","",""},    //2
-{"Minor Sub system Version","",""},    //2
+      {"Win 32 Version Value","",""},    //4
+      {"Size Of Image","",""},    //4
+      {"Size Of Headers","",""},    //4
+      {"Check Sum","",""},    //4
 
-{"Win 32 Version Value","",""},    //4
-{"Size Of Image","",""},    //4
-{"Size Of Headers","",""},    //4
-{"Check Sum","",""},    //4
+      {"Sub system","",""},    //2
+      {"Dll Characteristics","",""},     //2
 
-{"Sub system","",""},    //2
-{"Dll Characteristics","",""},     //2
+      {"Size Of Stack Reserve","",""},     //4
+      {"Size Of Stack Commit","",""},     //4
+      {"Size Of Heap Reserve","",""},     //4
+      {"Size Of Heap Commit","",""},     //4
+      {"Loader Flags","",""},     //4
+      {"Data Directory Array Size","",""},     //4
+    };
+    Object columnNames[]={"Usage","Hex","Dec"};
 
-{"Size Of Stack Reserve","",""},     //4
-{"Size Of Stack Commit","",""},     //4
-{"Size Of Heap Reserve","",""},     //4
-{"Size Of Heap Commit","",""},     //4
-{"Loader Flags","",""},     //4
-{"Data Drectory Array Size","",""},     //4
-};
-Object columnNames[]={"Useage","Hex","Dec"};
+    //data decode to table
 
-//data decode to table
+    b.read(b2); String OPS = toHex(b2); RowData[0][1] = OPS;
 
-DDS=(int)b.ReadDWORD((int)PE+92);
+    b.read(b1); RowData[1][1] = toHex(b1); RowData[1][2] = ((int)b1[0]) + "";
+    b.read(b1); RowData[2][1] = toHex(b1); RowData[2][2] = ((int)b1[0]) + "";
 
-System.out.println("Data Drector Array Size = "+DDS+"");
+    b.read(b4); RowData[3][1] = toHex(b4); RowData[3][2] = toInt(b4);
+    b.read(b4); RowData[4][1] = toHex(b4); RowData[4][2] = toInt(b4);
+    b.read(b4); RowData[5][1] = toHex(b4); RowData[5][2] = toInt(b4);
+    b.read(b4); RowData[6][1] = toHex(b4); RowData[6][2] = toInt(b4);
+    b.read(b4); RowData[7][1] = toHex(b4); RowData[7][2] = toInt(b4);
+    b.read(b4); RowData[8][1] = toHex(b4); RowData[8][2] = toInt(b4);
 
-RowData[0][1]=OPS;
+    b.read(b4); RowData[9][1] = toHex(b4); RowData[9][2] = toInt(b4);
+    b.read(b4); RowData[10][1] = toHex(b4); RowData[10][2] = toInt(b4);
+    b.read(b4); RowData[11][1] = toHex(b4); RowData[11][2] = toInt(b4);
 
-RowData[1][1]=b.ReadHEX((int)PE+2,1);RowData[1][2]=b.ReadBYTE((int)PE+2);
-RowData[2][1]=b.ReadHEX((int)PE+3,1);RowData[2][2]=b.ReadBYTE((int)PE+3);
+    b.read(b2); RowData[12][1] = toHex(b2); RowData[12][2] = toShort(b2);
+    b.read(b2); RowData[13][1] = toHex(b2); RowData[13][2] = toShort(b2);
+    b.read(b2); RowData[14][1] = toHex(b2); RowData[14][2] = toShort(b2);
+    b.read(b2); RowData[15][1] = toHex(b2); RowData[15][2] = toShort(b2);
+    b.read(b2); RowData[16][1] = toHex(b2); RowData[16][2] = toShort(b2);
+    b.read(b2); RowData[17][1] = toHex(b2); RowData[17][2] = toShort(b2);
 
-RowData[3][1]=b.ReadHEX((int)PE+4,4);RowData[3][2]=b.ReadDWORD((int)PE+4);
-RowData[4][1]=b.ReadHEX((int)PE+8,4);RowData[4][2]=b.ReadDWORD((int)PE+8);
-RowData[5][1]=b.ReadHEX((int)PE+12,4);RowData[5][2]=b.ReadDWORD((int)PE+12);
-RowData[6][1]=b.ReadHEX((int)PE+16,4);RowData[6][2]=b.ReadDWORD((int)PE+16);
-RowData[7][1]=b.ReadHEX((int)PE+20,4);RowData[7][2]=b.ReadDWORD((int)PE+20);
-RowData[8][1]=b.ReadHEX((int)PE+24,4);RowData[8][2]=b.ReadDWORD((int)PE+24);
+    b.read(b4); RowData[18][1] = toHex(b4); RowData[18][2] = toInt(b4);
+    b.read(b4); RowData[19][1] = toHex(b4); RowData[19][2] = toInt(b4);
+    b.read(b4); RowData[20][1] = toHex(b4); RowData[20][2] = toInt(b4);
+    b.read(b4); RowData[21][1] = toHex(b4); RowData[21][2] = toInt(b4);
 
-RowData[9][1]=b.ReadHEX((int)PE+28,4);RowData[9][2]=b.ReadDWORD((int)PE+28);
-RowData[10][1]=b.ReadHEX((int)PE+32,4);RowData[10][2]=b.ReadDWORD((int)PE+32);
-RowData[11][1]=b.ReadHEX((int)PE+36,4);RowData[11][2]=b.ReadDWORD((int)PE+36);
+    b.read(b2); RowData[22][1] = toHex(b2);
+    b.read(b2); RowData[23][1] = toHex(b2); RowData[23][2] = toShort(b2);
 
-RowData[12][1]=b.ReadHEX((int)PE+40,2);RowData[12][2]=b.ReadWORD((int)PE+40);
-RowData[13][1]=b.ReadHEX((int)PE+42,2);RowData[13][2]=b.ReadWORD((int)PE+42);
-RowData[14][1]=b.ReadHEX((int)PE+44,2);RowData[14][2]=b.ReadWORD((int)PE+44);
-RowData[15][1]=b.ReadHEX((int)PE+46,2);RowData[15][2]=b.ReadWORD((int)PE+46);
-RowData[16][1]=b.ReadHEX((int)PE+48,2);RowData[16][2]=b.ReadWORD((int)PE+48);
-RowData[17][1]=b.ReadHEX((int)PE+50,2);RowData[17][2]=b.ReadWORD((int)PE+50);
+    b.read(b4); RowData[24][1] = toHex(b4); RowData[24][2] = toInt(b4);
+    b.read(b4); RowData[25][1] = toHex(b4); RowData[25][2] = toInt(b4);
+    b.read(b4); RowData[26][1] = toHex(b4); RowData[26][2] = toInt(b4);
+    b.read(b4); RowData[27][1] = toHex(b4); RowData[27][2] = toInt(b4);
+    b.read(b4); RowData[28][1] = toHex(b4); RowData[28][2] = toInt(b4);
+    b.read(b4); DDS = toInt(b4); RowData[29][1] = toHex(b4); RowData[29][2] = DDS;
+  
+    //return the output
 
-RowData[18][1]=b.ReadHEX((int)PE+52,4);RowData[18][2]=b.ReadDWORD((int)PE+52);
-RowData[19][1]=b.ReadHEX((int)PE+56,4);RowData[19][2]=b.ReadDWORD((int)PE+56);
-RowData[20][1]=b.ReadHEX((int)PE+60,4);RowData[20][2]=b.ReadDWORD((int)PE+60);
-RowData[21][1]=b.ReadHEX((int)PE+64,4);RowData[21][2]=b.ReadDWORD((int)PE+64);
+    JTable T = new JTable( RowData,columnNames );
 
-RowData[22][1]=b.ReadHEX((int)PE+68,2);
-RowData[23][1]=b.ReadHEX((int)PE+70,2);RowData[23][2]=b.ReadWORD((int)PE+70);
+    DDS *= 3;
 
-RowData[24][1]=b.ReadHEX((int)PE+72,4);RowData[24][2]=b.ReadDWORD((int)PE+72);
-RowData[25][1]=b.ReadHEX((int)PE+76,4);RowData[25][2]=b.ReadDWORD((int)PE+76);
-RowData[26][1]=b.ReadHEX((int)PE+80,4);RowData[26][2]=b.ReadDWORD((int)PE+80);
-RowData[27][1]=b.ReadHEX((int)PE+84,4);RowData[27][2]=b.ReadDWORD((int)PE+84);
-RowData[28][1]=b.ReadHEX((int)PE+88,4);RowData[28][2]=b.ReadDWORD((int)PE+88);
-RowData[29][1]=b.ReadHEX((int)PE+92,4);RowData[29][2]=DDS;
-//return the output
+    //If op header was read properly.
 
-JTable T=new JTable(RowData,columnNames);
+    if(OPS.equals("0B 01 ")) { return(T); }
+  
+    //Else error.
 
-DDS*=3;
+    return( new JTable( ( new Object[][]{ {"ERROR READING OP Header"} } ), ( new Object[]{"ERR"} ) ) );
+  }
 
-if(OPS.equals("0B 01 ")){return(T);}return(new JTable((new Object[][]{{"ERROR READING OP Header"}}),(new Object[]{"ERR"})));}
+//************************************************READ Data Directory Array********************************************
 
-//************************************************READ Data Drectory Array********************************************
-
-public JTable ReadDataDrectory(RandomAccessFileV b)
+/*public JTable ReadDataDrectory(RandomAccessFileV b)
 {
 PE+=96;
 
-System.out.println("Loading Data Drectory Array pos = "+PE+"");
+System.out.println("Loading Data Directory Array pos = "+PE+"");
 
 //names of the data array lowcations
 

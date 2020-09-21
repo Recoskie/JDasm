@@ -43,9 +43,9 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     try
     {
       try { DebugOut[0] = Header.ReadMZ( file ); } catch(Exception e) { }
-      /*try { DebugOut[1] = Header.ReadPE( file ); } catch(Exception e) { }
+      try { DebugOut[1] = Header.ReadPE( file ); } catch(Exception e) { }
       try { DebugOut[2] = Header.ReadOP( file ); } catch(Exception e) { }
-      try { DebugOut[3] = Header.ReadDataDrectory( file ); } catch(Exception e) { }
+      /*try { DebugOut[3] = Header.ReadDataDrectory( file ); } catch(Exception e) { }
       try { DebugOut[4] = Header.ReadSections( file ); } catch(Exception e) { }*/
 
       Headers.add(new DefaultMutableTreeNode("MZ Header.h"));
@@ -232,9 +232,9 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
   public void ElementOpen(String h)
   {
     if( h.equals("MZ Header.h") ) { out = DebugOut[0]; }
-    /*else if( h.equals("PE Header.h") ) { out = DebugOut[1]; }
+    else if( h.equals("PE Header.h") ) { out = DebugOut[1]; }
     else if( h.equals("OP Header.h") ) { out = DebugOut[2]; }
-    else if( h.equals("Data Directory Array.h") ) { out = DebugOut[3]; }
+    /*else if( h.equals("Data Directory Array.h") ) { out = DebugOut[3]; }
     else if( h.equals("Mapped EXE SECTOINS TO RAM.h") ) { out = DebugOut[4]; }
     else if( h.equals("DLL IMPORT ARRAY DECODE.H") ) { out = data.DLLTable[0]; }*/
 
