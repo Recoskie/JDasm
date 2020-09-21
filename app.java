@@ -70,7 +70,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
 
     JMenuItem Back = new JMenuItem( "Back", new ImageIcon( app.class.getResource( "AppPictures/back.png" ) ) );
     JMenuItem Home = new JMenuItem( "User", new ImageIcon( app.class.getResource( "AppPictures/home.png" ) ) );
-    JMenuItem Go = new JMenuItem( "Foward", new ImageIcon( app.class.getResource( "AppPictures/go.png" ) ) );
+    JMenuItem Go = new JMenuItem( "Forward", new ImageIcon( app.class.getResource( "AppPictures/go.png" ) ) );
     JMenuItem Up = new JMenuItem( "Up a Folder", new ImageIcon( app.class.getResource( "AppPictures/up.png" ) ) );
     JMenuItem Computer = new JMenuItem( "My Computer", new ImageIcon( app.class.getResource( "AppPictures/computer.png" ) ) );
 
@@ -134,7 +134,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
   {
     if( !Debug )
     {
-      Path += tree.getLastSelectedPathComponent().toString(); Path+="\\";dirSerach();
+      Path += tree.getLastSelectedPathComponent().toString(); Path += "\\";dirSerach();
     }
   }
 
@@ -196,7 +196,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
     
   public String fix(String path)
   {
-    String temp="";
+    String temp = "";
       
     for(int i = path.length(); i > 0;i-- )
     {

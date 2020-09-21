@@ -217,126 +217,106 @@ public class Headers extends Data
     return( new JTable( ( new Object[][]{ {"ERROR READING OP Header"} } ), ( new Object[]{"ERR"} ) ) );
   }
 
-//************************************************READ Data Directory Array********************************************
+  //************************************************READ Data Directory Array********************************************
+  //Each section is given in virtual address position if used.
+  //The next header defines the sections that are to be read and placed in ram memory.
 
-/*public JTable ReadDataDrectory(RandomAccessFileV b)
-{
-PE+=96;
+  public JTable ReadDataDrectory(RandomAccessFileV b) throws IOException
+  {
+    //names of the data array locations
 
-System.out.println("Loading Data Directory Array pos = "+PE+"");
+    String[] Types=new String[] {"Export DLL FUNCTIONS Location",
+      "Import DLL FUNCTIONS Location",
+      "Resource Location to Files In DLL or EXE",
+      "Exceptions",
+      "Security",
+      "Relocation used for patching",
+      "Debug",
+      "Description/Architecture",
+      "Machine Value (MIPS GP)",
+      "Thread Storage",
+      "Load Configuration",
+      "Bound Import DLL Function Inside EXE",
+      "Import Address Table",
+      "Delayed Imports",
+      "COM Runtime Descriptor",
+      "USED BY MS DOS EXE DLL SYS Loader"};
 
-//names of the data array lowcations
+    DataDir = new long[ ( ( DDS / 3 ) * 2 ) ]; DataDirUsed = new boolean[ ( DDS / 3 ) ];
 
-String[] Types=new String[]
-{"Export DLL FUNCTIONS Lowcation",
-"Import DLL FUNCTIONS Lowcation",
-"Resource Lowcation to Files In DLL or EXE",
-"Exceptions",
-"Security",
-"Relocation used for patching",
-"Debug",
-"Decription/Architecture",
-"Machine Value (MIPS GP)",
-"Thread Storage",
-"Load Configuration",
-"Bound Import DLL Function Inside EXE",
-"Import Address Table",
-"Delayed Imports",
-"COM Runtime Descriptor",
-"USED BY MS DOS EXE DLL SYS Loader"};
+    //create the table logarithmically to data array size.
 
-DataDir=new long[((DDS/3)*2)];
-DataDirUsed=new boolean[(DDS/3)];
+    Object RowData[][] = new Object[ DDS ][ 3 ];
 
-//create the table algarithamacly to data array size
+    for( int i=0, i2=0, i3=0; i < DDS; i+=3, i2+=2, i3++ )
+    {
+      b.read(b4); DataDir[i2] = toInt(b4);
 
-Object RowData[][]=new Object[DDS][3];
+      RowData[i][0] = "Array Element " + ( i / 3 ) + "";
 
-for(int i=0,i2=0,i3=0;i<DDS;i+=3,i2+=2,i3++)
-{
-DataDir[i2]=b.ReadDWORD((int)PE);
+      if( ( i / 3 ) < Types.length )
+      {
+        RowData[i][1] = Types[ ( i / 3 ) ];
+      }
+      else { RowData[i][1] = "Unknown use"; }
 
-RowData[i][0]="Array Element "+(i/3)+"";
+      RowData[ i + 1 ][ 0 ] = "Virtual Address"; RowData[ i + 1 ][ 1 ] = toHex(b4); RowData[ i + 1 ][ 2 ] = DataDir[ i2 ];
+      
+      b.read(b4);
+      
+      DataDir[ i2 + 1 ] = toInt(b4);
+      
+      RowData[ i + 2 ][ 0 ] = "Size"; RowData[ i + 2 ][ 1 ] = toHex( b4 ); RowData[ i + 2 ][ 2 ] = DataDir[ i2 + 1 ];
 
-if((i/3)<Types.length){RowData[i][1]=Types[(i/3)];}
-else{RowData[i][1]="Unkowen use";}
+      DataDirUsed[ i3 ] = ( DataDir[ i2 ] > 0 ) && ( DataDir[ i2 + 1 ] > 0 );
+    }
 
-RowData[i+1][0]="Virtual Address";
-RowData[i+1][1]=b.ReadHEX((int)PE,4);
-RowData[i+1][2]=DataDir[i2];PE+=4;
-DataDir[i2+1]=b.ReadDWORD((int)PE);
-RowData[i+2][0]="Size";
-RowData[i+2][1]=b.ReadHEX((int)PE,4);
-RowData[i+2][2]=DataDir[i2+1];PE+=4;
+    JTable T=new JTable(RowData,new Object[]{"Usage","Hex","Dec"});
 
-DataDirUsed[i3]=(DataDir[i2]!=0)&(DataDir[i2+1]!=0);}
+    return(T);
+  }
 
-JTable T=new JTable(RowData,new Object[]{"Useage","Hex","Dec"});
+  //****************************************Read the Mapped Sections of executable, or dll*******************************************
+  //There are always 4 sections. Without this the virtual addresses of each section in DataDrectory is useless.
 
-return(T);}
+  public JTable ReadSections(RandomAccessFileV b) throws IOException
+  {
+    long v1=0, v2=0, v3=0, v4=0;
+    byte[] bd = new byte[12];
 
-//****************************************Read the Maped Sections of executable or dll*******************************************
+    Object RowData[][] = new Object[ ( NOS * 7 ) ][ 3 ];
 
-public JTable ReadSections(RandomAccessFileV b)
-{
-System.out.println("Reading Section Dump Pos = "+PE+"");
+    for( int i = 0, i2 = 0; i < ( NOS * 7 ); i += 7, i2 += 4 )
+    {
+      //Section name.
+      
+      b.read(b8); RowData[i][0] = "Section Name"; RowData[i][1] = "ASCII 8 Bytes"; RowData[i][2] = toText( b8 );
 
-long v1=0,v2=0,v3=0,v4=0;
+      //Virtual address.
 
-Object RowData[][]=new Object[(NOS*7)][3];
+      b.read(b4); RowData[i+1][0] = "Section Size Loaded In Ram"; RowData[i+1][1] = "DWORD"; v1 = toInt(b4); RowData[i+1][2] = v1;
 
-for(int i=0,i2=0;i<(NOS*7);i+=7,i2+=4)
-{RowData[i][0]="Section Name";
-RowData[i][1]="ASCII 8 Bytes";
-RowData[i][2]=b.ReadASCII((int)PE,8);
+      b.read(b4); RowData[i+2][0] = "Where to Store Bytes in Ram"; RowData[i+2][1] = "DWORD"; v2 = toInt(b4); RowData[i+2][2] = v2;
 
-System.out.println("Section Nane = "+b.ReadASCII((int)PE,8));
+      b.read(b4); RowData[i+3][0] = "Byte length to read from EXE file"; RowData[i+3][1] = "DWORD"; v3 = toInt(b4); RowData[i+3][2] = v3;
 
-PE+=8;
+      b.read(b4); RowData[i+4][0] = "Position to Start Reading EXE"; RowData[i+4][1] = "DWORD"; v4 = toInt(b4); RowData[i+4][2] = v4;
 
-RowData[i+1][0]="Section Size Loaded In Ram";
-RowData[i+1][1]="DWORD";
+      //Reserved section.
 
-v1=b.ReadDWORD((int)PE);
-RowData[i+1][2]=v1;PE+=4;
+      b.read(bd); RowData[i+5][0] = "Reserved 12 bytes"; RowData[i+5][1] = "HEX"; RowData[i+5][2] = toHex(bd);
 
-RowData[i+2][0]="Where to Store Bytes in Ram";
-RowData[i+2][1]="DWORD";
+      //Section FLAGS.
 
-System.out.println("Ram Address position = "+b.ReadDWORD((int)PE)+"");
+      b.read(b4); RowData[i+6][0] = "Section flags"; RowData[i+6][1] = "FLAG HEX"; RowData[i+6][2] = toHex(b4);
 
-v2=b.ReadDWORD((int)PE);
-RowData[i+2][2]=v2;PE+=4;
+      //Add virtual address to IO system.
 
-RowData[i+3][0]="Byte length to read from EXE file";
-RowData[i+3][1]="DWORD";
+      b.addV( v1, v2, v3, v4);
+    }
 
-v3=b.ReadDWORD((int)PE);
-RowData[i+3][2]=v3;PE+=4;
+    JTable T=new JTable(RowData,new Object[]{"Usage","Data Type","Decode"});
 
-RowData[i+4][0]="Position to Start Reading EXE";
-RowData[i+4][1]="DWORD";
-
-System.out.println("Exe Disk Position = "+b.ReadDWORD((int)PE));
-
-v4=b.ReadDWORD((int)PE);
-RowData[i+4][2]=v4;PE+=4;
-
-RowData[i+5][0]="Reserved 12 bytes";
-RowData[i+5][1]="HEX";
-RowData[i+5][2]=b.ReadHEX((int)PE,12);PE+=12;
-RowData[i+6][0]="Section flags";
-RowData[i+6][1]="FLAG HEX";
-RowData[i+6][2]=b.ReadHEX((int)PE,4);PE+=4;
-
-System.out.println("RVA Section Start "+v2+"");
-System.out.println("RVA Section End "+(v1+v2)+"");
-System.out.println("Disk Reed length "+v1+"");
-
-b.AddVraPos(v1,v2,v3,v4);}
-
-JTable T=new JTable(RowData,new Object[]{"Useage","Data Type","Decode"});
-
-return(T);}*/
-
+    return(T);
+  }
 }
