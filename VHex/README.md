@@ -84,4 +84,4 @@ public class Window
 }
 ```
 
-![ExampleCode](ExampleCode.bmp)
+![ExampleCode](https://github.com/Recoskie/VHex/blob/master/ExampleCode.bmp)
