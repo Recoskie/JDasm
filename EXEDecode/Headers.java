@@ -3,70 +3,89 @@ import javax.swing.*;
 import java.io.*;
 import javax.swing.tree.*;
 import java.awt.*;
+import RandomAccessFileV.*;
 
 public class Headers extends Data
 {
-//*********************************creates the nicely styled data of the MZ header***********************************
+  //*********************************creates the nicely styled data of the MZ header***********************************
 
-public JTable ReadMZ(VraReader b)
-{
-Object rowData[][]={
-{"SIGNATRUE","",""},
-{"Size of Last Page","",""},
-{"Number of 512 byte pages in file","",""},
-{"Number of Relocation Entries","",""},
-{"Header size in Paragraphs","",""},
-{"Minimum additional Memory required in paragraphs","",""},
-{"Maximum additional Memory required in paragraphs","",""},
-{"Initial SS relative to start of file","",""},
-{"Initial SP","",""},
-{"Checksum (unused)","",""},
-{"Initial IP","",""},
-{"Initial CS relative to start of file","",""},
-{"Offset within Header of Relocation Table","",""},
-{"Overlay Number","",""},
-{"Reserved","",""},
-{"ID","",""},
-{"INFO","",""},
-{"Reserved","",""},
-{"PE Header Lowcation","",""},
-{"8086 ASM CODE","",""}
-};
-Object columnNames[]={"Useage","Hex","Dec"};
+  public JTable ReadMZ(RandomAccessFileV b) throws IOException
+  {
+    Object rowData[][]={
+      {"SIGNATRUE","",""},
+      {"Size of Last Page","",""},
+      {"Number of 512 byte pages in file","",""},
+      {"Number of Relocation Entries","",""},
+      {"Header size in Paragraphs","",""},
+      {"Minimum additional Memory required in paragraphs","",""},
+      {"Maximum additional Memory required in paragraphs","",""},
+      {"Initial SS relative to start of file","",""},
+      {"Initial SP","",""},
+      {"Checksum (unused)","",""},
+      {"Initial IP","",""},
+      {"Initial CS relative to start of file","",""},
+      {"Offset within Header of Relocation Table","",""},
+      {"Overlay Number","",""},
+      {"Reserved","",""},
+      {"ID","",""},
+      {"INFO","",""},
+      {"Reserved","",""},
+      {"PE Header Location","",""},
+      {"8086 ASM CODE","",""}
+    };
+    
+    Object columnNames[]={"Usage","Hex","Dec"};
 
-String MZ=b.ReadHEX(0,2);
-PE=b.ReadDWORD(60);
+    byte[] bd = new byte[2]; b.read(bd);
 
-rowData[0][1]=MZ;
-rowData[1][1]=b.ReadHEX(2,2);rowData[1][2]=b.ReadWORD(2)+"";
-rowData[2][1]=b.ReadHEX(4,2);rowData[2][2]=b.ReadWORD(4)+"";
-rowData[3][1]=b.ReadHEX(6,2);rowData[3][2]=b.ReadWORD(6)+"";
-rowData[4][1]=b.ReadHEX(8,2);rowData[4][2]=b.ReadWORD(8)+"";
-rowData[5][1]=b.ReadHEX(10,2);rowData[5][2]=b.ReadWORD(10)+"";
-rowData[6][1]=b.ReadHEX(12,2);rowData[6][2]=b.ReadWORD(12)+"";
-rowData[7][1]=b.ReadHEX(14,2);rowData[7][2]=b.ReadWORD(14)+"";
-rowData[8][1]=b.ReadHEX(16,2);rowData[8][2]=b.ReadWORD(16)+"";
-rowData[9][1]=b.ReadHEX(18,2);rowData[9][2]=b.ReadWORD(18)+"";
-rowData[10][1]=b.ReadHEX(20,2);rowData[10][2]=b.ReadWORD(20)+"";
-rowData[11][1]=b.ReadHEX(22,2);rowData[11][2]=b.ReadWORD(22)+"";
-rowData[12][1]=b.ReadHEX(24,2);rowData[12][2]=b.ReadWORD(24)+"";
-rowData[13][1]=b.ReadHEX(26,2);rowData[13][2]=b.ReadWORD(26)+"";
-rowData[14][1]=b.ReadHEX(28,8);
-rowData[15][1]=b.ReadHEX(36,2);rowData[15][2]=b.ReadWORD(36)+"";
-rowData[16][1]=b.ReadHEX(38,2);rowData[16][2]=b.ReadWORD(38)+"";
-rowData[17][1]=b.ReadHEX(40,20);
-rowData[18][1]=b.ReadHEX(60,4);rowData[18][2]=PE+"";
-rowData[19][1]=b.ReadHEX(64,(int)(PE-64));
+    String MZ = toHex( bd ); rowData[0][1] = MZ;
 
-JTable T=new JTable(rowData,columnNames);
+    //String.format( "%1$02X", ); Convert number to hex sting.
 
-if(MZ.equals("4D 5A ")){return(T);}
-return(new JTable((new Object[][]{{"ERROR READING MZ Header"}}),(new Object[]{"ERR"})));
-}
+    b.read(bd); rowData[1][1] = toHex(bd); rowData[1][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[2][1] = toHex(bd); rowData[2][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[3][1] = toHex(bd); rowData[3][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[4][1] = toHex(bd); rowData[4][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[5][1] = toHex(bd); rowData[5][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[6][1] = toHex(bd); rowData[6][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[7][1] = toHex(bd); rowData[7][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[8][1] = toHex(bd); rowData[8][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[9][1] = toHex(bd); rowData[9][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[10][1] = toHex(bd); rowData[10][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[11][1] = toHex(bd); rowData[11][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[12][1] = toHex(bd); rowData[12][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+    b.read(bd); rowData[13][1] = toHex(bd); rowData[13][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+
+    bd = new byte[8]; b.read(bd); rowData[14][1] = toHex(bd);
+    
+    bd = new byte[2]; b.read(bd); rowData[15][1] = toHex(bd); rowData[15][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+
+    b.read(bd); rowData[16][1] = toHex(bd); rowData[16][2] = Short.toUnsignedInt( toShort(bd) ) + "";
+
+    bd = new byte[20]; b.read(bd); rowData[17][1] = toHex(bd);
+
+    //Location to the PE header.
+
+    bd = new byte[4]; b.read(bd);
+    
+    rowData[18][1] = toHex(bd); PE = toInt(bd); rowData[18][2] = PE + "";
+
+    //The section before the PE header is the small MZ dos program.
+    
+    bd = new byte[ (int)( PE - 64 ) ]; b.read(bd); rowData[19][1] = toHex(bd);
+
+    //Create the table data.
+
+    JTable T=new JTable(rowData,columnNames);
+
+    if( MZ.equals("4D 5A ") ) { return( T ); }
+
+    return( new JTable( ( new Object[][]{ {"ERROR READING MZ Header"} } ), ( new Object[]{"ERR"} ) ) );
+  }
 
 //*********************************creates the nicely styled data of the PE header***********************************
 
-public JTable ReadPE(VraReader b)
+/*public JTable ReadPE(RandomAccessFileV b)
 {
 String PES=b.ReadHEX((int)PE,4);
 
@@ -103,7 +122,7 @@ if(PES.equals("50 45 00 00 ")){return(T);}return(new JTable((new Object[][]{{"ER
 
 //************************************************READ OP HEADER********************************************
 
-public JTable ReadOP(VraReader b)
+public JTable ReadOP(RandomAccessFileV b)
 {
 PE+=24;
 String OPS=b.ReadHEX((int)PE,2);
@@ -201,7 +220,7 @@ if(OPS.equals("0B 01 ")){return(T);}return(new JTable((new Object[][]{{"ERROR RE
 
 //************************************************READ Data Drectory Array********************************************
 
-public JTable ReadDataDrectory(VraReader b)
+public JTable ReadDataDrectory(RandomAccessFileV b)
 {
 PE+=96;
 
@@ -259,7 +278,7 @@ return(T);}
 
 //****************************************Read the Maped Sections of executable or dll*******************************************
 
-public JTable ReadSections(VraReader b)
+public JTable ReadSections(RandomAccessFileV b)
 {
 System.out.println("Reading Section Dump Pos = "+PE+"");
 
@@ -319,6 +338,6 @@ b.AddVraPos(v1,v2,v3,v4);}
 
 JTable T=new JTable(RowData,new Object[]{"Useage","Data Type","Decode"});
 
-return(T);}
+return(T);}*/
 
 }

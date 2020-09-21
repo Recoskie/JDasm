@@ -7,19 +7,58 @@ import javax.swing.event.*;
 import java.awt.event.*;
 import java.lang.reflect.*;
 
+//New file components.
+
+import RandomAccessFileV.*;
+import VHex.*;
+
 public class app extends DefaultWindowCompoents implements TreeWillExpandListener, TreeSelectionListener, ActionListener, MouseListener
 {
-  public String Path="";
+  //Current file path.
+
+  public String Path = "";
+
+  //The file system stream to the file type.
+
+  RandomAccessFileV file;
+
+  //Visual Hex editor component.
+
+  VHex Virtual, Offset;
+
+  //File chooser menu bar.
+
+  JMenuBar fcBar;
+
+  //File path history.
 
   public String[] History = new String[10];
-  public int h = -1, h2 = -1;
-  public Boolean REC = true, Debug = false;
 
-  //Decoder programs for file types.
+  //File path index.
+
+  public int h = -1, h2 = -1;
+
+  //Enable, or disable file path recoding.
+
+  public boolean REC = true;
+
+  //Converts the file chooser tree into binary data sections.
+  
+  public boolean Debug = false;
+
+  //Each integer is the file decoder to use by file extensions.
 
   public int UseDecoder[] = new int[] { 0, 0, 0, 0, 0 };
+
+  //Supported file format extensions.
+
   public String Suports[] = new String[] { ".exe", ".dll", ".sys", ".drv", ".ocx" };
+
+  //The file to load. To begin decoding file types.
+
   public String DecodeAPP[] = new String[]{ "EXE" };
+
+  //Create the application.
 
   public app()
   {
@@ -27,7 +66,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
 
     //File chooser controls.
 
-    JMenuBar menuBar = new JMenuBar();
+    fcBar = new JMenuBar();
 
     JMenuItem Back = new JMenuItem( "Back", new ImageIcon( app.class.getResource( "AppPictures/back.png" ) ) );
     JMenuItem Home = new JMenuItem( "User", new ImageIcon( app.class.getResource( "AppPictures/home.png" ) ) );
@@ -35,7 +74,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
     JMenuItem Up = new JMenuItem( "Up a Folder", new ImageIcon( app.class.getResource( "AppPictures/up.png" ) ) );
     JMenuItem Computer = new JMenuItem( "My Computer", new ImageIcon( app.class.getResource( "AppPictures/computer.png" ) ) );
 
-    menuBar.add( Computer ); menuBar.add( Back ); menuBar.add( Home ); menuBar.add( Go ); menuBar.add( Up );
+    fcBar.add( Computer ); fcBar.add( Back ); fcBar.add( Home ); fcBar.add( Go ); fcBar.add( Up );
   
     //Action commands.
   
@@ -74,7 +113,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
 
     //set the menu bar controls for file chooser.
 
-    f.setJMenuBar(menuBar);
+    f.setJMenuBar(fcBar);
 
     //Set application icon image.
 
@@ -281,8 +320,13 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
         System.out.println(e.getCause()+"");
         JOptionPane.showMessageDialog(null,"Unable to Load Decode Program For This File Format");
       }
-    
-      ((ExploerEventListener)UsedDecoder).Read( Path + "\\" + f );
+
+      try
+      {
+        file = new RandomAccessFileV( Path + "\\" + f, "rw" );
+        ((ExploerEventListener)UsedDecoder).Read( Path + "\\" + f, file );
+      }
+      catch(Exception er) { System.out.println("cant read file!"); }
     }
 
     else if( !Debug )
