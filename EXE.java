@@ -151,7 +151,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("DLL Import Table.h") )
     {
-      try{ b.seekV( data.DataDir[1] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[2] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -159,7 +159,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Resource Files.h") )
     {
-      try{ b.seekV( data.DataDir[2] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[4] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -167,7 +167,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Exception Table.h") )
     {
-      try{ b.seekV( data.DataDir[3] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[6] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -175,7 +175,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Security Level Settings.h") )
     {
-      try{ b.seekV( data.DataDir[4] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[8] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -183,7 +183,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Relocation/Patching.h") )
     {
-      try{ b.seekV( data.DataDir[5] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[10] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -191,7 +191,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("DEBUG TABLE.h") )
     {
-      try{ b.seekV( data.DataDir[6] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[12] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -199,7 +199,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Description/Architecture.h") )
     {
-      try{ b.seekV( data.DataDir[7] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[14] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -207,7 +207,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Machine Value.h") )
     {
-      try{ b.seekV( data.DataDir[8] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[16] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -215,7 +215,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Thread Storage Lowcation.h") )
     {
-      try{ b.seekV( data.DataDir[9] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[18] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -223,7 +223,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Load System Configuration.h") )
     {
-      try{ b.seekV( data.DataDir[10] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[20] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -231,7 +231,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Import Table of Functions inside program.h") )
     {
-      try{ b.seekV( data.DataDir[11] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[22] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -239,7 +239,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Import Address Setup Table.h") )
     {
-      try{ b.seekV( data.DataDir[12] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[24] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -247,7 +247,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Delayed Import Table.h") )
     {
-      try{ b.seekV( data.DataDir[13] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[26] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
@@ -255,7 +255,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("COM Runtime Descriptor.h") )
     {
-      try{ b.seekV( data.DataDir[14] ); } catch( IOException e ) {}
+      try{ b.seekV( data.DataDir[28] ); } catch( IOException e ) {}
 
       //Decoder goes here.
 
