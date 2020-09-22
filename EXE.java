@@ -143,7 +143,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
 
     else if( h.equals("function Export Table.h") )
     {
-      try{ b.seekV( data.DataDir[0] ); } catch( IOException e ) { }
+      try
+      {
+        b.seekV( data.DataDir[0] );
+        Virtual.setSelected( data.DataDir[0], data.DataDir[0] + data.DataDir[1] - 1 );
+        Offset.setSelected( data.DataDir[0], data.DataDir[0] + data.DataDir[1] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -151,7 +157,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("DLL Import Table.h") )
     {
-      try{ b.seekV( data.DataDir[2] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[2] );
+        Virtual.setSelected( data.DataDir[2], data.DataDir[2] + data.DataDir[3] - 1 );
+        Offset.setSelected( data.DataDir[2], data.DataDir[2] + data.DataDir[3] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -159,7 +171,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Resource Files.h") )
     {
-      try{ b.seekV( data.DataDir[4] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[4] );
+        Virtual.setSelected( data.DataDir[4], data.DataDir[4] + data.DataDir[5] - 1 );
+        Offset.setSelected( data.DataDir[4], data.DataDir[4] + data.DataDir[5] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -167,7 +185,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Exception Table.h") )
     {
-      try{ b.seekV( data.DataDir[6] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[6] );
+        Virtual.setSelected( data.DataDir[6], data.DataDir[6] + data.DataDir[7] - 1 );
+        Offset.setSelected( data.DataDir[6], data.DataDir[6] + data.DataDir[7] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -175,7 +199,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Security Level Settings.h") )
     {
-      try{ b.seekV( data.DataDir[8] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[8] );
+        Virtual.setSelected( data.DataDir[8], data.DataDir[8] + data.DataDir[9] - 1 );
+        Offset.setSelected( data.DataDir[8], data.DataDir[8] + data.DataDir[9] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -183,7 +213,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Relocation/Patching.h") )
     {
-      try{ b.seekV( data.DataDir[10] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[10] );
+        Virtual.setSelected( data.DataDir[10], data.DataDir[10] + data.DataDir[11] - 1 );
+        Offset.setSelected( data.DataDir[10], data.DataDir[10] + data.DataDir[11] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -191,7 +227,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("DEBUG TABLE.h") )
     {
-      try{ b.seekV( data.DataDir[12] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[12] );
+        Virtual.setSelected( data.DataDir[12], data.DataDir[12] + data.DataDir[13] - 1 );
+        Offset.setSelected( data.DataDir[12], data.DataDir[12] + data.DataDir[13] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -199,7 +241,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Description/Architecture.h") )
     {
-      try{ b.seekV( data.DataDir[14] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[14] );
+        Virtual.setSelected( data.DataDir[14], data.DataDir[14] + data.DataDir[15] - 1 );
+        Offset.setSelected( data.DataDir[14], data.DataDir[14] + data.DataDir[15] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -207,7 +255,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Machine Value.h") )
     {
-      try{ b.seekV( data.DataDir[16] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[16] );
+        Virtual.setSelected( data.DataDir[16], data.DataDir[16] + data.DataDir[17] - 1 );
+        Offset.setSelected( data.DataDir[16], data.DataDir[16] + data.DataDir[17] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -215,7 +269,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Thread Storage Lowcation.h") )
     {
-      try{ b.seekV( data.DataDir[18] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[18] );
+        Virtual.setSelected( data.DataDir[18], data.DataDir[18] + data.DataDir[19] - 1 );
+        Offset.setSelected( data.DataDir[18], data.DataDir[18] + data.DataDir[19] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -223,7 +283,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Load System Configuration.h") )
     {
-      try{ b.seekV( data.DataDir[20] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[20] );
+        Virtual.setSelected( data.DataDir[20], data.DataDir[20] + data.DataDir[21] - 1 );
+        Offset.setSelected( data.DataDir[20], data.DataDir[20] + data.DataDir[21] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -231,7 +297,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Import Table of Functions inside program.h") )
     {
-      try{ b.seekV( data.DataDir[22] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[22] );
+        Virtual.setSelected( data.DataDir[22], data.DataDir[22] + data.DataDir[23] - 1 );
+        Offset.setSelected( data.DataDir[22], data.DataDir[22] + data.DataDir[23] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -239,7 +311,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Import Address Setup Table.h") )
     {
-      try{ b.seekV( data.DataDir[24] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[24] );
+        Virtual.setSelected( data.DataDir[24], data.DataDir[24] + data.DataDir[25] - 1 );
+        Offset.setSelected( data.DataDir[24], data.DataDir[24] + data.DataDir[25] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -247,7 +325,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Delayed Import Table.h") )
     {
-      try{ b.seekV( data.DataDir[26] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[26] );
+        Virtual.setSelected( data.DataDir[26], data.DataDir[26] + data.DataDir[27] - 1 );
+        Offset.setSelected( data.DataDir[26], data.DataDir[26] + data.DataDir[27] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 
@@ -255,7 +339,13 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
     }
     else if( h.equals("COM Runtime Descriptor.h") )
     {
-      try{ b.seekV( data.DataDir[28] ); } catch( IOException e ) {}
+      try
+      {
+        b.seekV( data.DataDir[28] );
+        Virtual.setSelected( data.DataDir[28], data.DataDir[28] + data.DataDir[29] - 1 );
+        Offset.setSelected( data.DataDir[28], data.DataDir[28] + data.DataDir[29] - 1 );
+      }
+      catch( IOException e ) { }
 
       //Decoder goes here.
 

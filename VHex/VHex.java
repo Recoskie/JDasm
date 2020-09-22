@@ -265,6 +265,10 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   public long selectEnd() { return( Long.compareUnsigned( sel, sele ) >= 0 ? sel : sele ); }
 
+  //Set selected bytes.
+
+  public void setSelected( long start, long end ){ SelectC = new Color( 57, 105, 138, 128 ); sel = start; sele = end; repaint(); }
+
   //Enable, or disable the text editor.
 
   public void enableText( boolean set )
