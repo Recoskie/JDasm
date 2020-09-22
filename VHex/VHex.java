@@ -333,7 +333,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   public void paintComponent( Graphics g )
   {
-    g.setFont( font );
+    g.setFont( font ); if( charWidth[0] == 0 ) { init(); }
 
     //Adjust byte buffer on larger height.
 

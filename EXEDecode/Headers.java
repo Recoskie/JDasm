@@ -9,7 +9,7 @@ public class Headers extends Data
 {
   //*********************************creates the nicely styled data of the MZ header***********************************
 
-  public JTable ReadMZ(RandomAccessFileV b) throws IOException
+  public JTable readMZ(RandomAccessFileV b) throws IOException
   {
     Object rowData[][]={
       {"SIGNATRUE","",""},
@@ -79,7 +79,7 @@ public class Headers extends Data
 
   //*********************************creates the nicely styled data of the PE header***********************************
 
-  public JTable ReadPE(RandomAccessFileV b) throws IOException
+  public JTable readPE(RandomAccessFileV b) throws IOException
   {
     Object RowData[][] = {
       {"SIGNATRUE","",""}, //4
@@ -120,7 +120,7 @@ public class Headers extends Data
 
   //************************************************READ OP HEADER********************************************
 
-  public JTable ReadOP(RandomAccessFileV b) throws IOException
+  public JTable readOP(RandomAccessFileV b) throws IOException
   {
     Object RowData[][] = {
       {"SIGNATRUE","",""}, //2
@@ -153,10 +153,10 @@ public class Headers extends Data
       {"Sub system","",""},    //2
       {"Dll Characteristics","",""},     //2
 
-      {"Size Of Stack Reserve","",""},     //4
-      {"Size Of Stack Commit","",""},     //4
-      {"Size Of Heap Reserve","",""},     //4
-      {"Size Of Heap Commit","",""},     //4
+      {"Size Of Stack Reserve","",""},     //4, or 8
+      {"Size Of Stack Commit","",""},     //4, or 8
+      {"Size Of Heap Reserve","",""},     //4, or 8
+      {"Size Of Heap Commit","",""},     //4, or 8
       {"Loader Flags","",""},     //4
       {"Data Directory Array Size","",""},     //4
     };
@@ -241,7 +241,7 @@ public class Headers extends Data
   //Each section is given in virtual address position if used. Sections that are not used have a virtual address of 0.
   //The next header defines the sections that are to be read and placed in ram memory.
 
-  public JTable ReadDataDrectory(RandomAccessFileV b) throws IOException
+  public JTable readDataDrectory(RandomAccessFileV b) throws IOException
   {
     //names of the data array locations
 
@@ -297,9 +297,9 @@ public class Headers extends Data
   }
 
   //****************************************Read the Mapped Sections of executable, or dll*******************************************
-  //There are always 4 sections. Without this the virtual addresses of each section in DataDrectory is useless.
+  //The PE header defines the number of sections. Without this the virtual addresses of each section in DataDrectory is useless.
 
-  public JTable ReadSections(RandomAccessFileV b) throws IOException
+  public JTable readSections(RandomAccessFileV b) throws IOException
   {
     long v1=0, v2=0, v3=0, v4=0;
     byte[] bd = new byte[12];
@@ -332,7 +332,7 @@ public class Headers extends Data
 
       //Add virtual address to IO system.
 
-      b.addV( v1, v2, v3, v4);
+      b.addV( v4, v3, v2, v1 );
     }
 
     JTable T=new JTable(RowData,new Object[]{"Usage","Data Type","Decode"});

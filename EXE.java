@@ -7,9 +7,9 @@ import RandomAccessFileV.*;
 
 public class EXE extends DefaultWindowCompoents implements ExploerEventListener
 {
-  //the output table
-  
-  public JTable out = new JTable();
+  //file system.
+
+  public RandomAccessFileV b;
 
   public JTable DebugOut[] = new JTable[5];
 
@@ -25,8 +25,10 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
 
   //plug in the separate decoders of the exe format together
 
-  public void Read(String F, RandomAccessFileV file )
+  public void read(String F, RandomAccessFileV file )
   {
+    b = file;
+
     //Root node is now the target file.
  
     ((DefaultTreeModel)tree.getModel()).setRoot(null);
@@ -41,11 +43,11 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
 
     try
     {
-      try { DebugOut[0] = Header.ReadMZ( file ); } catch(Exception e) { }
-      try { DebugOut[1] = Header.ReadPE( file ); } catch(Exception e) { }
-      try { DebugOut[2] = Header.ReadOP( file ); } catch(Exception e) { }
-      try { DebugOut[3] = Header.ReadDataDrectory( file ); } catch(Exception e) {  data.DataDirUsed = new boolean[16]; }
-      try { DebugOut[4] = Header.ReadSections( file ); } catch(Exception e) { }
+      try { DebugOut[0] = Header.readMZ( b ); } catch(Exception e) { }
+      try { DebugOut[1] = Header.readPE( b ); } catch(Exception e) { }
+      try { DebugOut[2] = Header.readOP( b ); } catch(Exception e) { }
+      try { DebugOut[3] = Header.readDataDrectory( b ); } catch(Exception e) {  data.DataDirUsed = new boolean[16]; }
+      try { DebugOut[4] = Header.readSections( b ); } catch(Exception e) { }
 
       Headers.add(new DefaultMutableTreeNode("MZ Header.h"));
       Headers.add(new DefaultMutableTreeNode("PE Header.h"));
@@ -57,168 +59,63 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
 
       //Location of the export directory
 
-      if( data.DataDirUsed[0] )
-      {
-        DefaultMutableTreeNode Export = new DefaultMutableTreeNode("function Export Table.h");
-
-        //Decoder goes here.
-
-        root.add(Export);
-      }
+      if( data.DataDirUsed[0] ) { DefaultMutableTreeNode Export = new DefaultMutableTreeNode("function Export Table.h"); root.add(Export); }
 
       //Location of the import directory
 
-      if( data.DataDirUsed[1] )
-      {
-        DefaultMutableTreeNode Import = new DefaultMutableTreeNode("DLL Import Table");
-        
-        //Import = DLL.LoadDLLImport( Import, file );
-        
-        root.add(Import);
-      }
+      if( data.DataDirUsed[1] ) { DefaultMutableTreeNode Import = new DefaultMutableTreeNode("DLL Import Table.h"); root.add(Import); }
 
       //Location of the resource directory
 
-      if( data.DataDirUsed[2] )
-      {
-        DefaultMutableTreeNode RE = new DefaultMutableTreeNode("Resource Files");
-        
-        //RE = RSRC.Decode( RE, file );
-        
-        root.add(RE);
-      }
+      if( data.DataDirUsed[2] ) { DefaultMutableTreeNode RE = new DefaultMutableTreeNode("Resource Files.h"); root.add(RE); }
 
       //Exception
 
-      if( data.DataDirUsed[3] )
-      {
-        DefaultMutableTreeNode EX = new DefaultMutableTreeNode("Exception Table.h");
-
-        //decoder goes here
-  
-        root.add(EX);
-      }
+      if( data.DataDirUsed[3] ) { DefaultMutableTreeNode EX = new DefaultMutableTreeNode("Exception Table.h"); root.add(EX); }
 
       //Security
 
-      if( data.DataDirUsed[4] )
-      {
-        DefaultMutableTreeNode Security = new DefaultMutableTreeNode("Security Level Settings.h");
-
-        //decoder goes here
-
-        root.add(Security);
-      }
+      if( data.DataDirUsed[4] ) { DefaultMutableTreeNode Security = new DefaultMutableTreeNode("Security Level Settings.h"); root.add(Security); }
 
       //Relocation/Patching
 
-      if( data.DataDirUsed[5] )
-      {
-        DefaultMutableTreeNode RELOC = new DefaultMutableTreeNode("Relocation/Patching.h");
-
-        //decoder goes here
-
-        root.add(RELOC);
-      }
+      if( data.DataDirUsed[5] ) { DefaultMutableTreeNode RELOC = new DefaultMutableTreeNode("Relocation/Patching.h"); root.add(RELOC); }
 
       //Debug
 
-      if( data.DataDirUsed[6] )
-      {
-        DefaultMutableTreeNode DEBUG = new DefaultMutableTreeNode("DEBUG TABLE.h");
-
-        //decoder goes here
-
-        root.add(DEBUG);
-      }
+      if( data.DataDirUsed[6] ) { DefaultMutableTreeNode DEBUG = new DefaultMutableTreeNode("DEBUG TABLE.h"); root.add(DEBUG); }
 
       //Description/Architecture
 
-      if( data.DataDirUsed[7] )
-      {
-        DefaultMutableTreeNode Decription = new DefaultMutableTreeNode("Description/Architecture.h");
-
-        //decoder goes here
-
-        root.add(Decription);
-      }
+      if( data.DataDirUsed[7] ) { DefaultMutableTreeNode Decription = new DefaultMutableTreeNode("Description/Architecture.h"); root.add(Decription); }
 
       //Machine Value
 
-      if( data.DataDirUsed[8] )
-      {
-        DefaultMutableTreeNode MV = new DefaultMutableTreeNode("Machine Value.h");
-
-        //decoder goes here
-
-        root.add(MV);
-      }
+      if( data.DataDirUsed[8] ) { DefaultMutableTreeNode MV = new DefaultMutableTreeNode("Machine Value.h"); root.add(MV); }
 
       //Thread Storage
 
-      if( data.DataDirUsed[9] )
-      {
-        DefaultMutableTreeNode TS = new DefaultMutableTreeNode("Thread Storage Lowcation.h");
-
-        //decoder goes here
-
-        root.add(TS);
-      }
+      if( data.DataDirUsed[9] ) { DefaultMutableTreeNode TS = new DefaultMutableTreeNode("Thread Storage Lowcation.h"); root.add(TS); }
 
       //Load System Configuration
 
-      if( data.DataDirUsed[10] )
-      {
-        DefaultMutableTreeNode ConFIG = new DefaultMutableTreeNode("Load System Configuration.h");
-
-        //decoder goes here
-
-        root.add(ConFIG);
-      }
+      if( data.DataDirUsed[10] ) { DefaultMutableTreeNode ConFIG = new DefaultMutableTreeNode("Load System Configuration.h"); root.add(ConFIG); }
 
       //Location of alternate import-binding director
 
-      if( data.DataDirUsed[11] )
-      {
-        DefaultMutableTreeNode BoundImport = new DefaultMutableTreeNode("Import Table of Functions inside program.h");
-
-        //decoder goes here
-
-        root.add(BoundImport);
-      }
+      if( data.DataDirUsed[11] ) { DefaultMutableTreeNode BoundImport = new DefaultMutableTreeNode("Import Table of Functions inside program.h"); root.add(BoundImport); }
 
       //Import Address Table
 
-      if( data.DataDirUsed[12] )
-      {
-        DefaultMutableTreeNode ImportAddress = new DefaultMutableTreeNode("Import Address Setup Table.h");
-
-        //decoder goes here
-
-        root.add(ImportAddress);
-      }
+      if( data.DataDirUsed[12] ) { DefaultMutableTreeNode ImportAddress = new DefaultMutableTreeNode("Import Address Setup Table.h"); root.add(ImportAddress); }
 
       //Delayed Imports
 
-      if( data.DataDirUsed[13] )
-      {
-        DefaultMutableTreeNode DelayImport = new DefaultMutableTreeNode("Delayed Import Table.h");
-
-        //decoder goes here
-
-        root.add(DelayImport);
-      }
+      if( data.DataDirUsed[13] ) { DefaultMutableTreeNode DelayImport = new DefaultMutableTreeNode("Delayed Import Table.h"); root.add(DelayImport); }
 
       //COM Runtime Descriptor
 
-      if( data.DataDirUsed[14] )
-      {
-        DefaultMutableTreeNode COM = new DefaultMutableTreeNode("COM Runtime Descriptor.h");
-
-        //decoder goes here
-
-        root.add(COM);
-      }
+      if( data.DataDirUsed[14] ) { DefaultMutableTreeNode COM = new DefaultMutableTreeNode("COM Runtime Descriptor.h"); root.add(COM); }
 
       ((DefaultTreeModel)tree.getModel()).setRoot(root);f.setVisible(true);
     }
@@ -230,63 +127,148 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
 
   //Change What To Display Based on what the user clicks on
 
-  public void ElementOpen(String h)
+  public void elementOpen(String h)
   {
+    //Headers must be decoded before any other part of the program can be read.
+
     if( h.equals("MZ Header.h") ) { out = DebugOut[0]; }
     else if( h.equals("PE Header.h") ) { out = DebugOut[1]; }
     else if( h.equals("OP Header.h") ) { out = DebugOut[2]; }
     else if( h.equals("Data Directory Array.h") ) { out = DebugOut[3]; }
     else if( h.equals("Mapped EXE SECTOINS TO RAM.h") ) { out = DebugOut[4]; }
 
-    //else if( h.equals("DLL IMPORT ARRAY DECODE.H") ) { out = data.DLLTable[0]; }
+    //Seek virtual address position. Thus begin reading section.
 
-    //for each dll name has a table used for it
-
-    /*else if( (h.lastIndexOf(35) > 0 ) && ( h.substring( ( h.lastIndexOf(35) + 1 ), ( h.lastIndexOf(35) + 2 ) ) ).equals("D") )
+    else if( h.equals("function Export Table.h") )
     {
-      out = data.DLLTable[ Integer.parseInt( h.substring( ( h.lastIndexOf(35) + 2 ), h.length() ) ) ];
+      try{ b.seekV( data.DataDir[0] ); } catch( IOException e ) { }
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("DLL Import Table.h") )
+    {
+      try{ b.seekV( data.DataDir[1] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Resource Files.h") )
+    {
+      try{ b.seekV( data.DataDir[2] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Exception Table.h") )
+    {
+      try{ b.seekV( data.DataDir[3] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Security Level Settings.h") )
+    {
+      try{ b.seekV( data.DataDir[4] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Relocation/Patching.h") )
+    {
+      try{ b.seekV( data.DataDir[5] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("DEBUG TABLE.h") )
+    {
+      try{ b.seekV( data.DataDir[6] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Description/Architecture.h") )
+    {
+      try{ b.seekV( data.DataDir[7] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Machine Value.h") )
+    {
+      try{ b.seekV( data.DataDir[8] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Thread Storage Lowcation.h") )
+    {
+      try{ b.seekV( data.DataDir[9] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Load System Configuration.h") )
+    {
+      try{ b.seekV( data.DataDir[10] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Import Table of Functions inside program.h") )
+    {
+      try{ b.seekV( data.DataDir[11] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Import Address Setup Table.h") )
+    {
+      try{ b.seekV( data.DataDir[12] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("Delayed Import Table.h") )
+    {
+      try{ b.seekV( data.DataDir[13] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
+    }
+    else if( h.equals("COM Runtime Descriptor.h") )
+    {
+      try{ b.seekV( data.DataDir[14] ); } catch( IOException e ) {}
+
+      //Decoder goes here.
+
+      noDecode();
     }
 
-    //extract an resource file
+    //Update the window.
 
-    else if( ( h.lastIndexOf(35) > 0 ) && ( h.substring( ( h.lastIndexOf(35) + 1 ), ( h.lastIndexOf(35) + 2 ) ) ).equals("R") )
-    {
-      try
-      { 
-        int v = JOptionPane.showConfirmDialog( null, "Extract File As A Icon","Resource Decoder", JOptionPane.YES_NO_OPTION );
+    updateWindowData();
+  }
 
-        if( v == JOptionPane.YES_OPTION )
-        {
-          RSRC.ExtractFileAsIcon( Integer.parseInt( h.substring( ( h.lastIndexOf(35) + 2 ), h.length() ) ), h.substring( 0, h.lastIndexOf(35) ), c );
-        }
-        else
-        {
-          RSRC.ExtractFile( Integer.parseInt( h.substring( ( h.lastIndexOf(35) + 2 ), h.length() ) ), h.substring( 0, h.lastIndexOf(35) ), c );
-        }
-      }
-      catch(Exception e){System.out.println(e+"");}
-    }*/
+  //No Decoder.
 
-    //no decode of section
-
-    else
-    {
-      JOptionPane.showMessageDialog(null,"No Decoder Has Ben Created Yet By\r\nDamian Recoskie for That Section\r\nof the current decoded program");
-    
-      out = new JTable( ( new Object[][] { { "NO DECODER" } } ), ( new Object[]{ "NO DECODER HAS BEN WORTE YET" } ) );
-    }
-
-    f.setLayout( new GridLayout(0, 2 ) );
-    f.getContentPane().removeAll();
-
-    f.add(tree);
-    
-    f.add( new JScrollPane( tree ) );
-    f.add( out );
-    f.add( new JScrollPane( out ) );
-
-    tree.setShowsRootHandles( true );
-    tree.setRootVisible( true );
-    f.setVisible( true );
+  public void noDecode()
+  { 
+    out = new JTable( ( new Object[][] { { "NO DECODER" } } ), ( new Object[]{ "NO DECODER HAS BEN WORTE YET" } ) );
   }
 }

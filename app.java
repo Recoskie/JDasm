@@ -20,15 +20,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
 
   //The file system stream to the file type.
 
-  RandomAccessFileV file;
-
-  //Visual Hex editor component.
-
-  VHex Virtual, Offset;
-
-  //File chooser menu bar.
-
-  JMenuBar fcBar;
+  public static RandomAccessFileV file;
 
   //File path history.
 
@@ -42,7 +34,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
 
   public boolean REC = true;
 
-  //Converts the file chooser tree into binary data sections.
+  //Converts the file chooser tree into binary data sections. For binary file format readers.
   
   public boolean Debug = false;
 
@@ -84,6 +76,26 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
     Home.setActionCommand( "H" ); Home.addActionListener(this);
     Up.setActionCommand( "U" ); Up.addActionListener(this);
 
+    //Binary tools menu bar.
+
+    bdBar = new JMenuBar();
+
+    JMenu fm = new JMenu("File");
+    JMenu vm = new JMenu("View");
+ 
+    JMenuItem f1 = new JMenuItem("Open new File");
+
+    JMenuItem v1 = new JMenuItem("Toggle text View");
+    JMenuItem v2 = new JMenuItem("Toggle virtual space View");
+
+    fm.add(f1); vm.add(v1); vm.add(v2);
+
+    bdBar.add(fm); bdBar.add(vm);
+  
+    //add ActionListener to menuItems.
+    
+    f1.addActionListener(this); v1.addActionListener(this); v2.addActionListener(this);
+
     //The tree is used for file chooser, and for decoded data view.
 
     tree = new JTree();
@@ -104,8 +116,8 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
 
     //Simple grid layout, for the tree.
 
-    f.setLayout(new GridLayout(0,1));
-    f.add(tree);
+    f.setLayout(new GridLayout(1,0)); f.add(tree);
+
 
     //scroll bar for the tree.
 
@@ -255,8 +267,6 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
   
   public void actionPerformed(ActionEvent e)
   {
-    Reset();
-
     //Basic file path commands.
     
     if( e.getActionCommand() == "B" ) { back(); }
@@ -267,7 +277,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
     
     if( e.getActionCommand() == "H" ) { Path = System.getProperty("user.home")+"\\"; dirSerach(); }
 
-    //I don't know.
+    //Up one folder.
     
     if( e.getActionCommand() == "U" )
     {
@@ -297,13 +307,32 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
         Path = ""; dirSerach();
       }
     }
+
+    //Binary tool display controls.
+
+    else if( e.getActionCommand().equals("Toggle text View") )
+    {
+      textV = !textV; Offset.enableText( textV ); Virtual.enableText( textV );
+    }
+
+    else if( e.getActionCommand().equals("Toggle virtual space View") )
+    {
+      addV = !addV; if(!Debug) { editMode(); } else { updateWindow(); }
+    }
+
+    else if( e.getActionCommand().equals("Open new File") )
+    {
+      Reset();
+    }
   }
 
   //check the file type
 
-  public void CheckFT(String f)
+  public void CheckFT(String ft)
   {
-    String ex = f.substring( ( f.lastIndexOf(46) ), f.length() ).toLowerCase();
+    String ex = ft.substring( ( ft.lastIndexOf(46) ), ft.length() ).toLowerCase();
+
+    //If file format is Supported. Open in reader with binary tools.
 
     int I = DefaultProgram( ex );
 
@@ -322,8 +351,22 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
 
       try
       {
-        file = new RandomAccessFileV( Path + "\\" + f, "rw" );
-        ((ExploerEventListener)UsedDecoder).Read( Path + "\\" + f, file );
+        file = new RandomAccessFileV( Path + "\\" + ft, "rw" );
+
+         if(!HInit)
+        {
+          Virtual = new VHex( file, true ); Offset = new VHex( file, false );
+          Offset.enableText( textV ); Virtual.enableText( textV );
+          HInit = true;
+        }
+        else
+        {
+          Offset.setTarget( file ); Virtual.setTarget( file );
+        }
+
+        ((ExploerEventListener)UsedDecoder).read( Path + "\\" + ft, file );
+
+        updateWindow(); f.pack(); f.setLocationRelativeTo(null);
       }
       catch(Exception er)
       {
@@ -331,14 +374,36 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
       }
     }
 
+    //Else open file in binary tools.
+
     else if( !Debug )
     {
-      JOptionPane.showMessageDialog(null,"There is no Decoder For Your Selected File Format");
+      try
+      {
+        file = new RandomAccessFileV( Path + "\\" + ft, "rw" );
+
+        if(!HInit)
+        {
+          Virtual = new VHex( file, true ); Offset = new VHex( file, false );
+          Offset.enableText( textV ); Virtual.enableText( textV );
+          HInit = true;
+        }
+        else
+        {
+          Offset.setTarget( file ); Virtual.setTarget( file );
+        }
+        
+        editMode(); f.pack(); f.setLocationRelativeTo(null);
+      }
+      catch(Exception er)
+      {
+        JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file"); Reset();
+      }
     }
 
     else
     {
-      ((ExploerEventListener)UsedDecoder).ElementOpen(f);
+      ((ExploerEventListener)UsedDecoder).elementOpen(ft);
     }
   }
 
@@ -346,7 +411,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
 
   public void Reset()
   {
-    Debug = false; new FileIconManager().Debug = false; SetDefault();
+    Debug = false; new FileIconManager().Debug = false; fileChooser();
   }
   
   public void mouseExited(MouseEvent e) { }
