@@ -9,7 +9,7 @@ public class Headers extends Data
 {
   //*********************************creates the nicely styled data of the MZ header***********************************
 
-  public JTable readMZ(RandomAccessFileV b) throws IOException
+  public Descriptor readMZ(RandomAccessFileV b) throws IOException
   {
     Object rowData[][]={
       {"SIGNATRUE","",""},
@@ -70,16 +70,16 @@ public class Headers extends Data
 
     //Create the table data.
 
-    JTable T=new JTable(rowData,columnNames);
+    Descriptor T = new Descriptor(rowData,columnNames);
 
     if( MZ.equals("4D 5A ") ) { return( T ); }
 
-    return( new JTable( ( new Object[][]{ {"ERROR READING MZ Header"} } ), ( new Object[]{"ERR"} ) ) );
+    return( new Descriptor( ( new Object[][]{ {"ERROR READING MZ Header"} } ), ( new Object[]{"ERR"} ) ) );
   }
 
   //*********************************creates the nicely styled data of the PE header***********************************
 
-  public JTable readPE(RandomAccessFileV b) throws IOException
+  public Descriptor readPE(RandomAccessFileV b) throws IOException
   {
     Object RowData[][] = {
       {"SIGNATRUE","",""}, //4
@@ -107,7 +107,7 @@ public class Headers extends Data
 
     //return the output
 
-    JTable T=new JTable(RowData,columnNames);
+    Descriptor T = new Descriptor(RowData,columnNames);
 
     //Test if PE header was read correctly.
 
@@ -115,12 +115,12 @@ public class Headers extends Data
     
     //Else error.
 
-    return( new JTable( ( new Object[][]{ {"ERROR READING PE Header"} } ), ( new Object[]{"ERR"} ) ) );
+    return( new Descriptor( ( new Object[][]{ {"ERROR READING PE Header"} } ), ( new Object[]{"ERR"} ) ) );
   }
 
   //************************************************READ OP HEADER********************************************
 
-  public JTable readOP(RandomAccessFileV b) throws IOException
+  public Descriptor readOP(RandomAccessFileV b) throws IOException
   {
     Object RowData[][] = {
       {"SIGNATRUE","",""}, //2
@@ -224,7 +224,7 @@ public class Headers extends Data
   
     //return the output
 
-    JTable T = new JTable( RowData,columnNames );
+    Descriptor T = new Descriptor( RowData,columnNames );
 
     DDS *= 3;
 
@@ -234,14 +234,14 @@ public class Headers extends Data
   
     //Else error.
 
-    return( new JTable( ( new Object[][]{ {"ERROR READING OP Header"} } ), ( new Object[]{"ERR"} ) ) );
+    return( new Descriptor( ( new Object[][]{ {"ERROR READING OP Header"} } ), ( new Object[]{"ERR"} ) ) );
   }
 
   //************************************************READ Data Directory Array********************************************
   //Each section is given in virtual address position if used. Sections that are not used have a virtual address of 0.
   //The next header defines the sections that are to be read and placed in ram memory.
 
-  public JTable readDataDrectory(RandomAccessFileV b) throws IOException
+  public Descriptor readDataDrectory(RandomAccessFileV b) throws IOException
   {
     //names of the data array locations
 
@@ -291,7 +291,7 @@ public class Headers extends Data
       DataDirUsed[ i3 ] = ( DataDir[ i2 ] > 0 ) && ( DataDir[ i2 + 1 ] > 0 );
     }
 
-    JTable T=new JTable(RowData,new Object[]{"Usage","Hex","Dec"});
+    Descriptor T = new Descriptor(RowData,new Object[]{"Usage","Hex","Dec"});
 
     return(T);
   }
@@ -299,7 +299,7 @@ public class Headers extends Data
   //****************************************Read the Mapped Sections of executable, or dll*******************************************
   //The PE header defines the number of sections. Without this the virtual addresses of each section in DataDrectory is useless.
 
-  public JTable readSections(RandomAccessFileV b) throws IOException
+  public Descriptor readSections(RandomAccessFileV b) throws IOException
   {
     long v1=0, v2=0, v3=0, v4=0;
     byte[] bd = new byte[12];
@@ -335,7 +335,7 @@ public class Headers extends Data
       b.addV( v4, v3, v2, v1 );
     }
 
-    JTable T=new JTable(RowData,new Object[]{"Usage","Data Type","Decode"});
+    Descriptor T = new Descriptor(RowData,new Object[]{"Usage","Data Type","Decode"});
 
     return(T);
   }

@@ -11,7 +11,9 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
 
   public RandomAccessFileV b;
 
-  public JTable DebugOut[] = new JTable[5];
+  //The new Descriptor table allows a description of clicked data.
+
+  public Descriptor DebugOut[] = new Descriptor[5];
 
   //plug in the executable Readers
 
@@ -49,9 +51,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
       try { DebugOut[3] = Header.readDataDrectory( b ); } catch(Exception e) {  data.DataDirUsed = new boolean[16]; }
       try { DebugOut[4] = Header.readSections( b ); } catch(Exception e) { }
 
-      DefaultMutableTreeNode MZ = new DefaultMutableTreeNode("MZ Header.h");
-
-      Headers.add(MZ);
+      Headers.add(new DefaultMutableTreeNode("MZ Header.h"));
       Headers.add(new DefaultMutableTreeNode("PE Header.h"));
       Headers.add(new DefaultMutableTreeNode("OP Header.h"));
       Headers.add(new DefaultMutableTreeNode("Data Directory Array.h"));
@@ -133,11 +133,40 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
   {
     //Headers must be decoded before any other part of the program can be read.
 
-    if( h.equals("MZ Header.h") ) { out = DebugOut[0]; }
-    else if( h.equals("PE Header.h") ) { out = DebugOut[1]; }
-    else if( h.equals("OP Header.h") ) { out = DebugOut[2]; }
-    else if( h.equals("Data Directory Array.h") ) { out = DebugOut[3]; }
-    else if( h.equals("Mapped EXE SECTOINS TO RAM.h") ) { out = DebugOut[4]; }
+    if( h.equals("MZ Header.h") )
+    {
+      Offset.setSelected( 0, data.PE - 1 );
+      
+      out = DebugOut[0];
+    }
+    else if( h.equals("PE Header.h") )
+    {
+      Offset.setSelected( data.PE, data.PE + 23 );
+
+      out = DebugOut[1];
+    }
+    else if( h.equals("OP Header.h") )
+    {
+      Offset.setSelected( data.PE + 24, data.is64bit ? data.PE + 135 : data.PE + 119 );
+
+      out = DebugOut[2];
+    }
+    else if( h.equals("Data Directory Array.h") )
+    {
+      long pos = data.is64bit ? data.PE + 136 : data.PE + 120;
+
+      Offset.setSelected( pos, pos + ( ( data.DDS / 3 ) << 3 ) - 1 );
+
+      out = DebugOut[3];
+    }
+    else if( h.equals("Mapped EXE SECTOINS TO RAM.h") )
+    {
+      long pos = ( data.is64bit ? data.PE + 136 : data.PE + 120 ) + ( ( data.DDS / 3 ) << 3 );
+
+      Offset.setSelected( pos, pos + ( data.NOS * 40 ) - 1 );
+
+      out = DebugOut[4];
+    }
 
     //Seek virtual address position. Thus begin reading section.
 
@@ -362,5 +391,6 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
   public void noDecode()
   { 
     out = new JTable( ( new Object[][] { { "NO DECODER" } } ), ( new Object[]{ "NO DECODER HAS BEN MADE YET" } ) );
+    out.setEnabled(false);
   }
 }

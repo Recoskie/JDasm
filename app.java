@@ -146,7 +146,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
   {
     if( !Debug )
     {
-      Path += tree.getLastSelectedPathComponent().toString(); Path += "\\";dirSerach();
+      Path += tree.getLastSelectedPathComponent().toString(); Path += "\\"; dirSerach();
     }
   }
 
@@ -247,7 +247,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
     {
       h-=1; Path = History[h];
       
-      REC = false; dirSerach(); REC=true;
+      REC = false; dirSerach(); REC = true;
     }
   }
 
@@ -328,7 +328,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
 
   //check the file type
 
-  public void CheckFT(String ft)
+  public void checkFT(String ft)
   {
     String ex = ft.substring( ( ft.lastIndexOf(46) ), ft.length() ).toLowerCase();
 
@@ -436,7 +436,7 @@ public class app extends DefaultWindowCompoents implements TreeWillExpandListene
         
         if( e.getClickCount() == 2 )
         {
-          CheckFT(p);
+          checkFT(p);
         }
       }
     }
