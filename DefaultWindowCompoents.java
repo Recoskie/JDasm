@@ -66,15 +66,19 @@ public class DefaultWindowCompoents
 
   public void updateWindowData()
   {
-    if(addV) { f.setLayout(new GridLayout(1,4)); } else { f.setLayout(new GridLayout(1,3)); }
+    f.setLayout(new GridLayout(2,1));
     
     f.getContentPane().removeAll();
 
-    f.add(tree); f.add(new JScrollPane(tree));
+    JPanel p1 = new JPanel(new GridLayout(1,2));
+    JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-    f.add(out); f.add(new JScrollPane(out));
+    p1.add(tree); p1.add(new JScrollPane(tree));
+    p1.add(out); p1.add(new JScrollPane(out));
 
-    if( addV ) { f.add( Virtual ); } f.add( Offset );
+    if( addV ) { p2.add( Virtual ); } p2.add( Offset );
+
+    f.add(p1); f.add(p2);
 
     f.setJMenuBar(bdBar);
     
@@ -85,13 +89,18 @@ public class DefaultWindowCompoents
 
   public void updateWindow()
   {
-    if(addV) { f.setLayout(new GridLayout(1,3)); } else { f.setLayout(new GridLayout(1,2)); }
+    f.setLayout(new GridLayout(2,1));
     
     f.getContentPane().removeAll();
 
-    f.add(tree); f.add(new JScrollPane(tree));
+    JPanel p1 = new JPanel(new GridLayout(1,2));
+    JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-    if( addV ) { f.add( Virtual ); } f.add( Offset );
+    p1.add(tree); p1.add(new JScrollPane(tree));
+
+    if( addV ) { p2.add( Virtual ); } p2.add( Offset );
+
+    f.add(p1); f.add(p2);
 
     f.setJMenuBar(bdBar);
     

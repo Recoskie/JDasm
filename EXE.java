@@ -49,7 +49,9 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
       try { DebugOut[3] = Header.readDataDrectory( b ); } catch(Exception e) {  data.DataDirUsed = new boolean[16]; }
       try { DebugOut[4] = Header.readSections( b ); } catch(Exception e) { }
 
-      Headers.add(new DefaultMutableTreeNode("MZ Header.h"));
+      DefaultMutableTreeNode MZ = new DefaultMutableTreeNode("MZ Header.h");
+
+      Headers.add(MZ);
       Headers.add(new DefaultMutableTreeNode("PE Header.h"));
       Headers.add(new DefaultMutableTreeNode("OP Header.h"));
       Headers.add(new DefaultMutableTreeNode("Data Directory Array.h"));
@@ -117,7 +119,7 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
 
       if( data.DataDirUsed[14] ) { DefaultMutableTreeNode COM = new DefaultMutableTreeNode("COM Runtime Descriptor.h"); root.add(COM); }
 
-      ((DefaultTreeModel)tree.getModel()).setRoot(root);f.setVisible(true);
+      ((DefaultTreeModel)tree.getModel()).setRoot(root); f.setVisible(true);
     }
     catch(Exception e)
     {
