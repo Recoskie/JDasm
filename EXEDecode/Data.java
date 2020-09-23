@@ -17,6 +17,10 @@ public class Data
 
   public static long PE = 0;
 
+  //Machine code.
+
+  public static int baseOfCode = 0, sizeOfCode = 0;
+
   //the number of mapped sections in the executable.
 
   public static int NOS = 0;

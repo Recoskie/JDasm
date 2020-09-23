@@ -16,6 +16,8 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public Descriptor DebugOut[] = new Descriptor[5];
 
+  //Nodes that can be added to when Adding section format readers.
+
   DefaultMutableTreeNode Export = new DefaultMutableTreeNode("function Export Table.h");
   DefaultMutableTreeNode Import = new DefaultMutableTreeNode("DLL Import Table.h");
   DefaultMutableTreeNode RE = new DefaultMutableTreeNode("Resource Files.h");
@@ -44,7 +46,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   //plug in the separate decoders of the exe format together
 
-  public void read(String F, RandomAccessFileV file )
+  public void read( String F, RandomAccessFileV file )
   {
     b = file;
 
@@ -75,6 +77,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       Headers.add(new DefaultMutableTreeNode("Mapped EXE SECTOINS TO RAM.h"));
 
       root.add( Headers );
+
+      //Start of code.
+
+      if( data.baseOfCode != 0 ) { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h")); }
 
       //Location of the export directory
 
@@ -148,9 +154,26 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public void elementOpen(String h)
   {
+    //Start of application.
+    
+    if( h.equals("Program Start (Machine code).h") )
+    {
+      try
+      {
+        b.seekV( data.baseOfCode );
+        Virtual.setSelected( data.baseOfCode, data.baseOfCode + data.sizeOfCode - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.sizeOfCode - 1 );
+      }
+      catch( IOException e ) { }
+
+      //Disassembler is not ready yet.
+
+      noDecode();
+    }
+
     //Headers must be decoded before any other part of the program can be read.
 
-    if( h.equals("MZ Header.h") )
+    else if( h.equals("MZ Header.h") )
     {
       Offset.setSelected( 0, data.PE - 1 );
       

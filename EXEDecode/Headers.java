@@ -173,11 +173,11 @@ public class Headers extends Data
     b.read(b1); RowData[1][1] = toHex(b1); RowData[1][2] = ((int)b1[0]) + "";
     b.read(b1); RowData[2][1] = toHex(b1); RowData[2][2] = ((int)b1[0]) + "";
 
-    b.read(b4); RowData[3][1] = toHex(b4); RowData[3][2] = toInt(b4);
+    b.read(b4); RowData[3][1] = toHex(b4); sizeOfCode = toInt(b4); RowData[3][2] = sizeOfCode;
     b.read(b4); RowData[4][1] = toHex(b4); RowData[4][2] = toInt(b4);
     b.read(b4); RowData[5][1] = toHex(b4); RowData[5][2] = toInt(b4);
     b.read(b4); RowData[6][1] = toHex(b4); RowData[6][2] = toInt(b4);
-    b.read(b4); RowData[7][1] = toHex(b4); RowData[7][2] = toInt(b4);
+    b.read(b4); RowData[7][1] = toHex(b4); baseOfCode = toInt(b4); RowData[7][2] = baseOfCode;
     b.read(b4); RowData[8][1] = toHex(b4); RowData[8][2] = toInt(b4);
 
     b.read(b4); RowData[9][1] = toHex(b4); RowData[9][2] = toInt(b4);
