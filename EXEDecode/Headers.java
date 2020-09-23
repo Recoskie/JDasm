@@ -291,7 +291,7 @@ public class Headers extends Data
       DataDirUsed[ i3 ] = ( DataDir[ i2 ] > 0 ) && ( DataDir[ i2 + 1 ] > 0 );
     }
 
-    Descriptor T = new Descriptor(RowData,new Object[]{"Usage","Hex","Dec"});
+    Descriptor T = new Descriptor( RowData, new Object[]{"Usage","Hex","Dec"} ); T.setType( Descriptor.MZ );
 
     return(T);
   }

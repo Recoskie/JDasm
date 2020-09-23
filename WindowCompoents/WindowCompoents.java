@@ -1,9 +1,10 @@
+package WindowCompoents;
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.tree.*;
 import VHex.*;
 
-public class DefaultWindowCompoents
+public class WindowCompoents
 {
   //Main application Window.
 

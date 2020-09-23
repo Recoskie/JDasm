@@ -6,13 +6,14 @@ import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.awt.event.*;
 import java.lang.reflect.*;
+import WindowCompoents.*;
 
 //New file components.
 
 import RandomAccessFileV.*;
 import VHex.*;
 
-public class app extends DefaultWindowCompoents implements TreeWillExpandListener, TreeSelectionListener, ActionListener, MouseListener
+public class app extends WindowCompoents implements TreeWillExpandListener, TreeSelectionListener, ActionListener, MouseListener
 {
   //Current file path.
 

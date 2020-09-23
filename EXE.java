@@ -4,8 +4,9 @@ import javax.swing.tree.*;
 import java.awt.*;
 import EXEDecode.*;
 import RandomAccessFileV.*;
+import WindowCompoents.*;
 
-public class EXE extends DefaultWindowCompoents implements ExploerEventListener
+public class EXE extends WindowCompoents implements ExploerEventListener
 {
   //file system.
 
@@ -14,6 +15,22 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
   //The new Descriptor table allows a description of clicked data.
 
   public Descriptor DebugOut[] = new Descriptor[5];
+
+  DefaultMutableTreeNode Export = new DefaultMutableTreeNode("function Export Table.h");
+  DefaultMutableTreeNode Import = new DefaultMutableTreeNode("DLL Import Table.h");
+  DefaultMutableTreeNode RE = new DefaultMutableTreeNode("Resource Files.h");
+  DefaultMutableTreeNode EX = new DefaultMutableTreeNode("Exception Table.h");
+  DefaultMutableTreeNode Security = new DefaultMutableTreeNode("Security Level Settings.h");
+  DefaultMutableTreeNode RELOC = new DefaultMutableTreeNode("Relocation/Patching.h");
+  DefaultMutableTreeNode DEBUG = new DefaultMutableTreeNode("DEBUG TABLE.h");
+  DefaultMutableTreeNode Decription = new DefaultMutableTreeNode("Description/Architecture.h");
+  DefaultMutableTreeNode MV = new DefaultMutableTreeNode("Machine Value.h");
+  DefaultMutableTreeNode TS = new DefaultMutableTreeNode("Thread Storage Lowcation.h");
+  DefaultMutableTreeNode ConFIG = new DefaultMutableTreeNode("Load System Configuration.h");
+  DefaultMutableTreeNode BoundImport = new DefaultMutableTreeNode("Import Table of Functions inside program.h");
+  DefaultMutableTreeNode ImportAddress = new DefaultMutableTreeNode("Import Address Setup Table.h");
+  DefaultMutableTreeNode DelayImport = new DefaultMutableTreeNode("Delayed Import Table.h");
+  DefaultMutableTreeNode COM = new DefaultMutableTreeNode("COM Runtime Descriptor.h");
 
   //plug in the executable Readers
 
@@ -61,63 +78,63 @@ public class EXE extends DefaultWindowCompoents implements ExploerEventListener
 
       //Location of the export directory
 
-      if( data.DataDirUsed[0] ) { DefaultMutableTreeNode Export = new DefaultMutableTreeNode("function Export Table.h"); root.add(Export); }
+      if( data.DataDirUsed[0] ) { root.add(Export); }
 
       //Location of the import directory
 
-      if( data.DataDirUsed[1] ) { DefaultMutableTreeNode Import = new DefaultMutableTreeNode("DLL Import Table.h"); root.add(Import); }
+      if( data.DataDirUsed[1] ) { root.add(Import); }
 
       //Location of the resource directory
 
-      if( data.DataDirUsed[2] ) { DefaultMutableTreeNode RE = new DefaultMutableTreeNode("Resource Files.h"); root.add(RE); }
+      if( data.DataDirUsed[2] ) { root.add(RE); }
 
       //Exception
 
-      if( data.DataDirUsed[3] ) { DefaultMutableTreeNode EX = new DefaultMutableTreeNode("Exception Table.h"); root.add(EX); }
+      if( data.DataDirUsed[3] ) { root.add(EX); }
 
       //Security
 
-      if( data.DataDirUsed[4] ) { DefaultMutableTreeNode Security = new DefaultMutableTreeNode("Security Level Settings.h"); root.add(Security); }
+      if( data.DataDirUsed[4] ) { root.add(Security); }
 
       //Relocation/Patching
 
-      if( data.DataDirUsed[5] ) { DefaultMutableTreeNode RELOC = new DefaultMutableTreeNode("Relocation/Patching.h"); root.add(RELOC); }
+      if( data.DataDirUsed[5] ) { root.add(RELOC); }
 
       //Debug
 
-      if( data.DataDirUsed[6] ) { DefaultMutableTreeNode DEBUG = new DefaultMutableTreeNode("DEBUG TABLE.h"); root.add(DEBUG); }
+      if( data.DataDirUsed[6] ) { root.add(DEBUG); }
 
       //Description/Architecture
 
-      if( data.DataDirUsed[7] ) { DefaultMutableTreeNode Decription = new DefaultMutableTreeNode("Description/Architecture.h"); root.add(Decription); }
+      if( data.DataDirUsed[7] ) { root.add(Decription); }
 
       //Machine Value
 
-      if( data.DataDirUsed[8] ) { DefaultMutableTreeNode MV = new DefaultMutableTreeNode("Machine Value.h"); root.add(MV); }
+      if( data.DataDirUsed[8] ) { root.add(MV); }
 
       //Thread Storage
 
-      if( data.DataDirUsed[9] ) { DefaultMutableTreeNode TS = new DefaultMutableTreeNode("Thread Storage Lowcation.h"); root.add(TS); }
+      if( data.DataDirUsed[9] ) { root.add(TS); }
 
       //Load System Configuration
 
-      if( data.DataDirUsed[10] ) { DefaultMutableTreeNode ConFIG = new DefaultMutableTreeNode("Load System Configuration.h"); root.add(ConFIG); }
+      if( data.DataDirUsed[10] ) { root.add(ConFIG); }
 
       //Location of alternate import-binding director
 
-      if( data.DataDirUsed[11] ) { DefaultMutableTreeNode BoundImport = new DefaultMutableTreeNode("Import Table of Functions inside program.h"); root.add(BoundImport); }
+      if( data.DataDirUsed[11] ) { root.add(BoundImport); }
 
       //Import Address Table
 
-      if( data.DataDirUsed[12] ) { DefaultMutableTreeNode ImportAddress = new DefaultMutableTreeNode("Import Address Setup Table.h"); root.add(ImportAddress); }
+      if( data.DataDirUsed[12] ) { root.add(ImportAddress); }
 
       //Delayed Imports
 
-      if( data.DataDirUsed[13] ) { DefaultMutableTreeNode DelayImport = new DefaultMutableTreeNode("Delayed Import Table.h"); root.add(DelayImport); }
+      if( data.DataDirUsed[13] ) { root.add(DelayImport); }
 
       //COM Runtime Descriptor
 
-      if( data.DataDirUsed[14] ) { DefaultMutableTreeNode COM = new DefaultMutableTreeNode("COM Runtime Descriptor.h"); root.add(COM); }
+      if( data.DataDirUsed[14] ) { root.add(COM); }
 
       ((DefaultTreeModel)tree.getModel()).setRoot(root); f.setVisible(true);
     }
