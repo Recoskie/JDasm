@@ -65,7 +65,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       try { DebugOut[0] = Header.readMZ( b ); } catch(Exception e) { }
       try { DebugOut[1] = Header.readPE( b ); } catch(Exception e) { }
       try { DebugOut[2] = Header.readOP( b ); } catch(Exception e) { }
-      try { DebugOut[3] = Header.readDataDrectory( b ); } catch(Exception e) {  data.DataDirUsed = new boolean[16]; }
+      try { DebugOut[3] = Header.readDataDrectory( b ); } catch(Exception e) { data.DataDirUsed = new boolean[16]; }
       try { DebugOut[4] = Header.readSections( b ); } catch(Exception e) { }
 
       Headers.add(new DefaultMutableTreeNode("MZ Header.h"));
@@ -154,19 +154,19 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       Offset.setSelected( 0, data.PE - 1 );
       
-      out = DebugOut[0];
+      DebugOut[0].setType( Descriptor.MZ ); out = DebugOut[0];
     }
     else if( h.equals("PE Header.h") )
     {
       Offset.setSelected( data.PE, data.PE + 23 );
 
-      out = DebugOut[1];
+      DebugOut[1].setType( Descriptor.PE ); out = DebugOut[1];
     }
     else if( h.equals("OP Header.h") )
     {
       Offset.setSelected( data.PE + 24, data.is64bit ? data.PE + 135 : data.PE + 119 );
 
-      out = DebugOut[2];
+      DebugOut[2].setType( Descriptor.OP ); out = DebugOut[2];
     }
     else if( h.equals("Data Directory Array.h") )
     {
@@ -174,7 +174,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       Offset.setSelected( pos, pos + ( ( data.DDS / 3 ) << 3 ) - 1 );
 
-      out = DebugOut[3];
+      DebugOut[3].setType( Descriptor.dataDirectoryArray ); out = DebugOut[3];
     }
     else if( h.equals("Mapped EXE SECTOINS TO RAM.h") )
     {
@@ -182,7 +182,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       Offset.setSelected( pos, pos + ( data.NOS * 40 ) - 1 );
 
-      out = DebugOut[4];
+      DebugOut[4].setType( Descriptor.sections ); out = DebugOut[4];
     }
 
     //Seek virtual address position. Thus begin reading section.
