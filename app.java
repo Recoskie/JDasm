@@ -37,7 +37,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   //Converts the file chooser tree into binary data sections. For binary file format readers.
   
-  public boolean Debug = false;
+  public boolean Open = false;
 
   //Each integer is the file decoder to use by file extensions.
 
@@ -145,7 +145,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   public void treeWillExpand(TreeExpansionEvent e)
   {
-    if( !Debug )
+    if( !Open )
     {
       Path += tree.getLastSelectedPathComponent().toString(); Path += "\\"; dirSerach();
     }
@@ -337,74 +337,39 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     int I = DefaultProgram( ex );
 
-    if( I >= 0 & !Debug )
+    Open = true; new FileIconManager().Open = true; //AddToHistory(Path);
+
+    try
     {
-      Debug = true; new FileIconManager().Debug = true; AddToHistory(Path);
-
-      try
-      {
-        Class.forName(DecodeAPP[UseDecoder[I]]).getConstructor().newInstance();
-      }
-      catch(Exception e)
-      {
-        JOptionPane.showMessageDialog(null,"Unable to Load Decode Program For This File Format!");
-      }
-
-      try
-      {
-        file = new RandomAccessFileV( Path + "\\" + ft, "rw" );
-
-         if(!HInit)
-        {
-          Virtual = new VHex( file, true ); Offset = new VHex( file, false );
-          Offset.enableText( textV ); Virtual.enableText( textV );
-          HInit = true;
-        }
-        else
-        {
-          Offset.setTarget( file ); Virtual.setTarget( file );
-        }
-
-        ((ExploerEventListener)UsedDecoder).read( Path + "\\" + ft, file );
-
-        updateWindow(); f.pack(); f.setLocationRelativeTo(null);
-      }
-      catch(Exception er)
-      {
-        JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file"); Reset();
-      }
+      if( I >= 0 ) { Class.forName(DecodeAPP[UseDecoder[I]]).getConstructor().newInstance(); }
+    }
+    catch(Exception e)
+    {
+      JOptionPane.showMessageDialog(null,"Unable to Load Decode Program For This File Format!");
     }
 
-    //Else open file in binary tools.
-
-    else if( !Debug )
+    try
     {
-      try
-      {
-        file = new RandomAccessFileV( Path + "\\" + ft, "rw" );
+      file = new RandomAccessFileV( Path + "\\" + ft, "rw" );
 
-        if(!HInit)
-        {
-          Virtual = new VHex( file, true ); Offset = new VHex( file, false );
-          Offset.enableText( textV ); Virtual.enableText( textV );
-          HInit = true;
-        }
-        else
-        {
-          Offset.setTarget( file ); Virtual.setTarget( file );
-        }
-        
-        editMode(); f.pack(); f.setLocationRelativeTo(null);
-      }
-      catch(Exception er)
+      if(!HInit)
       {
-        JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file"); Reset();
+        Virtual = new VHex( file, true ); Offset = new VHex( file, false );
+        Offset.enableText( textV ); Virtual.enableText( textV );
+        HInit = true;
       }
+      else
+      {
+        Offset.setTarget( file ); Virtual.setTarget( file );
+      }
+
+      ((ExploerEventListener)UsedDecoder).read( Path + "\\" + ft, file );
+
+      updateWindow(); f.pack(); f.setLocationRelativeTo(null);
     }
-
-    else
+    catch(Exception er)
     {
-      ((ExploerEventListener)UsedDecoder).elementOpen(ft);
+      JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file"); Reset();
     }
   }
 
@@ -412,7 +377,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   public void Reset()
   {
-    Debug = false; new FileIconManager().Debug = false; fileChooser();
+    Open = false; new FileIconManager().Open = false; fileChooser();
   }
   
   public void mouseExited(MouseEvent e) { }
@@ -429,7 +394,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   {
     int r = tree.getRowForLocation( e.getX(), e.getY() );
 
-    if( r != -1 )
+    if( !Open && r != -1 )
     {
       if( tree.getLastSelectedPathComponent() != null )
       {
@@ -440,6 +405,10 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
           checkFT(p);
         }
       }
+    }
+    else
+    {
+      ((ExploerEventListener)UsedDecoder).elementOpen(tree.getLastSelectedPathComponent().toString());
     }
   }
 

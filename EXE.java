@@ -207,6 +207,14 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       DebugOut[4].setType( Descriptor.sections ); out = DebugOut[4];
     }
+    else if( h.equals("Header Data") )
+    {
+      long pos = ( data.is64bit ? data.PE + 136 : data.PE + 120 ) + ( ( data.DDS / 3 ) << 3 );
+
+      Offset.setSelected( 0, pos + ( data.NOS * 40 ) - 1 );
+
+      out = new JTable();
+    }
 
     //Seek virtual address position. Thus begin reading section.
 

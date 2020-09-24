@@ -14,7 +14,7 @@ public class FileIconManager extends DefaultTreeCellRenderer
 
   public static ImageIcon LoadedPic[] = new ImageIcon[6];
 
-  public static boolean Debug = false, LoadData = true;
+  public static boolean Open = false, LoadData = true;
 
   public FileIconManager()
   {
@@ -72,7 +72,7 @@ public class FileIconManager extends DefaultTreeCellRenderer
 
   protected void FolderIcon(String f)
   {
-    if( Debug )
+    if( Open )
     {
       if( !SetImage(f) )
       {
@@ -89,7 +89,7 @@ public class FileIconManager extends DefaultTreeCellRenderer
   {
     //In case the file uses a value at the end of it's name to use as reference in a list
 
-    if( Debug )
+    if( Open )
     {
       f = FilterRefrence( f );
 
