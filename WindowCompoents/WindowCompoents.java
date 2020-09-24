@@ -26,6 +26,10 @@ public class WindowCompoents
 
   public static JTable out;
 
+  //Additional detailed information output.
+
+  public static JLabel infoData = new JLabel("");
+
   //Hex editor.
 
   public static VHex Virtual, Offset;
@@ -46,9 +50,9 @@ public class WindowCompoents
 
   public void fileChooser()
   {
-    f.setLayout(new GridLayout(1,1));
-    
     f.getContentPane().removeAll();
+
+    f.setLayout(new GridLayout(1,1));
 
     f.add(tree);
     
@@ -63,58 +67,42 @@ public class WindowCompoents
     f.validate();
   }
 
+  public static void info( String s ) { infoData.setVisible(!s.equals("")); infoData.setText(s); f.validate(); }
+
   //Update window when viewing decoded data.
-
-  public void updateWindowData()
-  {
-    f.setLayout(new GridLayout(2,1));
-    
-    f.getContentPane().removeAll();
-
-    JPanel p1 = new JPanel(new GridLayout(1,2));
-    JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-    p1.add(tree); p1.add(new JScrollPane(tree));
-    p1.add(out); p1.add(new JScrollPane(out));
-
-    if( addV ) { p2.add( Virtual ); } p2.add( Offset );
-
-    f.add(p1); f.add(p2);
-
-    f.setJMenuBar(bdBar);
-    
-    f.validate();
-  }
-
-  //Update window.
 
   public void updateWindow()
   {
-    f.setLayout(new GridLayout(2,1));
-    
     f.getContentPane().removeAll();
 
-    JPanel p1 = new JPanel(new GridLayout(1,2));
+    f.setLayout(new GridLayout(1,1));
+
+    JSplitPane p1 = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JScrollPane( tree ), new JScrollPane( out ) ), infoData );
+
+    //Binary tools.
+
     JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-    p1.add(tree); p1.add(new JScrollPane(tree));
+    //Hex editor view, or additional binary tools.
 
-    if( addV ) { p2.add( Virtual ); } p2.add( Offset );
+    p2.add( Virtual ); p2.add( Offset );
 
-    f.add(p1); f.add(p2);
+    //Septate the two panels.
 
-    f.setJMenuBar(bdBar);
+    f.add( new JSplitPane(JSplitPane.VERTICAL_SPLIT, p1, p2) );
+
+    f.setJMenuBar( bdBar );
     
     f.validate();
   }
 
-  //Hex edit mode. Binary tools.
+  //Hex edit mode. Binary tools only.
 
   public void editMode()
   {
-    if(addV) { f.setLayout(new GridLayout(1,2)); } else { f.setLayout(new GridLayout(1,1)); }
-    
     f.getContentPane().removeAll();
+
+    if(addV) { f.setLayout(new GridLayout(1,2)); } else { f.setLayout(new GridLayout(1,1)); }
 
     if( addV ) { f.add( Virtual ); } f.add( Offset );
 

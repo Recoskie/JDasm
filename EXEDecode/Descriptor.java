@@ -40,6 +40,29 @@ public class Descriptor extends JTable
   //Detailed description of the MZ header.
 
   public static final int[] MZsec = new int[]{0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,36,38,40,60,64};
+  public static final String[] MZinfo = new String[]{"<html><p>The signature must always be 4D 5A = MZ.<br /><br />" + 
+  "It must be at the start of any windows binary.<br /><br />" +
+  "If the file does not pass this test. Then it is corrupted.<br /><br />" + 
+  "Or is a different file type disguise as a windows binary.</p></html>",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  ""};
 
   public void MZinfo( int row )
   {
@@ -49,6 +72,7 @@ public class Descriptor extends JTable
 
     //No description outputs yet.
 
+    WindowCompoents.info( MZinfo[ row ] );
   }
 
   //Detailed description of the PE header.

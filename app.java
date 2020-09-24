@@ -318,7 +318,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     else if( e.getActionCommand().equals("Toggle virtual space View") )
     {
-      addV = !addV; if(!Debug) { editMode(); } else { updateWindow(); }
+      addV = !addV; Virtual.setVisible(addV);
     }
 
     else if( e.getActionCommand().equals("Open new File") )

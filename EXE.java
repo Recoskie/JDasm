@@ -423,7 +423,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     //Update the window.
 
-    updateWindowData();
+    updateWindow();
   }
 
   //No Decoder.
