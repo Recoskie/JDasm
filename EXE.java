@@ -176,18 +176,27 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       Offset.setSelected( 0, data.PE - 1 );
       
       des.setType( Descriptor.MZ ); out.setModel( TData[0] );
+
+      info("<html><p>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
+      "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
+      "Which normally contains a small 16 bit code that prints the message that this program can not be ran in DOS mode.</p></html>");
     }
     else if( h.equals("PE Header.h") )
     {
       Offset.setSelected( data.PE, data.PE + 23 );
 
       des.setType( Descriptor.PE ); out.setModel( TData[1] );
+
+      info("<html><p>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
+      "This header specifies the number of sections to map in virtual space. The processor type, and date of compilation.</p></html>");
     }
     else if( h.equals("OP Header.h") )
     {
       Offset.setSelected( data.PE + 24, data.is64bit ? data.PE + 135 : data.PE + 119 );
 
       des.setType( Descriptor.OP ); out.setModel( TData[2] );
+
+      info("<html><p>At the end of the PE header is the start of the Optional header. However, this header is not optional.</p></html>");
     }
     else if( h.equals("Data Directory Array.h") )
     {
@@ -196,6 +205,8 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       Offset.setSelected( pos, pos + ( ( data.DDS / 3 ) << 3 ) - 1 );
 
       des.setType( Descriptor.dataDirectoryArray ); out.setModel( TData[3] );
+
+      info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address potions are useless without setting up the mapped sections after the array.</p></html>");
     }
     else if( h.equals("Mapped EXE SECTOINS TO RAM.h") )
     {
@@ -204,12 +215,17 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       Offset.setSelected( pos, pos + ( data.NOS * 40 ) - 1 );
 
       des.setType( Descriptor.sections ); out.setModel( TData[4] );
+
+      info("<html><p>The PE header specifies the number of sections to read.<br /><br />Each section specifies where to read the file, and size, and at what address to place the data in virtual Memory, and size.<br /><br />" +
+      "Without doing this, the data Directory Array is useless. Also the base of code in the OP header is a virtual address position. Which is the start of the programs machine code.</p></html>");
     }
     else if( h.equals("Header Data") )
     {
       long pos = ( data.is64bit ? data.PE + 136 : data.PE + 120 ) + ( ( data.DDS / 3 ) << 3 );
 
       Offset.setSelected( 0, pos + ( data.NOS * 40 ) - 1 );
+
+      info("<html><p>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located. Nether can the machine code Start position.</p></html>");
     }
 
     //Seek virtual address position. Thus begin reading section.
