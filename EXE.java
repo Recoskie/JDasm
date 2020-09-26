@@ -179,7 +179,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       info("<html><p>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
       "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
-      "Which normally contains a small 16 bit code that prints the message that this program can not be ran in DOS mode.</p></html>");
+      "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.</p></html>");
     }
     else if( h.equals("PE Header.h") )
     {

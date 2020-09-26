@@ -78,6 +78,48 @@ public class Descriptor extends JTable
   //Detailed description of the PE header.
 
   public static final int[] PEsec = new int[]{0,4,6,8,12,16,20,22,24};
+  public static final String[] PEinfo = new String[]{"<html><p>The PE header must start with PE = 50 45 00 00.<br /><br />If it does not pass the signature test then the windows binary is corrupted.</p></html>",
+  "<html><p>Windows does not translate binary to match other cores. It sets a core to the start of the program if CPU is compatible.<br /><br /><table border='1'>" +
+  "<tr><td>Value</td><td>Type</td></tr>" +
+  "<tr><td>4C 01</td><td>Intel 386</td></tr>" +
+  "<tr><td>64 86</td><td>Intel x64, and AMD x64</td></tr>" +
+  "<tr><td>62 01</td><td>MIPS R3000</td></tr>" +
+  "<tr><td>68 01</td><td>MIPS R10000</td></tr>" +
+  "<tr><td>69 01</td><td>MIPS little endian WCI v2</td></tr>" +
+  "<tr><td>83 01</td><td>old Alpha AXP</td></tr>" +
+  "<tr><td>84 01</td><td>Alpha AXP</td></tr>" +
+  "<tr><td>A2 01</td><td>Hitachi SH3</td></tr>" +
+  "<tr><td>A3 01</td><td>Hitachi SH3 DSP</td></tr>" +
+  "<tr><td>A6 01</td><td>Hitachi SH4</td></tr>" +
+  "<tr><td>A8 01</td><td>Hitachi SH5</td></tr>" +
+  "<tr><td>C0 01</td><td>ARM little endian</td></tr>" +
+  "<tr><td>C2 01</td><td>Thumb</td></tr>" +
+  "<tr><td>C4 01</td><td>ARMv7 (Thumb-2)</td></tr>" +
+  "<tr><td>D3 01</td><td>Matsushita AM33</td></tr>" +
+  "<tr><td>F0 01</td><td>PowerPC little endian</td></tr>" +
+  "<tr><td>F1 01</td><td>PowerPC with floating point support</td></tr>" +
+  "<tr><td>F2 01</td><td>PowerPC 64-bit little endian</td></tr>" +
+  "<tr><td>00 02</td><td>Intel IA64</td></tr>" +
+  "<tr><td>66 02</td><td>MIPS16</td></tr>" +
+  "<tr><td>68 02</td><td>Motorola 68000 series</td></tr>" +
+  "<tr><td>84 02</td><td>Alpha AXP 64-bit</td></tr>" +
+  "<tr><td>66 03</td><td>MIPS with FPU</td></tr>" +
+  "<tr><td>66 04</td><td>MIPS16 with FPU</td></tr>" +
+  "<tr><td>BC 0E</td><td>EFI Byte Code</td></tr>" +
+  "<tr><td>41 90</td><td>Mitsubishi M32R little endian</td></tr>" +
+  "<tr><td>64 AA</td><td>ARM64 little endian</td></tr>" +
+  "<tr><td>EE C0</td><td>clr pure MSIL</td></tr>" +
+  "</table><br />Generally Windows is wrote in x86 machine code. So the only two settings you will ever see used are.<br /><br />" +
+  "4C 01 = Intel 386 is 32 bit x86 machine code.<br />64 86 = Intel x64, and AMD x64 is 64 bit x86 machine code.<br /><br />A 64 bit x86 core can run 32 bit by setting operation size 32 bits when running code.<br /><br />" +
+  "However a 32 bit x86 core can not be forced to do 64 bit in length operations. Even though the machine code is the same.<br /><br />" +
+  "There is also windows RT. Which RT is a ARM core compilation of windows. In which case you might see Machine ARM.</p></html>",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  ""};
 
   public void PEinfo( int row )
   {
@@ -87,6 +129,7 @@ public class Descriptor extends JTable
 
     //No description outputs yet.
 
+    WindowCompoents.info( PEinfo[ row ] );
   }
 
   //Detailed description of the OP header.

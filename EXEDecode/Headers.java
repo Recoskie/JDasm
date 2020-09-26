@@ -15,7 +15,7 @@ public class Headers extends Data
 
     mzData.addColumn("Usage"); mzData.addColumn("Hex"); mzData.addColumn("Dec");
 
-    b.read(b2); String MZ = toHex( b2 ); mzData.addRow( new Object[]{ "SIGNATRUE", toHex( b2 ), MZ } );
+    b.read(b2); String MZ = toHex( b2 ); mzData.addRow( new Object[]{ "SIGNATRUE", MZ, toText( b2 ) } );
     b.read(b2); mzData.addRow( new Object[]{ "Size of Last Page", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
     b.read(b2); mzData.addRow( new Object[]{ "Number of 512 byte pages in file", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
     b.read(b2); mzData.addRow( new Object[]{ "Number of Relocation Entries", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );

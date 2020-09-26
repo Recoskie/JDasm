@@ -83,7 +83,7 @@ public class WindowCompoents
 
     f.setLayout(new GridLayout(1,1));
 
-    JSplitPane p1 = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JScrollPane( tree ), new JScrollPane( out ) ), infoData );
+    JSplitPane p1 = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JScrollPane( tree ), new JScrollPane( out ) ), new JScrollPane(infoData) );
 
     //Binary tools.
 
