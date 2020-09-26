@@ -14,7 +14,8 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   //The new Descriptor table allows a description of clicked data.
 
-  public Descriptor DebugOut[] = new Descriptor[5];
+  public Descriptor des = new Descriptor( new Object[][] {{}}, new Object[]{} );
+  public javax.swing.table.DefaultTableModel TData[] = new javax.swing.table.DefaultTableModel[5];
 
   //Nodes that can be added to when Adding section format readers.
 
@@ -42,7 +43,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
   //public DLLImport DLL = new DLLImport();
   //public Resource RSRC = new Resource();
 
-  public EXE() { UsedDecoder = this; }
+  public EXE() { UsedDecoder = this; out = des; out.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); }
 
   //plug in the separate decoders of the exe format together
 
@@ -64,90 +65,87 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     try
     {
-      try { DebugOut[0] = Header.readMZ( b ); } catch(Exception e) { }
-      try { DebugOut[1] = Header.readPE( b ); } catch(Exception e) { }
-      try { DebugOut[2] = Header.readOP( b ); } catch(Exception e) { }
-      try { DebugOut[3] = Header.readDataDrectory( b ); } catch(Exception e) { data.DataDirUsed = new boolean[16]; }
-      try { DebugOut[4] = Header.readSections( b ); } catch(Exception e) { }
-
-      Headers.add(new DefaultMutableTreeNode("MZ Header.h"));
-      Headers.add(new DefaultMutableTreeNode("PE Header.h"));
-      Headers.add(new DefaultMutableTreeNode("OP Header.h"));
-      Headers.add(new DefaultMutableTreeNode("Data Directory Array.h"));
-      Headers.add(new DefaultMutableTreeNode("Mapped EXE SECTOINS TO RAM.h"));
-
-      root.add( Headers );
-
-      //Start of code.
-
-      if( data.baseOfCode != 0 ) { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h")); }
-
-      //Location of the export directory
-
-      if( data.DataDirUsed[0] ) { root.add(Export); }
-
-      //Location of the import directory
-
-      if( data.DataDirUsed[1] ) { root.add(Import); }
-
-      //Location of the resource directory
-
-      if( data.DataDirUsed[2] ) { root.add(RE); }
-
-      //Exception
-
-      if( data.DataDirUsed[3] ) { root.add(EX); }
-
-      //Security
-
-      if( data.DataDirUsed[4] ) { root.add(Security); }
-
-      //Relocation/Patching
-
-      if( data.DataDirUsed[5] ) { root.add(RELOC); }
-
-      //Debug
-
-      if( data.DataDirUsed[6] ) { root.add(DEBUG); }
-
-      //Description/Architecture
-
-      if( data.DataDirUsed[7] ) { root.add(Decription); }
-
-      //Machine Value
-
-      if( data.DataDirUsed[8] ) { root.add(MV); }
-
-      //Thread Storage
-
-      if( data.DataDirUsed[9] ) { root.add(TS); }
-
-      //Load System Configuration
-
-      if( data.DataDirUsed[10] ) { root.add(ConFIG); }
-
-      //Location of alternate import-binding director
-
-      if( data.DataDirUsed[11] ) { root.add(BoundImport); }
-
-      //Import Address Table
-
-      if( data.DataDirUsed[12] ) { root.add(ImportAddress); }
-
-      //Delayed Imports
-
-      if( data.DataDirUsed[13] ) { root.add(DelayImport); }
-
-      //COM Runtime Descriptor
-
-      if( data.DataDirUsed[14] ) { root.add(COM); }
-
-      ((DefaultTreeModel)tree.getModel()).setRoot(root); f.setVisible(true);
+      TData[0] = Header.readMZ( b );
+      TData[1] = Header.readPE( b );
+      TData[2] = Header.readOP( b );
+      TData[3] = Header.readDataDrectory( b );
+      TData[4] = Header.readSections( b );
     }
-    catch(Exception e)
-    {
-      JOptionPane.showMessageDialog(null,"Error "+e);
-    }
+    catch(Exception e) { data.DataDirUsed = new boolean[15]; }
+
+    Headers.add(new DefaultMutableTreeNode("MZ Header.h"));
+    Headers.add(new DefaultMutableTreeNode("PE Header.h"));
+    Headers.add(new DefaultMutableTreeNode("OP Header.h"));
+    Headers.add(new DefaultMutableTreeNode("Data Directory Array.h"));
+    Headers.add(new DefaultMutableTreeNode("Mapped EXE SECTOINS TO RAM.h"));
+
+    root.add( Headers );
+
+    //Start of code.
+
+    if( data.baseOfCode != 0 ) { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h")); }
+
+    //Location of the export directory
+
+    if( data.DataDirUsed[0] ) { root.add(Export); }
+
+    //Location of the import directory
+
+    if( data.DataDirUsed[1] ) { root.add(Import); }
+
+    //Location of the resource directory
+
+    if( data.DataDirUsed[2] ) { root.add(RE); }
+
+    //Exception
+
+    if( data.DataDirUsed[3] ) { root.add(EX); }
+
+    //Security
+
+    if( data.DataDirUsed[4] ) { root.add(Security); }
+
+    //Relocation/Patching
+
+    if( data.DataDirUsed[5] ) { root.add(RELOC); }
+
+    //Debug
+
+    if( data.DataDirUsed[6] ) { root.add(DEBUG); }
+
+    //Description/Architecture
+
+    if( data.DataDirUsed[7] ) { root.add(Decription); }
+
+    //Machine Value
+
+    if( data.DataDirUsed[8] ) { root.add(MV); }
+
+    //Thread Storage
+
+    if( data.DataDirUsed[9] ) { root.add(TS); }
+
+    //Load System Configuration
+
+    if( data.DataDirUsed[10] ) { root.add(ConFIG); }
+
+    //Location of alternate import-binding director
+
+    if( data.DataDirUsed[11] ) { root.add(BoundImport); }
+
+    //Import Address Table
+
+    if( data.DataDirUsed[12] ) { root.add(ImportAddress); }
+
+    //Delayed Imports
+
+    if( data.DataDirUsed[13] ) { root.add(DelayImport); }
+
+    //COM Runtime Descriptor
+
+    if( data.DataDirUsed[14] ) { root.add(COM); }
+
+    ((DefaultTreeModel)tree.getModel()).setRoot(root); f.setVisible(true);
   }
 
   //Change What To Display Based on what the user clicks on
@@ -177,19 +175,19 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       Offset.setSelected( 0, data.PE - 1 );
       
-      DebugOut[0].setType( Descriptor.MZ ); out = DebugOut[0];
+      des.setType( Descriptor.MZ ); out.setModel( TData[0] );
     }
     else if( h.equals("PE Header.h") )
     {
       Offset.setSelected( data.PE, data.PE + 23 );
 
-      DebugOut[1].setType( Descriptor.PE ); out = DebugOut[1];
+      des.setType( Descriptor.PE ); out.setModel( TData[1] );
     }
     else if( h.equals("OP Header.h") )
     {
       Offset.setSelected( data.PE + 24, data.is64bit ? data.PE + 135 : data.PE + 119 );
 
-      DebugOut[2].setType( Descriptor.OP ); out = DebugOut[2];
+      des.setType( Descriptor.OP ); out.setModel( TData[2] );
     }
     else if( h.equals("Data Directory Array.h") )
     {
@@ -197,7 +195,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       Offset.setSelected( pos, pos + ( ( data.DDS / 3 ) << 3 ) - 1 );
 
-      DebugOut[3].setType( Descriptor.dataDirectoryArray ); out = DebugOut[3];
+      des.setType( Descriptor.dataDirectoryArray ); out.setModel( TData[3] );
     }
     else if( h.equals("Mapped EXE SECTOINS TO RAM.h") )
     {
@@ -205,15 +203,13 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       Offset.setSelected( pos, pos + ( data.NOS * 40 ) - 1 );
 
-      DebugOut[4].setType( Descriptor.sections ); out = DebugOut[4];
+      des.setType( Descriptor.sections ); out.setModel( TData[4] );
     }
     else if( h.equals("Header Data") )
     {
       long pos = ( data.is64bit ? data.PE + 136 : data.PE + 120 ) + ( ( data.DDS / 3 ) << 3 );
 
       Offset.setSelected( 0, pos + ( data.NOS * 40 ) - 1 );
-
-      out = new JTable();
     }
 
     //Seek virtual address position. Thus begin reading section.
@@ -428,17 +424,17 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       noDecode();
     }
-
-    //Update the window.
-
-    updateWindow();
   }
+
+  //Create table model.
+
+
 
   //No Decoder.
 
   public void noDecode()
   { 
-    out = new JTable( ( new Object[][] { { "NO DECODER" } } ), ( new Object[]{ "NO DECODER HAS BEN MADE YET" } ) );
+    out.setModel(new JTable( ( new Object[][] { { "NO DECODER" } } ), ( new Object[]{ "NO DECODER HAS BEN MADE YET" } ) ).getModel());
     out.setEnabled(false);
   }
 }
