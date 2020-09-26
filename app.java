@@ -365,7 +365,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       ((ExploerEventListener)UsedDecoder).read( Path + "\\" + ft, file );
 
-      updateWindow(); f.pack(); f.setLocationRelativeTo(null);
+      openFile(); f.pack(); f.setLocationRelativeTo(null);
     }
     catch(Exception er)
     {

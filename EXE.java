@@ -426,15 +426,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     }
   }
 
-  //Create table model.
-
-
-
   //No Decoder.
 
   public void noDecode()
   { 
-    out.setModel(new JTable( ( new Object[][] { { "NO DECODER" } } ), ( new Object[]{ "NO DECODER HAS BEN MADE YET" } ) ).getModel());
-    out.setEnabled(false);
+    info(""); out.setModel(new JTable( ( new Object[][] { { "NO DECODER" } } ), ( new Object[]{ "NO DECODER HAS BEN MADE YET" } ) ).getModel());
   }
 }
