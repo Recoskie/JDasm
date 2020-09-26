@@ -35,6 +35,3 @@ Virtual mapped memory view and hex editor.
 
 https://github.com/Recoskie/VHex
 
-The new system will allow you to step through headers as you watch the hex editor highlight bytes that are used while decompiling the program or editing it from the hex editor.
-
-TODO. The hex editor still has to be added to the window during reading headers.
