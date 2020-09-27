@@ -39,6 +39,26 @@ public class Descriptor extends JTable
 
   //Detailed description of the MZ header.
 
+  public static final String res = "A section that is reserved, is skipped. So that some day the empty space may be used for something new.";
+  
+  public static final String stack = "The SP (stack pointer) is a place that CPU uses to store data. Each thing wrote into the stack increments the stack pointer.<br /><br />" +
+  "Each thing read from the stack deincrements the stack pointer. Thus the first thing read is the last thing added to the stack.<br /><br />" +
+  "The stack is used between method calls. As the stack is a convenient place to put things that function, or method uses as input.<br /><br />" +
+  "It is important that the stack pointer is adjusted away from the program. So the stack does not write into the programs machine code in virtual space.";
+
+  public static final String Instruct = "The instruction pointer is the position the CPU is set with the binary code.<br /><br />" +
+  "The CPU reads the memory at the position of the instruction pointer, and does a operation.<br /><br />" +
+  "Instruction pointer increments after completing a single operation. To fetch the next instruction. This repeats in a cycle.<br /><br />" +
+  "The instruction pointer is built into the CPU in order to run software.";
+  
+  public static final String sseg = "SS (Stack segment) is a value that is multiplied by 16 plus the SP (stack pointer) to forum the stack pointer position.<br /><br />" +
+  "This was done to make the address space bigger in 16 bit computers.<br /><br />" +
+  "Thus 32 bit, and 64 bit systems no longer use a segment. Unless set 16 bit mode.<br /><br />";
+
+  public static final String cseg = "CS (Code segment) is a value that is multiplied by 16 plus the IP (Instruction pointer) to forum the Instruction pointer position.<br /><br />" +
+  "This was done to make the address space bigger in 16 bit computers.<br /><br />" +
+  "Thus 32 bit, and 64 bit systems no longer use a segment. Unless set 16 bit mode.<br /><br />";
+
   public static final int[] MZsec = new int[]{0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,36,38,40,60,64};
   public static final String[] MZinfo = new String[]{"<html><p>The signature must always be 4D 5A = MZ.<br /><br />" + 
   "It must be at the start of any windows binary.<br /><br />" +
@@ -50,19 +70,19 @@ public class Descriptor extends JTable
   "",
   "",
   "",
+  "<html><p>" + sseg + stack + "</p></html>",
+  "<html><p>" + sseg + stack + "</p></html>",
+  "",
+  "<html><p>" + cseg + Instruct + "</p></html>",
+  "<html><p>" + cseg + Instruct + "</p></html>",
   "",
   "",
+  "<html><p>" + res + "</p></html>",
   "",
   "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  ""};
+  "<html><p>"+res+"</p></html>",
+  "<html><p>" + res + "<br /><br />Instead of adding to DOS. Microsoft created a new system that uses the reserved section to locate to the PE header.</p></html>",
+  "<html><p>This is a x86 binary that gets loaded by DOS in 16 bit. The new \"Windows\" system used the PE location to go to the new PE header.</html>"};
 
   public void MZinfo( int row )
   {
@@ -113,7 +133,8 @@ public class Descriptor extends JTable
   "4C 01 = Intel 386 is 32 bit x86 machine code.<br />64 86 = Intel x64, and AMD x64 is 64 bit x86 machine code.<br /><br />A 64 bit x86 core can run 32 bit by setting operation size 32 bits when running code.<br /><br />" +
   "However a 32 bit x86 core can not be forced to do 64 bit in length operations. Even though the machine code is the same.<br /><br />" +
   "There is also windows RT. Which RT is a ARM core compilation of windows. In which case you might see Machine ARM.</p></html>",
-  "",
+  "<html><p>This is the number of sections to read after the OP header. In the \"Mapped EXE SECTOINS TO RAM\".<br /><br />" +
+  "The sections specify a position to read the file, and virtual address to place the section, from the windows binary in RAM.</p></html>",
   "",
   "",
   "",

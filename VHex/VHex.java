@@ -834,7 +834,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   {
     SelectC = new Color( 57, 105, 138, 128 );
 
-    if( !Virtual ) { sel = e.SPos(); sele = sel; } else { sel = e.SPosV(); sele = sel; }
+    if( !Virtual ) { sel = e.SPos(); sele = sel; } else if( e.MapV() ) { sel = e.SPosV(); sele = sel; }
 
     if( ( sel - offset ) >= Rows * 16 || ( sel - offset ) < 0 ) { offset = sel & 0xFFFFFFFFFFFFFFF0L; updateData(); }
     
@@ -847,7 +847,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   {
     endEdit(); SelectC = new Color( 33, 255, 33, 128 );
 
-    if( !Virtual ) { sel = e.SPos(); sele = e.EPos(); } else { sel = e.SPosV(); sele = e.EPosV(); }
+    if( !Virtual ) { sel = e.SPos(); sele = e.EPos(); } else if( e.MapV() ) { sel = e.SPosV(); sele = e.EPosV(); }
 
     if( ( sel - offset ) >= Rows << 4 || ( sel - offset ) < 0 ) { offset = sel & 0xFFFFFFFFFFFFFFF0L; updateData(); } 
     
@@ -860,7 +860,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   {
     SelectC = new Color( 255, 33, 33, 128 );
 
-    if( !Virtual ) { sel = e.SPos(); sele = e.EPos(); } else { sel = e.SPosV(); sele = e.EPosV(); }
+    if( !Virtual ) { sel = e.SPos(); sele = e.EPos(); } else if( e.MapV()) { sel = e.SPosV(); sele = e.EPosV(); }
 
     if( ( sel - offset ) > Rows << 4 ) { offset = sel & 0xFFFFFFFFFFFFFFF0L; }
 

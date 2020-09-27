@@ -421,7 +421,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
       }
     }
     
-    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0, getVirtualPointer(), 0 ) );
+    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0, getVirtualPointer(), 0, curVra.Len != 0 ) );
   }
   
   public int readV() throws IOException
@@ -713,7 +713,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   {
     while( Events && Trigger ) { EventThread.interrupt(); }
     
-    super.seek( Offset ); fireIOEventSeek( new IOEvent( this, Offset, 0, getVirtualPointer(), 0 ) );
+    super.seek( Offset ); fireIOEventSeek( new IOEvent( this, Offset, 0, getVirtualPointer(), 0, curVra.Len != 0 ) );
   }
   
   //Seek. Same as seek, but is a little faster of a read ahead trick.
@@ -724,7 +724,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
     
     int b = super.skipBytes( n );
     
-    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0,  getVirtualPointer(), 0 ) );
+    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0,  getVirtualPointer(), 0, curVra.Len != 0 ) );
     
     return( b );
   }
@@ -839,7 +839,8 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
           {
             if( pos == super.getFilePointer() )
             {
-              fireIOEvent( new IOEvent( this, TPos, pos - 1, TPosV, posV - 1 ) ); Trigger = false;
+              fireIOEvent( new IOEvent( this, TPos, pos - 1, TPosV, posV - 1, curVra.Len != 0 ) );
+              Trigger = false;
             }
             else{ pos = super.getFilePointer(); posV = getVirtualPointer(); }
           }
