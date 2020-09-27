@@ -159,8 +159,9 @@ public class Descriptor extends JTable
   public static final int[] OP64sec = new int[]{24,26,27,28,32,36,40,44,48,52,56,60,64,66,68,70,72,74,76,80,84,88,92,94,96,104,112,120,128,132,136};
   
   public static final String[] OPinfo = new String[]{"<html><p>The Optional header has three different possible signatures.<br /><br />" +
-  "0B 01 = 32 Bit binary.<br /><br />0B 02 = 64 bit binary<br /><br />07 01 = ROM Image file.<br /><br />" +
-  "The only time the OP header changes format is the 64 bit version of the Header.</p></html>",
+  "0B 01 = 32 Bit binary.<br /><br />0B 02 = 64 Bit binary<br /><br />07 01 = ROM Image file.<br /><br />" +
+  "The only time the OP header changes format is the 64 bit version of the Header.<br /><br />" +
+  "If this section does not test true, for any of the three signatures, then the file is corrupted.</p></html>",
   "",
   "",
   "",
