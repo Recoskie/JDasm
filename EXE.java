@@ -77,7 +77,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     Headers.add(new DefaultMutableTreeNode("PE Header.h"));
     Headers.add(new DefaultMutableTreeNode("OP Header.h"));
     Headers.add(new DefaultMutableTreeNode("Data Directory Array.h"));
-    Headers.add(new DefaultMutableTreeNode("Mapped EXE SECTOINS TO RAM.h"));
+    Headers.add(new DefaultMutableTreeNode("Mapped SECTOINS TO RAM.h"));
 
     root.add( Headers );
 
@@ -206,9 +206,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       des.setType( Descriptor.dataDirectoryArray ); out.setModel( TData[3] );
 
-      info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address potions are useless without setting up the mapped sections after the array.</p></html>");
+      info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
+      "Anything that is 0 is not used.</p></html>");
     }
-    else if( h.equals("Mapped EXE SECTOINS TO RAM.h") )
+    else if( h.equals("Mapped SECTOINS TO RAM.h") )
     {
       long pos = ( data.is64bit ? data.PE + 136 : data.PE + 120 ) + ( ( data.DDS / 3 ) << 3 );
 

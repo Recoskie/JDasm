@@ -80,7 +80,7 @@ public class Descriptor extends JTable
   "<html><p>" + res + "</p></html>",
   "",
   "",
-  "<html><p>"+res+"</p></html>",
+  "<html><p>" + res + "</p></html>",
   "<html><p>" + res + "<br /><br />Instead of adding to DOS. Microsoft created a new system that uses the reserved section to locate to the PE header.</p></html>",
   "<html><p>This is a x86 binary that gets loaded by DOS in 16 bit. The new \"Windows\" system used the PE location to go to the new PE header.</html>"};
 
@@ -133,7 +133,7 @@ public class Descriptor extends JTable
   "4C 01 = Intel 386 is 32 bit x86 machine code.<br />64 86 = Intel x64, and AMD x64 is 64 bit x86 machine code.<br /><br />A 64 bit x86 core can run 32 bit by setting operation size 32 bits when running code.<br /><br />" +
   "However a 32 bit x86 core can not be forced to do 64 bit in length operations. Even though the machine code is the same.<br /><br />" +
   "There is also windows RT. Which RT is a ARM core compilation of windows. In which case you might see Machine ARM.</p></html>",
-  "<html><p>This is the number of sections to read after the OP header. In the \"Mapped EXE SECTOINS TO RAM\".<br /><br />" +
+  "<html><p>This is the number of sections to read after the OP header. In the \"Mapped SECTOINS TO RAM\".<br /><br />" +
   "The sections specify a position to read the file, and virtual address to place the section, from the windows binary in RAM.</p></html>",
   "",
   "",
@@ -157,6 +157,39 @@ public class Descriptor extends JTable
 
   public static final int[] OP32sec = new int[]{24,26,27,28,32,36,40,44,48,52,56,60,64,66,68,70,72,74,76,80,84,88,92,94,96,100,104,108,112,116,120};
   public static final int[] OP64sec = new int[]{24,26,27,28,32,36,40,44,48,52,56,60,64,66,68,70,72,74,76,80,84,88,92,94,96,104,112,120,128,132,136};
+  
+  public static final String[] OPinfo = new String[]{"<html><p>The Optional header has three different possible signatures.<br /><br />" +
+  "0B 01 = 32 Bit binary.<br /><br />0B 02 = 64 bit binary<br /><br />07 01 = ROM Image file.<br /><br />" +
+  "The only time the OP header changes format is the 64 bit version of the Header.</p></html>",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "<html><p>Data Directory Array can be made bigger than it's default size 16.<br /><br />Which allows for more features to be added to the windows application format.<p></html>"};
 
   public void OPinfo( int row )
   {
@@ -166,6 +199,7 @@ public class Descriptor extends JTable
 
     //No description outputs yet.
 
+    WindowCompoents.info( OPinfo[ row ] );
   }
 
   //Detailed description of the data Directory Array.
@@ -187,9 +221,22 @@ public class Descriptor extends JTable
     WindowCompoents.Offset.setSelected( pos, end );
 
     //No extra information possible.
+
+    WindowCompoents.info( "" );
   }
 
   //Detailed description of the sections to RAM memory.
+
+  public static final String[] Sinfo = new String[]{"<html><p>The 8 bytes can be given any text based name you like. It is not used for anything by the system.<br /><br />" +
+  "The names can be very deceiving. As x86 compilers can compile out the code section giving it a \".text\" name.<br /><br />" +
+  "Don't worry about the names. The data Directory Array defines what each section is after it is in virtual space.<br /><br />" +
+  "Thus the PE header marks the machine code in it's \"Base of code\" value. Which is a virtual address position.</p></html>",
+  "",
+  "",
+  "",
+  "",
+  "<html><p>" + res + "</p></html>",
+  ""};
 
   public void Sinfo( int row )
   {
@@ -197,7 +244,9 @@ public class Descriptor extends JTable
 
     //Select Bytes.
 
-    int end = row % 7; pos += ( row / 7 ) * 40;
+    int end = row % 7; WindowCompoents.info( Sinfo[ end ] );
+    
+    pos += ( row / 7 ) * 40;
 
     if( end == 0 ){ end = pos + 7; }
     else if( end < 5 ) { end -= 1; pos += 8 + (end << 2); end = pos + 3; }
@@ -205,7 +254,5 @@ public class Descriptor extends JTable
     else if( end == 6 ) { pos += 36; end = pos + 3; }
 
     WindowCompoents.Offset.setSelected( pos, end );
-
-    //Some detailed descriptions can be added.
   }
 }
