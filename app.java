@@ -363,7 +363,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         Offset.setTarget( file ); Virtual.setTarget( file );
       }
 
-      if( I > 0 )
+      if( I >= 0 )
       {
         ((ExploerEventListener)UsedDecoder).read( Path + "\\" + ft, file );
 
