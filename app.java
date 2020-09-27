@@ -345,7 +345,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     }
     catch(Exception e)
     {
-      JOptionPane.showMessageDialog(null,"Unable to Load Decode Program For This File Format!");
+      I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Decode Program For This File Format!");
     }
 
     try
@@ -363,9 +363,15 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         Offset.setTarget( file ); Virtual.setTarget( file );
       }
 
-      ((ExploerEventListener)UsedDecoder).read( Path + "\\" + ft, file );
+      if( I > 0 )
+      {
+        ((ExploerEventListener)UsedDecoder).read( Path + "\\" + ft, file );
 
-      openFile(); f.pack(); f.setLocationRelativeTo(null);
+        openFile();
+      }
+      else { editMode(); }
+
+      f.pack(); f.setLocationRelativeTo(null);
     }
     catch(Exception er)
     {
