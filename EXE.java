@@ -207,7 +207,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       des.setType( Descriptor.dataDirectoryArray ); out.setModel( TData[3] );
 
       info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
-      "Anything that is 0 is not used.</p></html>");
+      "Anything that is 0, is not used.</p></html>");
     }
     else if( h.equals("Mapped SECTOINS TO RAM.h") )
     {
@@ -226,7 +226,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       Offset.setSelected( 0, pos + ( data.NOS * 40 ) - 1 );
 
-      info("<html><p>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located. Nether can the machine code Start position.</p></html>");
+      info("<html><p>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
+      "Export Table can not be located.<br /><br />" +
+      "Files that are included in the binary. Called Resource Files. Also can not be located.<br /><br />" +
+      "Nether can the machine code Start position.</p></html>");
     }
 
     //Seek virtual address position. Thus begin reading section.
