@@ -78,8 +78,7 @@ public class WindowCompoents
     f.getContentPane().removeAll();
 
     infoData.setBorder( BorderFactory.createLineBorder( Color.BLUE, 3 ) );
-    infoData.setHorizontalAlignment( SwingConstants.CENTER );
-    infoData.setVerticalAlignment( SwingConstants.CENTER );
+    infoData.setVerticalAlignment(JLabel.TOP); infoData.setHorizontalAlignment(JLabel.LEFT);
 
     f.setLayout(new GridLayout(1,1));
 
