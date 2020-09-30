@@ -168,7 +168,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       try
       {
-        b.seekV( data.baseOfCode );
+        b.seekV( data.startOfCode );
 
         //Disassembler.
 
@@ -179,14 +179,14 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         //Disassemble till end, or return from application.
         //Note that more can be added here such as the jump operation.
 
-        while( !t2.equals("RET") && b.getVirtualPointer() < end )
+        while( t2.indexOf("RET") != 0 && b.getVirtualPointer() < end )
         {
           t2 = ((X86)data.core).decodeInstruction(); t += ((X86)data.core).pos() + " " + t2 + "<br />";
         }
 
         long f = ((X86)data.core).getPos() - 1, v = ((X86)data.core).getPosV() - 1;
 
-        b.seekV( data.baseOfCode ); Virtual.setSelected( data.baseOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
+        b.seekV( data.startOfCode ); Virtual.setSelected( data.startOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
 
         info( "<html>" + t + "</html>" );
       }

@@ -90,7 +90,7 @@ public class Headers extends Data
     b.read(b4); sizeOfCode = toInt(b4); opData.addRow( new Object[]{ "Size Of Code", toHex(b4), sizeOfCode + "" } );
     b.read(b4); opData.addRow( new Object[]{ "Size Of Initialized Data", toHex(b4), toInt(b4) + "" } );
     b.read(b4); opData.addRow( new Object[]{ "Size Of Uninitialized Data", toHex(b4), toInt(b4) + "" } );
-    b.read(b4); opData.addRow( new Object[]{ "Address Of Entry Point", toHex(b4), toInt(b4) + "" } );
+    b.read(b4); startOfCode = toInt(b4); opData.addRow( new Object[]{ "Start Of Code.", toHex(b4), startOfCode + "" } );
     b.read(b4); baseOfCode = toInt(b4); opData.addRow( new Object[]{ "Base Of Code", toHex(b4), baseOfCode + "" } );
     b.read(b4); opData.addRow( new Object[]{ "Base Of Data", toHex(b4), toInt(b4) + "" } );
 
