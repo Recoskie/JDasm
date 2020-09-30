@@ -82,14 +82,10 @@ public class Descriptor extends JTable
   "",
   "<html><p>" + res + "</p></html>",
   "<html><p>" + res + "<br /><br />Instead of adding to DOS. Microsoft created a new system that uses the reserved section to locate to the PE header.</p></html>",
-  "<html><p>This is a x86 binary that gets loaded by DOS in 16 bit. The new \"Windows\" system used the PE location to go to the new PE header.</html>"};
+  "<p>This is a x86 binary that gets loaded by DOS in 16 bit. The new \"Windows\" system used the PE location to go to the new PE header.<br /><br />"};
 
   public void MZinfo( int row )
   {
-    //Select Bytes.
-
-    WindowCompoents.Offset.setSelected( MZsec[row], row == 19 ? Data.PE - 1 : MZsec[row+1] - 1 );
-
     //Disassemble 16 bit section.
 
     if( row == 19 )
@@ -109,24 +105,29 @@ public class Descriptor extends JTable
 
         ((core.x86.X86)Data.core).setPos( MZsec[row] );
 
-        while( ((core.x86.X86)Data.core).getPos() < Data.PE - 1 )
+        while( ((core.x86.X86)Data.core).getPos() < Data.PE )
         {
           t2 = ((core.x86.X86)Data.core).decodeInstruction();
           
           if( Dos_exit == 0 && t2.equals("MOV AX,4C01") ) { Dos_exit = 1; }
           else if( Dos_exit == 1 && t2.equals("INT 21") ) { Dos_exit = 2; }
           
-          t += ((core.x86.X86)Data.core).pos() + " " + t2 + "\r\n";
+          t += ((core.x86.X86)Data.core).pos() + " " + t2 + "<br />";
 
           if( Dos_exit == 2 ) { break; }
         }
+
+        WindowCompoents.Offset.setSelected( MZsec[row], ((core.x86.X86)Data.core).getPos() - 1 );
+        WindowCompoents.info( "<html>" + MZinfo[ row ] + t + "</html>" );
       }
       catch( Exception e ) { }
-
-      WindowCompoents.dis.setText( t );
     }
 
-    WindowCompoents.info( MZinfo[ row ] );
+    else
+    {
+      WindowCompoents.Offset.setSelected( MZsec[row], MZsec[row+1] - 1 );
+      WindowCompoents.info( MZinfo[ row ] );
+    }
   }
 
   //Detailed description of the PE header.

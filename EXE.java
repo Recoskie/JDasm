@@ -169,8 +169,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       try
       {
         b.seekV( data.baseOfCode );
-        Virtual.setSelected( data.baseOfCode, data.baseOfCode + data.sizeOfCode - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.sizeOfCode - 1 );
 
         //Disassembler.
 
@@ -183,12 +181,16 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
         while( !t2.equals("RET") && b.getVirtualPointer() < end )
         {
-          t2 = ((X86)data.core).decodeInstruction(); t += ((X86)data.core).pos() + " " + t2 + "\r\n";
+          t2 = ((X86)data.core).decodeInstruction(); t += ((X86)data.core).pos() + " " + t2 + "<br />";
         }
+
+        long f = ((X86)data.core).getPos() - 1, v = ((X86)data.core).getPosV() - 1;
+
+        b.seekV( data.baseOfCode ); Virtual.setSelected( data.baseOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
+
+        info( "<html>" + t + "</html>" );
       }
       catch( Exception e ) { }
-
-      dis.setText( t );
     }
 
     //Headers must be decoded before any other part of the program can be read.

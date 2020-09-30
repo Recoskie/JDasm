@@ -34,10 +34,6 @@ public class WindowCompoents
 
   public static VHex Virtual, Offset;
 
-  //A place to put disassembly output, and to Handel code navigation.
-
-  public static JEditorPane dis = new JEditorPane();
-
   //Once hex editor is initialized. Then the target is set afterwards for new files.
 
   public static boolean HInit = false;
@@ -95,7 +91,7 @@ public class WindowCompoents
 
     //Hex editor view, or additional binary tools.
 
-    p2.add( Virtual ); p2.add( Offset ); p2.add( new autoSizeScroll( dis ) ); dis.setEditable(false);
+    p2.add( Virtual ); p2.add( Offset );
 
     //Septate the two panels.
 
