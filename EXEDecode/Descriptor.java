@@ -90,7 +90,41 @@ public class Descriptor extends JTable
 
     WindowCompoents.Offset.setSelected( MZsec[row], row == 19 ? Data.PE - 1 : MZsec[row+1] - 1 );
 
-    //No description outputs yet.
+    //Disassemble 16 bit section.
+
+    if( row == 19 )
+    {
+      String t = "", t2 = "";
+
+      int Dos_exit = 0; //DOS has a exit code.
+
+      try
+      {
+        //Disassembler.
+
+        ((core.x86.X86)Data.core).setBit( core.x86.X86.x86_16 );
+
+        //Disassemble till end, or return from application.
+        //Note that more can be added here such as the jump operation.
+
+        ((core.x86.X86)Data.core).setPos( MZsec[row] );
+
+        while( ((core.x86.X86)Data.core).getPos() < Data.PE - 1 )
+        {
+          t2 = ((core.x86.X86)Data.core).decodeInstruction();
+          
+          if( Dos_exit == 0 && t2.equals("MOV AX,4C01") ) { Dos_exit = 1; }
+          else if( Dos_exit == 1 && t2.equals("INT 21") ) { Dos_exit = 2; }
+          
+          t += ((core.x86.X86)Data.core).pos() + " " + t2 + "\r\n";
+
+          if( Dos_exit == 2 ) { break; }
+        }
+      }
+      catch( Exception e ) { }
+
+      WindowCompoents.dis.setText( t );
+    }
 
     WindowCompoents.info( MZinfo[ row ] );
   }

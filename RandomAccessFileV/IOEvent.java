@@ -32,5 +32,5 @@ public class IOEvent extends EventObject
 
   public long lengthV(){ return( EndV - PosV ); }
 
-  public boolean MapV(){ return( MapedV ); }
+  public boolean MapV(){ return( MapV ); }
 }

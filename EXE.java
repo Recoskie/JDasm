@@ -6,11 +6,19 @@ import EXEDecode.*;
 import RandomAccessFileV.*;
 import WindowCompoents.*;
 
+//Processor cores.
+
+import core.x86.*; //X86.
+
 public class EXE extends WindowCompoents implements ExploerEventListener
 {
   //file system.
 
   public RandomAccessFileV b;
+
+  //The disassembler.
+
+  public static Object core;
 
   //The new Descriptor table allows a description of clicked data.
 
@@ -49,7 +57,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public void read( String F, RandomAccessFileV file )
   {
-    b = file;
+    b = file; data.core = new X86( b );
 
     //Root node is now the target file.
  
@@ -83,7 +91,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     //Start of code.
 
-    if( data.baseOfCode != 0 ) { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h")); }
+    if( data.baseOfCode != 0 )  { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h")); }
 
     //Location of the export directory
 
@@ -156,17 +164,31 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     
     if( h.equals("Program Start (Machine code).h") )
     {
+      String t = "", t2 = "";
+
       try
       {
         b.seekV( data.baseOfCode );
         Virtual.setSelected( data.baseOfCode, data.baseOfCode + data.sizeOfCode - 1 );
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.sizeOfCode - 1 );
+
+        //Disassembler.
+
+        if( data.is64bit ) { ((X86)data.core).setBit( X86.x86_64 ); } else { ((X86)data.core).setBit( X86.x86_32 ); }
+
+        long end = data.baseOfCode + data.sizeOfCode;
+
+        //Disassemble till end, or return from application.
+        //Note that more can be added here such as the jump operation.
+
+        while( !t2.equals("RET") && b.getVirtualPointer() < end )
+        {
+          t2 = ((X86)data.core).decodeInstruction(); t += ((X86)data.core).pos() + " " + t2 + "\r\n";
+        }
       }
-      catch( IOException e ) { }
+      catch( Exception e ) { }
 
-      //Disassembler is not ready yet.
-
-      noDecode();
+      dis.setText( t );
     }
 
     //Headers must be decoded before any other part of the program can be read.

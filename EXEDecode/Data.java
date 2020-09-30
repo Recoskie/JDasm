@@ -41,13 +41,20 @@ public class Data
 
   public static String DLL[] = new String[0];
 
-  //list of functions used from the DLL
+  //list of functions used from the DLL.
+  //Note the 32 bit number that locates to the method name.
+  //Is wrote over by windows for the real position the method loaded to memory is.
+  //Thus function calls to this 32 bit number is then the method.
 
   public static String FDLL[][] = new String[0][0];
 
   //Different lengths of byte buffers for reading different data types.
 
   public static final byte[] b1 = new byte[1], b2 = new byte[2], b4 = new byte[4], b8 = new byte[8];
+
+  //Processor core engine.
+
+  public static Object core;
 
   //Methods to convert bytes to different data types.
 

@@ -411,11 +411,58 @@ public class X86 extends X86Types
   Target is the file system stream.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  public static RandomAccessFileV data;
-  
-  public X86( RandomAccessFileV d ) { data = d; }
+  public static RandomAccessFileV data; public X86( RandomAccessFileV d ) { data = d; }
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Sets 16, 32, or 64 bit.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  public static final int x86_16 = 0, x86_32 = 1, x86_64 = 2;
+
+  public void setBit( int t ){ BitMode = t; }
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Position.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  public void setPos( long pos ) throws Exception { data.seek(pos); }
+  public void setPosV( long pos ) throws Exception { data.seekV(pos); }
+  public long getPos() throws Exception { return( data.getFilePointer() ); }
+  public long getPosV() throws Exception { return( data.getVirtualPointer() ); }
+
+  public String pos() throws Exception
+  {
+    String pad = "";
+
+    if( BitMode == 0 ) { pad = "%1$04X"; } else if ( BitMode == 1 ) { pad = "%1$08X"; } else if( BitMode == 2 ) { pad = "%1$016X"; }
+
+    if( BitMode == 0 )
+    {
+      return( String.format( pad, CodeSeg ) + ":" + String.format( pad, data.getFilePointer() ) );
+    }
+    
+    return( String.format( pad, data.getFilePointer() ) );
+  }
+
+  public String posV() throws Exception
+  {
+    String pad = "";
+
+    if( BitMode == 0 ) { pad = "%1$04X"; } else if ( BitMode == 1 ) { pad = "%1$08X"; } else if( BitMode == 2 ) { pad = "%1$016X"; }
+
+    if( BitMode == 0 )
+    {
+      return( String.format( pad, CodeSeg ) + ":" + String.format( pad, data.getVirtualPointer() ) );
+    }
+    
+    return( String.format( pad, data.getVirtualPointer() ) );
+  }
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Compatibility mode. This is not rally needed.
+  -------------------------------------------------------------------------------------------------------------------------*/
    
-  public void CompatibilityMode( int type )
+  public void compatibilityMode( int type )
   {
     //Reset the changeable sections of the Mnemonics array, and operand encoding array.
   
@@ -1613,7 +1660,7 @@ public class X86 extends X86Types
     {
       SIMD = (Opcode & 0x02 )  |  ( 1 - Opcode & 0x01 ); //F2, and F3 change the SIMD mode during SSE Is.
       PrefixG1 = (String)Mnemonics[ Opcode ]; //set the Prefix string.
-      HLEFlipG1G2 = true; //set Filp HLE in case this is the last prefix read, and LOCK was set in string G2 first for HLE.
+      HLEFlipG1G2 = true; //set Flip HLE in case this is the last prefix read, and LOCK was set in string G2 first for HLE.
       decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode I.
     }
 
@@ -2197,6 +2244,8 @@ public class X86 extends X86Types
 
   public String decodeInstruction() throws Exception
   {
+    data.Events = false;
+
     //Reset Prefix adjustments, and vector setting adjustments.
 
     reset();
@@ -2430,6 +2479,8 @@ public class X86 extends X86Types
 
       //Return the instruction.
     }
+
+    data.Events = true;
 
     return( out );
   }
