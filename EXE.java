@@ -16,10 +16,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public RandomAccessFileV b;
 
-  //The disassembler.
-
-  public static Object core;
-
   //The new Descriptor table allows a description of clicked data.
 
   public Descriptor des = new Descriptor( new Object[][] {{}}, new Object[]{} );
@@ -172,7 +168,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
         //Disassembler.
 
-        if( data.is64bit ) { ((X86)data.core).setBit( X86.x86_64 ); } else { ((X86)data.core).setBit( X86.x86_32 ); }
+        if( data.is64bit ) { data.core.setBit( X86.x86_64 ); } else { data.core.setBit( X86.x86_32 ); }
 
         long end = data.baseOfCode + data.sizeOfCode;
 
@@ -181,10 +177,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
         while( t2.indexOf("RET") != 0 && b.getVirtualPointer() < end )
         {
-          t2 = ((X86)data.core).decodeInstruction(); t += ((X86)data.core).pos() + " " + t2 + "<br />";
+          t2 = data.core.disASM(); t += data.core.pos() + " " + t2 + "<br />";
         }
 
-        long f = ((X86)data.core).getPos() - 1, v = ((X86)data.core).getPosV() - 1;
+        long f = data.core.getPos() - 1, v = data.core.getPosV() - 1;
 
         b.seekV( data.startOfCode ); Virtual.setSelected( data.startOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
 

@@ -98,26 +98,26 @@ public class Descriptor extends JTable
       {
         //Disassembler.
 
-        ((core.x86.X86)Data.core).setBit( core.x86.X86.x86_16 );
+        Data.core.setBit( core.x86.X86.x86_16 );
 
         //Disassemble till end, or return from application.
         //Note that more can be added here such as the jump operation.
 
-        ((core.x86.X86)Data.core).setPos( MZsec[row] );
+        Data.core.setPos( MZsec[row] );
 
-        while( ((core.x86.X86)Data.core).getPos() < Data.PE )
+        while( Data.core.getPos() < Data.PE )
         {
-          t2 = ((core.x86.X86)Data.core).decodeInstruction();
+          t2 = Data.core.disASM();
           
           if( Dos_exit == 0 && t2.equals("MOV AX,4C01") ) { Dos_exit = 1; }
           else if( Dos_exit == 1 && t2.equals("INT 21") ) { Dos_exit = 2; }
           
-          t += ((core.x86.X86)Data.core).pos() + " " + t2 + "<br />";
+          t += Data.core.pos() + " " + t2 + "<br />";
 
           if( Dos_exit == 2 ) { break; }
         }
 
-        WindowCompoents.Offset.setSelected( MZsec[row], ((core.x86.X86)Data.core).getPos() - 1 );
+        WindowCompoents.Offset.setSelected( MZsec[row], Data.core.getPos() - 1 );
         WindowCompoents.info( "<html>" + MZinfo[ row ] + t + "</html>" );
       }
       catch( Exception e ) { }

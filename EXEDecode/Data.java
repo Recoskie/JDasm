@@ -52,9 +52,9 @@ public class Data
 
   public static final byte[] b1 = new byte[1], b2 = new byte[2], b4 = new byte[4], b8 = new byte[8];
 
-  //Processor core engine.
+  //Processor core interface engine.
 
-  public static Object core;
+  public static core.Core core;
 
   //Methods to convert bytes to different data types.
 

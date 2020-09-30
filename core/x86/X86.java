@@ -2,7 +2,7 @@ package core.x86;
 
 import RandomAccessFileV.*;
 
-public class X86 extends X86Types
+public class X86 extends X86Types implements core.Core
 {
   /*-------------------------------------------------------------------------------------------------------------------------
   When Bit Mode is 2 the disassembler will default to decoding 64 bit binary code possible settings are 0=16 bit, 1=32 bit, 2=64 bit.
@@ -419,18 +419,18 @@ public class X86 extends X86Types
 
   public static final int x86_16 = 0, x86_32 = 1, x86_64 = 2;
 
-  public void setBit( int t ){ BitMode = t; }
+  @Override public void setBit( int t ){ BitMode = t; }
 
   /*-------------------------------------------------------------------------------------------------------------------------
   Position.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  public void setPos( long pos ) throws Exception { data.seek(pos); }
-  public void setPosV( long pos ) throws Exception { data.seekV(pos); }
-  public long getPos() throws Exception { return( data.getFilePointer() ); }
-  public long getPosV() throws Exception { return( data.getVirtualPointer() ); }
+  @Override public void setPos( long pos ) throws Exception { data.seek(pos); }
+  @Override public void setPosV( long pos ) throws Exception { data.seekV(pos); }
+  @Override public long getPos() throws Exception { return( data.getFilePointer() ); }
+  @Override public long getPosV() throws Exception { return( data.getVirtualPointer() ); }
 
-  public String pos() throws Exception
+  @Override public String pos() throws Exception
   {
     String pad = "";
 
@@ -444,7 +444,7 @@ public class X86 extends X86Types
     return( String.format( pad, data.getFilePointer() ) );
   }
 
-  public String posV() throws Exception
+  @Override public String posV() throws Exception
   {
     String pad = "";
 
@@ -2242,7 +2242,7 @@ public class X86 extends X86Types
   The main Instruction decode function plugs everything in together for the steps required to decode a full X86 instruction.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  public String decodeInstruction() throws Exception
+  @Override public String disASM() throws Exception
   {
     data.Events = false;
 
