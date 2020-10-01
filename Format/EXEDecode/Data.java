@@ -1,4 +1,4 @@
-package EXEDecode;
+package Format.EXEDecode;
 import javax.swing.JTable;
 import RandomAccessFileV.*;
 

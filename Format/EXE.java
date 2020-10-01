@@ -1,8 +1,9 @@
+package Format;
 import javax.swing.*;
 import java.io.*;
 import javax.swing.tree.*;
 import java.awt.*;
-import EXEDecode.*;
+import Format.EXEDecode.*;
 import RandomAccessFileV.*;
 import WindowCompoents.*;
 
@@ -177,7 +178,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       if(Data.coreLoaded)
       {
-        String t = "", t2 = "";
+        String t = "", t1 = "", t2 ="";
 
         try
         {
@@ -192,10 +193,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
           while( t2.indexOf("RET") != 0 && b.getVirtualPointer() < end )
           {
-            t2 = data.core.disASM(); t += data.core.pos() + " " + t2 + "<br />";
+            t1 = data.core.posV(); t2 = data.core.disASM(); t += t1 + " " + t2 + "<br />";
           }
 
-          long f = data.core.getPos() - 1, v = data.core.getPosV() - 1;
+          long f = b.getFilePointer() - 1, v = b.getVirtualPointer() - 1;
 
           b.seekV( data.startOfCode ); Virtual.setSelected( data.startOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
 

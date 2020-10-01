@@ -39,7 +39,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   
   public boolean Open = false;
 
-  //Each integer is the file decoder to use by file extensions.
+  //Each integer is the file format decoder to use by file extensions.
 
   public int UseDecoder[] = new int[] { 0, 0, 0, 0, 0 };
 
@@ -49,7 +49,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   //The file to load. To begin decoding file types.
 
-  public String DecodeAPP[] = new String[]{ "EXE" };
+  public String DecodeAPP[] = new String[]{ "Format.EXE" };
 
   //Create the application.
 
@@ -408,7 +408,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         
         if( e.getClickCount() == 2 )
         {
-          checkFT(p);
+          REC = false; checkFT(p); REC = true;
         }
       }
     }
