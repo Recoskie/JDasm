@@ -35,7 +35,7 @@ public class X86 extends X86Types implements core.Core
   private String IHex = "";
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  The IPos String stores the start position of a decoded binary I in memory from the function ^GetPosition()^.
+  The IPos String stores the start position of a decoded binary I in memory from the function ^getPosition()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private long IPos = 0;
@@ -308,7 +308,7 @@ public class X86 extends X86Types implements core.Core
   "MVEX.E" control is set in an register to register operation.
   ---------------------------------------------------------------------------------------------------------------------------
   The function ^Decode_ModRM_SIB_Address()^ sets RoundMode.
-  The function DecodeI() adds the error Suppression to the end of the I.
+  The function decodeImmediate() adds the error Suppression to the end of the I.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private int RoundMode = 0;
@@ -366,7 +366,7 @@ public class X86 extends X86Types implements core.Core
   Intel HLE is used with basic arithmetic Is like Add, and subtract, and shift operations.
   Intel HLE Is replace the Repeat F2, and F3, also lock F0 with XACQUIRE, and XRELEASE.
   ---------------------------------------------------------------------------------------------------------------------------
-  This is used by function ^DecodeI()^.
+  This is used by function ^decodeImmediate()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean XRelease = false, XAcquire = false;
@@ -376,7 +376,7 @@ public class X86 extends X86Types implements core.Core
   not read first then G1, and G2 flip. Also XACQUIRE, and XRELEASE replace REP, and REPNE if the LOCK prefix is used with
   REP, or REPNE if the I supports Intel HLE.
   ---------------------------------------------------------------------------------------------------------------------------
-  This is used by function ^DecodeI()^.
+  This is used by function ^decodeImmediate()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean HLEFlipG1G2 = false;
@@ -384,7 +384,7 @@ public class X86 extends X86Types implements core.Core
   /*-------------------------------------------------------------------------------------------------------------------------
   Replaces segment overrides CS, and DS with HT, and HNT prefix for Branch taken and not taken used by jump Is.
   ---------------------------------------------------------------------------------------------------------------------------
-  This is used by functions ^Decode_ModRM_SIB_Address()^, and ^DecodeI()^.
+  This is used by functions ^Decode_ModRM_SIB_Address()^, and ^decodeImmediate()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean HT = false;
@@ -392,7 +392,7 @@ public class X86 extends X86Types implements core.Core
   /*-------------------------------------------------------------------------------------------------------------------------
   I that support MPX replace the REPNE prefix with BND if operation is a MPX I.
   ---------------------------------------------------------------------------------------------------------------------------
-  This is used by function ^DecodeI()^.
+  This is used by function ^decodeImmediate()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean BND = false;
@@ -402,7 +402,7 @@ public class X86 extends X86Types implements core.Core
   Also some opcodes are invalid in different cpu bit modes.
   ---------------------------------------------------------------------------------------------------------------------------
   Function ^decodePrefixAdjustments()^ Set the Invalid Opcode if an I or prefix is compared that is invalid for CPU bit mode.
-  The function ^DecodeI()^ returns an invalid I if Invalid Operation is used for CPU bit mode.
+  The function ^decodeImmediate()^ returns an invalid I if Invalid Operation is used for CPU bit mode.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean InvalidOp = false;
@@ -425,12 +425,12 @@ public class X86 extends X86Types implements core.Core
   Position.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  @Override public void setPos( long pos ) throws Exception { data.seek(pos); }
-  @Override public void setPosV( long pos ) throws Exception { data.seekV(pos); }
-  @Override public long getPos() throws Exception { return( data.getFilePointer() ); }
-  @Override public long getPosV() throws Exception { return( data.getVirtualPointer() ); }
+  @Override public void setPos( long pos ) throws java.io.IOException { data.seek(pos); }
+  @Override public void setPosV( long pos ) throws java.io.IOException { data.seekV(pos); }
+  @Override public long getPos() throws java.io.IOException { return( data.getFilePointer() ); }
+  @Override public long getPosV() throws java.io.IOException { return( data.getVirtualPointer() ); }
 
-  @Override public String pos() throws Exception
+  @Override public String pos() throws java.io.IOException
   {
     String pad = "";
 
@@ -444,7 +444,7 @@ public class X86 extends X86Types implements core.Core
     return( String.format( pad, data.getFilePointer() ) );
   }
 
-  @Override public String posV() throws Exception
+  @Override public String posV() throws java.io.IOException
   {
     String pad = "";
 
@@ -772,7 +772,7 @@ public class X86 extends X86Types implements core.Core
   The third element is the last three bits for the ModR/M byte the R/M bits, or the SIB Base Register value as a number value 0 to 7.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  private byte[] decode_ModRM_SIB_Value() throws Exception
+  private byte[] decode_ModRM_SIB_Value() throws java.io.IOException
   {
     //Get the current position byte value
 
@@ -799,7 +799,7 @@ public class X86 extends X86Types implements core.Core
   0=8,1=16,2=32,3=64 by size setting value.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  private String decodeImmediate( int type, boolean BySize, byte SizeSetting ) throws Exception
+  private String decodeImmediate( int type, boolean BySize, byte SizeSetting ) throws java.io.IOException
   {
     //The 64 bit IMM.
 
@@ -981,7 +981,7 @@ public class X86 extends X86Types implements core.Core
   and the higher four bits is the selected register.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  private String decode_ModRM_SIB_Address( byte[] ModRM, boolean BySize, byte Setting ) throws Exception
+  private String decode_ModRM_SIB_Address( byte[] ModRM, boolean BySize, byte Setting ) throws java.io.IOException
   {
     String out = ""; //the variable out is what stores the decoded address pointer, or Register if Register mode.
     String S_C = "{"; //L1OM, and K1OM {SSS,CCCCC} setting decoding, or EVEX broadcast round.
@@ -1354,7 +1354,7 @@ public class X86 extends X86Types implements core.Core
   At the end of this function "Opcode" should not hold any prefix code, so then Opcode contains an operation code.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  public void decodePrefixAdjustments() throws Exception
+  public void decodePrefixAdjustments() throws java.io.IOException
   {
     //-------------------------------------------------------------------------------------------------------------------------
     Opcode = ( Opcode & 0x300 ) | ( data.read() & 0xFF ); //Add 8 bit opcode while bits 9, and 10 are used for opcode map.
@@ -1696,7 +1696,7 @@ public class X86 extends X86Types implements core.Core
   used for the bit mode the CPU is in as it will set InvalidOp true.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  public void decodeOpcode() throws Exception
+  public void decodeOpcode() throws java.io.IOException
   {
     if(Mnemonics[Opcode] instanceof String)
     {
@@ -1977,7 +1977,7 @@ public class X86 extends X86Types implements core.Core
   This function is used after ^DecodeOperandString()^ which sets up the X86 Decoder for the instructions operands.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  private void decodeOperands() throws Exception
+  private void decodeOperands() throws java.io.IOException
   {
     //The Operands array is a string array in which the operand number is the element the decoded operand is positioned.
 
@@ -2242,7 +2242,7 @@ public class X86 extends X86Types implements core.Core
   The main Instruction decode function plugs everything in together for the steps required to decode a full X86 instruction.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  @Override public String disASM() throws Exception
+  @Override public String disASM() throws java.io.IOException
   {
     data.Events = false;
 

@@ -82,7 +82,7 @@ public class Descriptor extends JTable
   "",
   "<html><p>" + res + "</p></html>",
   "<html><p>" + res + "<br /><br />Instead of adding to DOS. Microsoft created a new system that uses the reserved section to locate to the PE header.</p></html>",
-  "<p>This is a x86 binary that gets loaded by DOS in 16 bit. The new \"Windows\" system used the PE location to go to the new PE header.<br /><br />"};
+  "<p>This is a x86 binary that gets loaded by DOS in 16 bit.<br /><br />The new \"Windows\" system used the PE location to go to the new PE header.<br /><br />"};
 
   public void MZinfo( int row )
   {
@@ -94,30 +94,30 @@ public class Descriptor extends JTable
 
       int Dos_exit = 0; //DOS has a exit code.
 
+      //16 bit x86 DOS.
+
+      core.x86.X86 temp = new core.x86.X86( Data.stream ); temp.setBit( core.x86.X86.x86_16 );
+
       try
       {
-        //Disassembler.
-
-        Data.core.setBit( core.x86.X86.x86_16 );
-
         //Disassemble till end, or return from application.
         //Note that more can be added here such as the jump operation.
 
-        Data.core.setPos( MZsec[row] );
+        temp.setPos( MZsec[row] );
 
-        while( Data.core.getPos() < Data.PE )
+        while( temp.getPos() < Data.PE )
         {
-          t2 = Data.core.disASM();
+          t2 = temp.disASM();
           
           if( Dos_exit == 0 && t2.equals("MOV AX,4C01") ) { Dos_exit = 1; }
           else if( Dos_exit == 1 && t2.equals("INT 21") ) { Dos_exit = 2; }
           
-          t += Data.core.pos() + " " + t2 + "<br />";
+          t += temp.pos() + " " + t2 + "<br />";
 
           if( Dos_exit == 2 ) { break; }
         }
 
-        WindowCompoents.Offset.setSelected( MZsec[row], Data.core.getPos() - 1 );
+        WindowCompoents.Offset.setSelected( MZsec[row], temp.getPos() - 1 );
         WindowCompoents.info( "<html>" + MZinfo[ row ] + t + "</html>" );
       }
       catch( Exception e ) { }

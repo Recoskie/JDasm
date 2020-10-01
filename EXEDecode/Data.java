@@ -1,8 +1,13 @@
 package EXEDecode;
 import javax.swing.JTable;
+import RandomAccessFileV.*;
 
 public class Data
 {
+  //File system stream.
+
+  public static RandomAccessFileV stream;
+
   //variables used to hold dll table of functions and dll name for when user click on dll
   //the number in the name array corresponds to which table to use.
   
@@ -48,6 +53,10 @@ public class Data
 
   public static String FDLL[][] = new String[0][0];
 
+  //Error when reading headers or section.
+
+  public static boolean error = false;
+
   //Different lengths of byte buffers for reading different data types.
 
   public static final byte[] b1 = new byte[1], b2 = new byte[2], b4 = new byte[4], b8 = new byte[8];
@@ -55,6 +64,14 @@ public class Data
   //Processor core interface engine.
 
   public static core.Core core;
+
+  //If the core is loaded.
+
+  public static boolean coreLoaded = false;
+
+  //The machine core type.
+
+  public static int coreType = 0;
 
   //Methods to convert bytes to different data types.
 

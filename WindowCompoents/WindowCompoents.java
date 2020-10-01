@@ -27,6 +27,7 @@ public class WindowCompoents
   public static JTable out;
 
   //Additional detailed information output. For data in table cells, or section.
+  //Also disassembly output.
 
   public static JLabel infoData = new JLabel("");
 

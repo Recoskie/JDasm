@@ -41,7 +41,7 @@ public class Headers extends Data
     
     //Return Table data.
     
-    if( !MZ.equals("4D 5A ") ) { throw new IOException("Wong MZ SIGNATRUE."); }; return( mzData );
+    if( !MZ.equals("4D 5A ") ) { Data.error = true; }; return( mzData );
   }
 
   //*********************************creates the nicely styled data of the PE header***********************************
@@ -55,7 +55,7 @@ public class Headers extends Data
     //data decode to table
 
     b.read(b4); String PES = toHex(b4); peData.addRow( new Object[]{ "SIGNATRUE", PES, "" } );
-    b.read(b2); peData.addRow( new Object[]{ "Machine", toHex(b2), "" } );
+    b.read(b2); coreType = toShort(b2) & 0xFFFF; peData.addRow( new Object[]{ "Machine", toHex(b2), "" } );
     b.read(b2); NOS = toShort( b2 ); peData.addRow( new Object[]{ "Number Of Sections", toHex(b2), NOS + "" } );
     b.read(b4); peData.addRow( new Object[]{ "Time Date Stamp", toHex(b4), toInt(b4) + "" } );
     b.read(b4); peData.addRow( new Object[]{ "Pointer To Symbol Table", toHex(b4), toInt(b4) + "" } );
@@ -65,7 +65,7 @@ public class Headers extends Data
 
     //Test if PE header was read correctly.
 
-    if( !PES.equals("50 45 00 00 ") ) { throw new IOException("Wong PE SIGNATRUE."); }; return( peData );
+    if( !PES.equals("50 45 00 00 ") ) { Data.error = true; }; return( peData );
   }
 
   //************************************************READ OP HEADER********************************************
@@ -140,7 +140,7 @@ public class Headers extends Data
 
     //If op header was read properly.
 
-    if( !OPS.equals("0B 01 ") && !is64bit ) { throw new IOException("Wong OP SIGNATRUE."); }; return( opData );
+    if( !OPS.equals("0B 01 ") && !is64bit ) { Data.error = true; }; return( opData );
   }
 
   //************************************************READ Data Directory Array********************************************

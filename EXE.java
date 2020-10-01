@@ -53,7 +53,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public void read( String F, RandomAccessFileV file )
   {
-    b = file; data.core = new X86( b );
+    b = file; data.stream = file;
 
     //Root node is now the target file.
  
@@ -70,12 +70,27 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     try
     {
       TData[0] = Header.readMZ( b );
-      TData[1] = Header.readPE( b );
-      TData[2] = Header.readOP( b );
-      TData[3] = Header.readDataDrectory( b );
-      TData[4] = Header.readSections( b );
+      if(!Data.error) { TData[1] = Header.readPE( b ); }
+      if(!Data.error) { TData[2] = Header.readOP( b ); }
+      if(!Data.error) { TData[3] = Header.readDataDrectory( b ); }
+      if(!Data.error) { TData[4] = Header.readSections( b ); }
     }
-    catch(Exception e) { data.DataDirUsed = new boolean[15]; }
+    catch(java.io.IOException e) { Data.error = true; }
+
+    if( Data.error ) { data.DataDirUsed = new boolean[15]; } //Error.
+    else
+    {
+      //Load processor core type.
+
+      if( Data.coreType == 0x014C )
+      {
+        data.core = new X86( b ); data.core.setBit( X86.x86_32 ); data.coreLoaded = true;
+      }
+      else if( Data.coreType == 0x8664 )
+      {
+        data.core = new X86( b ); data.core.setBit( X86.x86_64 ); data.coreLoaded = true;
+      }
+    }
 
     Headers.add(new DefaultMutableTreeNode("MZ Header.h"));
     Headers.add(new DefaultMutableTreeNode("PE Header.h"));
@@ -160,33 +175,35 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     
     if( h.equals("Program Start (Machine code).h") )
     {
-      String t = "", t2 = "";
-
-      try
+      if(Data.coreLoaded)
       {
-        b.seekV( data.startOfCode );
+        String t = "", t2 = "";
 
-        //Disassembler.
-
-        if( data.is64bit ) { data.core.setBit( X86.x86_64 ); } else { data.core.setBit( X86.x86_32 ); }
-
-        long end = data.baseOfCode + data.sizeOfCode;
-
-        //Disassemble till end, or return from application.
-        //Note that more can be added here such as the jump operation.
-
-        while( t2.indexOf("RET") != 0 && b.getVirtualPointer() < end )
+        try
         {
-          t2 = data.core.disASM(); t += data.core.pos() + " " + t2 + "<br />";
+          b.seekV( data.startOfCode );
+
+          //Disassembler.
+
+          long end = data.baseOfCode + data.sizeOfCode;
+
+          //Disassemble till end, or return from application.
+          //Note that more can be added here such as the jump operation.
+
+          while( t2.indexOf("RET") != 0 && b.getVirtualPointer() < end )
+          {
+            t2 = data.core.disASM(); t += data.core.pos() + " " + t2 + "<br />";
+          }
+
+          long f = data.core.getPos() - 1, v = data.core.getPosV() - 1;
+
+          b.seekV( data.startOfCode ); Virtual.setSelected( data.startOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
+
+          info( "<html>" + t + "</html>" );
         }
-
-        long f = data.core.getPos() - 1, v = data.core.getPosV() - 1;
-
-        b.seekV( data.startOfCode ); Virtual.setSelected( data.startOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
-
-        info( "<html>" + t + "</html>" );
+        catch( Exception e ) { }
       }
-      catch( Exception e ) { }
+      else { noCore(); }
     }
 
     //Headers must be decoded before any other part of the program can be read.
@@ -195,7 +212,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       Offset.setSelected( 0, data.PE - 1 );
       
-      des.setType( Descriptor.MZ ); out.setModel( TData[0] );
+      des.setType( Descriptor.MZ ); if(TData[0] != null) { out.setModel( TData[0] ); } else { errDecode(); }
 
       info("<html><p>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
       "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
@@ -205,7 +222,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       Offset.setSelected( data.PE, data.PE + 23 );
 
-      des.setType( Descriptor.PE ); out.setModel( TData[1] );
+      des.setType( Descriptor.PE ); if(TData[1] != null) { out.setModel( TData[1] ); } else { errDecode(); }
 
       info("<html><p>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
       "This header specifies the number of sections to map in virtual space. The processor type, and date of compilation.</p></html>");
@@ -214,7 +231,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       Offset.setSelected( data.PE + 24, data.is64bit ? data.PE + 135 : data.PE + 119 );
 
-      des.setType( Descriptor.OP ); out.setModel( TData[2] );
+      des.setType( Descriptor.OP ); if(TData[2] != null) { out.setModel( TData[2] ); } else { errDecode(); }
 
       info("<html><p>At the end of the PE header is the start of the Optional header. However, this header is not optional.</p></html>");
     }
@@ -224,7 +241,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       Offset.setSelected( pos, pos + ( ( data.DDS / 3 ) << 3 ) - 1 );
 
-      des.setType( Descriptor.dataDirectoryArray ); out.setModel( TData[3] );
+      des.setType( Descriptor.dataDirectoryArray ); if(TData[3] != null) { out.setModel( TData[3] ); } else { errDecode(); }
 
       info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
       "Anything that is 0, is not used.</p></html>");
@@ -235,7 +252,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       Offset.setSelected( pos, pos + ( data.NOS * 40 ) - 1 );
 
-      des.setType( Descriptor.sections ); out.setModel( TData[4] );
+      des.setType( Descriptor.sections ); if(TData[4] != null) { out.setModel( TData[4] ); } else { errDecode(); }
 
       info("<html><p>The PE header specifies the number of sections to read.<br /><br />Each section specifies where to read the file, and size, and at what address to place the data in virtual Memory, and size.<br /><br />" +
       "Without doing this, the data Directory Array is useless. Also the base of code in the OP header is a virtual address position. Which is the start of the programs machine code.</p></html>");
@@ -471,5 +488,19 @@ public class EXE extends WindowCompoents implements ExploerEventListener
   public void noDecode()
   { 
     info(""); out.setModel(new JTable( ( new Object[][] { { "NO DECODER" } } ), ( new Object[]{ "NO DECODER HAS BEN MADE YET" } ) ).getModel());
+  }
+
+  //Error while reading file.
+
+  public void errDecode()
+  { 
+    out.setModel(new JTable( ( new Object[][] { { "Error" } } ), ( new Object[]{ "Error" } ) ).getModel());
+  }
+
+  //Processor core not supported.
+
+  public void noCore()
+  { 
+    info("<html>The processor core is not supported.</html>"); out.setModel(new JTable().getModel());
   }
 }

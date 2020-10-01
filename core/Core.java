@@ -4,16 +4,16 @@ public interface Core
 {
   //Disassemble a single operation.
 
-  public String disASM() throws Exception;
+  public String disASM() throws java.io.IOException;
 
   //Position operations.
 
-  public void setPos( long pos ) throws Exception;
-  public void setPosV( long pos ) throws Exception;
-  public long getPos() throws Exception;
-  public long getPosV() throws Exception;
-  public String pos() throws Exception;
-  public String posV() throws Exception;
+  public void setPos( long pos ) throws java.io.IOException;
+  public void setPosV( long pos ) throws java.io.IOException;
+  public long getPos() throws java.io.IOException;
+  public long getPosV() throws java.io.IOException;
+  public String pos() throws java.io.IOException;
+  public String posV() throws java.io.IOException;
 
   //Core bit mode.
 
