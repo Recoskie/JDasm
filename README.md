@@ -1,7 +1,13 @@
-Disassembler, and format decompiler.
+JFH-Disassembly.
 =============================
 
-This application supports Microsoft binaries .exe, .dll, .sys, .drv, .ocx.
+Welcome to Java Forensics Hex editor.
+
+This is a platform independent application built in Java.
+
+Allowing you to decompile software, and do hex editing, and forensics, of binary files.
+
+This application currently supports Microsoft binaries .exe, .dll, .sys, .drv, .ocx.
 
 This project makes binary formats visual, easy to map, and modify.
 
@@ -17,7 +23,7 @@ DLLimport, and Resource Reader still have to be redesigned, for the new system.
 The Microcode Disassembler.
 ------------------------------------------------------------
 
-It was cool to write it in JavaScript. The porject can be found <a href="https://github.com/Recoskie/X86-64-CPU-Binary-Code-Disassembler-JS">Here</a>.
+It was cool to write it in JavaScript. The project can be found <a href="https://github.com/Recoskie/X86-64-CPU-Binary-Code-Disassembler-JS">Here</a>.
 
 The disassembler is rebuilt in Java, for this project.
 
