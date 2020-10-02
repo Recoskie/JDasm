@@ -452,11 +452,13 @@ public class X86 extends X86Types implements core.Core
 
     if( BitMode == 0 )
     {
-      return( String.format( pad, CodeSeg ) + ":" + String.format( pad, data.getVirtualPointer() ) );
+      return( String.format( pad, CodeSeg ) + ":" + String.format( pad, data.getVirtualPointer() - ( CodeSeg << 4 ) ) );
     }
     
     return( String.format( pad, data.getVirtualPointer() ) );
   }
+
+  @Override public void setSeg( short cs ) { CodeSeg = cs; }
 
   /*-------------------------------------------------------------------------------------------------------------------------
   Compatibility mode. This is not rally needed.
@@ -863,7 +865,7 @@ public class X86 extends X86Types implements core.Core
 
       //Add current position.
     
-      val += data.getFilePointer();
+      val += data.getVirtualPointer();
     }
 
     /*---------------------------------------------------------------------------------------------------------------------------

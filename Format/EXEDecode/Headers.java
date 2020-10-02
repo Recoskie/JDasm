@@ -1,4 +1,5 @@
 package Format.EXEDecode;
+
 import javax.swing.*;
 import java.io.*;
 import javax.swing.tree.*;
@@ -35,9 +36,13 @@ public class Headers extends Data
     byte[] bd = new byte[20]; b.read(bd); mzData.addRow( new Object[]{ "Reserved", toHex(bd), "" } );
     b.read(b4); PE = toInt(b4); mzData.addRow( new Object[]{ "PE Header Location", toHex(b4), PE + "" } );
 
+    //Map the dos program in virtual space.
+
+    bd = new byte[ (int)( PE - 64 ) ]; b.addV( b.getFilePointer(), bd.length, 256, bd.length );
+
     //The section before the PE header is the small MZ dos program.
     
-    bd = new byte[ (int)( PE - 64 ) ]; b.read(bd); mzData.addRow( new Object[]{ "8086 16-bit", toHex(bd), "" } );
+    b.read(bd); mzData.addRow( new Object[]{ "8086 16-bit", toHex(bd), "" } );
     
     //Return Table data.
     
@@ -92,9 +97,23 @@ public class Headers extends Data
     b.read(b4); opData.addRow( new Object[]{ "Size Of Uninitialized Data", toHex(b4), toInt(b4) + "" } );
     b.read(b4); startOfCode = toInt(b4); opData.addRow( new Object[]{ "Start Of Code.", toHex(b4), startOfCode + "" } );
     b.read(b4); baseOfCode = toInt(b4); opData.addRow( new Object[]{ "Base Of Code", toHex(b4), baseOfCode + "" } );
-    b.read(b4); opData.addRow( new Object[]{ "Base Of Data", toHex(b4), toInt(b4) + "" } );
 
-    b.read(b4); opData.addRow( new Object[]{ "Image Base", toHex(b4), toInt(b4) + "" } );
+    if(!is64bit) { b.read(b4); opData.addRow( new Object[]{ "Base Of Data", toHex(b4), toInt(b4) + "" } ); } //32 bit only.
+
+    //64 bit.
+
+    if(is64bit)
+    {
+      b.read(b8); imageBase = toLong(b8); opData.addRow( new Object[]{ "Base Address", toHex(b8), imageBase + "" } );
+    }
+    
+    //32 bit.
+
+    else
+    {
+      b.read(b4); imageBase = toInt(b4); opData.addRow( new Object[]{ "Base Address", toHex(b4), imageBase + "" } );
+    }
+
     b.read(b4); opData.addRow( new Object[]{ "Section Alignment", toHex(b4), toInt(b4) + "" } );
     b.read(b4); opData.addRow( new Object[]{ "File Alignment", toHex(b4), toInt(b4) + "" } );
 
@@ -190,7 +209,7 @@ public class Headers extends Data
 
       //Test if data Dir Is used.
 
-      DataDirUsed[ i3 ] = ( DataDir[ i2 ] > 0 ) && ( DataDir[ i2 + 1 ] > 0 );
+      DataDirUsed[ i3 ] = ( DataDir[ i2 ] > 0 ) && ( DataDir[ i2 + 1 ] > 0 ); DataDir[ i2 ] += imageBase;
     }
 
     return(ddData);
@@ -232,7 +251,7 @@ public class Headers extends Data
 
       //Add virtual address to IO system.
 
-      b.addV( offset, size, virtualOffset, virtualSize );
+      b.addV( offset, size, virtualOffset + imageBase, virtualSize );
     }
 
     return(sData);

@@ -258,7 +258,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   {
     if( h < h2 )
     {
-      h+=1;Path=History[h];
+      h += 1; Path = History[h];
       
       REC = false; dirSerach(); REC = true;
     }
@@ -323,7 +323,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     else if( e.getActionCommand().equals("Open new File") )
     {
-      Reset();
+      Path = History[h]; Reset(); REC = false; dirSerach(); REC = true;
     }
   }
 
@@ -337,7 +337,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     int I = DefaultProgram( ex );
 
-    Open = true; new FileIconManager().Open = true; //AddToHistory(Path);
+    Open = true; new FileIconManager().Open = true;
 
     try
     {
@@ -408,7 +408,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         
         if( e.getClickCount() == 2 )
         {
-          REC = false; checkFT(p); REC = true;
+          checkFT(p);
         }
       }
     }

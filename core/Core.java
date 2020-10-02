@@ -18,4 +18,8 @@ public interface Core
   //Core bit mode.
 
   public void setBit( int mode );
+
+  //Set code segment position.
+
+  public void setSeg( short cs );
 }

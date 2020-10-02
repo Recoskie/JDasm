@@ -109,7 +109,7 @@ public class WindowCompoents
   {
     f.getContentPane().removeAll();
 
-    if( addV ) { f.setLayout(new GridLayout(1,2)); } else { f.setLayout(new GridLayout(1,1)); }
+    f.setLayout(new FlowLayout(FlowLayout.LEFT));
 
     if( addV ) { f.add( Virtual ); } f.add( Offset );
 

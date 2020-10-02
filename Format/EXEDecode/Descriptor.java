@@ -1,4 +1,5 @@
 package Format.EXEDecode;
+
 import javax.swing.*;
 import WindowCompoents.*;
 
@@ -90,7 +91,7 @@ public class Descriptor extends JTable
 
     if( row == 19 )
     {
-      String t = "", t2 = "";
+      String t = "", t1 = "", t2 = "";
 
       int Dos_exit = 0; //DOS has a exit code.
 
@@ -98,26 +99,28 @@ public class Descriptor extends JTable
 
       core.x86.X86 temp = new core.x86.X86( Data.stream ); temp.setBit( core.x86.X86.x86_16 );
 
+      temp.setSeg( (short)0x0010 ); //Sets the code segment.
+
       try
       {
         //Disassemble till end, or return from application.
         //Note that more can be added here such as the jump operation.
 
-        temp.setPos( MZsec[row] );
+        temp.setPosV( 256 );
 
         while( temp.getPos() < Data.PE )
         {
-          t2 = temp.disASM();
+          t1 = temp.posV(); t2 = temp.disASM();
           
           if( Dos_exit == 0 && t2.equals("MOV AX,4C01") ) { Dos_exit = 1; }
           else if( Dos_exit == 1 && t2.equals("INT 21") ) { Dos_exit = 2; }
           
-          t += temp.pos() + " " + t2 + "<br />";
+          t += t1 + " " + t2 + "<br />";
 
           if( Dos_exit == 2 ) { break; }
         }
 
-        WindowCompoents.Offset.setSelected( MZsec[row], temp.getPos() - 1 );
+        WindowCompoents.Virtual.setSelected( 256, temp.getPosV() - 1 ); WindowCompoents.Offset.setSelected( MZsec[row], temp.getPos() - 1 );
         WindowCompoents.info( "<html>" + MZinfo[ row ] + t + "</html>" );
       }
       catch( Exception e ) { }
@@ -170,7 +173,8 @@ public class Descriptor extends JTable
   "There is also windows RT. Which RT is a ARM core compilation of windows. In which case you might see Machine ARM.</p></html>",
   "<html><p>This is the number of sections to read after the OP header. In the \"Mapped SECTOINS TO RAM\".<br /><br />" +
   "The sections specify a position to read the file, and virtual address to place the section, from the windows binary in RAM.</p></html>",
-  "",
+  "<html>A date time stamp is in seconds. The seconds are added to the starting date \"Wed Dec 31 7:00:00PM 1969\".<br /><br />" +
+  "If the time date stamp is \"37\" in value, then it is plus 37 second giving \"Wed Dec 31 7:00:37PM 1969\".</html>",
   "",
   "",
   "",
@@ -183,7 +187,7 @@ public class Descriptor extends JTable
 
     WindowCompoents.Offset.setSelected( Data.PE + PEsec[row], Data.PE + PEsec[row+1] - 1 );
 
-    //No description outputs yet.
+    //Description outputs yet.
 
     WindowCompoents.info( PEinfo[ row ] );
   }
@@ -191,29 +195,31 @@ public class Descriptor extends JTable
   //Detailed description of the OP header.
 
   public static final int[] OP32sec = new int[]{24,26,27,28,32,36,40,44,48,52,56,60,64,66,68,70,72,74,76,80,84,88,92,94,96,100,104,108,112,116,120};
-  public static final int[] OP64sec = new int[]{24,26,27,28,32,36,40,44,48,52,56,60,64,66,68,70,72,74,76,80,84,88,92,94,96,104,112,120,128,132,136};
+  public static final int[] OP64sec = new int[]{24,26,27,28,32,36,40,44,48,48,56,60,64,66,68,70,72,74,76,80,84,88,92,94,96,104,112,120,128,132,136};
+
+  public static final String Ver = "Major, and Minor are put together to forum the version number.<br /><br />Example.<br /><br />Major version = 5<br /><br />Minor version = 12<br /><br />Would mean version 5.12V.";
   
   public static final String[] OPinfo = new String[]{"<html><p>The Optional header has three different possible signatures.<br /><br />" +
   "0B 01 = 32 Bit binary.<br /><br />0B 02 = 64 Bit binary<br /><br />07 01 = ROM Image file.<br /><br />" +
   "The only time the OP header changes format is the 64 bit version of the Header.<br /><br />" +
   "If this section does not test true, for any of the three signatures, then the file is corrupted.</p></html>",
+  "<html>" + Ver + "<br /><br />The linker links the sections together into a EXE, or DLL.</html>",
+  "<html>" + Ver + "<br /><br />The linker links the sections together into a EXE, or DLL.</html>",
   "",
   "",
   "",
+  "<html>Start of the binaries machine code in virtual space.</html>",
+  "<html>The beginning of the machine code section.<br /><br />The start position does not have to be at the very start of the machine code section.</html>",
+  "<html>The Data section is a safe spot to put results from operations without writing over program machine code.<br /><br />In code these are called variables.</html>",
+  "<html>Base address is added to all virtual addresses. It is the preferred address to load the mapped sections in RAM.</html>",
   "",
   "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
+  "<html>" + Ver + "<br /><br />The version number of the required operating system.</html>",
+  "<html>" + Ver + "<br /><br />The version number of the required operating system.</html>",
+  "<html>" + Ver + "<br /><br />The version number of this file.</html>",
+  "<html>" + Ver + "<br /><br />The version number of this file.</html>",
+  "<html>" + Ver + "<br /><br />The subsystem version.</html>",
+  "<html>" + Ver + "<br /><br />The subsystem version.</html>",
   "",
   "",
   "",
@@ -229,11 +235,13 @@ public class Descriptor extends JTable
 
   public void OPinfo( int row )
   {
+    if( Data.is64bit && row >= 8 ) { row += 1; } //64 bit no data section.
+
     //Select Bytes.
 
     WindowCompoents.Offset.setSelected( Data.PE + ( Data.is64bit ? OP64sec[row] : OP32sec[row] ), Data.PE + ( Data.is64bit ? OP64sec[row+1] : OP32sec[row+1] ) - 1 );
 
-    //No description outputs yet.
+    //Description outputs.
 
     WindowCompoents.info( OPinfo[ row ] );
   }
@@ -266,7 +274,7 @@ public class Descriptor extends JTable
   public static final String[] Sinfo = new String[]{"<html><p>The 8 bytes can be given any text based name you like. It is not used for anything by the system.<br /><br />" +
   "The names can be very deceiving. As x86 compilers can compile out the code section giving it a \".text\" name.<br /><br />" +
   "Don't worry about the names. The data Directory Array defines what each section is after it is in virtual space.<br /><br />" +
-  "Thus the PE header marks the machine code in it's \"Base of code\" value. Which is a virtual address position.</p></html>",
+  "Thus the PE header marks the machine code in it's \"Start of code\" value. Which is a virtual address position.</p></html>",
   "",
   "",
   "",

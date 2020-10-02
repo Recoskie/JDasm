@@ -1,4 +1,5 @@
 package Format;
+
 import javax.swing.*;
 import java.io.*;
 import javax.swing.tree.*;
@@ -182,11 +183,11 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
         try
         {
-          b.seekV( data.startOfCode );
+          b.seekV( data.imageBase + data.startOfCode );
 
           //Disassembler.
 
-          long end = data.baseOfCode + data.sizeOfCode;
+          long end = data.imageBase + data.baseOfCode + data.sizeOfCode;
 
           //Disassemble till end, or return from application.
           //Note that more can be added here such as the jump operation.
@@ -198,7 +199,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
           long f = b.getFilePointer() - 1, v = b.getVirtualPointer() - 1;
 
-          b.seekV( data.startOfCode ); Virtual.setSelected( data.startOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
+          b.seekV( data.imageBase + data.startOfCode ); Virtual.setSelected( data.imageBase + data.startOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
 
           info( "<html>" + t + "</html>" );
         }

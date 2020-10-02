@@ -722,7 +722,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
      
      try { ScrollBar.setMaximum( Virtual ? 0xFFFFFFFFFFFFFFFFL : IOStream.length() ); } catch( Exception e ) { }
      
-     offset = 0; updateData(); repaint();
+     offset = 0; sel = 0; sele = 0; SelectC = new Color(57, 105, 138, 128); updateData(); repaint();
    }
 
    //Writes modified byte before moving.

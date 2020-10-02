@@ -1,4 +1,5 @@
 package Format.EXEDecode;
+
 import javax.swing.JTable;
 import RandomAccessFileV.*;
 
@@ -25,6 +26,10 @@ public class Data
   //Machine code.
 
   public static int baseOfCode = 0, sizeOfCode = 0, startOfCode = 0;
+
+  //Base address of the program.
+
+  public static long imageBase = 0;
 
   //the number of mapped sections in the executable.
 
