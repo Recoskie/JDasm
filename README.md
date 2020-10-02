@@ -5,7 +5,7 @@ Welcome to Java Forensics Hex editor.
 
 This is a platform independent application built in Java.
 
-Allowing you to decompile software, and do hex editing, and forensics, of binary files.
+Allowing you to decompile software, hex editing, and forensics, of binary files.
 
 This application currently supports Microsoft binaries .exe, .dll, .sys, .drv, .ocx.
 
