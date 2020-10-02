@@ -3,7 +3,7 @@ Disassembler, and format decompiler.
 
 This application supports Microsoft binaries .exe, .dll, .sys, .drv, .ocx.
 
-This project makes binary formats visual, and easy to map, and modify.
+This project makes binary formats visual, easy to map, and modify.
 
 This project is meant to support different binary file formats, and application formats.
 
