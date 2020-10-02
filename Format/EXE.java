@@ -246,7 +246,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       des.setType( Descriptor.dataDirectoryArray ); if(TData[3] != null) { out.setModel( TData[3] ); } else { errDecode(); }
 
       info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
-      "Anything that is 0, is not used.</p></html>");
+      "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.<br /><br />Anything that is 0, is not used.</p></html>");
     }
     else if( h.equals("Mapped SECTOINS TO RAM.h") )
     {
@@ -257,7 +257,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       des.setType( Descriptor.sections ); if(TData[4] != null) { out.setModel( TData[4] ); } else { errDecode(); }
 
       info("<html><p>The PE header specifies the number of sections to read.<br /><br />Each section specifies where to read the file, and size, and at what address to place the data in virtual Memory, and size.<br /><br />" +
-      "Without doing this, the data Directory Array is useless. Also the base of code in the OP header is a virtual address position. Which is the start of the programs machine code.</p></html>");
+      "Each virtual address is added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.</p></html>");
     }
     else if( h.equals("Header Data") )
     {

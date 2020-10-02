@@ -53,16 +53,17 @@ public class Data
 
   //list of functions used from the DLL.
   //Note the 32 bit number that locates to the method name.
-  //Is wrote over by windows for the real position the method loaded to memory is.
-  //Thus function calls to this 32 bit number is then the method.
+  //Is wrote over by windows after it is loaded at a address location.
+  //The location that located to the method name then locates to the method.
+  //A disassembled call operation that locates to the DLL string location is then a function call to the method.
 
   public static String FDLL[][] = new String[0][0];
 
-  //Error when reading headers or section.
+  //Error when reading headers, or section.
 
   public static boolean error = false;
 
-  //Different lengths of byte buffers for reading different data types.
+  //Different lengths of byte array, for reading different data types.
 
   public static final byte[] b1 = new byte[1], b2 = new byte[2], b4 = new byte[4], b8 = new byte[8];
 

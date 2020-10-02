@@ -205,13 +205,13 @@ public class Descriptor extends JTable
   "If this section does not test true, for any of the three signatures, then the file is corrupted.</p></html>",
   "<html>" + Ver + "<br /><br />The linker links the sections together into a EXE, or DLL.</html>",
   "<html>" + Ver + "<br /><br />The linker links the sections together into a EXE, or DLL.</html>",
+  "<html>Adding this to \"Base of code\" marks the end of the machine code. Plus the \"Base Address\".</html>",
   "",
   "",
-  "",
-  "<html>Start of the binaries machine code in virtual space.</html>",
-  "<html>The beginning of the machine code section.<br /><br />The start position does not have to be at the very start of the machine code section.</html>",
+  "<html>Start of the binaries machine code in virtual space. Plus the \"Base Address\".</html>",
+  "<html>The beginning of the machine code section. Plus the \"Base Address\".<br /><br />The start position does not have to be at the very start of the machine code section.</html>",
   "<html>The Data section is a safe spot to put results from operations without writing over program machine code.<br /><br />In code these are called variables.</html>",
-  "<html>Base address is added to all virtual addresses. It is the preferred address to load the mapped sections in RAM.</html>",
+  "<html>Base address is added to all virtual addresses. It is the preferred address to load the mapped sections in RAM from this file.<br /><br />Windows may add to this number to space programs apart in virtual space.</html>",
   "",
   "",
   "<html>" + Ver + "<br /><br />The version number of the required operating system.</html>",
@@ -220,9 +220,9 @@ public class Descriptor extends JTable
   "<html>" + Ver + "<br /><br />The version number of this file.</html>",
   "<html>" + Ver + "<br /><br />The subsystem version.</html>",
   "<html>" + Ver + "<br /><br />The subsystem version.</html>",
-  "",
-  "",
-  "",
+  "<html>The win 32 Value has never been used.</html>",
+  "<html>The size of this file.</html>",
+  "<html>The size of the headers, for setting up the virtual space of this binary. Excluding the rest of the data.</html>",
   "",
   "",
   "",
@@ -248,13 +248,17 @@ public class Descriptor extends JTable
 
   //Detailed description of the data Directory Array.
 
+  public static final String[] DDRinfo = new String[]{"<html>Array element consisting of two 32 bit values.</html>",
+  "<html>Virtual Address of section.<br /><br />Plus the programs base address. The Base address is defined in OP header.</html>",
+  "<html>Size of section data.</html>"};
+
   public void DDRinfo( int row )
   {
     int pos = (int)Data.PE + ( Data.is64bit ? 136 : 120 ); pos += ( row / 3 ) << 3;
 
     //Select Bytes.
 
-    int end = row % 3;
+    int end = row % 3; WindowCompoents.info( DDRinfo[ end ] );
 
     if( end == 0 ) { end = pos + 7; }
 
@@ -263,10 +267,6 @@ public class Descriptor extends JTable
     if( end == 2 ) { pos += 4; end = pos + 3; }
 
     WindowCompoents.Offset.setSelected( pos, end );
-
-    //No extra information possible.
-
-    WindowCompoents.info( "" );
   }
 
   //Detailed description of the sections to RAM memory.
@@ -274,11 +274,11 @@ public class Descriptor extends JTable
   public static final String[] Sinfo = new String[]{"<html><p>The 8 bytes can be given any text based name you like. It is not used for anything by the system.<br /><br />" +
   "The names can be very deceiving. As x86 compilers can compile out the code section giving it a \".text\" name.<br /><br />" +
   "Don't worry about the names. The data Directory Array defines what each section is after it is in virtual space.<br /><br />" +
-  "Thus the PE header marks the machine code in it's \"Start of code\" value. Which is a virtual address position.</p></html>",
-  "",
-  "",
-  "",
-  "",
+  "Thus the OP header marks the machine code in it's \"Start of code\" value. Which is a virtual address position.</p></html>",
+  "<html>Number of bytes to put in virtual space. This reflects the sections actual size.<br /><br />As number of bytes read from file may be padded by the linker that linked the section together.</html>",
+  "<html>The virtual address is added to the programs \"Base Address\".<br /><br />The programs \"Base Address\" is defined by the OP header.</html>",
+  "<html>Number of bytes to read from file.<br /><br />The number of bytes read, may not all be put in RAM. If Number of bytes to put in virtual space is smaller.<br /><br />This happens, because sections are aligned in multiples by the linker.</html>",
+  "<html>The position of the file to read.</html>",
   "<html><p>" + res + "</p></html>",
   ""};
 
