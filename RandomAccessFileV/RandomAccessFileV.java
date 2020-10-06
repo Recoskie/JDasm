@@ -39,6 +39,10 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   private Thread EventThread;
 
+  //Test if read only.
+
+  public static boolean readOnly = false;
+
   //Add and remove event listeners.
 
   public void addIOEventListener( IOEventListener listener )
@@ -218,9 +222,9 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   //Construct the reader using an file, or disk drive.
   
-  public RandomAccessFileV( File file, String mode ) throws FileNotFoundException { super( file, mode ); }
+  public RandomAccessFileV( File file, String mode ) throws FileNotFoundException { super( file, mode ); this.readOnly = mode.indexOf("w") < 0; }
   
-  public RandomAccessFileV( String name, String mode ) throws FileNotFoundException { super( name, mode ); }
+  public RandomAccessFileV( String name, String mode ) throws FileNotFoundException { super( name, mode ); this.readOnly = mode.indexOf("w") < 0; }
   
   //Temporary data. This is so that components that are dependent on this file system can be used without a target file.
   
@@ -230,7 +234,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public RandomAccessFileV( byte[] data ) throws IOException
   {
-    super( mkf(), "r" ); super.write( data );
+    super( mkf(), "r" ); this.readOnly = true; super.write( data );
     
     addV( 0, data.length, 0, data.length );
     
@@ -239,7 +243,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public RandomAccessFileV( byte[] data, long Address ) throws IOException
   {
-    super( mkf(), "r" ); super.write( data );
+    super( mkf(), "r" ); this.readOnly = true; super.write( data );
     
     addV( 0, (long)data.length, Address, (long)data.length );
     

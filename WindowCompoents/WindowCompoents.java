@@ -42,7 +42,7 @@ public class WindowCompoents
 
   //Hex editor view options.
 
-  public static boolean textV = true, addV = true;
+  public static boolean textV = true;
 
   //The current file reader. Used for handling events to decode for the section of interest in the tree.
 
@@ -79,20 +79,23 @@ public class WindowCompoents
   {
     f.getContentPane().removeAll();
 
-    infoData.setBorder( BorderFactory.createLineBorder( Color.BLUE, 3 ) );
-    infoData.setVerticalAlignment(JLabel.TOP); infoData.setHorizontalAlignment(JLabel.LEFT);
-
     f.setLayout(new GridLayout(1,1));
 
     JSplitPane p1 = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JScrollPane( tree ), new JScrollPane( out ) ), new JScrollPane(infoData) );
 
     //Binary tools.
 
-    JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    JPanel p2 = new JPanel(new GridBagLayout());
+
+    GridBagConstraints c = new GridBagConstraints();
+    c.fill = GridBagConstraints.VERTICAL;
+    c.anchor = GridBagConstraints.FIRST_LINE_START;
 
     //Hex editor view, or additional binary tools.
 
-    p2.add( Virtual ); p2.add( Offset );
+    c.weightx = 1; p2.add( Virtual , c );
+    
+    c.weightx = 1000; p2.add( Offset, c );
 
     //Septate the two panels.
 
@@ -107,14 +110,24 @@ public class WindowCompoents
 
   public void editMode()
   {
-    f.getContentPane().removeAll();
+    f.getContentPane().removeAll(); Virtual.setVisible(false);
 
-    f.setLayout(new FlowLayout(FlowLayout.LEFT));
+    f.setLayout(new GridLayout(1,1));
 
-    if( addV ) { f.add( Virtual ); } f.add( Offset );
+    JPanel p1 = new JPanel(new GridBagLayout());
+
+    GridBagConstraints c = new GridBagConstraints();
+    c.fill = GridBagConstraints.VERTICAL;
+    c.anchor = GridBagConstraints.FIRST_LINE_START;
+
+    c.weightx = 1; c.gridx = 0; p1.add( Virtual , c );
+    
+    c.weightx = 1000; c.gridx = 1; p1.add( Offset, c );
+
+    f.add( new JScrollPane( p1, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED ) );
 
     f.setJMenuBar(bdBar);
     
-    f.validate(); f.repaint();
+    f.validate();
   }
 }

@@ -230,7 +230,11 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
     //Setup Scroll bar system.
 
-    try { ScrollBar = new LongScrollBar(JScrollBar.VERTICAL, 16, 0, 0, Virtual ? 0xFFFFFFFFFFFFFFFFL : IOStream.length(), this ); } catch (java.io.IOException e) {}
+    try { ScrollBar = new LongScrollBar(JScrollBar.VERTICAL, 16, 0, 0, Virtual ? 0xFFFFFFFFFFFFFFFFL : IOStream.length(), this ); }
+    catch (java.io.IOException e)
+    {
+      ScrollBar = new LongScrollBar(JScrollBar.VERTICAL, 16, 0, 0, 0x7FFFFFFFFFFFFFFFL, this );
+    }
     
     ScrollBar.setUnitIncrement( 16 ); ScrollBar.setBlockIncrement( 16 );
 
@@ -674,7 +678,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   public void mouseClicked( MouseEvent e )
   {
-    if( e.getClickCount() == 2 && e.getX() > textcol && e.getX() < endw && e.getY() > lineHeight )
+    if( !IOStream.readOnly && e.getClickCount() == 2 && e.getX() > textcol && e.getX() < endw && e.getY() > lineHeight )
     {
       ecellX = ( ( e.getX() - textcol ) / charWidth[0] ) << 1;
 
@@ -691,7 +695,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
         requestFocus(); repaint();
       }
     }
-    else if( e.getClickCount() == 2 && e.getX() > addcol && e.getX() < hexend && e.getY() > lineHeight )
+    else if( !IOStream.readOnly && e.getClickCount() == 2 && e.getX() > addcol && e.getX() < hexend && e.getY() > lineHeight )
     {
       ecellX = ( e.getX() - addcol ) / cell;
 

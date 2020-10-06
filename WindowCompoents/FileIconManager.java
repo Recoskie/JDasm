@@ -9,12 +9,12 @@ public class FileIconManager extends DefaultTreeCellRenderer
   public static String Folder = "Icons/f.gif", UnkowenFile = "Icons/u.gif";
   public static ImageIcon FolderPic[] = new ImageIcon[2];
 
-  public static String FType[] = new String[] { ".h",".exe",".dll",".sys",".drv",".ocx" };
+  public static String FType[] = new String[] { ".h", ".disk", ".exe",".dll",".sys",".drv",".ocx" };
 
-  public static String Load[] = new String[] { "Icons/H.gif","Icons/EXE.gif","Icons/dll.gif",
+  public static String Load[] = new String[] { "Icons/H.gif", "Icons/disk.gif", "Icons/EXE.gif","Icons/dll.gif",
   "Icons/sys.gif","Icons/sys.gif","Icons/sys.gif" };
 
-  public static ImageIcon LoadedPic[] = new ImageIcon[6];
+  public static ImageIcon LoadedPic[] = new ImageIcon[7];
 
   public static boolean Open = false, LoadData = true;
 
@@ -64,7 +64,7 @@ public class FileIconManager extends DefaultTreeCellRenderer
       if( n != -1 )
       {
         setIcon( LoadedPic[n] );
-        setText( FilterExstntion( name ) );
+        setText( FilterRefrence( FilterExstntion( name ) ) );
         return( true );
       }
     }

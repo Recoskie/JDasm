@@ -23,6 +23,8 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   public static RandomAccessFileV file;
 
+  public static boolean diskMode = false;
+
   //File path history.
 
   public String[] History = new String[10];
@@ -55,7 +57,12 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   public app()
   {
-    f = new JFrame("Decoder"); f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    f = new JFrame("JFH-Disassembly"); f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    //Tool window.
+
+    infoData.setBorder( BorderFactory.createLineBorder( Color.BLUE, 3 ) );
+    infoData.setVerticalAlignment(JLabel.TOP); infoData.setHorizontalAlignment(JLabel.LEFT);
 
     //File chooser controls.
 
@@ -66,8 +73,9 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     JMenuItem Go = new JMenuItem( "Forward", new ImageIcon( app.class.getResource( "AppPictures/go.png" ) ) );
     JMenuItem Up = new JMenuItem( "Up a Folder", new ImageIcon( app.class.getResource( "AppPictures/up.png" ) ) );
     JMenuItem Computer = new JMenuItem( "My Computer", new ImageIcon( app.class.getResource( "AppPictures/computer.png" ) ) );
+    JMenuItem OpenDisk = new JMenuItem( "Open Disk", new ImageIcon( app.class.getResource( "AppPictures/OpenDisk.png" ) ) );
 
-    fcBar.add( Computer ); fcBar.add( Back ); fcBar.add( Home ); fcBar.add( Go ); fcBar.add( Up );
+    fcBar.add( Computer ); fcBar.add( Back ); fcBar.add( Home ); fcBar.add( Go ); fcBar.add( Up ); fcBar.add( OpenDisk );
   
     //Action commands.
   
@@ -76,6 +84,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     Computer.setActionCommand( "C" ); Computer.addActionListener(this);
     Home.setActionCommand( "H" ); Home.addActionListener(this);
     Up.setActionCommand( "U" ); Up.addActionListener(this);
+    OpenDisk.setActionCommand( "O" ); OpenDisk.addActionListener(this);
 
     //Binary tools menu bar.
 
@@ -88,14 +97,19 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     JMenuItem v1 = new JMenuItem("Toggle text View");
     JMenuItem v2 = new JMenuItem("Toggle virtual space View");
+    JMenuItem v3 = new JMenuItem("Toggle offset View");
+    JMenuItem v4 = new JMenuItem("Toggle Data Inspector");
 
-    fm.add(f1); vm.add(v1); vm.add(v2);
+    fm.add(f1); vm.add(v1); vm.add(v2); vm.add(v3); vm.add(v4);
 
     bdBar.add(fm); bdBar.add(vm);
   
     //add ActionListener to menuItems.
     
-    f1.addActionListener(this); v1.addActionListener(this); v2.addActionListener(this);
+    f1.addActionListener(this);
+    
+    v1.addActionListener(this); v2.addActionListener(this);
+    v3.addActionListener(this); v4.addActionListener(this);
 
     //The tree is used for file chooser, and for decoded data view.
 
@@ -118,7 +132,6 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     //Simple grid layout, for the tree.
 
     f.setLayout(new GridLayout(1,0)); f.add(tree);
-
 
     //scroll bar for the tree.
 
@@ -270,13 +283,13 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   {
     //Basic file path commands.
     
-    if( e.getActionCommand() == "B" ) { back(); }
+    if( e.getActionCommand() == "B" ) { diskMode = false; back(); }
     
-    if( e.getActionCommand() == "G" ) { go(); }
+    if( e.getActionCommand() == "G" ) { diskMode = false; go(); }
     
-    if( e.getActionCommand() == "C" ) { Path = ""; dirSerach(); }
+    if( e.getActionCommand() == "C" ) { diskMode = false; Path = ""; dirSerach(); }
     
-    if( e.getActionCommand() == "H" ) { Path = System.getProperty("user.home")+"\\"; dirSerach(); }
+    if( e.getActionCommand() == "H" ) { diskMode = false; Path = System.getProperty("user.home")+"\\"; dirSerach(); }
 
     //Up one folder.
     
@@ -309,6 +322,34 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
       }
     }
 
+    //Disk selector.
+    
+    if( e.getActionCommand() == "O" )
+    {
+      //Clear the current tree nodes.
+
+      ((DefaultTreeModel)tree.getModel()).setRoot( null ); DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+
+      boolean end = false; int r = 0;
+
+      while(!end)
+      {
+        //Windows uses Physical drive.
+
+        try
+        {
+          new RandomAccessFile( new File ("\\\\.\\PhysicalDrive" + r + ""), "r");
+          root.add( new DefaultMutableTreeNode( "Disk" + r + "#\\\\.\\PhysicalDrive" + r + ".disk" ) );
+          r += 1;
+        }
+        catch( Exception er ) { end = true; }
+      }
+
+      //Set the new tree.
+    
+      ((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
+    }
+
     //Binary tool display controls.
 
     else if( e.getActionCommand().equals("Toggle text View") )
@@ -318,7 +359,12 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     else if( e.getActionCommand().equals("Toggle virtual space View") )
     {
-      addV = !addV; Virtual.setVisible(addV);
+      Virtual.setVisible(!Virtual.isVisible());
+    }
+
+    else if( e.getActionCommand().equals("Toggle offset View") )
+    {
+      Offset.setVisible(!Offset.isVisible());
     }
 
     else if( e.getActionCommand().equals("Open new File") )
@@ -400,7 +446,35 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   {
     int r = tree.getRowForLocation( e.getX(), e.getY() );
 
-    if( !Open && r != -1 )
+    if( diskMode )
+    {
+      String p = tree.getLastSelectedPathComponent().toString();
+
+      p = p.substring( p.lastIndexOf(35) + 1, p.lastIndexOf(46) );
+
+      try
+      {
+        file = new RandomAccessFileVS( p, "r" );
+
+        if(!HInit)
+        {
+          Virtual = new VHex( file, true ); Offset = new VHex( file, false );
+          Offset.enableText( textV ); Virtual.enableText( textV );
+          HInit = true;
+        }
+        else
+        {
+          Offset.setTarget( file ); Virtual.setTarget( file );
+        }
+        
+        editMode();
+      }
+      catch(Exception er)
+      {
+        JOptionPane.showMessageDialog(null,"Can't Open disk!"); Reset();
+      }
+    }
+    else if( !Open && r != -1 )
     {
       if( tree.getLastSelectedPathComponent() != null )
       {

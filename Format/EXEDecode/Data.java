@@ -118,6 +118,6 @@ public class Data
   public long toLong( byte[] b )
   {
     return( ( (long)b[0] & 0xFFL ) | ( ((long)b[1] << 8) & 0xFF00L ) | ( ((long)b[2] << 16) & 0xFF0000L ) | ( ((long)b[3] << 24) & 0xFF000000L ) |
-     ( ( (long)b[0] << 32 ) & 0xFF00000000L ) | ( ( (long)b[0] << 40 ) & 0xFF0000000000L ) | ( ( (long)b[0] << 48 ) & 0xFF000000000000L ) | ( ( (long)b[0] << 56 ) & 0xFF00000000000000L ) );
+     ( ( (long)b[4] << 32 ) & 0xFF00000000L ) | ( ( (long)b[5] << 40 ) & 0xFF0000000000L ) | ( ( (long)b[6] << 48 ) & 0xFF000000000000L ) | ( ( (long)b[7] << 56 ) & 0xFF00000000000000L ) );
   }
 }
