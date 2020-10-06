@@ -47,10 +47,8 @@ A fast custom UI hex editor component: https://github.com/Recoskie/VHex
 Additional planed tools.
 ------------------------------------------------------------
 
-Data type inspector.
+*Data type inspector.
 
-Disc sector reader.
+*Boot sector decompilation.
 
-Boot sector decompilation.
-
-File system array structure reader (NTFS, FAT32, EXT)
+*File system array structure reader (NTFS, FAT32, EXT)
