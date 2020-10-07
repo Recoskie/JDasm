@@ -345,6 +345,17 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
       }
 
       //Linux, and Mac uses folder "/dev" as the drive mount points.
+      
+      end = false; while(!end)
+      {
+        //Windows uses Physical drive.
+
+        try
+        {
+          new RandomAccessFile( new File ("/dev/sda" + ( r == 0 ? "" : r ) + ""), "r"); root.add( new DefaultMutableTreeNode( "Disk" + r + "#/dev/sda" + ( r == 0 ? "" : r ) + ".disk" ) ); r += 1;
+        }
+        catch( Exception er ) { end = true; }
+      }
 
       //Set the new tree.
     
@@ -472,6 +483,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
       }
       catch(Exception er)
       {
+        er.printStackTrace();
         JOptionPane.showMessageDialog(null,"Can't Open disk!"); Reset();
       }
     }

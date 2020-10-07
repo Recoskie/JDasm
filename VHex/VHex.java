@@ -233,7 +233,14 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
     //Setup Scroll bar system.
 
-    try { ScrollBar = new LongScrollBar(JScrollBar.VERTICAL, 16, 0, 0, Virtual ? 0xFFFFFFFFFFFFFFFFL : IOStream.length(), this ); }
+    try
+    {
+      long s = IOStream.length();
+      
+      if( s <= 0 ) { s = 0x7FFFFFFFFFFFFFFFL; }
+      
+      ScrollBar = new LongScrollBar(JScrollBar.VERTICAL, 16, 0, 0, Virtual ? 0xFFFFFFFFFFFFFFFFL : s, this );
+    }
     catch (java.io.IOException e)
     {
       ScrollBar = new LongScrollBar(JScrollBar.VERTICAL, 16, 0, 0, 0x7FFFFFFFFFFFFFFFL, this );
