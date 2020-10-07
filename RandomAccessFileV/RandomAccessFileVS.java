@@ -55,7 +55,7 @@ public class RandomAccessFileVS extends RandomAccessFileV
 
     TempPos = super.getFilePointer(); TempPosV = super.getVirtualPointer();
     
-    base = ( TempPos / 512 ) * 512; buf = new byte[(int)( ( ( ( TempPos - base ) + b.length ) / 512 ) + 1 ) * 512]; System.out.println(buf.length+"");
+    base = ( TempPos / 512 ) * 512; buf = new byte[(int)( ( ( ( TempPos - base ) + b.length ) / 512 ) + 1 ) * 512];
 
     super.seek( base ); r = super.read( buf ); super.seek( TempPos + b.length );
 
