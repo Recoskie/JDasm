@@ -18,6 +18,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   //Current file path.
 
   public String Path = "";
+  public String Sep = System.getProperty("file.separator");
 
   //The file system stream to the file type.
 
@@ -160,7 +161,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   {
     if( !Open )
     {
-      Path += tree.getLastSelectedPathComponent().toString(); Path += "\\"; dirSerach();
+      Path += tree.getLastSelectedPathComponent().toString(); Path += Sep; dirSerach();
     }
   }
 
@@ -228,7 +229,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     {
       temp=path.substring( i - 1, i );
         
-      if(temp.equals("\\"))
+      if(temp.equals(Sep))
       {
         path = path.substring( i, path.length() );
         break;
@@ -289,7 +290,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     
     if( e.getActionCommand() == "C" ) { diskMode = false; Path = ""; dirSerach(); }
     
-    if( e.getActionCommand() == "H" ) { diskMode = false; Path = System.getProperty("user.home")+"\\"; dirSerach(); }
+    if( e.getActionCommand() == "H" ) { diskMode = false; Path = System.getProperty("user.home") + Sep; dirSerach(); }
 
     //Up one folder.
     
@@ -303,9 +304,9 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         {
           temp = Path.substring( i - 1, i );
           
-          if( temp.equals("\\") )
+          if( temp.equals(Sep) )
           {
-            Path = Path.substring( 0, i - 1 ); Path += "\\"; break;
+            Path = Path.substring( 0, i - 1 ); Path += Sep; break;
           }
         }
           
@@ -396,7 +397,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     try
     {
-      file = new RandomAccessFileV( Path + "\\" + ft, "rw" );
+      file = new RandomAccessFileV( Path + "/" + ft, "rw" );
 
       if(!HInit)
       {
@@ -411,7 +412,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       if( I >= 0 )
       {
-        ((ExploerEventListener)UsedDecoder).read( Path + "\\" + ft, file );
+        ((ExploerEventListener)UsedDecoder).read( Path + Sep + ft, file );
 
         openFile();
       }

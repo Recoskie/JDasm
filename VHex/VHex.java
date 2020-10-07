@@ -253,15 +253,11 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
     super.addKeyListener(this);
 
-    //Load component font in 106 DPI.
-
-    float dpi = 12.0f * ( Toolkit.getDefaultToolkit().getScreenResolution() ) / 106.0f;
-
     try
     {
-      font = Font.createFont( Font.TRUETYPE_FONT, VHex.class.getResourceAsStream("Font/DOS.ttf") ).deriveFont( dpi );
+      font = Font.createFont( Font.TRUETYPE_FONT, VHex.class.getResourceAsStream("Font/DOS.ttf") ).deriveFont( 16f );
     }
-    catch( Exception er ) { font = new Font( "Monospaced", Font.BOLD, (int)( dpi + 0.5f ) ); }
+    catch( Exception er ) { font = new Font( "Monospaced", Font.BOLD, 16 ); }
   }
 
   //Get selected byte index.
