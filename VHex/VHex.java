@@ -147,7 +147,10 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
         IOStream.Events = true;
       }
     }
-    catch ( Exception er ) {}
+    catch ( Exception er )
+    {
+      for( int i = rd; i < data.length; i++ ) { udata[i] = true; }
+    }
 
     t = 0;
   }

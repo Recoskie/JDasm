@@ -338,12 +338,12 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
         try
         {
-          new RandomAccessFile( new File ("\\\\.\\PhysicalDrive" + r + ""), "r");
-          root.add( new DefaultMutableTreeNode( "Disk" + r + "#\\\\.\\PhysicalDrive" + r + ".disk" ) );
-          r += 1;
+          new RandomAccessFile( new File ("\\\\.\\PhysicalDrive" + r + ""), "r"); root.add( new DefaultMutableTreeNode( "Disk" + r + "#\\\\.\\PhysicalDrive" + r + ".disk" ) ); r += 1;
         }
         catch( Exception er ) { end = true; }
       }
+
+      //Linux, and Mac uses folder "/dev" as the drive mount points.
 
       //Set the new tree.
     

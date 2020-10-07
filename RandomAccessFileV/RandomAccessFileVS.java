@@ -6,8 +6,10 @@ import java.io.*;
 public class RandomAccessFileVS extends RandomAccessFileV
 {
   private static byte[] buf = new byte[512];
-  private long TPos = 0;
+  private long TempPos = 0, TempPosV = 0;
   private long base = 0;
+  private int r = 0;
+  private boolean e = false;
 
   public RandomAccessFileVS( File file, String mode ) throws FileNotFoundException { super( file, mode ); }
   
@@ -23,53 +25,78 @@ public class RandomAccessFileVS extends RandomAccessFileV
   
   @Override public int read() throws IOException
   {
-    super.Events = false;
+    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
 
-    TPos = super.getFilePointer(); base = ( TPos / 512 ) * 512;
+    e = super.Events; super.Events = false;
 
-    super.seek( base ); super.read( buf ); super.seek( TPos + 1 );
-
-    super.Events = true;
+    TempPos = super.getFilePointer(); TempPosV = super.getVirtualPointer();
     
-    return( (int)buf[(int)( TPos - base )] );
+    base = ( TempPos / 512 ) * 512;
+
+    super.seek( base ); super.read( buf ); super.seek( TempPos + 1 );
+      
+    r = (int)buf[(int)( TempPos - base )];
+    
+    if( e )
+    {
+      super.Events = true; Read = true;
+      
+      super.fireIOEvent( new IOEvent( this, TempPos, TempPos + 1, TempPosV, TempPosV + 1, false ) );
+    }
+
+    return( r );
   }
   
   @Override public int read( byte[] b ) throws IOException
   {
-    super.Events = false;
+    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
 
-    TPos = super.getFilePointer(); base = ( TPos / 512 ) * 512;
+    e = super.Events; super.Events = false;
 
-    buf = new byte[(int)( ( b.length / 512 ) + 1 ) * 512];
-
-    super.seek( base );
+    TempPos = super.getFilePointer(); TempPosV = super.getVirtualPointer();
     
-    int r = super.read( buf ); super.seek( TPos + b.length );
+    base = ( TempPos / 512 ) * 512; buf = new byte[(int)( ( b.length / 512 ) + 1 ) * 512];
 
-    for(int s = (int)( TPos - base ), e = (int)( TPos + b.length ), i = 0; s < e; b[i++] = buf[s++] );
+    super.seek( base ); r = super.read( buf ); super.seek( TempPos + b.length );
+
+    for(int s = (int)( TempPos - base ), e = (int)( s + b.length - 1 ), i = 0; s < e; b[i++] = buf[s++] );
 
     buf = new byte[512];
 
-    super.Events = true;
-    
+    if( e )
+    {
+      super.Events = true; Read = true;
+      
+      super.fireIOEvent( new IOEvent( this, TempPos, super.getFilePointer(), TempPosV, super.getVirtualPointer(), false ) );
+    }
+
     return( r );
   }
   
   @Override public int read( byte[] b, int off, int len ) throws IOException
   {
-    super.Events = false;
+    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
 
-    TPos = super.getFilePointer(); base = ( TPos / 512 ) * 512;
+    e = super.Events; super.Events = false;
+
+    TempPos = super.getFilePointer(); TempPosV = super.getVirtualPointer();
+    
+    base = ( TempPos / 512 ) * 512;
 
     buf = new byte[(int)( ( b.length / 512 ) + 1 ) * 512];
 
-    super.seek( base ); int r = super.read( buf ); super.seek( TPos + b.length );
+    super.seek( base ); r = super.read( buf ); super.seek( TempPos + b.length );
 
-    for(int s = (int)( TPos - base ) + off, e = (int)( TPos + off ) + len, i = 0; s < e; b[i++] = buf[s++] );
+    for(int s = (int)( TempPos - base ) + off, e = (int)( s ) + ( len - 1 ), i = 0; s < e; b[i++] = buf[s++] );
 
     buf = new byte[512];
 
-    super.Events = true;
+    if( e )
+    {
+      super.Events = true; Read = true;
+      
+      super.fireIOEvent( new IOEvent( this, TempPos, super.getFilePointer(), TempPosV, super.getVirtualPointer(), false ) );
+    }
     
     return( r );
   }

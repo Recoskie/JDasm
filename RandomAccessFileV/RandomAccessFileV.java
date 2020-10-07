@@ -11,7 +11,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   //Disable events. This is to stop graphics components from updating while doing intensive operations.
   
-  public boolean Events = false;
+  public static boolean Events = false;
   
   //Trigger Position.
   
@@ -29,15 +29,15 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   //Event trigger.
   
-  private boolean Trigger = false;
+  public boolean Trigger = false;
   
   //Read or write event.
   
-  private boolean Read = false;
+  public boolean Read = false;
   
   //Main event thread.
   
-  private Thread EventThread;
+  public Thread EventThread;
 
   //Test if read only.
 
@@ -210,7 +210,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   //The virtual address that the current virtual address pointer is in range of.
   
-  private VRA curVra = Map.get(0);
+  public VRA curVra = Map.get(0);
   
   //Speeds up search. By going up or down from current virtual address.
   
@@ -837,7 +837,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
       {
         //If read, or write is triggered.
         
-        if( Trigger )
+        if( Trigger && Events )
         {
           try
           {
