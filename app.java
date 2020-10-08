@@ -53,6 +53,36 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   //The file to load. To begin decoding file types.
 
   public String DecodeAPP[] = new String[]{ "Format.EXE" };
+  
+  //get system Disks.
+  
+  public class getDisks
+  {
+    private boolean end = false , check = false;
+    private int r = 0;
+    private File f;
+    private DefaultMutableTreeNode root;
+    
+    public boolean admin = false;
+    public int disks = 0;
+    
+    public getDisks( DefaultMutableTreeNode r ){ root = r; }
+      
+    public void checkDisk( String Root, String type, boolean Zero )
+    {
+      r = 0; end = false; while(!end)
+      {
+        try
+        {
+          f = new File (Root + ( r == 0 && Zero ? "" : r ) + ""); check = f.exists();
+          new RandomAccessFile( f, "r");
+          root.add( new DefaultMutableTreeNode( type + r + "#" + Root + ( r == 0 && Zero ? "" : r ) + ".disk" ) );
+          r += 1; disks += 1;
+        }
+        catch( Exception er ) { if(check) { admin = true; } end = true; }
+      }
+    }
+  }
 
   //Create the application.
 
@@ -331,44 +361,22 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       ((DefaultTreeModel)tree.getModel()).setRoot( null ); DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
 
-      boolean end = false , check = false, admin = false; int r = 0, d = 0;
+      getDisks d = new getDisks( root );
       
-      File f;
-
       //Windows uses Physical drive. Does not need admin to read disks.
 
-      while(!end)
-      {
-        try
-        {
-          f = new File ("\\\\.\\PhysicalDrive" + r + "");
-          new RandomAccessFile( f, "r"); root.add( new DefaultMutableTreeNode( "Disk" + d + "#\\\\.\\PhysicalDrive" + r + ".disk" ) );
-          r += 1; d += 1;
-        }
-        catch( Exception er )
-        {
-          end = true;
-        }
-      }
+      d.checkDisk( "\\\\.\\PhysicalDrive", "Disk", false );
 
       //Linux, and Mac uses folder "/dev" as the drive mount points.
       
-      end = false; while(!end)
-      {
-        try
-        {
-          f = new File ("/dev/sda" + ( r == 0 ? "" : r ) + ""); check = f.exists();
-          new RandomAccessFile( f, "r"); root.add( new DefaultMutableTreeNode( "Disk" + d + "#/dev/sda" + ( r == 0 ? "" : r ) + ".disk" ) );
-          r += 1; d += 1;
-        }
-        catch( Exception er ) { if(check) { admin = true; } end = true; }
-      }
+      d.checkDisk("/dev/sda", "Disk", true );
+      d.checkDisk("/dev/sdb", "Removable Disk", true );
       
-      if(admin)
+      if(d.admin)
       {
-        JOptionPane.showMessageDialog(null,"Need Administrative privilege read Disk drives.\r\nOn Linux, or mac you have to run as sudo."); REC = false; dirSerach(); REC = true;
+        JOptionPane.showMessageDialog(null,"Need Administrative privilege read Disk drives.\r\nOn Linux, or Mac you have to run as sudo."); REC = false; dirSerach(); REC = true;
       }
-      else if( d == 0 )
+      else if( d.disks == 0 )
       {
         JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); REC = false; dirSerach(); REC = true;
       }
