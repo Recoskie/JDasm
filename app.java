@@ -331,35 +331,53 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       ((DefaultTreeModel)tree.getModel()).setRoot( null ); DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
 
-      boolean end = false; int r = 0;
+      boolean end = false , check = false, admin = false; int r = 0, d = 0;
+      
+      File f;
+
+      //Windows uses Physical drive. Does not need admin to read disks.
 
       while(!end)
       {
-        //Windows uses Physical drive.
-
         try
         {
-          new RandomAccessFile( new File ("\\\\.\\PhysicalDrive" + r + ""), "r"); root.add( new DefaultMutableTreeNode( "Disk" + r + "#\\\\.\\PhysicalDrive" + r + ".disk" ) ); r += 1;
+          f = new File ("\\\\.\\PhysicalDrive" + r + "");
+          new RandomAccessFile( f, "r"); root.add( new DefaultMutableTreeNode( "Disk" + d + "#\\\\.\\PhysicalDrive" + r + ".disk" ) );
+          r += 1; d += 1;
         }
-        catch( Exception er ) { end = true; }
+        catch( Exception er )
+        {
+          end = true;
+        }
       }
 
       //Linux, and Mac uses folder "/dev" as the drive mount points.
       
       end = false; while(!end)
       {
-        //Windows uses Physical drive.
-
         try
         {
-          new RandomAccessFile( new File ("/dev/sda" + ( r == 0 ? "" : r ) + ""), "r"); root.add( new DefaultMutableTreeNode( "Disk" + r + "#/dev/sda" + ( r == 0 ? "" : r ) + ".disk" ) ); r += 1;
+          f = new File ("/dev/sda" + ( r == 0 ? "" : r ) + ""); check = f.exists();
+          new RandomAccessFile( f, "r"); root.add( new DefaultMutableTreeNode( "Disk" + d + "#/dev/sda" + ( r == 0 ? "" : r ) + ".disk" ) );
+          r += 1; d += 1;
         }
-        catch( Exception er ) { end = true; }
+        catch( Exception er ) { if(check) { admin = true; } end = true; }
       }
-
-      //Set the new tree.
+      
+      if(admin)
+      {
+        JOptionPane.showMessageDialog(null,"Need Administrative privilege read Disk drives.\r\nOn Linux, or mac you have to run as sudo."); REC = false; dirSerach(); REC = true;
+      }
+      else if( d == 0 )
+      {
+        JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); REC = false; dirSerach(); REC = true;
+      }
+      else
+      {
+      	//Set the new tree.
     
-      ((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
+      	((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
+      }
     }
 
     //Binary tool display controls.
