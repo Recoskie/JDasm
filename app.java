@@ -359,6 +359,8 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     {
       //Clear the current tree nodes.
 
+      Boolean err = false;
+
       ((DefaultTreeModel)tree.getModel()).setRoot( null ); DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
 
       getDisks d = new getDisks( root );
@@ -367,20 +369,40 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       d.checkDisk( "\\\\.\\PhysicalDrive", "Disk", false );
 
-      //Linux, and Mac uses folder "/dev" as the drive mount points.
+      if( d.admin )
+      {
+        err = true;
+        JOptionPane.showMessageDialog(null,"Unable to read disk drives. Try running as administrator."); REC = false; dirSerach(); REC = true;
+      }
+
+      //Linux.
       
       d.checkDisk("/dev/sda", "Disk", true );
       d.checkDisk("/dev/sdb", "Removable Disk", true );
-      
-      if(d.admin)
+
+      if( !err && d.admin )
       {
-        JOptionPane.showMessageDialog(null,"Need Administrative privilege read Disk drives.\r\nOn Linux, or Mac you have to run as sudo."); REC = false; dirSerach(); REC = true;
+        err = true;
+        JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as 'sudo'."); REC = false; dirSerach(); REC = true;
       }
-      else if( d.disks == 0 )
+
+      //Mac OS X.
+
+      d.checkDisk("/dev/disk", "Disk", false );
+      
+      if( !err && d.admin )
+      {
+        err = true;
+        JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as root on Mac OS.\r\n" +
+        "On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java."); REC = false; dirSerach(); REC = true;
+      }
+      
+      if( !err && d.disks == 0 )
       {
         JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); REC = false; dirSerach(); REC = true;
       }
-      else
+      
+      if( !err )
       {
       	//Set the new tree.
     
