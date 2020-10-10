@@ -12,6 +12,7 @@ import WindowCompoents.*;
 
 import RandomAccessFileV.*;
 import VHex.*;
+import dataInspector.*;
 
 public class app extends WindowCompoents implements TreeWillExpandListener, TreeSelectionListener, ActionListener, MouseListener
 {
@@ -359,11 +360,11 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     {
       //Clear the current tree nodes.
 
-      Boolean err = false;
-
       ((DefaultTreeModel)tree.getModel()).setRoot( null ); DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
 
-      getDisks d = new getDisks( root );
+      //Setup disk check utility.
+
+      boolean err = false; getDisks d = new getDisks( root );
       
       //Windows uses Physical drive. Does not need admin to read disks.
 
@@ -371,8 +372,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       if( d.admin )
       {
-        err = true;
-        JOptionPane.showMessageDialog(null,"Unable to read disk drives. Try running as administrator."); REC = false; dirSerach(); REC = true;
+        err = true; JOptionPane.showMessageDialog(null,"Unable to read disk drives. Try running as administrator.");
       }
 
       //Linux.
@@ -382,8 +382,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       if( !err && d.admin )
       {
-        err = true;
-        JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as 'sudo'."); REC = false; dirSerach(); REC = true;
+        err = true; JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as 'sudo'.");
       }
 
       //Mac OS X.
@@ -394,19 +393,25 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
       {
         err = true;
         JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as root on Mac OS.\r\n" +
-        "On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java."); REC = false; dirSerach(); REC = true;
+        "On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java.");
       }
       
-      if( !err && d.disks == 0 )
+      if( err )
       {
-        JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); REC = false; dirSerach(); REC = true;
+        REC = false; dirSerach(); REC = true;
       }
-      
-      if( !err )
+      else
       {
-      	//Set the new tree.
-    
-      	((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
+        if( d.disks == 0 )
+        {
+          JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System.");
+        }
+        else
+        {
+          //Set the new tree.
+
+          ((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
+        }
       }
     }
 
@@ -429,7 +434,12 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     else if( e.getActionCommand().equals("Open new File") )
     {
-      Path = History[h]; Reset(); REC = false; dirSerach(); REC = true;
+      diskMode = false; Path = History[h]; Reset(); REC = false; dirSerach(); REC = true;
+    }
+
+    else if( e.getActionCommand().equals("Toggle Data Inspector") )
+    {
+      ds.setVisible(!ds.isVisible());
     }
   }
 
@@ -460,13 +470,13 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       if(!HInit)
       {
-        Virtual = new VHex( file, true ); Offset = new VHex( file, false );
+        Virtual = new VHex( file, true ); Offset = new VHex( file, false ); ds = new dataInspector( file );
         Offset.enableText( textV ); Virtual.enableText( textV );
         HInit = true;
       }
       else
       {
-        Offset.setTarget( file ); Virtual.setTarget( file );
+        Offset.setTarget( file ); Virtual.setTarget( file ); ds.setTarget( file );
       }
 
       if( I >= 0 )
@@ -518,13 +528,13 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
         if(!HInit)
         {
-          Virtual = new VHex( file, true ); Offset = new VHex( file, false );
+          Virtual = new VHex( file, true ); Offset = new VHex( file, false ); ds = new dataInspector( file );
           Offset.enableText( textV ); Virtual.enableText( textV );
           HInit = true;
         }
         else
         {
-          Offset.setTarget( file ); Virtual.setTarget( file );
+          Offset.setTarget( file ); Virtual.setTarget( file ); ds.setTarget( file );
         }
         
         editMode();

@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import javax.swing.tree.*;
 import VHex.*;
+import dataInspector.*;
 
 public class WindowCompoents
 {
@@ -35,6 +36,10 @@ public class WindowCompoents
   //Hex editor.
 
   public static VHex Virtual, Offset;
+
+  //Data type inspector tool.
+
+  public static dataInspector ds;
 
   //Once hex editor is initialized. Then the target is set afterwards for new files.
 
@@ -96,6 +101,8 @@ public class WindowCompoents
     c.weightx = 1; p2.add( Virtual , c );
     
     c.weightx = 1000; p2.add( Offset, c );
+    
+    c.weightx = 1000000; c.weighty = 1; p2.add( ds, c );
 
     //Septate the two panels.
 
@@ -123,6 +130,8 @@ public class WindowCompoents
     c.weightx = 1; c.gridx = 0; p1.add( Virtual , c );
     
     c.weightx = 1000; c.gridx = 1; p1.add( Offset, c );
+    
+    c.weightx = 1000000; c.gridx = 2; c.weighty = 1; p1.add( ds, c );
 
     f.add( new JScrollPane( p1, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED ) );
 
