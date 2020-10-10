@@ -120,7 +120,10 @@ public class Descriptor extends JTable
           if( Dos_exit == 2 ) { break; }
         }
 
-        WindowCompoents.Virtual.setSelected( 256, temp.getPosV() - 1 ); WindowCompoents.Offset.setSelected( MZsec[row], temp.getPos() - 1 );
+        long pos = temp.getPos() - 1;
+        WindowCompoents.Virtual.setSelected( 256, temp.getPosV() - 1, true );
+        WindowCompoents.Offset.setSelected( MZsec[row], pos, false );
+        
         WindowCompoents.info( "<html>" + MZinfo[ row ] + t + "</html>" );
       }
       catch( Exception e ) { }

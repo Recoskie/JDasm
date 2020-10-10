@@ -277,15 +277,31 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   //Set selected bytes.
 
+  public void setSelected( long start, long end, boolean seek )
+  {
+    SelectC = new Color( 57, 105, 138, 128 );
+    
+    sel = start;
+    
+    if( seek )
+    {
+      try { if( !Virtual ) { IOStream.seek( sel ); } else { IOStream.seekV( sel ); } } catch( java.io.IOException e ) { }
+    }
+
+    sele = end;
+
+    if( !seek ) { repaint(); }
+  }
+
   public void setSelected( long start, long end )
   {
     SelectC = new Color( 57, 105, 138, 128 );
     
-    sel = start; sele = end;
-
-    if( ( sel - offset ) >= Rows * 16 || ( sel - offset ) < 0 ) { offset = sel & 0xFFFFFFFFFFFFFFF0L; updateData(); }
+    sel = start;
     
-    repaint();
+    try { if( !Virtual ) { IOStream.seek( sel ); } else { IOStream.seekV( sel ); } } catch( java.io.IOException e ) { }
+
+    sele = end;
   }
 
   //Enable, or disable the text editor.
@@ -298,7 +314,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
     super.removeAll(); super.add( Box.createRigidArea( new Dimension( endw, 0 ) ) ); super.add( ScrollBar );
 
-    repaint();
+    validate();
   }
 
   //Initialize the draw area and component size.
