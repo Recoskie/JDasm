@@ -107,10 +107,10 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
     //Byte order panel.
 
-    JRadioButton Little = new JRadioButton("Little Indian"); Little.setActionCommand("L"); Little.setSelected(true);
-    JRadioButton Big = new JRadioButton("Big Indian"); Big.setActionCommand("B"); Big.setSelected(false);
+    JRadioButton Little = new JRadioButton("Little Endian"); Little.setActionCommand("L"); Little.setSelected(true);
+    JRadioButton Big = new JRadioButton("Big Endian"); Big.setActionCommand("B"); Big.setSelected(false);
 
-    ButtonGroup indian = new ButtonGroup(); indian.add(Little); indian.add(Big);
+    ButtonGroup endian = new ButtonGroup(); endian.add(Little); endian.add(Big);
 
     JPanel p1 = new JPanel( new GridLayout( 1, 2 ) ); p1.add(Little); p1.add(Big);
 
