@@ -41,7 +41,7 @@ public class RandomAccessFileVS extends RandomAccessFileV
     {
       super.Events = true; Read = true;
       
-      super.fireIOEvent( new IOEvent( this, TempPos, TempPos + 1, TempPosV, TempPosV + 1, false ) );
+      super.fireIOEvent( new IOEvent( this, TempPos, TempPos + 1, TempPosV, TempPosV + 1 ) );
     }
 
     return( r );
@@ -67,7 +67,7 @@ public class RandomAccessFileVS extends RandomAccessFileV
     {
       super.Events = true; Read = true;
       
-      super.fireIOEvent( new IOEvent( this, TempPos, super.getFilePointer(), TempPosV, super.getVirtualPointer(), false ) );
+      super.fireIOEvent( new IOEvent( this, TempPos, super.getFilePointer(), TempPosV, super.getVirtualPointer() ) );
     }
 
     return( r );
@@ -95,7 +95,7 @@ public class RandomAccessFileVS extends RandomAccessFileV
     {
       super.Events = true; Read = true;
       
-      super.fireIOEvent( new IOEvent( this, TempPos, super.getFilePointer(), TempPosV, super.getVirtualPointer(), false ) );
+      super.fireIOEvent( new IOEvent( this, TempPos, super.getFilePointer(), TempPosV, super.getVirtualPointer() ) );
     }
     
     return( r );

@@ -120,9 +120,10 @@ public class Descriptor extends JTable
           if( Dos_exit == 2 ) { break; }
         }
 
-        long pos = temp.getPos() - 1;
-        WindowCompoents.Virtual.setSelected( 256, temp.getPosV() - 1, true );
-        WindowCompoents.Offset.setSelected( MZsec[row], pos, false );
+        long pos = temp.getPos() - 1, posV = temp.getPosV() - 1;
+        
+        Data.stream.seekV( 256 );
+        WindowCompoents.Virtual.setSelectedEnd( posV ); WindowCompoents.Offset.setSelectedEnd( pos );
         
         WindowCompoents.info( "<html>" + MZinfo[ row ] + t + "</html>" );
       }
@@ -131,7 +132,8 @@ public class Descriptor extends JTable
 
     else
     {
-      WindowCompoents.Offset.setSelected( MZsec[row], MZsec[row+1] - 1 );
+      try { Data.stream.seek( MZsec[row] ); } catch( java.io.IOException e ) { }
+      WindowCompoents.Offset.setSelectedEnd( MZsec[row+1] - 1 );
       WindowCompoents.info( MZinfo[ row ] );
     }
   }
@@ -188,7 +190,8 @@ public class Descriptor extends JTable
   {
     //Select Bytes.
 
-    WindowCompoents.Offset.setSelected( Data.PE + PEsec[row], Data.PE + PEsec[row+1] - 1 );
+    try { Data.stream.seek( Data.PE + PEsec[row] ); } catch( java.io.IOException e ) { }
+    WindowCompoents.Offset.setSelectedEnd( Data.PE + PEsec[row+1] - 1 );
 
     //Description outputs yet.
 
@@ -242,7 +245,8 @@ public class Descriptor extends JTable
 
     //Select Bytes.
 
-    WindowCompoents.Offset.setSelected( Data.PE + ( Data.is64bit ? OP64sec[row] : OP32sec[row] ), Data.PE + ( Data.is64bit ? OP64sec[row+1] : OP32sec[row+1] ) - 1 );
+    try { Data.stream.seek( Data.PE + ( Data.is64bit ? OP64sec[row] : OP32sec[row] ) ); } catch( java.io.IOException e ) { }
+    WindowCompoents.Offset.setSelectedEnd( Data.PE + ( Data.is64bit ? OP64sec[row+1] : OP32sec[row+1] ) - 1 );
 
     //Description outputs.
 
@@ -269,7 +273,8 @@ public class Descriptor extends JTable
 
     if( end == 2 ) { pos += 4; end = pos + 3; }
 
-    WindowCompoents.Offset.setSelected( pos, end );
+    try { Data.stream.seek( pos ); } catch( java.io.IOException e ) { }
+    WindowCompoents.Offset.setSelectedEnd( end );
   }
 
   //Detailed description of the sections to RAM memory.
@@ -300,6 +305,7 @@ public class Descriptor extends JTable
     else if( end == 5 ) { pos += 24; end = pos + 11; }
     else if( end == 6 ) { pos += 36; end = pos + 3; }
 
-    WindowCompoents.Offset.setSelected( pos, end );
+    try { Data.stream.seek( pos ); } catch( java.io.IOException e ) { }
+    WindowCompoents.Offset.setSelectedEnd( end );
   }
 }

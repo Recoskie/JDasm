@@ -129,6 +129,10 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
     //Virtual address end position. If grater than actual data the rest is 0 filled space.
     
     private long VEnd = 0x0000000000000000L;
+
+    //If this address has mapped space.
+
+    private boolean Maped = false;
     
     //Construct area map. Both long/int size. Note End position can match the start position as the same byte. End position is minus 1.
     
@@ -143,6 +147,10 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
       //Calculate file offset end positions and virtual end positions.
       
       FEnd = Pos + (Len > 0 ? ( Len - 1 ) : 0); VEnd = VPos + ( VLen - 1 );
+
+      //Set mapped.
+
+      Maped = Len != 0;
     }
     
     //Set the end of an address when another address writes into this address.
@@ -164,6 +172,10 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
       //Calculate the bytes written into.
       
       FEnd = Pos + (Len > 0 ? ( Len - 1 ) : 0);
+
+      //Set mapped.
+
+      Maped = Len != 0;
     }
     
     //Addresses that write over the start of an address.
@@ -185,6 +197,10 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
       if( Len == 0 ) { Pos = 0; }
 
       VLen = Long.compareUnsigned( VPos, VEnd ) > 0 ? 0 : ( VEnd + 1 ) - VPos;
+
+      //Set mapped.
+
+      Maped = Len != 0;
     }
     
     //String Representation for address space.
@@ -210,7 +226,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   //The virtual address that the current virtual address pointer is in range of.
   
-  public VRA curVra = Map.get(0);
+  private VRA curVra = Map.get(0);
   
   //Speeds up search. By going up or down from current virtual address.
   
@@ -248,6 +264,20 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
     addV( 0, (long)data.length, Address, (long)data.length );
     
     TFile.delete();
+  }
+
+  //Check if position is maped.
+
+  public boolean isMaped()
+  {
+    if( curVra.Maped )
+    {
+      Events = false; try { seekV(getVirtualPointer()); } catch( IOException e ) { } Events = true;
+
+      return( curVra.Maped );
+    }
+
+    return( false );
   }
 
   //Reset the Virtual ram map.
@@ -425,7 +455,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
       }
     }
     
-    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0, getVirtualPointer(), 0, curVra.Len != 0 ) );
+    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0, getVirtualPointer(), 0 ) );
   }
   
   public int readV() throws IOException
@@ -717,7 +747,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   {
     while( Events && Trigger ) { EventThread.interrupt(); }
     
-    super.seek( Offset ); fireIOEventSeek( new IOEvent( this, Offset, 0, getVirtualPointer(), 0, curVra.Len != 0 ) );
+    super.seek( Offset ); fireIOEventSeek( new IOEvent( this, Offset, 0, getVirtualPointer(), 0 ) );
   }
   
   //Seek. Same as seek, but is a little faster of a read ahead trick.
@@ -728,7 +758,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
     
     int b = super.skipBytes( n );
     
-    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0,  getVirtualPointer(), 0, curVra.Len != 0 ) );
+    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0,  getVirtualPointer(), 0 ) );
     
     return( b );
   }
@@ -843,7 +873,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
           {
             if( pos == super.getFilePointer() )
             {
-              fireIOEvent( new IOEvent( this, TPos, pos - 1, TPosV, posV - 1, curVra.Len != 0 ) );
+              fireIOEvent( new IOEvent( this, TPos, pos - 1, TPosV, posV - 1 ) );
               Trigger = false;
             }
             else{ pos = super.getFilePointer(); posV = getVirtualPointer(); }

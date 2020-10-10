@@ -199,7 +199,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
           long f = b.getFilePointer() - 1, v = b.getVirtualPointer() - 1;
 
-          b.seekV( data.imageBase + data.startOfCode ); Virtual.setSelected( data.imageBase + data.startOfCode, v, true ); Offset.setSelected( b.getFilePointer(), f, false );
+          b.seekV( data.imageBase + data.startOfCode ); Virtual.setSelected( data.imageBase + data.startOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
 
           info( "<html>" + t + "</html>" );
         }
@@ -212,7 +212,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     else if( h.equals("MZ Header.h") )
     {
-      Offset.setSelected( 0, data.PE - 1 );
+      try{ b.seek( 0 ); } catch( IOException er ) { } Offset.setSelectedEnd( data.PE - 1 );
       
       des.setType( Descriptor.MZ ); if(TData[0] != null) { out.setModel( TData[0] ); } else { errDecode(); }
 
@@ -222,7 +222,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     }
     else if( h.equals("PE Header.h") )
     {
-      Offset.setSelected( data.PE, data.PE + 23 );
+      try{ b.seek( data.PE ); } catch( IOException er ) { } Offset.setSelectedEnd( data.PE + 23 );
 
       des.setType( Descriptor.PE ); if(TData[1] != null) { out.setModel( TData[1] ); } else { errDecode(); }
 
@@ -231,7 +231,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     }
     else if( h.equals("OP Header.h") )
     {
-      Offset.setSelected( data.PE + 24, data.is64bit ? data.PE + 135 : data.PE + 119 );
+      try{ b.seek(data.PE + 24); } catch( IOException er ) { } Offset.setSelectedEnd( data.is64bit ? data.PE + 135 : data.PE + 119 );
 
       des.setType( Descriptor.OP ); if(TData[2] != null) { out.setModel( TData[2] ); } else { errDecode(); }
 
@@ -241,7 +241,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       long pos = data.is64bit ? data.PE + 136 : data.PE + 120;
 
-      Offset.setSelected( pos, pos + ( ( data.DDS / 3 ) << 3 ) - 1 );
+      try{ b.seek( pos ); } catch( IOException er ) { } Offset.setSelectedEnd( pos + ( ( data.DDS / 3 ) << 3 ) - 1 );
 
       des.setType( Descriptor.dataDirectoryArray ); if(TData[3] != null) { out.setModel( TData[3] ); } else { errDecode(); }
 
@@ -252,7 +252,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       long pos = ( data.is64bit ? data.PE + 136 : data.PE + 120 ) + ( ( data.DDS / 3 ) << 3 );
 
-      Offset.setSelected( pos, pos + ( data.NOS * 40 ) - 1 );
+      try{ b.seek( pos ); } catch( IOException er ) { } Offset.setSelectedEnd( pos + ( data.NOS * 40 ) - 1 );
 
       des.setType( Descriptor.sections ); if(TData[4] != null) { out.setModel( TData[4] ); } else { errDecode(); }
 
@@ -263,7 +263,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       long pos = ( data.is64bit ? data.PE + 136 : data.PE + 120 ) + ( ( data.DDS / 3 ) << 3 );
 
-      Offset.setSelected( 0, pos + ( data.NOS * 40 ) - 1 );
+      try{ b.seek(0); } catch( IOException er ) { } Offset.setSelectedEnd( pos + ( data.NOS * 40 ) - 1 );
 
       info("<html><p>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
       "Export Table can not be located.<br /><br />" +
@@ -277,9 +277,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[0]);
-        Virtual.setSelected( data.DataDir[0], data.DataDir[0] + data.DataDir[1] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[1] - 1, false );
+        b.seekV(data.DataDir[0]);b.seekV(data.DataDir[0]);
+        Virtual.setSelected( data.DataDir[0], data.DataDir[0] + data.DataDir[1] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[1] - 1 );
       }
       catch( IOException e ) { }
 
@@ -291,9 +291,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[2]);
-        Virtual.setSelected( data.DataDir[2], data.DataDir[2] + data.DataDir[3] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[3] - 1, false );
+        b.seekV(data.DataDir[2]);b.seekV(data.DataDir[2]);
+        Virtual.setSelected( data.DataDir[2], data.DataDir[2] + data.DataDir[3] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[3] - 1 );
       }
       catch( IOException e ) { }
 
@@ -305,9 +305,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[4]);
-        Virtual.setSelected( data.DataDir[4], data.DataDir[4] + data.DataDir[5] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[5] - 1, false );
+        b.seekV(data.DataDir[4]);b.seekV(data.DataDir[4]);
+        Virtual.setSelected( data.DataDir[4], data.DataDir[4] + data.DataDir[5] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[5] - 1 );
       }
       catch( IOException e ) { }
 
@@ -319,9 +319,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[6]);
-        Virtual.setSelected( data.DataDir[6], data.DataDir[6] + data.DataDir[7] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[7] - 1, false );
+        b.seekV(data.DataDir[6]);b.seekV(data.DataDir[6]);
+        Virtual.setSelected( data.DataDir[6], data.DataDir[6] + data.DataDir[7] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[7] - 1 );
       }
       catch( IOException e ) { }
 
@@ -333,9 +333,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[8]);
-        Virtual.setSelected( data.DataDir[8], data.DataDir[8] + data.DataDir[9] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[9] - 1, false );
+        b.seekV(data.DataDir[8]);b.seekV(data.DataDir[8]);
+        Virtual.setSelected( data.DataDir[8], data.DataDir[8] + data.DataDir[9] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[9] - 1 );
       }
       catch( IOException e ) { }
 
@@ -347,9 +347,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[10]);
-        Virtual.setSelected( data.DataDir[10], data.DataDir[10] + data.DataDir[11] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[11] - 1, false );
+        b.seekV(data.DataDir[10]);b.seekV(data.DataDir[10]);
+        Virtual.setSelected( data.DataDir[10], data.DataDir[10] + data.DataDir[11] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[11] - 1 );
       }
       catch( IOException e ) { }
 
@@ -361,9 +361,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[12]);
-        Virtual.setSelected( data.DataDir[12], data.DataDir[12] + data.DataDir[13] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[13] - 1, false );
+        b.seekV(data.DataDir[12]);b.seekV(data.DataDir[12]);
+        Virtual.setSelected( data.DataDir[12], data.DataDir[12] + data.DataDir[13] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[13] - 1 );
       }
       catch( IOException e ) { }
 
@@ -375,9 +375,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[14]);
-        Virtual.setSelected( data.DataDir[14], data.DataDir[14] + data.DataDir[15] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[15] - 1, false );
+        b.seekV(data.DataDir[14]);b.seekV(data.DataDir[14]);
+        Virtual.setSelected( data.DataDir[14], data.DataDir[14] + data.DataDir[15] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[15] - 1 );
       }
       catch( IOException e ) { }
 
@@ -389,9 +389,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[16]);
-        Virtual.setSelected( data.DataDir[16], data.DataDir[16] + data.DataDir[17] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[17] - 1, false );
+        b.seekV(data.DataDir[16]);b.seekV(data.DataDir[16]);
+        Virtual.setSelected( data.DataDir[16], data.DataDir[16] + data.DataDir[17] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[17] - 1 );
       }
       catch( IOException e ) { }
 
@@ -403,9 +403,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[18]);
-        Virtual.setSelected( data.DataDir[18], data.DataDir[18] + data.DataDir[19] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[19] - 1, false );
+        b.seekV(data.DataDir[18]);b.seekV(data.DataDir[18]);
+        Virtual.setSelected( data.DataDir[18], data.DataDir[18] + data.DataDir[19] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[19] - 1 );
       }
       catch( IOException e ) { }
 
@@ -417,9 +417,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[20]);
-        Virtual.setSelected( data.DataDir[20], data.DataDir[20] + data.DataDir[21] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[21] - 1, false );
+        b.seekV(data.DataDir[20]);b.seekV(data.DataDir[20]);
+        Virtual.setSelected( data.DataDir[20], data.DataDir[20] + data.DataDir[21] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[21] - 1 );
       }
       catch( IOException e ) { }
 
@@ -431,9 +431,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[22]);
-        Virtual.setSelected( data.DataDir[22], data.DataDir[22] + data.DataDir[23] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[23] - 1, false );
+        b.seekV(data.DataDir[22]);b.seekV(data.DataDir[22]);
+        Virtual.setSelected( data.DataDir[22], data.DataDir[22] + data.DataDir[23] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[23] - 1 );
       }
       catch( IOException e ) { }
 
@@ -445,9 +445,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[24]);
-        Virtual.setSelected( data.DataDir[24], data.DataDir[24] + data.DataDir[25] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[25] - 1, false );
+        b.seekV(data.DataDir[24]);b.seekV(data.DataDir[24]);
+        Virtual.setSelected( data.DataDir[24], data.DataDir[24] + data.DataDir[25] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[25] - 1 );
       }
       catch( IOException e ) { }
 
@@ -459,9 +459,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[26]);
-        Virtual.setSelected( data.DataDir[26], data.DataDir[26] + data.DataDir[27] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[27] - 1, false );
+        b.seekV(data.DataDir[26]);b.seekV(data.DataDir[26]);
+        Virtual.setSelected( data.DataDir[26], data.DataDir[26] + data.DataDir[27] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[27] - 1 );
       }
       catch( IOException e ) { }
 
@@ -473,9 +473,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[28]);
-        Virtual.setSelected( data.DataDir[28], data.DataDir[28] + data.DataDir[29] - 1, true );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[29] - 1, false );
+        b.seekV(data.DataDir[28]);b.seekV(data.DataDir[28]);
+        Virtual.setSelected( data.DataDir[28], data.DataDir[28] + data.DataDir[29] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[29] - 1 );
       }
       catch( IOException e ) { }
 

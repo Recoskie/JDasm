@@ -277,31 +277,18 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   //Set selected bytes.
 
-  public void setSelected( long start, long end, boolean seek )
-  {
-    SelectC = new Color( 57, 105, 138, 128 );
-    
-    sel = start;
-    
-    if( seek )
-    {
-      try { if( !Virtual ) { IOStream.seek( sel ); } else { IOStream.seekV( sel ); } } catch( java.io.IOException e ) { }
-    }
-
-    sele = end;
-
-    if( !seek ) { repaint(); }
-  }
-
   public void setSelected( long start, long end )
   {
     SelectC = new Color( 57, 105, 138, 128 );
     
-    sel = start;
-    
-    try { if( !Virtual ) { IOStream.seek( sel ); } else { IOStream.seekV( sel ); } } catch( java.io.IOException e ) { }
+    if( !Virtual || IOStream.isMaped() ) { sel = start; sele = end; repaint(); }
+  }
 
-    sele = end;
+  public void setSelectedEnd( long end )
+  {
+    SelectC = new Color( 57, 105, 138, 128 );
+    
+    if( !Virtual || IOStream.isMaped() ) { sele = end; repaint(); }
   }
 
   //Enable, or disable the text editor.
@@ -860,11 +847,11 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   {
     SelectC = new Color( 57, 105, 138, 128 );
 
-    if( !Virtual ) { sel = e.SPos(); sele = sel; } else if( e.MapV() ) { sel = e.SPosV(); sele = sel; }
+    if( !Virtual ) { sel = e.SPos(); sele = sel; } else if( IOStream.isMaped() ) { sel = e.SPosV(); sele = sel; }
 
     if( ( sel - offset ) >= Rows * 16 || ( sel - offset ) < 0 ) { offset = sel & 0xFFFFFFFFFFFFFFF0L; updateData(); }
     
-    repaint();
+    if( !Virtual || IOStream.isMaped() ) { repaint(); }
   }
   
   //On Reading bytes in stream.
@@ -873,11 +860,11 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   {
     endEdit(); SelectC = new Color( 33, 255, 33, 128 );
 
-    if( !Virtual ) { sel = e.SPos(); sele = e.EPos(); } else if( e.MapV() ) { sel = e.SPosV(); sele = e.EPosV(); }
+    if( !Virtual ) { sel = e.SPos(); sele = e.EPos(); } else if( IOStream.isMaped() ) { sel = e.SPosV(); sele = e.EPosV(); }
 
     if( ( sel - offset ) >= Rows << 4 || ( sel - offset ) < 0 ) { offset = sel & 0xFFFFFFFFFFFFFFF0L; updateData(); } 
     
-    repaint();
+    if( !Virtual || IOStream.isMaped() ) { repaint(); }
   }
   
   //On writing bytes in stream.
@@ -886,11 +873,11 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   {
     SelectC = new Color( 255, 33, 33, 128 );
 
-    if( !Virtual ) { sel = e.SPos(); sele = e.EPos(); } else if( e.MapV()) { sel = e.SPosV(); sele = e.EPosV(); }
+    if( !Virtual ) { sel = e.SPos(); sele = e.EPos(); } else if( IOStream.isMaped() ) { sel = e.SPosV(); sele = e.EPosV(); }
 
     if( ( sel - offset ) > Rows << 4 ) { offset = sel & 0xFFFFFFFFFFFFFFF0L; }
 
-    updateData(); repaint();
+    if( !Virtual || IOStream.isMaped() ) { updateData(); repaint(); }
   }
 
   //Text cursor line animation.
