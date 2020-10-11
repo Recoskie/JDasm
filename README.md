@@ -19,7 +19,7 @@ Running the application.
 
 To run the application you only need the <a href="https://github.com/Recoskie/JFH-Disassembly/raw/master/JFHApp.jar">JFHApp.jar</a> file. It does not install to the system.
 
-Or you can download the clone the entire project if you wish to make changes, or have a copy of the source code.
+You can also download the project. Clone the entire project if you wish to make changes, or have a copy of the source code.
 
 You also need java 8, or higher.
 
