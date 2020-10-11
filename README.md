@@ -14,6 +14,8 @@ This project makes binary formats visual, easy to map, and modify.
 This project is meant to support different binary file formats, and application formats.
 
 ------------------------------------------------------------
+Running the application.
+------------------------------------------------------------
 
 To run the application you only need the JFHApp.jar file. It does not install to the system.
 
