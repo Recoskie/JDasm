@@ -11,9 +11,45 @@ public class RandomAccessFileVS extends RandomAccessFileV
   private int r = 0;
   private boolean e = false;
 
-  public RandomAccessFileVS( File file, String mode ) throws FileNotFoundException { super( file, mode ); }
+  //The size of a raw disk volume.
+
+  private long size = 0;
+
+  public RandomAccessFileVS( File file, String mode ) throws FileNotFoundException
+  {
+    super( file, mode );
+
+    //Calculate the length of a raw disk volume.
+
+    long bit = 0x4000000000000000L; super.Events = false;
+
+    while( bit >= 512 )
+    {
+      try { super.seek(size | bit); super.read(buf); size |= bit; } catch( Exception e ) { }
+
+      bit >>= 1;
+    }
+
+    try { super.seek(0); } catch( Exception e ) {  } super.Events = true;
+  }
   
-  public RandomAccessFileVS( String name, String mode ) throws FileNotFoundException { super( name, mode ); }
+  public RandomAccessFileVS( String name, String mode ) throws FileNotFoundException
+  {
+    super( name, mode );
+
+    //Calculate the length of a raw disk volume.
+
+    long bit = 0x4000000000000000L; super.Events = false;
+
+    while( bit >= 512 )
+    {
+      try { super.seek(size | bit); super.read(buf); size |= bit; } catch( Exception e ) { }
+
+      bit >>= 1;
+    }
+
+    try { super.seek(0); } catch( Exception e ) {  } super.Events = true;
+  }
   
   //Temporary data. This is so that components that are dependent on this file system can be used without a target file.
   
@@ -100,4 +136,6 @@ public class RandomAccessFileVS extends RandomAccessFileV
     
     return( r );
   }
+
+  @Override public long length() { return( size ); }
 }
