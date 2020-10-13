@@ -14,6 +14,12 @@ This project makes binary formats visual, easy to map, and modify.
 This project is meant to support different binary file formats, and application formats.
 
 ------------------------------------------------------------
+Help, and documentation.
+------------------------------------------------------------
+
+Using JFH-Disassembly Basic: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">Link</a>
+
+------------------------------------------------------------
 Running the application.
 ------------------------------------------------------------
 
