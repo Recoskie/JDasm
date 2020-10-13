@@ -120,7 +120,7 @@
     <tr><td>deci</td><td>d</td><td>1/10</td><td>10<sup>-1</sup></td><td>Tenth</td></tr>
     <tr><td>centi</td><td>c</td><td>1/100</td><td>10<sup>-2</sup></td><td>Hundredth</td></tr>
     <tr><td>milli</td><td>m</td><td>1/1,000</td><td>10<sup>-3</sup></td><td>Thousandth</td></tr>
-    <tr><td>micro</td><td>µ</td><td>1/1,000,000</td><td>10<sup>-6</sup></td><td>Millionth</td></tr>
+    <tr><td>micro</td><td>¬µ</td><td>1/1,000,000</td><td>10<sup>-6</sup></td><td>Millionth</td></tr>
     <tr><td>nano</td><td>n</td><td>1/1,000,000,000</td><td>10<sup>-9</sup></td><td>Billionth</td></tr>
     <tr><td>pico</td><td>p</td><td>1/1,000,000,000,000</td><td>10<sup>-12</sup></td><td>Trillionth</td></tr>
     <tr><td>femto</td><td>f</td><td>1/1,000,000,000,000,000</td><td>10<sup>-15</sup></td><td>Quadrillionth</td></tr>
@@ -191,7 +191,7 @@
 
   <br /><br />
 
-  Today when we read these sizes. Then wish to do arithmetic with different read lengths of data. We specify types like "byte", "short" (WORD), ìintegerî (DWORD), ìlongî (QWORD).
+  Today when we read these sizes. Then wish to do arithmetic with different read lengths of data. We specify types like "byte", "short" (WORD), ‚Äúinteger‚Äù (DWORD), ‚Äúlong‚Äù (QWORD).
 
   <br /><br />
 
@@ -321,7 +321,7 @@
 
   <br /><br />
 
-  In reality your source code can have singed numbers, but by disassembling itís machine operations. You could recreate the code as all unsigned numbers without error.
+  In reality your source code can have singed numbers, but by disassembling it‚Äôs machine operations. You could recreate the code as all unsigned numbers without error.
   
   <br /><br />
   
@@ -409,12 +409,12 @@
     <tr><td>Binary</td><td>Hex</td><td>Char</td><td>Binary</td><td>Hex</td><td>Char</td><td>Binary</td><td>Hex</td><td>Char</td><td>Binary</td><td>Hex</td><td>Char</td></tr>
     <tr><td>00000000</td><td>00</td><td>NUL</td><td>00100000</td><td>20</td><td>SP</td><td>01000000</td><td>40</td><td>@</td><td>01100000</td><td>60</td><td>`</td></tr>
     <tr><td>00000001</td><td>01</td><td>SOH</td><td>00100001</td><td>21</td><td>!</td><td>01000001</td><td>41</td><td>A</td><td>01100001</td><td>61</td><td>a</td></tr>
-    <tr><td>00000010</td><td>02</td><td>STX</td><td>00100010</td><td>22</td><td>ì</td><td>01000010</td><td>42</td><td>B</td><td>01100010</td><td>62</td><td>b</td></tr>
+    <tr><td>00000010</td><td>02</td><td>STX</td><td>00100010</td><td>22</td><td>‚Äú</td><td>01000010</td><td>42</td><td>B</td><td>01100010</td><td>62</td><td>b</td></tr>
     <tr><td>00000011</td><td>03</td><td>ETX</td><td>00100011</td><td>23</td><td>#</td><td>01000011</td><td>43</td><td>C</td><td>01100011</td><td>63</td><td>c</td></tr>
     <tr><td>00000100</td><td>04</td><td>EOT</td><td>00100100</td><td>24</td><td>$</td><td>01000100</td><td>44</td><td>D</td><td>01100100</td><td>64</td><td>d</td></tr>
     <tr><td>00000101</td><td>05</td><td>ENQ</td><td>00100101</td><td>25</td><td>%</td><td>01000101</td><td>45</td><td>E</td><td>01100101</td><td>65</td><td>e</td></tr>
     <tr><td>00000110</td><td>06</td><td>ACK</td><td>00100110</td><td>26</td><td>&</td><td>01000110</td><td>46</td><td>F</td><td>01100110</td><td>66</td><td>f</td></tr>
-    <tr><td>00000111</td><td>07</td><td>BEL</td><td>00100111</td><td>27</td><td>ë</td><td>01000111</td><td>47</td><td>G</td><td>01100111</td><td>67</td><td>g</td></tr>
+    <tr><td>00000111</td><td>07</td><td>BEL</td><td>00100111</td><td>27</td><td>‚Äò</td><td>01000111</td><td>47</td><td>G</td><td>01100111</td><td>67</td><td>g</td></tr>
     <tr><td>00001000</td><td>08</td><td>BS</td><td>00101000</td><td>28</td><td>(</td><td>01001000</td><td>48</td><td>H</td><td>01101000</td><td>68</td><td>h</td></tr>
     <tr><td>00001001</td><td>09</td><td>HT</td><td>00101001</td><td>29</td><td>)</td><td>01001001</td><td>49</td><td>I</td><td>01101001</td><td>69</td><td>i</td></tr>
     <tr><td>00001010</td><td>0A</td><td>LF</td><td>00101010</td><td>2A</td><td>*</td><td>01001010</td><td>4A</td><td>J</td><td>01101010</td><td>6A</td><td>j</td></tr>
@@ -487,7 +487,7 @@
   
   <br /><br />
   
-  When decoded as characters usually mean something. Like in a Microsoft executable. The first two bytes are 4D 5A = ìMZî.
+  When decoded as characters usually mean something. Like in a Microsoft executable. The first two bytes are 4D 5A = ‚ÄúMZ‚Äù.
   
   <br /><br />
 
