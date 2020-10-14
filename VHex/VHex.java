@@ -166,30 +166,32 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
     
     private int ov = 0, rel = 0;
 
+    private boolean exstend = false;
+
     private VHex comp;
     
     public LongScrollBar(int orientation, int value, int visible, int minimum, long maximum, VHex c )
     {
       super( orientation, value, visible, minimum, Long.compareUnsigned( maximum, 0x7FFFFFF0 ) > 0 ? 0x7FFFFFF0 : (int) ( ( maximum + 15 ) & 0x7FFFFFF0 ) );
-      End = maximum; VisibleEnd = ( End - visible ) & 0x7FFFFFFFFFFFFFF0L; comp = c;
+      
+      End = maximum; exstend = Long.compareUnsigned( maximum, 0x7FFFFFF0 ) > 0;
+      
+      if( Long.compareUnsigned( visible, End ) < 0 ) { VisibleEnd = ( End - visible ) & 0x7FFFFFFFFFFFFFF0L; }
+      
+      comp = c;
     }
     
     @Override public void setValue( int v )
     {
       //Relatively scroll really large files that are too big for scroll bar.
 
-      if( Long.compareUnsigned( VisibleEnd, 0x7FFFFFF0 ) > 0 )
+      if( exstend )
       {
         rel = v - ov; ov = v; offset += rel;
 
         //Limit offset within the disk size, or file size.
 
-        if( !Virtual )
-        {
-          if( offset < 0 ) { offset = 0; }
-        
-          else if( Long.compareUnsigned( offset, VisibleEnd ) > 0 ) { offset = VisibleEnd; }
-        }
+        if( !Virtual ) { if( offset < 0 ) { offset = 0; } else if( Long.compareUnsigned( offset, VisibleEnd ) > 0 ) { offset = VisibleEnd; } }
 
         //Adjust scroll bar.
 
@@ -212,9 +214,17 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
         
           //Remaining data to end.
         
-          else { ov = (int)( 0x8000000F - ( End - offset ) ); }
+          else { ov = (int)( 0x7FFFFFF0 - ( End - offset ) ); }
         }
-      } else { offset = v; ov = v; }
+      }
+      else
+      {
+        offset = v; ov = v;
+        
+        //Limit offset within the disk size, or file size.
+
+        if( offset < 0 ) { offset = 0; } else if( offset > VisibleEnd ) { offset = VisibleEnd; }
+      }
 
       //Update scroll bar relative positioning.
       
@@ -223,9 +233,11 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
     
     @Override public void setVisibleAmount( int v )
     {
-      VisibleEnd = ( End - v ) & 0x7FFFFFFFFFFFFFF0L; super.setVisibleAmount( v );
+      if( Long.compareUnsigned( v, End ) < 0 ) { VisibleEnd = ( ( exstend ? End : End + 15 ) - v ) & 0x7FFFFFFFFFFFFFF0L; } else { VisibleEnd = 0; }
       
-      if( Long.compareUnsigned( offset, VisibleEnd ) > 0 ) { setValue( VisibleEnd + 16 ); }
+      super.setVisibleAmount( v );
+      
+      if( Long.compareUnsigned( offset, VisibleEnd ) > 0 ) { setValue( VisibleEnd ); }
     }
     
     public void setValue( long v )
@@ -241,7 +253,12 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
       super.setValue( ( (int) v ) & 0x7FFFFFF0 );
     }
 
-    public void setMaximum( long v ) { End = v; super.setMaximum( Long.compareUnsigned( v, 0x7FFFFFF0 ) > 0 ? 0x7FFFFFF0 : (int) ( ( v + 15 ) & 0x7FFFFFF0 ) ); }
+    public void setMaximum( long v )
+    {
+      End = v; exstend = Long.compareUnsigned( v, 0x7FFFFFF0 ) > 0;
+      
+      super.setMaximum( exstend ? 0x7FFFFFF0 : (int) ( ( v + 15 ) & 0x7FFFFFF0 ) );
+    }
   }
   
   //If no mode setting then assume offset mode.
@@ -748,7 +765,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
    {
      IOStream = f; IOStream.removeIOEventListener( this ); f.addIOEventListener( this );
      
-     try { ScrollBar.setMaximum( Virtual ? 0xFFFFFFFFFFFFFFFFL : IOStream.length() ); } catch( Exception e ) { }
+     try { ScrollBar.setMaximum( Virtual ? 0xFFFFFFFFFFFFFFFFL : IOStream.length() ); ScrollBar.setVisibleAmount( Rows << 4 ); ScrollBar.setValue(0); } catch( Exception e ) { }
      
      offset = 0; sel = 0; sele = 0; SelectC = new Color(57, 105, 138, 128); updateData(); repaint();
    }
