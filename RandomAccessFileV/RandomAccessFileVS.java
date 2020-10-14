@@ -25,10 +25,12 @@ public class RandomAccessFileVS extends RandomAccessFileV
 
     while( bit >= 512 )
     {
-      try { super.seek(size | bit); super.read(buf); size |= bit; } catch( Exception e ) { }
+      try { super.seek( size | bit ); super.read( buf ); size |= bit; } catch( IOException e ) { }
 
       bit >>= 1;
     }
+
+    size += 511; //End of last sector.
 
     try { super.seek(0); } catch( Exception e ) {  } super.Events = true;
   }
@@ -43,19 +45,15 @@ public class RandomAccessFileVS extends RandomAccessFileV
 
     while( bit >= 512 )
     {
-      try { super.seek(size | bit); super.read(buf); size |= bit; } catch( Exception e ) { }
+      try { super.seek( size | bit ); super.read( buf ); size |= bit; } catch( IOException e ) { }
 
       bit >>= 1;
     }
 
+    size += 511; //End of last sector.
+
     try { super.seek(0); } catch( Exception e ) {  } super.Events = true;
   }
-  
-  //Temporary data. This is so that components that are dependent on this file system can be used without a target file.
-  
-  public RandomAccessFileVS( byte[] data ) throws IOException { super( data ); }
-  
-  public RandomAccessFileVS( byte[] data, long Address ) throws IOException { super( data, Address ); }
 
   //Read and write events.
   
