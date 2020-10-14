@@ -93,7 +93,7 @@ public class RandomAccessFileVS extends RandomAccessFileV
 
     super.seek( base ); r = super.read( buf ); super.seek( TempPos + b.length );
 
-    for(int s = (int)( TempPos - base ), e = (int)( s + b.length - 1 ), i = 0; s < e; b[i++] = buf[s++] );
+    for(int s = (int)( TempPos - base ), e = (int)( s + b.length - 1 ), i = 0; s <= e; b[i++] = buf[s++] );
 
     buf = new byte[512];
 
@@ -121,7 +121,7 @@ public class RandomAccessFileVS extends RandomAccessFileV
 
     super.seek( base ); r = super.read( buf ); super.seek( TempPos + b.length );
 
-    for(int s = (int)( TempPos - base ) + off, e = (int)( s ) + ( len - 1 ), i = 0; s < e; b[i++] = buf[s++] );
+    for(int s = (int)( TempPos - base ) + off, e = (int)( s ) + ( len - 1 ), i = 0; s <= e; b[i++] = buf[s++] );
 
     buf = new byte[512];
 
