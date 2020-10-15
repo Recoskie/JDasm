@@ -483,7 +483,7 @@
 
   <br /><br />
 
-  This is how the to string method is implemented in programming languages to convert any number to any number base 2 to 36.</strong>
+  This is how the to string method is implemented in all programming languages to convert any number to any number base 2 to 36.</strong>
 
   <br /><br />
 
@@ -517,6 +517,17 @@
 
   <br /><br />
 
+  <table border="1px">
+    <tr>
+      <td>Hex</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td>
+    </tr>
+    <tr>
+      <td>Binary</td><td>0000</td><td>0001</td><td>0010</td><td>0011</td><td>0100</td><td>0101</td><td>0110</td><td>0111</td><td>1000</td><td>1001</td><td>1010</td><td>1011</td><td>1100</td><td>1101</td><td>1110</td><td>1111</td>
+    </tr>
+  </table>
+
+  <br />
+
   A hexadecimal number uses 16 symbols. The last value F = 15 is exactly equal to the last value of a 4 bit binary number 1111=15.
 
   <br /><br />
@@ -525,7 +536,7 @@
 
   <br /><br />
 
-  10 = 1 (0001), 0 (0000) = 00010000
+  10 = 1 (0001), 0 (0000) = 0001 0000
 
   <br /><br />
 
@@ -569,15 +580,74 @@
 
   <br /><br />
 
-  Thus changing back, and fourth between binary, and hex instantly is universal.
+  Thus changing back, and fourth between binary, and hex byte character codes instantly is universal.
 
   <br /><br />
 
-  Base 10 does not match any multiple of 2, base 4, base 8 (Octal), base 16 (hexadecimal), base 32. So to convert a decimal number we have to divide by 10, and write the remainders down.
+  <table border="1px">
+    <tr>
+      <td>Octal</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td>
+    </tr>
+    <tr>
+      <td>Binary</td><td>000</td><td>001</td><td>010</td><td>011</td><td>100</td><td>101</td><td>110</td><td>111</td>
+    </tr>
+  </table>
+
+  <br />
+
+  Octal uses base 8 which is the byte character codes 0 to 7. The last Octal digit is also equal to the last 3 digit binary combination 111 = 7.
+
+  <br /><br />
+
+  So 7+1=10 in pace value. Thus every octal digit is 3 binary digits. Thus to change the value back to binary we go.
+
+  <br /><br />
+
+  10 = 1 (001), 0 (000) = 001 000
+
+  <br /><br />
+
+  So 53 Octal is.
+
+  <br /><br />
+
+  53 = 5 (101), 3 (011) = 101 011
+
+  <br /><br />
+
+  To change a really long binary number to hex like.
+
+  <br /><br />
+
+  101000101010100101010100101001010
+
+  <br /><br />
+
+  Splitting any size of binary number in sections of 4 from right to left. Allows us to convert to hex instantly.
+
+  <br /><br />
+
+  Split = (101), (000), (101), (010), (100), (101), (010), (100), (101), (001), (010)
+
+  <br />
+
+  Octal = (5), (0), (5), (2), (4), (5), (2), (4), (5), (1), (2)
+
+  <br /><br />
+
+  <strong>Base 10 does not match any multiple of 2, base 4, base 8 (Octal), base 16 (hexadecimal), base 32.</strong>
 
   <br /><br />
   
-  You can use division to convert to any number base grouping even hex. However hex can easily just be change back, and fourth since it matches in binary place values.
+  You can use division by 16, and write the remainder down for each hex digit. Because you then are using division to divide the number up in place value in sections just as we are doing above.
+  
+  <br /><br />
+  
+  So number bases that are not a multiple of 2 means we must divide by base, and write the remainders down.
+
+  <br /><br />
+
+  In our case we divide by 10 and, add the remainders to character byte codes to four a string.
   
   <br /><br />
 
@@ -585,7 +655,7 @@
 
   <br /><br />
 
-  So it does not matter the number of digits you are using to display a number.
+  So it does not matter the number of digits you are using to display a number. You can translate a number to any groping of digits you like using division, and remainder.
 
   <h1>Array.</h1>
   
@@ -703,11 +773,7 @@
   
   However it is recommended to add Hardware accelerated graphics through a GPU by implanting the method calls that the GPU supports.
 
-  <br /><br />
-
   <h2>Audio format.</h2>
-
-  <br /><br />
 
   Audio is also another concept.
   
@@ -729,7 +795,7 @@
   
   <br /><br />
   
-  The faster the sample rate then the more precise the audio reproduction is. Anyway this is how uncompressed audio works. Also bitmap is a lossless format as the colors are stored as they are in graphics.
+  The faster the sample rate, then the more precise the audio reproduction is. Anyway this is how uncompressed audio works. Also bitmap is a lossless format as the colors are stored as they are in graphics.
   
   <br /><br />
   
