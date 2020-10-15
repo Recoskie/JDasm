@@ -524,7 +524,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       try
       {
-        file = new RandomAccessFileVS( p, "r" );
+        file = new RandomAccessDevice( p, "r" ); file.ready();
 
         if(!HInit)
         {

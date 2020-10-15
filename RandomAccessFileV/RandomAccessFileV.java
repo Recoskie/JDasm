@@ -854,6 +854,10 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
     
     System.out.println( s );
   }
+
+  //wait till device is ready, used by RandomAccessDevice.
+
+  public void ready() throws IOException {}
   
   //Main Event thread.
   
