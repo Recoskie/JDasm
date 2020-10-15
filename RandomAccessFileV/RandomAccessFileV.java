@@ -29,15 +29,15 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   //Event trigger.
   
-  public boolean Trigger = false;
+  private boolean Trigger = false;
   
   //Read or write event.
   
-  public boolean Read = false;
+  private boolean Read = false;
   
   //Main event thread.
   
-  public Thread EventThread;
+  private Thread EventThread;
 
   //Test if read only.
 
@@ -460,15 +460,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public int readV() throws IOException
   {
-    //Trigger writing event.
-    
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
-    
-    //Start read event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); Read = true; Trigger = true; }
-
-    //Begin read operation.
+    syncRV(); 
 
     //Seek address if outside current address space.
     
@@ -491,17 +483,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public int readV( byte[] b ) throws IOException
   {
-    //Trigger writing event.
-    
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
-    
-    //Start read event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); TPosV = getVirtualPointer(); Read = true; Trigger = true; }
-
-    //Begin read operation.
-
-    int Pos = 0, n = 0;
+    syncRV(); int Pos = 0, n = 0;
 
     //Seek address if outside current address space.
     
@@ -547,17 +529,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public int readV( byte[] b, int off, int len ) throws IOException
   {
-    //Trigger writing event.
-    
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
-    
-    //Start read event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); TPosV = getVirtualPointer(); Read = true; Trigger = true; }
-
-    //Begin read operation.
-
-    int Pos = off, n = 0; len += off;
+    syncRV(); int Pos = off, n = 0; len += off;
 
     //Seek address if outside current address space.
     
@@ -618,15 +590,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public void writeV( int b ) throws IOException
   {
-    //Trigger read event.
-    
-    while( Events && Trigger && Read ) { EventThread.interrupt(); }
-    
-    //Start write event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); Read = false; Trigger = true; }
-
-    //begin writing.
+    syncWV();
 
     //Seek address if outside current address space.
     
@@ -645,17 +609,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public void writeV( byte[] b ) throws IOException
   {
-    //Trigger read event.
-    
-    while( Events && Trigger && Read ) { EventThread.interrupt(); }
-    
-    //Start write event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); TPosV = getVirtualPointer(); Read = false; Trigger = true; }
-
-    //begin writing.
-
-    int Pos = 0, n = 0;
+    syncWV(); int Pos = 0, n = 0;
     
     //Seek address if outside current address space.
     
@@ -695,17 +649,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public void writeV( byte[] b, int off, int len ) throws IOException
   {
-    //Trigger read event.
-    
-    while( Events && Trigger && Read ) { EventThread.interrupt(); }
-    
-    //Start write event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); TPosV = getVirtualPointer(); Read = false; Trigger = true; }
-
-    //begin writing.
-
-    int Pos = off, n = 0; len += off;
+    syncWV(); int Pos = off, n = 0; len += off;
     
     //Seek address if outside current address space.
     
@@ -745,18 +689,14 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   @Override public void seek( long Offset ) throws IOException
   {
-    while( Events && Trigger ) { EventThread.interrupt(); }
-    
-    super.seek( Offset ); fireIOEventSeek( new IOEvent( this, Offset, 0, getVirtualPointer(), 0 ) );
+    sync(); super.seek( Offset ); fireIOEventSeek( new IOEvent( this, Offset, 0, getVirtualPointer(), 0 ) );
   }
   
   //Seek. Same as seek, but is a little faster of a read ahead trick.
   
   @Override public int skipBytes( int n ) throws IOException
   {
-    while( Events && Trigger ) { EventThread.interrupt(); }
-    
-    int b = super.skipBytes( n );
+    sync(); int b = super.skipBytes( n );
     
     fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0,  getVirtualPointer(), 0 ) );
     
@@ -765,84 +705,17 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   //Read and write events.
   
-  @Override public int read() throws IOException
-  {
-    //Trigger writing event.
-    
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
-    
-    //Start read event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); Read = true; Trigger = true; }
-    
-    return( super.read() );
-  }
+  @Override public int read() throws IOException { syncR(); return( super.read() ); }
   
-  @Override public int read( byte[] b ) throws IOException
-  {
-    //Trigger writing event.
-    
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
-    
-    //Start read event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); Read = true; Trigger = true; }
-    
-    return( super.read( b ) );
-  }
+  @Override public int read( byte[] b ) throws IOException { syncR(); return( super.read( b ) ); }
   
-  @Override public int read( byte[] b, int off, int len ) throws IOException
-  {
-    //Trigger writing event.
-    
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
-    
-    //Start read event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); Read = true; Trigger = true; }
-    
-    return( super.read( b, off, len ) );
-  }
-
+  @Override public int read( byte[] b, int off, int len ) throws IOException { syncR(); return( super.read( b, off, len ) ); }
   
-  @Override public void write( int b ) throws IOException
-  {
-    //Trigger read event.
-    
-    while( Events && Trigger && Read ) { EventThread.interrupt(); }
-    
-    //Start write event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); Read = false; Trigger = true; }
-    
-    super.write( b );
-  }
+  @Override public void write( int b ) throws IOException { syncW(); super.write( b ); }
   
-  @Override public void write( byte[] b ) throws IOException
-  {
-    //Trigger read event.
-    
-    while( Events && Trigger && Read ) { EventThread.interrupt(); }
-    
-    //Start write event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); Read = false; Trigger = true; }
-    
-    super.write( b );
-  }
+  @Override public void write( byte[] b ) throws IOException { syncW(); super.write( b ); }
   
-  @Override public void write( byte[] b, int off, int len ) throws IOException
-  {
-    //Trigger read event.
-    
-    while( Events && Trigger && Read ) { EventThread.interrupt(); }
-    
-    //Start write event tracing.
-    
-    if( Events && !Trigger ) { TPos = super.getFilePointer(); Read = false; Trigger = true; }
-    
-    super.write( b, off, len );
-  }
+  @Override public void write( byte[] b, int off, int len ) throws IOException { syncW(); super.write( b, off, len ); }
   
   //Debug The address mapped memory.
   
@@ -858,6 +731,57 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   //wait till device is ready, used by RandomAccessDevice.
 
   public void ready() throws IOException {}
+
+  //Event synchronization.
+
+  public final void sync()
+  {
+    while( Events && Trigger ) { EventThread.interrupt(); }
+  }
+
+  public final void syncR() throws IOException
+  {
+    //Trigger writing event.
+    
+    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
+    
+    //Start read event tracing.
+    
+    if( Events && !Trigger ) { TPos = super.getFilePointer(); Read = true; Trigger = true; }
+  }
+
+  public final void syncW() throws IOException
+  {
+    //Trigger read event.
+    
+    while( Events && Trigger && Read ) { EventThread.interrupt(); }
+    
+    //Start write event tracing.
+    
+    if( Events && !Trigger ) { TPos = super.getFilePointer(); Read = false; Trigger = true; }
+  }
+
+  public final void syncRV() throws IOException
+  {
+    //Trigger writing event.
+    
+    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
+    
+    //Start read event tracing.
+    
+    if( Events && !Trigger ) { TPos = super.getFilePointer(); TPosV = getVirtualPointer(); Read = true; Trigger = true; }
+  }
+
+  public final void syncWV() throws IOException
+  {
+    //Trigger read event.
+    
+    while( Events && Trigger && Read ) { EventThread.interrupt(); }
+    
+    //Start write event tracing.
+    
+    if( Events && !Trigger ) { TPos = super.getFilePointer(); TPosV = getVirtualPointer(); Read = false; Trigger = true; }
+  }
   
   //Main Event thread.
   

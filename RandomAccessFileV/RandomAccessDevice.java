@@ -5,7 +5,7 @@ import java.io.*;
 
 public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 {
-  //One has to wait for the disk to be measured. Error is in-case of error.
+  //One has to wait, for the disk to be measured. Error is in-case of error.
 
   private boolean init = false, error = false, run = false;
 
@@ -19,17 +19,17 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 
   //Used to keep track of position in sectors. Allowing unaligned read.
 
-  private long TempPos = 0, TempPosV = 0;
+  private long TempPos = 0;
 
   //Base of address in sector.
 
   private long base = 0;
 
-  //read bytes.
+  //number of bytes read.
 
   private int r = 0;
 
-  //If events are false before calling read, or write. Do not send events to listening components.
+  //Used to restore the original event state at end of method.
 
   private boolean e = false;
 
@@ -51,37 +51,34 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
   
   @Override public int read() throws IOException
   {
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
+    //Disable event during operation.
 
-    e = super.Events; super.Events = false;
+    super.syncR(); e = super.Events; super.Events = false;
 
-    TempPos = super.getFilePointer(); TempPosV = super.getVirtualPointer();
-    
-    base = ( TempPos / sector ) * sector;
+    //Read operation.
+
+    TempPos = super.getFilePointer(); base = ( TempPos / sector ) * sector;
 
     super.seek( base ); super.read( buf ); super.seek( TempPos + 1 );
       
     r = (int)buf[(int)( TempPos - base )];
-    
-    if( e )
-    {
-      super.Events = true; Read = true;
-      
-      super.fireIOEvent( new IOEvent( this, TempPos, TempPos + 1, TempPosV, TempPosV + 1 ) );
-    }
 
-    return( r );
+    //Restore event state.
+    
+    super.Events = e; return( r );
   }
   
   @Override public int read( byte[] b ) throws IOException
   {
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
+    //Disable event during operation.
 
-    e = super.Events; super.Events = false;
+    super.syncR(); e = super.Events; super.Events = false;
 
-    TempPos = super.getFilePointer(); TempPosV = super.getVirtualPointer();
+    //Read operation.
+
+    TempPos = super.getFilePointer(); base = ( TempPos / sector ) * sector;
     
-    base = ( TempPos / sector ) * sector; buf = new byte[(int)( ( ( ( TempPos - base ) + b.length ) / 512 ) + 1 ) * 512];
+    buf = new byte[(int)( ( ( ( TempPos - base ) + b.length ) / sector ) + 1 ) * sector];
 
     super.seek( base ); r = super.read( buf ); super.seek( TempPos + b.length );
 
@@ -89,25 +86,20 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 
     buf = new byte[sector];
 
-    if( e )
-    {
-      super.Events = true; Read = true;
-      
-      super.fireIOEvent( new IOEvent( this, TempPos, super.getFilePointer(), TempPosV, super.getVirtualPointer() ) );
-    }
+    //Restore event state.
 
-    return( r );
+    super.Events = e; return( r );
   }
   
   @Override public int read( byte[] b, int off, int len ) throws IOException
   {
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
+    //Disable event during operation.
 
-    e = super.Events; super.Events = false;
+    super.syncR(); e = super.Events; super.Events = false;
 
-    TempPos = super.getFilePointer(); TempPosV = super.getVirtualPointer();
-    
-    base = ( TempPos / sector ) * sector;
+    //Read operation.
+
+    TempPos = super.getFilePointer(); base = ( TempPos / sector ) * sector;
 
     buf = new byte[(int)( ( ( ( TempPos - base ) + b.length ) / sector ) + 1 ) * sector];
 
@@ -117,14 +109,9 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 
     buf = new byte[sector];
 
-    if( e )
-    {
-      super.Events = true; Read = true;
-      
-      super.fireIOEvent( new IOEvent( this, TempPos, super.getFilePointer(), TempPosV, super.getVirtualPointer() ) );
-    }
-    
-    return( r );
+    //Restore event state.
+
+    super.Events = e; return( r );
   }
 
   //The size of the disk.
@@ -137,7 +124,7 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
   {
     while( !init || error ) { try{ Thread.sleep( 70 ); } catch(InterruptedException e) { } }
     
-    if( error ){ throw( new IOException("Error.") ); }
+    if( error ){ throw( new IOException("Disk Error.") ); }
   }
 
   //Disk information. Note blank, or corrupted disks do not have disk information, so it is important to run this for all disks and media.
