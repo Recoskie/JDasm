@@ -3,12 +3,8 @@ import java.io.*;
 
 //Sector read version.
 
-public class RandomAccessDevice extends RandomAccessFileV implements Runnable
+public class RandomAccessDevice extends RandomAccessFileV
 {
-  //One has to wait, for the disk to be measured. Error is in case of disk reading error.
-
-  private boolean init = false, error = false, run = false;
-
   //Sector buffer. Sector size must be known to read disk.
 
   private static byte[] sector;
@@ -37,18 +33,35 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 
   private boolean e = false;
 
-  //The size of a raw disk volume. Does not rally need to be calculated in order to read a disk.
+  //The size of a raw disk volume. Does not really need to be calculated in order to read a disk.
 
   private long size = 0;
 
   public RandomAccessDevice( File file, String mode ) throws FileNotFoundException
   {
-    super( file, mode ); try { new Thread(this).start(); } catch( Exception e ) { }
+    super( file, mode );
+    
+    //Sector size.
+
+    try { getSectorSize(); } catch( IOException e ) { throw( new FileNotFoundException("") ); }
   }
   
   public RandomAccessDevice( String name, String mode ) throws FileNotFoundException
   {
-    super( name, mode ); try { new Thread(this).start(); } catch( Exception e ) { }
+    super( name, mode );
+
+    //Sector size.
+
+    try { getSectorSize(); } catch( IOException e ) { throw( new FileNotFoundException("") ); }
+  }
+
+  //Get sector size.
+
+  private void getSectorSize() throws IOException
+  {
+    boolean end = false; sectN = 1; while( !end && sectN <= 0x1000 ) { sector = new byte[ sectN ]; try { super.read( sector ); end = true; } catch( IOException e ) { sectN <<= 1; } }
+
+    if( !end ) { throw( new IOException("Disk Error!") ); } else { super.seek(0); }
   }
 
   //Read data at any position in sectors as a regular Random access file.
@@ -172,37 +185,24 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 
   //The size of the disk.
 
-  @Override public long length() { return( size ); }
-
-  //Wait till device is ready.
-
-  @Override public void ready() throws IOException
+  @Override public long length()
   {
-    while( !init || error ) { try{ Thread.sleep( 70 ); } catch(InterruptedException e) { } }
-    
-    if( error ){ throw( new IOException("Disk Error.") ); }
-  }
-
-  //Disk information. Note blank, or corrupted disks do not have disk information, so it is important to run this for all disks and media.
-
-  public void run()
-  {
-    if( !run )
+    if( size == 0 )
     {
-      run = true; super.Events = false;
-
-      //Sector size.
-
-      boolean end = false; sectN = 1; while( !end && sectN <= 0x1000 ) { sector = new byte[ sectN ]; try { super.read( sector ); end = true; } catch( IOException e ) { sectN <<= 1; } }
-
-      //Calculate the length of a raw disk volume.
-
-      if( end )
+      try
       {
-        try { super.seek(0); } catch( IOException e ) {  }
+        size = super.length();
+      }
+      catch( IOException er )
+      {
+        super.Events = false; try { TempPos = super.getFilePointer(); } catch( IOException e ) { }
 
-        long bit = 0x4000000000000000L;
+        //Calculate the length of a raw disk volume.
+
+        long bit = sector.length; boolean end = false;
     
+        end = false; while( bit <= 0x4000000000000000L && !end ) { try { super.seek( bit <<= 1 ); super.read( sector ); } catch( IOException e ) { bit >>= 1; size |= bit; end = true; } }
+
         while( bit >= sector.length )
         {
           try { super.seek( size | bit ); super.read( sector ); size |= bit; } catch( IOException e ) { }
@@ -211,14 +211,11 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
         }
 
         size += sector.length - 1; //End of last sector.
-
-        try { super.seek(0); } catch( IOException e ) { }
-      
-        init = true;
+    
+        try { super.seek( TempPos ); } catch( IOException e ) { } super.Events = true;
       }
-      else { error = true; }
-
-      super.Events = true;
     }
+
+    return( size );
   }
 }
