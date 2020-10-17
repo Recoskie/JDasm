@@ -139,4 +139,17 @@ public class WindowCompoents
     
     f.validate();
   }
+
+  //Loading.
+
+  public void loading()
+  {
+    f.getContentPane().removeAll();
+
+    f.setLayout( new GridLayout(1,1) );
+
+    f.add( new JLabel( "Loading...", SwingConstants.CENTER ) );
+    
+    f.validate();
+  }
 }

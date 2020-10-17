@@ -59,9 +59,11 @@ public class RandomAccessDevice extends RandomAccessFileV
 
   private void getSectorSize() throws IOException
   {
+    super.Events = false;
+
     boolean end = false; sectN = 1; while( !end && sectN <= 0x1000 ) { sector = new byte[ sectN ]; try { super.read( sector ); end = true; } catch( IOException e ) { sectN <<= 1; } }
 
-    if( !end ) { throw( new IOException("Disk Error!") ); } else { super.seek(0); }
+    if( !end ) { throw( new IOException("Disk Error!") ); } else { super.seek(0); super.Events = true; }
   }
 
   //Read data at any position in sectors as a regular Random access file.

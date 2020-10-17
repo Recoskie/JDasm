@@ -522,28 +522,35 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       p = p.substring( p.lastIndexOf(35) + 1, p.lastIndexOf(46) );
 
-      try
-      {
-        file = new RandomAccessDevice( p, "r" );
 
-        if(!HInit)
-        {
-          Virtual = new VHex( file, true ); Offset = new VHex( file, false ); ds = new dataInspector( file );
-          Offset.enableText( textV ); Virtual.enableText( textV );
-          HInit = true;
-        }
-        else
-        {
-          Offset.setTarget( file ); Virtual.setTarget( file ); ds.setTarget( file );
-        }
+      try{ file = new RandomAccessDevice( p, "r" ); } catch( FileNotFoundException er ) { }
         
-        editMode();
-      }
-      catch(Exception er)
+      loading(); new Thread(new Runnable()
       {
-        er.printStackTrace();
-        JOptionPane.showMessageDialog(null,"Can't Open disk!"); Reset();
-      }
+        @Override public void run()
+        {
+          try
+          {
+            if(!HInit)
+            {
+              Virtual = new VHex( file, true ); Offset = new VHex( file, false ); ds = new dataInspector( file );
+              Offset.enableText( textV ); Virtual.enableText( textV );
+              HInit = true;
+            }
+            else
+            {
+              Offset.setTarget( file ); Virtual.setTarget( file ); ds.setTarget( file );
+            }
+        
+            editMode();
+          }
+          catch(Exception er)
+          {
+            er.printStackTrace();
+            JOptionPane.showMessageDialog(null,"Can't Open disk!"); Reset();
+          }
+        }
+      }).start();
     }
     else if( !Open && r != -1 )
     {
