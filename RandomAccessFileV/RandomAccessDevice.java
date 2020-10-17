@@ -5,27 +5,31 @@ import java.io.*;
 
 public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 {
-  //One has to wait, for the disk to be measured. Error is in-case of error.
+  //One has to wait, for the disk to be measured. Error is in case of disk reading error.
 
   private boolean init = false, error = false, run = false;
 
-  //Sector buffer.
+  //Sector buffer. Sector size must be known to read disk.
 
-  private static byte[] buf;
-
-  //Sector size.
-
-  private static int sector = 1;
+  private static byte[] sector;
 
   //Used to keep track of position in sectors. Allowing unaligned read.
 
   private long TempPos = 0;
 
-  //Base of address in sector.
+  //Base address, of sector.
 
   private long base = 0;
 
-  //number of bytes read.
+  //Data start position within sector.
+
+  private int pos = 0;
+
+  //Start, and end sector.
+
+  private int sectN = 0, sectE = 0;
+
+  //Number of readable bytes. Can be smaller, Because reached end of disk, or bad sector.
 
   private int r = 0;
 
@@ -33,7 +37,7 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 
   private boolean e = false;
 
-  //The size of a raw disk volume.
+  //The size of a raw disk volume. Does not rally need to be calculated in order to read a disk.
 
   private long size = 0;
 
@@ -57,34 +61,60 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 
     //Read operation.
 
-    TempPos = super.getFilePointer(); base = ( TempPos / sector ) * sector;
+    TempPos = super.getFilePointer(); base = ( TempPos / sector.length ) * sector.length;
 
-    super.seek( base ); super.read( buf ); super.seek( TempPos + 1 );
+    super.seek( base ); super.read( sector ); super.seek( TempPos + 1 );
       
-    r = (int)buf[(int)( TempPos - base )];
+    r = (int)sector[(int)( TempPos - base )];
 
     //Restore event state.
     
     super.Events = e; return( r );
   }
-  
+
   @Override public int read( byte[] b ) throws IOException
   {
     //Disable event during operation.
 
     super.syncR(); e = super.Events; super.Events = false;
 
-    //Read operation.
+    //Sector start address.
 
-    TempPos = super.getFilePointer(); base = ( TempPos / sector ) * sector;
+    TempPos = super.getFilePointer(); base = ( TempPos / sector.length ) * sector.length;
+
+    //Start of position within sector.
+
+    pos = (int)( TempPos - base );
     
-    buf = new byte[(int)( ( ( ( TempPos - base ) + b.length ) / sector ) + 1 ) * sector];
+    //Number of sectors needed, for the size of the data being read.
+    
+    sectE = (int)( ( ( pos + b.length ) / sector.length ) + 1 );
 
-    super.seek( base ); r = super.read( buf ); super.seek( TempPos + b.length );
+    //Start sector and number of read bytes inti 0.
 
-    for(int s = (int)( TempPos - base ), e = (int)( s + b.length - 1 ), i = 0; s <= e; b[i++] = buf[s++] );
+    sectN = 0; r = 0;
 
-    buf = new byte[sector];
+    //Move to Sector start address.
+
+    super.seek( base );
+
+    //Read and test each sector.
+    
+    try
+    {
+      while( sectN < sectE )
+      {
+        super.read( sector );
+
+        while( pos < sector.length && r < b.length ){ b[ r++ ] = sector[ pos++ ]; }
+        
+        pos = 0; sectN += 1;
+      }
+    } catch( IOException er ) {}
+
+    //Add original file potion by read operation size.
+    
+    super.seek( TempPos + b.length );
 
     //Restore event state.
 
@@ -97,21 +127,47 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 
     super.syncR(); e = super.Events; super.Events = false;
 
-    //Read operation.
+    //Sector start address.
 
-    TempPos = super.getFilePointer(); base = ( TempPos / sector ) * sector;
+    TempPos = super.getFilePointer(); base = ( TempPos / sector.length ) * sector.length;
 
-    buf = new byte[(int)( ( ( ( TempPos - base ) + b.length ) / sector ) + 1 ) * sector];
+    //Start of position within sector.
 
-    super.seek( base ); r = super.read( buf ); super.seek( TempPos + b.length );
+    pos = (int)( TempPos - base );
+    
+    //Number of sectors needed, for the size of the data being read.
+    
+    sectE = (int)( ( ( pos + b.length ) / sector.length ) + 1 );
 
-    for(int s = (int)( TempPos - base ) + off, e = (int)( s ) + ( len - 1 ), i = 0; s <= e; b[i++] = buf[s++] );
+    //Start sector and number of read bytes inti 0.
 
-    buf = new byte[sector];
+    sectN = 0; r = off;
+
+    //Move to Sector start address.
+
+    super.seek( base );
+
+    //Read and test each sector.
+    
+    try
+    {
+      while( sectN < sectE )
+      {
+        super.read( sector );
+
+        while( pos < sector.length && r < len ){ b[ r++ ] = sector[ pos++ ]; }
+        
+        pos = 0; sectN += 1;
+      }
+    } catch( IOException er ) {}
+
+    //Add original file potion by read operation size.
+    
+    super.seek( TempPos + b.length );
 
     //Restore event state.
 
-    super.Events = e; return( r );
+    super.Events = e; return( r - off );
   }
 
   //The size of the disk.
@@ -137,7 +193,7 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 
       //Sector size.
 
-      boolean end = false; while( !end && sector <= 0x1000 ) { buf = new byte[sector]; try { super.read( buf ); end = true; } catch( IOException e ) { sector <<= 1; } }
+      boolean end = false; sectN = 1; while( !end && sectN <= 0x1000 ) { sector = new byte[ sectN ]; try { super.read( sector ); end = true; } catch( IOException e ) { sectN <<= 1; } }
 
       //Calculate the length of a raw disk volume.
 
@@ -147,14 +203,14 @@ public class RandomAccessDevice extends RandomAccessFileV implements Runnable
 
         long bit = 0x4000000000000000L;
     
-        while( bit >= sector )
+        while( bit >= sector.length )
         {
-          try { super.seek( size | bit ); super.read( buf ); size |= bit; } catch( IOException e ) { }
+          try { super.seek( size | bit ); super.read( sector ); size |= bit; } catch( IOException e ) { }
 
           bit >>= 1;
         }
 
-        size += sector - 1; //End of last sector.
+        size += sector.length - 1; //End of last sector.
 
         try { super.seek(0); } catch( IOException e ) { }
       
