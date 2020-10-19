@@ -697,11 +697,48 @@
   
   <h1>Overview.</h1>
 
+  Programming languages all use the same primitive data types.
+
+  <br /><br />
+
+  <table border="1px">
+    <tr><td>JavaScript</td><td>JavaScript Assumes all numbers are float64 (double). During any bitwise operation changes to int 32, and back to float64.</td></tr>
+    <tr>
+      <td>Java</td>
+      <td>
+        Java assumes that all integers are signed, so the regular to string method splits the number into two from center, and adds the sing.
+
+        <br /><br />
+
+        In Java 8, and later. A new unsigned to string method was added to convert to a string that shows the integer as is. As a unsigned value.
+
+        <br /><br />
+
+        Adding, and subtracting singed, and unsigned numbers are the same as regular numbers. All that changes is how we display the value as characters.
+      </td>
+    </tr>
+    <tr><td>Languages C, and C++</td><td>Lets you pick how you want a integer to be treaded in code. All data types are also the same.</td></tr>
+  </table>
+
+  <br />
+
+  The primitive data types are the same. As the CPU is what processes them, not the programming language. Thus the arithmetic units in CPU processors are the same. As positional arithmetic never changes format. Even if you switch processor architecture.
+
+  <br /><br />
+
+  Also memory is still in bytes no matter what system you use. Thus data types are still in word size even if you switch processor architecture.
+
+  <br /><br />
+
+  <strong>Understanding the primitive data types at machine code level, and how the language treats them. Can make a big difference in understanding your code.</strong>
+
+  <br /><br />
+
   Generally speaking. The primitives are the same across systems. The same is true, for code recompiled from other systems in emulators.
 
   <br /><br />
 
-  Integer numbers, and floating point numbers are the same. String of text is the same.
+  Integer numbers, and floating point numbers are the same. As they can not be anything other than positional in 2. String of text is the same.
 
   <br /><br />
 
