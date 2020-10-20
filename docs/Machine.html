@@ -68,6 +68,13 @@
   MOV AH,97<br />
   MOV BX,3333<br />
   ADD AH, BYTE PTR[BX]
+
+  <br /><br />
+
+  Machine code:<br />
+  B4 97<br />
+  BB 33 33<br />
+  02 27
   
   <br /><br />
 
@@ -82,6 +89,13 @@
   MOV AH,97<br />
   MOV BX,3333<br />
   ADD BYTE PTR[BX], AH
+
+  <br /><br />
+
+  Machine code:<br />
+  B4 97<br />
+  BB 33 33<br />
+  00 27
 
   <br /><br />
 
@@ -102,6 +116,12 @@
 
   <br /><br />
 
+  Machine code:<br />
+  B4 97<br />
+  04 33
+
+  <br /><br />
+
   And two byte (16 bit add) add operation code 05.
 
   <br /><br />
@@ -111,11 +131,21 @@
 
   <br /><br />
 
+  Machine code:<br />
+  B8 97 63<br />
+  05 33 33
+
+  <br /><br />
+
   This makes a total of 6 add operations. Which is why there are multiple add operation codes.
 
   <br /><br />
 
-  The two MOV operation codes we have been using are B0 hex which puts the next byte into register AL, and operation code B8 hex which moves the next two bytes into register AX.
+  The two MOV operation codes we have been using are B0 to B7 hex which puts the next byte into a selected register, and operation codes B8 to BF hex which moves the next two bytes into selected register.
+
+  <br /><br />
+
+  There are 8 general arithmetic registers in total, so there is 8 MOV operation, for 8 bit, and 16 bit move.
 
   <br /><br />
 
