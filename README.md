@@ -18,6 +18,7 @@ Help, and documentation.
 ------------------------------------------------------------
 
 Using JFH-Disassembly Basics: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">Link</a>
+Machine code Architecture: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Machine.html">Link</a>
 
 ------------------------------------------------------------
 Running the application.
