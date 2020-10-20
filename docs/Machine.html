@@ -415,6 +415,81 @@
 
   <br /><br />
 
+  <strong>As flexible as the ModR/M byte seamed. More was added to it. The register code 100 is not usable in the address.</strong>
+
+  <br /><br />
+  
+  So 00, 101, 100 = 2C.
+
+  <br /><br />
+
+  48 03 2C 00 = ADD RBP,QWORD PTR [ RAX + RAX ]
+
+  <br /><br />
+
+  When register code 100 is used the next value becomes two register selections added together for the address.
+
+  <br /><br />
+  
+  So 00, 101, 100 = 2C. ModR/M byte.
+  Then 00, 001, 100 = 0C. SIB byte.
+
+  <br /><br />
+
+  48 03 2C 0C = ADD RBP,QWORD PTR [RSP+RCX]
+
+  <br /><br />
+
+  The second byte is called the SIB address. We can choose any two registers we wish to add together in the address. This is called the index, plus base address. The first 2 digits are 00 = *1, 01 = *2, 10 = *4, 11 = *8.
+
+  <br /><br />
+  
+  So 00, 101, 100 = 2C. ModR/M byte.
+  Then 10, 001, 100 = 8C. SIB byte.
+
+  <br /><br />
+
+  48 03 2C 8C = ADD RBP,QWORD PTR [RSP+RCX*4]
+
+  <br /><br />
+
+  Lastly the displacement mode in the ModR/M is added after the SIB byte.
+
+  <br /><br />
+
+  So 00, 101, 100 = 2C. ModR/M byte.
+  Then 10, 001, 100 = 8C. SIB byte.
+
+  <br /><br />
+
+  48 03 AC 8C 11 22 33 44 = ADD RBP,QWORD PTR [ RSP + RCX * 4 + 44332211 ]
+
+  <br /><br />
+
+  This made the address system very flexible.
+
+  <br /><br />
+
+  This makes the total instruction encoding for all operations as follows.
+
+  <br /><br />
+
+  <img src="figs/x86-fig1.gif" />
+
+  <br /><br />
+
+  This is the instruction format that is used with all binary instructions. Even to 8086. From <a href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-2a-manual.pdf#page=35" target="_blank">64 ia 32 architectures software developer</a>.
+
+  <br /><br />
+
+  You can also use the Intel x86 architecture reference for AMD x86 cores. As x86 is the instruction set architecture. See <a href="https://www.felixcloutier.com/x86/" target="_blank">AMD Instruction list.</a> Derived by Intel armatures manual.
+
+  <br /><br />
+
+  There is not much left to teach you here about x86 encoded instructions. You can however test out your coding skills with <a href="https://recoskie.github.io/X86-64-Disassembler-JS/Basic%20Live%20View.html" target="_blank">Web x86 code disassembler</a>.
+
+  <br /><br />
+
 
 </body>
 </html>
