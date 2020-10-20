@@ -343,7 +343,7 @@
   
   <br /><br />
   
-  However in 64 bit mode it is 32 in length by default. The register that is used as the memory location becomes 64 in length.
+  However in 64 bit mode. It is 32 in length by default. The register that is used as the memory location becomes 64 in length.
 
   <br /><br />
 
@@ -354,6 +354,66 @@
   Using codes 48, or 66 before a 8 bit operation does nothing to the 8 in size operation.
 
   <h1>Operand encoding.</h1>
+
+  48 03 07 = ADD RAX, QWORD PTR [RDI]
+
+  <br /><br />
+
+  The value 07 after the operation code is 00000111 binary. The binary splits apart as follows 00, 000, 111. The first two digits is the mode. The 3 digits after mode is the register code. The last 3 digits is the register code for the address.
+
+  <br /><br />
+
+  This is called a ModR/M byte. This is used with every register, and memory operation in x86. When the first two mode bits are set 11 then the address is switched to a register.
+  
+  <br /><br />
+  
+  So 11, 101, 011 = EB.
+
+  <br /><br />
+
+  48 03 EB = ADD RBP,RBX
+
+  <br /><br />
+
+  Thus register code 101 is RBP, and code 011 is register RBX. Don't forget the registers changes name based on the size of the operation.
+
+  <br /><br />
+
+  The ModR/M encoding is what makes x86 operations flexible. Switch mode to 00 with 00, 101, 011 = 2B.
+
+  <br /><br />
+
+  48 03 2B = ADD RBP,QWORD PTR [RBX]
+
+  <br /><br />
+
+  The selected register moves into the memory address as a location. The other two mode setting 01, and 10 add a byte after the ModR/M to the address.
+
+  <br /><br />
+  
+  So 01, 101, 011 = 6B.
+
+  <br /><br />
+
+  48 03 6B 72 = ADD RBP,QWORD PTR [RBX+72]
+
+  <br /><br />
+
+  The next byte is added to the address. This is called a 8 bit displacement.
+
+  <br /><br />
+  
+  And finally 10, 101, 011 = AB.
+
+  <br /><br />
+
+  48 03 AB 11 22 33 44 = ADD RBP,QWORD PTR [RBX+44332211]
+
+  <br /><br />
+
+  The next 4 bytes is added to the address. This is called a 32 bit displacement also called a dword displacement.
+
+  <br /><br />
 
 
 </body>
