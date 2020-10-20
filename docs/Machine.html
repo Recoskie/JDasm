@@ -1,0 +1,242 @@
+<html>
+<head>
+  <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
+  <title>Machine Code architecture Basics.</title>
+</head>
+<body>
+  <h1>JFH-Disassembly.</h1>
+  Welcome to JFH disassembly. A all in one multi platform binary tool.
+
+  <br />
+
+  <h1>Machine code Introduction.</h1>
+
+  In the very first document we discussed the basic primitive data types that processors can work with, and do operations with.
+
+  <br /><br />
+
+  In this document we will discuss basic machine code, and what we actually mean by system architecture. Thus what instruction sets are.
+
+  <br /><br />
+
+  When you compare a x86 core from the 80's like the 16 bit Intel 8086 to a modern AMD ryzen. The first though that runs though peoples heads is that they run completely different machine code.
+
+  <br /><br />
+
+  Well modern x86 can still run 16 bit 8086 machine code in 16 bit mode. This is called the processor instruction set architecture.
+
+  <br /><br />
+
+  Even though it's a AMD core. It still runs the same x86 machine code as a Intel x86. As x86 is the <strong>instruction set architecture</strong>.
+
+  <br /><br />
+
+  A processor that is architecture x86 means it runs x86 machine code natively without translation. This means binary software wrote in the 80's still runs on the most modern x86 core made by any company.
+
+  <br /><br />
+
+  A processor has a foundational instruction set that can do arithmetic with the basic primitive data types, and at least do comparison.
+
+  <br /><br />
+
+  The binary encoded instructions the processor understand as a particular command do not change in later x86 cores.
+  
+  <br /><br />
+  
+  However the internal design of the circuits may change, but the binary encoding, for each instruction does not change.
+
+  <br /><br />
+
+  <h1>Instruction encoding.</h1>
+
+  A single 0 to 255 byte value is used, for which operation you wish the CPU to do in a x86 core. This is called the opcode.
+
+  <br /><br />
+
+  This <a href="http://www.mlsite.net/8086/">link</a> is a mapping of the original 8086 instructions. Without any added instructions that became available in later cores.
+
+  <br /><br />
+
+  The 8086 map is the original foundation of x86 machine code. Thus modern x86 cores even AMD ones still run the same basic operations using exactly the same encoding.
+
+  <br /><br />
+
+  A processor has variables called registrars which operations are completed with. In this example we use the ADD operation code 02.
+
+  <br /><br />
+
+  MOV AH,97<br />
+  MOV BX,3333<br />
+  ADD AH, BYTE PTR[BX]
+  
+  <br /><br />
+
+  MOV is short for move. MOV set the value of the AH register 97, and then BX is set 3333. The ADD operation uses the BX register as a location to a byte that is added with AH.
+
+  <br /><br />
+
+  There are two 8 bit add operations. The other add operation adds, and stores the result at a memory location. This is ADD operation code 00.
+
+  <br /><br />
+  
+  MOV AH,97<br />
+  MOV BX,3333<br />
+  ADD BYTE PTR[BX], AH
+
+  <br /><br />
+
+  There is also two 16 bit ADD operations that do the same operation. Codes 01, and 03.
+
+  <br /><br />
+
+  Lastly there are two ADD operations that add a register by the next two byes, or one byte after the add operation.
+
+  <br /><br />
+
+  Add operation opcode 04.
+
+  <br /><br />
+
+  MOV AL, 97<br />
+  ADD AL, 33
+
+  <br /><br />
+
+  And two byte (16 bit add) add operation code 05.
+
+  <br /><br />
+
+  MOV AX, 9763<br />
+  ADD AX, 3333
+
+  <br /><br />
+
+  This makes a total of 6 add operations. Which is why there are multiple add operation codes.
+
+  <br /><br />
+
+  The two MOV operation codes we have been using are B0 hex which puts the next byte into register AL, and operation code B8 hex which moves the next two bytes into register AX.
+
+  <br /><br />
+
+  So you can key in this entire binary code your self on a AMD, or Intel x86 core if you liked.
+  
+  <br /><br />
+  
+  <strong>Or you can use an assembler program. Which a assembler program uses a x86 instruction map to generate the operation codes for you.</strong>
+
+  <h2>32 bit x86.</h2>
+
+  With the introduction of 32 bit. The 16 bit operations are made 32 bit's long. Thus two byte add became also 4 byte add. The 8 bit operations remain 8 bit's in length.
+
+  <br /><br />
+
+  Operation code 66 hex is used to make 32 bit operations switch to the original 16 bit version. After the instruction completes it switches back to 32 bits.
+
+  <br /><br />
+
+  So operation code 66 hex become known as the "operand override prefix". As it was used before every 32 bit operation to make the operation the original 16 bit operation.
+
+  <br /><br />
+
+  This way both 16 bit operations, and 32 bit operations can be mixed in 32 bit mode.
+
+  <br /><br />  
+  
+  <strong>A bit mode setting was added that lets you set the CPU 16 bit mode.</strong>
+
+  <br /><br />
+  
+  In 16 bit mode all 32 bit operations are their original 16 bit size without using the operand override prefix 66 hex before every operation.
+
+  <br /><br />
+
+  This allowed 16 bit 8086 to be directly run as it would on a 16 bit core. Plus with the prefix code 66 in 32 bit allowed both 16 bit, and 32 bit to be mixed.
+
+  <h2>64 bit x86.</h2>
+
+  With the introduction of 64 bit by AMD. All instructions stayed 32 bit. So using 66 before an 32 bit operation allowed the operation to go 16 bit.
+  
+  <br /><br />  
+  
+  Thus a new code was added that could only be used in 64 bit mode. The REX prefix uses operation codes 40 to 4F.
+
+  <br /><br />
+
+  The REX Prefix allowed us to set 64 bits before the next operation, and 3 additional settings.
+  
+  <br /><br />
+  
+  <strong>When we set bit mode 32 bit then instructions 40 to 4F are usable again as the REX prefix was disabled.</strong>
+
+  <br /><br />
+
+  Meaning 32 bit machine code has full backwards compatibility without any software emulation, or translation.
+
+  <br /><br />
+
+  Thus Intel uses AMD's 64 bit REX prefix as it is a good system. Plus does not effect compatibility to original 16 bit 8086 instruction to 32 bit to 64.
+
+  <br /><br />
+
+  So even today the most modern x86 core still runs the same operation codes. With prefixes that change the size of the next operation code.
+
+  <h2>Two byte instruction codes.</h2>
+
+  Both Intel, and AMD run out of room to put operation codes in 0 to 255. As each instruction code must have a unique number in order to ensure that older software runs without translation.
+  
+  <br /><br />  
+  
+  So the instruction code 0F hex was removed from later processor cores that originally did the operation "POP CS".
+
+  <br /><br />
+
+  The instruction "POP CS" was never really used. So getting rid of the instruction affect no software programs that used that operation as it was never used.
+
+  <br /><br />
+
+  Instead code 0F read the next byte as a new operation code. Giving a new set of operations 0 to 255.
+
+  <br /><br />
+
+  This was also done with 0F 38, and 0F 3A. Which allowed for two more sets of 0 to 255 instruction codes. Which are called three byte opcodes.
+
+  <h2>Adding operation codes to x86.</h2>
+
+  Intel, and AMD used prefix operations to add additional settings that expanded x86 without breaking compatibility with older machine code.
+
+  <br /><br />
+
+  And to not break compatibility with operating systems that are compiled in x86 machine code. Such as windows, MOC OS X x86, and even Linux x86. 
+
+  <br /><br />
+
+  Which is how machine code is supposed to work. As a x86 is a instruction set architecture. Every operation code must use a unique operation code for each operation.
+
+  <br /><br />
+
+  Say you are working at AMD, and wish to implement a new operation code under 0F 77. However you find out Intel already uses that two byte operation code, for the <strong>EMMS</strong> operation.
+
+  <br /><br />
+
+  You can include the instructions <strong>EMMS</strong> from Intel into your AMD x86 core. However you are not allowed to put your own AMD operation code here.
+
+  <br /><br />
+
+  You have to find ways of adding in your operations that do not use other operation codes taken by other companies. So companies keep x86 instruction architecture maps in order to make is easy to see opcodes not yet used.
+
+  <br /><br />
+
+  This ensures every operation code has a unique operation code number, and can not be anything other than it's operation.
+
+  <br /><br />
+
+  There has been actual legal battles in which AMD, and Intel fight, for operation code space.
+
+  <br /><br />
+
+  Thus x86 is old, and companies have to be really careful with how they add new operation codes to x86 instruction map. Without causing problems with x86 compiled operating systems.
+  
+  <h1>ModR/M byte encoding.</h1>
+</body>
+</html>
