@@ -17,8 +17,8 @@ This project is meant to support different binary file formats, and application 
 Help, and documentation.
 ------------------------------------------------------------
 
-Using JFH-Disassembly Basics: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">Link</a>
-Machine code Architecture: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Machine.html">Link</a>
+Using JFH-Disassembly Basics: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">Link</a><br />
+Machine code: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Machine.html">Link</a>
 
 ------------------------------------------------------------
 Running the application.
