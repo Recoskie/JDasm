@@ -197,7 +197,7 @@
   
   <br /><br />
   
-  <strong>When we set bit mode 32 bit then instructions 40 to 4F are usable again as the REX prefix was disabled.</strong>
+  <strong>When we set bit mode 32 bit the instructions 40 to 4F, are usable again as the REX prefix was disabled.</strong>
 
   <br /><br />
 
@@ -209,7 +209,7 @@
 
   <br /><br />
 
-  So even today the most modern x86 core still runs the same operation codes. With prefixes that change the size of the next operation code.
+  So even today the most modern x86 cores still runs the same operation codes. With prefixes that change the size of the next operation code.
 
   <h2>Two byte instruction codes.</h2>
 
@@ -225,11 +225,11 @@
 
   <br /><br />
 
-  Instead code 0F read the next byte as a new operation code. Giving a new set of operations 0 to 255.
+  Instead code 0F read the next byte as a new operation code. Giving a new set of operations 0 to 255. And a new Two byte instruction code map.
 
   <br /><br />
 
-  This was also done with 0F 38, and 0F 3A. Which allowed for two more sets of 0 to 255 instruction codes. Which are called three byte opcodes.
+  This was also done with two byte instructions 0F 38, and 0F 3A. Which allowed for two more sets of 0 to 255 instruction codes. Which are called three byte opcodes maps.
 
   <h2>Adding operation codes to x86.</h2>
 
@@ -249,7 +249,7 @@
 
   <br /><br />
 
-  You can include the instructions <strong>EMMS</strong> from Intel into your AMD x86 core. However you are not allowed to put your own AMD operation code here.
+  You can include the instruction <strong>EMMS</strong> from Intel into your AMD x86 core. However you are not allowed to put your own AMD operation code here.
 
   <br /><br />
 
@@ -267,7 +267,7 @@
 
   Also x86 is old, and companies have to be really careful with how they add new operation codes to x86 instruction map. Without causing problems with x86 compiled operating systems, and software.
   
-  <h1>Operand encoding.</h1>
+  <h1>Operation size naming.</h1>
 
   Because 16 bit, 32 bit, and 64 bit code can be mixed in x86 binary code using prefixes. With 8 bit operations having their own operation code.
 
@@ -309,7 +309,7 @@
  
   <br /><br />
   
-  There is only one small catch. All 8 bit operations use the first 4 registers in low, and high byte order.
+  There is only one small catch. All 8 bit operations use the first 4 registers in low, and switch to high byte order.
 
   <br /><br />
 
