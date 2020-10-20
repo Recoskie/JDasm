@@ -503,5 +503,35 @@
   <br /><br />
 
   In these instructions the first register code was never used. So instead of wasting instruction space. The unused register was used to select from 8 instructions that used one input.
+
+  <br /><br />
+
+  Additionally the register names can change depending on operation. For example vector operations use MMX registers flowed by the selected register number in your ModR/M byte. The Instruction encoding however never changes format.
+
+  <br /><br />
+
+  The only thing changing is the register you are picking from and the word size of memory.
+
+  <h1>ARM architecture.</h1>
+
+  Now lets switch to a different processor architecture. Companies that create ARM cores are also stuck to using the same encoding for all institutions.
+
+  <br /><br />
+
+  Also have to keep instruction maps as well. As the company has to find unused instructions not used by other companies to add new instructions.
+  
+  <br /><br />
+  
+  Even though it's a a snapdragon ARM core. It still runs the same ARM machine code as a Apple bionic ARM core. As ARM is the <strong>instruction set architecture</strong>. So in reality the official documentation by ARM is best.
+
+  <br /><br />
+
+  The internal circuits can change, however the instruction encoding does not. Thus ARM as a company has all the listings for all ARm instruction encodings which is freely available.
+
+  <br /><br />
+
+  Unlike x86 where there is a binary operation for everything. ARM focuses on doing things in software with a smaller instruction set. Which is why we call a <stong>x86 core a CISC core, and a ARM an RISC core</stong>.
+
+
 </body>
 </html>
