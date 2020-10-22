@@ -229,7 +229,7 @@
 
   <br /><br />
 
-  This was also done with two byte instructions 0F 38, and 0F 3A. Which allowed for two more sets of 0 to 255 instruction codes. Which are called three byte opcodes maps.
+  This was also done with two byte instructions 0F 38, and 0F 3A. Which allowed for two more sets of 0 to 255 instruction codes. Which are called three byte opcode maps.
 
   <h2>Adding operation codes to x86.</h2>
 
@@ -241,7 +241,7 @@
 
   <br /><br />
 
-  Which is how machine code is supposed to work. As a x86 is a instruction set architecture. Every operation code must use a unique operation code for each operation.
+  Which is how machine code is supposed to work. <strong>As a x86 is a instruction set architecture.</strong> Every operation code must use a unique operation code, for each operation.
 
   <br /><br />
 
@@ -313,7 +313,7 @@
 
   <br /><br />
 
-  The "A" register is called AL when it is the firs 8 bit's of the "A" register.<br />
+  The "A" register is called AL when it is the first 8 bit's of the "A" register.<br />
   The "A" register is called AH when it is the next 8 bits of the "A" register.
 
   <br /><br />
@@ -322,7 +322,7 @@
 
   <br /><br />
 
-  When reading memory we use BYTE (8 bit), WORD (16 bit), DWORD (32 bit), QWORD (64 bit). for the size of the number we wish to read and add with the size of our register.
+  When reading memory we use BYTE (8 bit), WORD (16 bit), DWORD (32 bit), QWORD (64 bit). for the size of the number we wish to read, and ADD with the size of our register.
 
   <br /><br />
 
@@ -343,7 +343,8 @@
   
   <br /><br />
   
-  However in 64 bit mode. It is 32 in length by default. The register that is used as the memory location becomes 64 in length.
+  However in 64 bit mode. It is 32 in length by default. The register that is used as the memory location becomes 64 in length.<br />
+  In 32 bit code, or 32 bit mode. The register RDI in the address would be EDI as 32 in length.
 
   <br /><br />
 
@@ -482,7 +483,7 @@
 
   <br /><br />
 
-  You can also use the Intel x86 architecture reference for AMD x86 cores. As x86 is the instruction set architecture. See <a href="https://www.felixcloutier.com/x86/" target="_blank">AMD Instruction list.</a> Derived by Intel architecture manual.
+  You can also use the Intel x86 architecture reference, for AMD x86 cores. As x86 is the instruction set architecture. See <a href="https://www.felixcloutier.com/x86/" target="_blank">AMD Instruction list.</a> Derived by Intel architecture manual.
   
   <br /><br />
   
@@ -494,7 +495,7 @@
 
   <br /><br />
 
-  The three other settings I did not go in depth about in the REX prefix are called register extension bits. It added a extra binary digit to your selected register codes in the ModR/M, and SIB. This upped the number of usable registers from 8 to 16.
+  The three other settings I did not go in depth about in the REX prefix. They are called register extension bits. It added a extra binary digit to your selected register codes in the ModR/M, and SIB. This upped the number of usable registers from 8 to 16.
 
   <br /><br />
 
@@ -502,7 +503,7 @@
 
   <br /><br />
 
-  In these instructions the first register code was never used. So instead of wasting instruction space. The unused register was used to select from 8 instructions that used one input.
+  In these instructions the first register code was never used in ModR/M. So instead of wasting instruction space. The unused register was used to select from 8 instructions that used one input.
 
   <br /><br />
 
@@ -510,7 +511,11 @@
 
   <br /><br />
 
-  The only thing changing is the register you are picking from and the word size of memory.
+  Even the FPU uses the same instruction format. The only thing changing is the register you are picking from and the word size of memory.
+
+  <br /><br />
+
+  My advice to you is to actually test the encodings your self and to learn from the Intel document.
 
   <br /><br />
 
@@ -526,7 +531,7 @@
   
   <br /><br />
   
-  Even though it's a a snapdragon ARM core. It still runs the same ARM machine code as a Apple bionic ARM core. As ARM is the <strong>instruction set architecture</strong>. So in reality the official documentation by ARM is best.
+  Even though it's a snapdragon ARM core. It still runs the same ARM machine code as a Apple bionic ARM core. As ARM is the <strong>instruction set architecture</strong>. So in reality the official documentation by ARM is best.
 
   <br /><br />
 
@@ -534,15 +539,15 @@
 
   <br /><br />
 
-  The internal circuits can change, however the instruction encodings do not. Thus ARM as a company has all the listings, for all ARM instruction encodings which is freely available.
+  The internal circuits can change. However, the instruction encodings do not. ARM as a company has all the listings, for all ARM instruction encodings which is freely available.
 
   <br /><br />
 
-  However Apple did not like people building emulators. So they made it that the binary is checked before it loads, for if it jump a core to code manually generated. Which is called JIT compilation.
+  However Apple did not like people building emulators. So they made it that the binary is checked before it loads, for if it jump a core to manually generated codes. Which is called JIT compilation.
 
   <br /><br />
 
-  However, nothing is stoping anyone from looking at any part of the IOS system. Thus decoding any part to what it does. If you wish to spend the time to dissemble ARM core codes, from the ARM code map, or use a ARM dissembler.
+  However, nothing is stoping anyone from looking at any part of the IOS system. Thus decoding any part to what it does. If you wish to spend the time to dissemble ARM core codes, from the ARM code map, or use a ARM disassembler.
 
   <br /><br />
 
@@ -594,27 +599,27 @@
   
   <br /><br />
   
-  Thus the same is true, for operating system as you must pick a architecture language that the whole system will run in.
+  Thus the same is true, for operating systems. As you must pick a architecture language that the whole system will run in.
 
   <h1>Self modifying code.</h1>
 
-  It turns out we can write self nonflying code. Once you understand the basics of a processor architecture. You can then write byte sequences out in memory and run them directly.
+  It turns out we can write self nonflying code. Once you understand the basics of a processor architecture. You can then write byte sequences out in memory, and run them directly.
 
   <br /><br />
 
-  There are still developers that actually know how to write code that compares data and makes changes on it's own. It is not magic once you know what processor architecture is.
+  There are still developers that actually know how to write code that compares data, and makes changes on it's own. It is not magic once you know what processor architecture is.
 
   <br /><br />
 
-  Self modifying code is very powerful in creating realistic artificial intelligence systems that performs quickly. Without any slow compiler, or interpreter, or Assembler level tool between.
+  Self modifying code is very powerful in creating realistic artificial intelligence systems that perform quickly. Without any slow compiler, or interpreter, or Assembler level tool between.
 
   <h1>Malicious code.</h1>
 
-  One of the problems with processor design is that it has to be mapped and standardized for software to work, or run.
+  One of the problems with processor design is that it has to be mapped, and standardized, for software to work, or run.
 
   <br /><br />
   
-  It, however makes it easy to write binary code that infects all systems. Since machine code is architecture based, and not Vernor, or company specific.
+  It, however, makes it easy to write binary code that infects all systems. Since machine code is architecture based, and not Vernor, or company specific.
 
   <br /><br />
 
@@ -622,10 +627,14 @@
 
   <br /><br />
 
-  We came up with instruction set encryption. However it is not practical. It requires the encryption key set in the CPU core to change after so much time.
+  We came up with instruction set encryption. However it is not practical. It requires the encryption key set in the CPU core to change after, so much time.
 
   <br /><br />
 
-  It also has to decrypt, and re-encrypt the entire program when that happens. So if another code tries to write to a running binary it then would have to know the current encryption key set in the CPU core.
+  Each time the encryption key changes it has to decrypt, and re-encrypt the entire program. So if another code tries to write to a running binary, it then would have to know the current encryption key set in the CPU core.
+
+  <br /><br />
+
+  IT works good when security is a must. However it is slow, and is not practical.
 </body>
 </html>
