@@ -75,12 +75,23 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
       {
         try
         {
-          f = new File (Root + ( r == 0 && Zero ? "" : r ) + ""); check = f.exists();
-          new RandomAccessFile( f, "r");
+          f = new File (Root + ( r == 0 && Zero ? "" : r ) + ""); check = f.exists(); new RandomAccessFile( f, "r");
           root.add( new DefaultMutableTreeNode( type + r + "#" + Root + ( r == 0 && Zero ? "" : r ) + ".disk" ) );
           r += 1; disks += 1;
         }
-        catch( Exception er ) { if(check) { admin = true; } end = true; }
+        catch( Exception er )
+        {
+          if( check || er.getMessage().indexOf("Access is denied") > 0 )
+          {
+            admin = true;
+            root.add( new DefaultMutableTreeNode( type + r + "#" + Root + ( r == 0 && Zero ? "" : r ) + ".disk" ) );
+            r += 1; disks += 1;
+          }
+          else
+          {
+            end = true;
+          }
+        }
       }
     }
   }
@@ -366,7 +377,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       boolean err = false; getDisks d = new getDisks( root );
       
-      //Windows uses Physical drive. Does not need admin to read disks.
+      //Windows uses Physical drive. Needs admin permission.
 
       d.checkDisk( "\\\\.\\PhysicalDrive", "Disk", false );
 
@@ -375,43 +386,35 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         err = true; JOptionPane.showMessageDialog(null,"Unable to read disk drives. Try running as administrator.");
       }
 
-      //Linux.
+      //Linux. Needs admin permission.
       
       d.checkDisk("/dev/sda", "Disk", true );
       d.checkDisk("/dev/sdb", "Removable Disk", true );
 
       if( !err && d.admin )
       {
-        err = true; JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as 'sudo'.");
+        JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as 'sudo'.");
       }
 
-      //Mac OS X.
+      //Mac OS X. Needs admin permission.
 
       d.checkDisk("/dev/disk", "Disk", false );
       
       if( !err && d.admin )
       {
-        err = true;
         JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as root on Mac OS.\r\n" +
         "On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java.");
       }
       
-      if( err )
+      if( d.disks == 0 )
       {
-        REC = false; dirSerach(); REC = true;
+        JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); REC = false; dirSerach(); REC = true; 
       }
       else
       {
-        if( d.disks == 0 )
-        {
-          JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System.");
-        }
-        else
-        {
-          //Set the new tree.
+        //Set the new tree.
 
-          ((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
-        }
+        ((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
       }
     }
 
