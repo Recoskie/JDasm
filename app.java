@@ -63,8 +63,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     private int r = 0;
     private File f;
     private DefaultMutableTreeNode root;
-    
-    public boolean admin = false;
+
     public int disks = 0;
     
     public getDisks( DefaultMutableTreeNode r ){ root = r; }
@@ -83,7 +82,6 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         {
           if( check || er.getMessage().indexOf("Access is denied") > 0 )
           {
-            admin = true;
             root.add( new DefaultMutableTreeNode( type + r + "#" + Root + ( r == 0 && Zero ? "" : r ) + ".disk" ) );
             r += 1; disks += 1;
           }
@@ -96,9 +94,11 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     }
   }
 
+  public int sys = 0;
+
   //Create the application.
 
-  public app()
+  public app( String file )
   {
     f = new JFrame("JFH-Disassembly"); f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -160,7 +160,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   
     //Update the tree with a directory search for file chooser.
   
-    if( diskMode ) { openDisk(); } else { dirSerach(); }
+    if( file == "" ) { dirSerach(); }
 
     //tree properties.
 
@@ -190,20 +190,27 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     //Display the window.
 
-    f.pack();
-  
-    f.setLocationRelativeTo(null);
-  
+    f.pack(); f.setLocationRelativeTo(null);
+
+    //open disk, or file.
+
+    if( file != "" )
+    {
+      if( diskMode ) { openDisk( file ); } else { checkFT( file ); }
+    }
+
     f.setVisible(true);
   }
 
-  public static void main(String[]args)
+  public static void main( String[] args )
   {
     File f = new File("J.lnk"); if(f.exists()) { f.delete(); }
 
-    if( args.length > 0 ) { if( args[0].equals("disk") ) { diskMode = true; } }
+    String open = "";
 
-    new app();
+    if( args.length > 1 ) { if( args[0].equals("disk") ) { diskMode = true; } open = args[1]; }
+
+    new app( open );
   }
 
   public void treeWillExpand(TreeExpansionEvent e)
@@ -327,9 +334,9 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     }
   }
 
-  //Disk selector.
+  //Search system for disks.
 
-  public void openDisk()
+  public void findDisks()
   {
     //Clear the current tree nodes.
 
@@ -337,54 +344,31 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     //Setup disk check utility.
 
-    int sys = 0; getDisks d = new getDisks( root );
+    sys = 0; getDisks d = new getDisks( root );
       
     //Windows uses Physical drive. Needs admin permission.
 
     d.checkDisk( "\\\\.\\PhysicalDrive", "Disk", false );
       
-    if( d.admin ) { sys = 1; }
+    if( d.disks != 0 ) { sys = 1; }
 
     //Linux. Needs admin permission.
       
     d.checkDisk("/dev/sda", "Disk", true ); d.checkDisk("/dev/sdb", "Removable Disk", true );
       
-    if( d.admin && sys == 0 ) { sys = 2; }
+    if( d.disks != 0 && sys == 0 ) { sys = 2; }
 
     //Mac OS X. Needs admin permission.
 
     d.checkDisk("/dev/disk", "Disk", false );
       
-    if( d.admin && sys == 0 ) { sys = 3; }
+    if( d.disks != 0 && sys == 0 ) { sys = 3; }
 
-    //Security check.
+    //Update tree.
       
     if( d.disks != 0 )
     {
       ((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
-
-      if( d.admin )
-      {
-        if( sys == 1 )
-        {
-          JOptionPane.showMessageDialog(null,"Unable to read disk drives. Try running as administrator.");
-            
-          //Prompt the user if they wish to run as admin.
-            
-          if( new rApp().win("disk") ) { System.exit(0); }
-        }
-
-        else if( sys == 2 )
-        {
-          JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as 'sudo'.");
-        }
-
-        else if( sys == 3 )
-        {
-          JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as root on Mac OS.\r\n" +
-          "On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java.");
-        }
-      }
     }
     else
     {
@@ -439,7 +423,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     //Disk selector.
     
-    if( e.getActionCommand() == "O" ) { openDisk(); }
+    if( e.getActionCommand() == "O" ) { findDisks(); }
 
     //Binary tool display controls.
 
@@ -460,7 +444,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     else if( e.getActionCommand().equals("Open new File") )
     {
-      diskMode = false; Path = History[h]; Reset(); REC = false; dirSerach(); REC = true;
+      diskMode = false; if( h < 0 ) { Path = ""; } else { Path = History[h]; } Reset(); REC = false; dirSerach(); REC = true;
     }
 
     else if( e.getActionCommand().equals("Toggle Data Inspector") )
@@ -487,12 +471,12 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     }
     catch(Exception e)
     {
-      I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Decode Program For This File Format!");
+      I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!");
     }
 
     try
     {
-      file = new RandomAccessFileV( Path + "/" + ft, "rw" );
+      file = new RandomAccessFileV( Path + Sep + ft, "rw" );
 
       if(!HInit)
       {
@@ -517,8 +501,61 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     }
     catch(Exception er)
     {
-      JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file"); Reset();
+      JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file."); Reset();
     }
+  }
+
+  //Open a disk.
+
+  public void openDisk( String disk )
+  {
+    try{ file = new RandomAccessDevice( disk, "r" ); } catch( FileNotFoundException er ) { }
+        
+    loading(); new Thread(new Runnable()
+    {
+      @Override public void run()
+      {
+        try
+        {
+          if(!HInit)
+          {
+            Virtual = new VHex( file, true ); Offset = new VHex( file, false ); ds = new dataInspector( file );
+            Offset.enableText( textV ); Virtual.enableText( textV );
+            HInit = true;
+          }
+          else
+          {
+            Offset.setTarget( file ); Virtual.setTarget( file ); ds.setTarget( file );
+          }
+        
+          editMode();
+        }
+        catch(Exception er)
+        {
+          if( sys == 1 )
+          {
+            JOptionPane.showMessageDialog(null,"In order to read disks in readonly mode. You must run as administrator.");
+            
+            //Prompt the user if they wish to run as admin.
+            
+            if( new rApp().win("disk " + disk) ) { System.exit(0); }
+          }
+
+          else if( sys == 2 )
+          {
+            JOptionPane.showMessageDialog(null,"In order to read disk drives you must run java application using 'sudo'.");
+          }
+
+          else if( sys == 3 )
+          {
+            JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as root on Mac OS using 'sudo'.\r\n" +
+            "On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java.");
+          }
+          
+          Reset();
+        }
+      }
+    }).start();
   }
 
   //Exit file format reader.
@@ -544,48 +581,19 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     if( diskMode )
     {
-      String p = tree.getLastSelectedPathComponent().toString();
-
-      p = p.substring( p.lastIndexOf(35) + 1, p.lastIndexOf(46) );
-
-
-      try{ file = new RandomAccessDevice( p, "r" ); } catch( FileNotFoundException er ) { }
-        
-      loading(); new Thread(new Runnable()
-      {
-        @Override public void run()
-        {
-          try
-          {
-            if(!HInit)
-            {
-              Virtual = new VHex( file, true ); Offset = new VHex( file, false ); ds = new dataInspector( file );
-              Offset.enableText( textV ); Virtual.enableText( textV );
-              HInit = true;
-            }
-            else
-            {
-              Offset.setTarget( file ); Virtual.setTarget( file ); ds.setTarget( file );
-            }
-        
-            editMode();
-          }
-          catch(Exception er)
-          {
-            JOptionPane.showMessageDialog(null,"Can't Open disk!"); Reset();
-          }
-        }
-      }).start();
+      String t = tree.getLastSelectedPathComponent().toString();
+      
+      openDisk( t.substring( t.lastIndexOf(35) + 1, t.lastIndexOf(46) ) );
     }
     else if( !Open && r != -1 )
     {
       if( tree.getLastSelectedPathComponent() != null )
       {
-        String p = tree.getLastSelectedPathComponent().toString();
+        String t = tree.getLastSelectedPathComponent().toString();
         
         if( e.getClickCount() == 2 )
         {
-          checkFT(p);
+          checkFT(t);
         }
       }
     }

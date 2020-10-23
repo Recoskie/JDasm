@@ -23,13 +23,13 @@ public class rApp
 
       String dir = System.getProperty("user.dir");
 
-      //Create run as admin. Originally was going to do this byte by byte. However WScript is better.
+      //Create run as admin. Note WScript.shell is not rally necessary. The link can be wrote byte by byte into temp.
 
       f = File.createTempFile ("JFH", ".js"); PrintWriter script = new PrintWriter(f);
 
       script.printf("var shell = new ActiveXObject(\"WScript.Shell\"),s = shell.CreateShortcut(\"" + dir.replaceAll("\\\\","\\\\\\\\") + "\\\\" + "J.lnk\");\r\n");
       script.printf("s.TargetPath = \"" + jre.replaceAll("\\\\","\\\\\\\\") + "\";\r\n");
-      script.printf("s.Arguments = \"-jar " + app.replaceAll("\\\\","\\\\\\\\") + " " + args + "\";\r\n");
+      script.printf("s.Arguments = \"-jar " + app.replaceAll("\\\\","\\\\\\\\") + " " + args.replaceAll("\\\\","\\\\\\\\") + "\";\r\n");
       script.printf("s.Save();");
       script.close();
 
