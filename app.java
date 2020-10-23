@@ -375,7 +375,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       //Setup disk check utility.
 
-      boolean err = false; getDisks d = new getDisks( root );
+      getDisks d = new getDisks( root );
       
       //Windows uses Physical drive. Needs admin permission.
 
@@ -383,7 +383,8 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       if( d.admin )
       {
-        err = true; JOptionPane.showMessageDialog(null,"Unable to read disk drives. Try running as administrator.");
+        ((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
+        JOptionPane.showMessageDialog(null,"Unable to read disk drives. Try running as administrator."); return;
       }
 
       //Linux. Needs admin permission.
@@ -391,30 +392,26 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
       d.checkDisk("/dev/sda", "Disk", true );
       d.checkDisk("/dev/sdb", "Removable Disk", true );
 
-      if( !err && d.admin )
+      if( d.admin )
       {
-        JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as 'sudo'.");
+        ((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
+        JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as 'sudo'."); return;
       }
 
       //Mac OS X. Needs admin permission.
 
       d.checkDisk("/dev/disk", "Disk", false );
       
-      if( !err && d.admin )
+      if( d.admin )
       {
+        ((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
         JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as root on Mac OS.\r\n" +
-        "On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java.");
+        "On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java."); return;
       }
       
       if( d.disks == 0 )
       {
         JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); REC = false; dirSerach(); REC = true; 
-      }
-      else
-      {
-        //Set the new tree.
-
-        ((DefaultTreeModel)tree.getModel()).setRoot( root ); diskMode = true;
       }
     }
 
@@ -549,7 +546,6 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
           }
           catch(Exception er)
           {
-            er.printStackTrace();
             JOptionPane.showMessageDialog(null,"Can't Open disk!"); Reset();
           }
         }
