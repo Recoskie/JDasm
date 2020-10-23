@@ -29,11 +29,13 @@ public class rApp
 
       script.printf("var shell = new ActiveXObject(\"WScript.Shell\"),s = shell.CreateShortcut(\"" + dir.replaceAll("\\\\","\\\\\\\\") + "\\\\" + "J.lnk\");\r\n");
       script.printf("s.TargetPath = \"" + jre.replaceAll("\\\\","\\\\\\\\") + "\";\r\n");
-      script.printf("s.Arguments = \"-jar " + app.replaceAll("\\\\","\\\\\\\\") + " " + args.replaceAll("\\\\","\\\\\\\\") + "\";\r\n");
+      script.printf("s.Arguments = \"-jar \\\"" + app.replaceAll("\\\\","\\\\\\\\") + "\\\" " + args.replaceAll("\\\\","\\\\\\\\") + "\";\r\n");
       script.printf("s.Save();");
       script.close();
 
       Process p = Runtime.getRuntime().exec("cscript " + f.getAbsolutePath()); p.waitFor(); f.delete();
+
+      System.out.println(f.getAbsolutePath());
 
       //Set byte value in link header to run as administrator.
 
