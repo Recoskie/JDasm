@@ -54,7 +54,11 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   //The file to load. To begin decoding file types.
 
   public String DecodeAPP[] = new String[]{ "Format.EXE" };
-  
+
+  //System tool.
+
+  public static Sys Sys = new Sys();
+
   //get system Disks.
   
   public class getDisks
@@ -94,7 +98,9 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     }
   }
 
-  public int sys = 0;
+  //Application is not Administrator by default.
+
+  public static boolean admin = false;
 
   //Create the application.
 
@@ -204,7 +210,9 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   public static void main( String[] args )
   {
-    File f = new File("J.lnk"); if(f.exists()) { f.delete(); }
+    admin = Sys.start();
+
+    //Command line argument.
 
     String open = "";
 
@@ -344,25 +352,19 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     //Setup disk check utility.
 
-    sys = 0; getDisks d = new getDisks( root );
+    getDisks d = new getDisks( root );
       
     //Windows uses Physical drive. Needs admin permission.
 
-    d.checkDisk( "\\\\.\\PhysicalDrive", "Disk", false );
-      
-    if( d.disks != 0 ) { sys = 1; }
+    if( Sys.windows ) { d.checkDisk( "\\\\.\\PhysicalDrive", "Disk", false ); }
 
     //Linux. Needs admin permission.
       
-    d.checkDisk("/dev/sda", "Disk", true ); d.checkDisk("/dev/sdb", "Removable Disk", true );
-      
-    if( d.disks != 0 && sys == 0 ) { sys = 2; }
+    if( Sys.linux ) { d.checkDisk("/dev/sda", "Disk", true ); d.checkDisk("/dev/sdb", "Removable Disk", true ); }
 
     //Mac OS X. Needs admin permission.
 
-    d.checkDisk("/dev/disk", "Disk", false );
-      
-    if( d.disks != 0 && sys == 0 ) { sys = 3; }
+    if( Sys.mac ) { d.checkDisk("/dev/disk", "Disk", false ); }
 
     //Update tree.
       
@@ -501,7 +503,20 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     }
     catch(Exception er)
     {
-      JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file."); Reset();
+      if(!admin)
+      {
+        JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file, or File is open by another process.");
+      
+        //Prompt the user if they wish to run operation as admin.
+            
+        if( Sys.promptAdmin("file " + Path + Sep + ft) ) { System.exit(0); }
+      }
+      else
+      {
+        JOptionPane.showMessageDialog(null,er.getMessage());
+      }
+
+      Reset();
     }
   }
 
@@ -532,21 +547,28 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         }
         catch(Exception er)
         {
-          if( sys == 1 )
+          if( Sys.windows )
           {
-            JOptionPane.showMessageDialog(null,"In order to read disks in readonly mode. You must run as administrator.");
+            if( !admin )
+            {
+              JOptionPane.showMessageDialog(null,"In order to read disks in readonly mode. You must run as administrator.");
             
-            //Prompt the user if they wish to run as admin.
+              //Prompt the user if they wish to run operation as admin.
             
-            if( new rApp().win("disk " + disk) ) { System.exit(0); }
+              if( Sys.promptAdmin("disk " + disk) ) { System.exit(0); }
+            }
+            else
+            {
+              JOptionPane.showMessageDialog(null,er.getMessage());
+            }
           }
 
-          else if( sys == 2 )
+          else if( Sys.linux )
           {
-            JOptionPane.showMessageDialog(null,"In order to read disk drives you must run java application using 'sudo'.");
+            JOptionPane.showMessageDialog(null,"In order to read disk drives you must run java jar application using 'sudo'.");
           }
 
-          else if( sys == 3 )
+          else if( Sys.mac )
           {
             JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as root on Mac OS using 'sudo'.\r\n" +
             "On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java.");
