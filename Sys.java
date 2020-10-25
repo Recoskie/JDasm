@@ -15,33 +15,32 @@ public class Sys
 
   public boolean promptAdmin( String args )
   {
+    File f = new File(System.getProperty("java.home")), f2; f = new File(f, "bin"); f = new File(f, "javaw.exe");
+
+    //The java engine.
+      
+    String jre = f.getAbsolutePath(), app = "";
+
+    //The application location.
+
+    try { app = new File(Sys.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath(); } catch(java.net.URISyntaxException e) { }
+
     //Windows
 
     if( windows )
     {
       try
       {
-        File f = new File(System.getProperty("java.home")); f = new File(f, "bin"); f = new File(f, "javaw.exe");
-
-        //The java engine.
-      
-        String jre = f.getAbsolutePath();
-
-        //The java application location.
-
-        String app = new File(Sys.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
-
         //Create run as admin. Note WScript.shell is not rally necessary. The link can be wrote byte by byte into temp.
 
-        f = File.createTempFile ("JFH", ".js"); File f2 = File.createTempFile ("JFH", ".lnk"); args = f2.getAbsolutePath() + " " + args;
+        f = File.createTempFile ("JFH", ".js"); f2 = File.createTempFile ("JFH", ".lnk"); args = f2.getAbsolutePath() + " " + args;
         
         PrintWriter script = new PrintWriter(f);
 
         script.printf("var shell = new ActiveXObject(\"WScript.Shell\"),s = shell.CreateShortcut( WScript.arguments(0) );\r\n");
         script.printf("s.TargetPath = \"" + jre.replaceAll("\\\\","\\\\\\\\") + "\";\r\n");
         script.printf("s.Arguments = \"-jar \\\"" + app.replaceAll("\\\\","\\\\\\\\") + "\\\" " + args.replaceAll("\\\\","\\\\\\\\") + "\";\r\n");
-        script.printf("s.Save();");
-        script.close();
+        script.printf("s.Save();"); script.close();
 
         Process p = Runtime.getRuntime().exec("cscript " + f.getAbsolutePath() + " " + f2.getAbsolutePath() ); p.waitFor(); f.delete();
 
