@@ -58,9 +58,74 @@ public class Sys
 
         //User declined run as administrator.
       
-        f2.delete(); return( false );
+        f2.delete();
       }
       catch( Exception e ) { e.printStackTrace(); }
+    }
+
+    //Linux does not have a nice prompt like Mac OS X. So we have to create one.
+
+    else if( linux )
+    {
+      InputStreamReader input; OutputStreamWriter output;
+
+      try
+      {
+        //Create the process.
+        
+        f = File.createTempFile ("JFH", ".sh"); PrintWriter script = new PrintWriter(f);
+
+        script.printf("#!/bin/sh\r\n"); script.printf("sudo nohup java -jar \"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n"); script.close();
+        
+        Process p = Runtime.getRuntime().exec(new String[]
+        {
+          "/bin/bash", "-c", "/usr/bin/sudo -S /bin/cat /etc/sudoers 2>&1 ; echo running ; sudo chmod +x \"" + f.getAbsolutePath() + "\" ; sudo bash \"" + f.getAbsolutePath() + "\""
+        });
+        
+        output = new OutputStreamWriter(p.getOutputStream()); input = new InputStreamReader(p.getInputStream());
+
+        int bytes; char buffer[] = new char[1024];
+        
+        boolean oneTry = false;
+        
+        //Password input field.
+        
+        javax.swing.JPasswordField pwd = new javax.swing.JPasswordField(20);
+        
+        while ((bytes = input.read(buffer, 0, 1024)) != -1 )
+        {
+          if( bytes == 0 ) { continue; }
+          
+          //sudo is requesting Password.
+          
+          String data = String.valueOf(buffer, 0, bytes);
+          
+          if (data.contains("[sudo] password"))
+          {
+            if( !oneTry )
+            {
+              int action = javax.swing.JOptionPane.showConfirmDialog(null, pwd,"Enter Password",javax.swing.JOptionPane.OK_CANCEL_OPTION);
+          
+              //Give password to system.
+            
+              char[] password = pwd.getPassword(); output.write(password); output.write('\n'); output.flush();
+            
+              //Erase password data.
+            
+              java.util.Arrays.fill(password, '\0'); oneTry = true;
+            }
+            
+            //Kill sudo on second try.
+            
+            else { p.destroy(); f.delete(); return( false ); }
+          }
+          
+          //Process started as admin.
+          
+          else if ( data.contains("running") ) { return( true ); }
+        }
+      }
+      catch (IOException ex) { System.out.println(ex.getMessage()); }
     }
 
     //User declined run as administrator, or operation failed.

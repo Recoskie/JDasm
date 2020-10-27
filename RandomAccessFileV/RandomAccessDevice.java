@@ -191,31 +191,24 @@ public class RandomAccessDevice extends RandomAccessFileV
   {
     if( size == 0 )
     {
-      try
-      {
-        size = super.length();
-      }
-      catch( IOException er )
-      {
-        super.Events = false; try { TempPos = super.getFilePointer(); } catch( IOException e ) { }
+      super.Events = false; try { TempPos = super.getFilePointer(); } catch( IOException e ) { }
 
-        //Calculate the length of a raw disk volume.
+      //Calculate the length of a raw disk volume.
 
-        long bit = sector.length; boolean end = false;
+      long bit = sector.length; boolean end = false;
     
-        end = false; while( bit <= 0x4000000000000000L && !end ) { try { super.seek( bit <<= 1 ); super.read( sector ); } catch( IOException e ) { bit >>= 1; size |= bit; end = true; } }
+      end = false; while( bit <= 0x4000000000000000L && !end ) { try { super.seek( bit <<= 1 ); super.read( sector ); } catch( IOException e ) { bit >>= 1; size |= bit; end = true; } }
 
-        while( bit >= sector.length )
-        {
-          try { super.seek( size | bit ); super.read( sector ); size |= bit; } catch( IOException e ) { }
+      while( bit >= sector.length )
+      {
+        try { super.seek( size | bit ); super.read( sector ); size |= bit; } catch( IOException e ) { }
 
-          bit >>= 1;
-        }
-
-        size += sector.length - 1; //End of last sector.
-    
-        try { super.seek( TempPos ); } catch( IOException e ) { } super.Events = true;
+        bit >>= 1;
       }
+
+      size += sector.length - 1; //End of last sector.
+    
+      try { super.seek( TempPos ); } catch( IOException e ) { } super.Events = true;
     }
 
     return( size );

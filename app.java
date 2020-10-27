@@ -565,7 +565,18 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
           else if( Sys.linux )
           {
-            JOptionPane.showMessageDialog(null,"In order to read disk drives you must run java jar application using 'sudo'.");
+            if( !admin )
+            {
+              JOptionPane.showMessageDialog(null,"In order to read disk drives you must run jar application using \"sudo\".");
+            
+              //Prompt the user if they wish to run operation as admin.
+              
+              if( Sys.promptAdmin("disk " + disk) ) { System.exit(0); }
+            }
+            else
+            {
+              JOptionPane.showMessageDialog(null,er.getMessage());
+            }
           }
 
           else if( Sys.mac )
