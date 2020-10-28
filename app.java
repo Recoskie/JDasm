@@ -210,7 +210,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   public static void main( String[] args )
   {
-    admin = Sys.start( args );
+    admin = Sys.start( app.class, args );
 
     //Command line argument.
 

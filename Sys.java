@@ -10,20 +10,22 @@ public class Sys
   public static final boolean solaris = Sys.startsWith("SunOS");
   public static final boolean iOS = Sys.startsWith("iOS");
 
+  //The application is initialized on start.
+
+  private String cd = "", app = "", Jar = "-jar ";
+
   //Convince method to prompt user if they wish to run application as administrator (Super user).
   //Starts the application with command line arguments.
 
   public boolean promptAdmin( String args )
   {
+    if( app == "" ) { return( false ); }
+
     File f = new File(System.getProperty("java.home")), f2; f = new File(f, "bin"); f = new File(f, "javaw.exe");
 
     //The java engine.
       
-    String jre = f.getAbsolutePath(), app = "";
-
-    //The application location.
-
-    try { app = new File(Sys.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath(); } catch(java.net.URISyntaxException e) { }
+    String jre = f.getAbsolutePath();
 
     //Windows
 
@@ -38,8 +40,11 @@ public class Sys
         PrintWriter script = new PrintWriter(f);
 
         script.printf("var shell = new ActiveXObject(\"WScript.Shell\"),s = shell.CreateShortcut( WScript.arguments(0) );\r\n");
+        
+        if( cd != "" ) { script.printf("s.WorkingDirectory = \"" + cd.replaceAll("\\\\","\\\\\\\\") + "\";\r\n"); }
+
         script.printf("s.TargetPath = \"" + jre.replaceAll("\\\\","\\\\\\\\") + "\";\r\n");
-        script.printf("s.Arguments = \"-jar \\\"" + app.replaceAll("\\\\","\\\\\\\\") + "\\\" " + args.replaceAll("\\\\","\\\\\\\\") + "\";\r\n");
+        script.printf("s.Arguments = \"" + Jar + "\\\"" + app.replaceAll("\\\\","\\\\\\\\") + "\\\" " + args.replaceAll("\\\\","\\\\\\\\") + "\";\r\n");
         script.printf("s.Save();"); script.close();
 
         Process p = Runtime.getRuntime().exec("cscript " + f.getAbsolutePath() + " " + f2.getAbsolutePath() ); p.waitFor(); f.delete();
@@ -75,7 +80,7 @@ public class Sys
         
         f = File.createTempFile ("JFH", ".sh"); PrintWriter script = new PrintWriter(f);
 
-        script.printf("#!/bin/sh\r\n"); script.printf("sudo nohup java -jar \"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n"); script.close();
+        script.printf("#!/bin/sh\r\n"); script.printf("sudo nohup java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n"); script.close();
         
         Process p = Runtime.getRuntime().exec(new String[]
         {
@@ -138,7 +143,7 @@ public class Sys
         
         f = File.createTempFile ("test", ".command"); PrintWriter script = new PrintWriter(f);
 
-        script.printf("osascript -e \"do shell script \\\"java -jar '" + app + "' '" + f.getAbsolutePath() + "' " + args + "\\\" with administrator privileges\"\r\n");
+        script.printf("osascript -e \"do shell script \\\"java " + Jar + "'" + app + "' '" + f.getAbsolutePath() + "' " + args + "\\\" with administrator privileges\"\r\n");
         script.close();
         
         Process p = new ProcessBuilder(new String[] {"chmod", "+x", "'" + f.getAbsolutePath() + "'"} ).start(); p.waitFor();
@@ -163,8 +168,16 @@ public class Sys
 
   //This method tests if the new process started as administrator.
 
-  public boolean start( String[] args )
+  public boolean start( Class cl, String[] args )
   {
+    try { app = new File(cl.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath(); } catch(java.net.URISyntaxException e) { }
+
+    //If not a jar. Then we must set current dir path, and app to class file name.
+
+    if( !app.toLowerCase().contains(".jar") ) { Jar = ""; cd = app; app = cl.getName(); }
+
+    //Test if user run as admin.
+
     boolean test = false;
 
     if( args.length > 0 )
