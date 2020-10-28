@@ -513,7 +513,8 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
       }
       else
       {
-        JOptionPane.showMessageDialog(null,er.getMessage());
+        System.out.println(er.getMessage());
+        JOptionPane.showMessageDialog(null,"Can't Open File.");
       }
 
       Reset();
@@ -559,7 +560,8 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
             }
             else
             {
-              JOptionPane.showMessageDialog(null,er.getMessage());
+              System.out.println(er.getMessage());
+              JOptionPane.showMessageDialog(null,"Can't read disk.");
             }
           }
 
@@ -575,14 +577,26 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
             }
             else
             {
-              JOptionPane.showMessageDialog(null,er.getMessage());
+              System.out.println(er.getMessage());
+              JOptionPane.showMessageDialog(null,"Can't read disk.");
             }
           }
 
           else if( Sys.mac )
           {
-            JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as root on Mac OS using 'sudo'.\r\n" +
-            "On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java.");
+            if( !admin )
+            {
+              JOptionPane.showMessageDialog(null,"In order to read disk drives you must run as root on Mac OS.");
+            
+              //Prompt the user if they wish to run operation as admin.
+              
+              if( Sys.promptAdmin("disk " + disk) ) { System.exit(0); }
+            }
+            else
+            {
+              System.out.println(er.getMessage());
+              JOptionPane.showMessageDialog(null,"On Mac OS Mojave (10.14), and higher. Full Disk access must be enabled under Settings, for java.");
+            }
           }
           
           Reset();

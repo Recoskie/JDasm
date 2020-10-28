@@ -128,6 +128,34 @@ public class Sys
       catch (IOException ex) { System.out.println(ex.getMessage()); }
     }
 
+    //Mac OS X. Much cleaner with osascript. Be nice if linux had an equivalent.
+
+    else if( mac )
+    {
+      try
+      {
+        //Create the process.
+        
+        f = File.createTempFile ("test", ".command"); PrintWriter script = new PrintWriter(f);
+
+        script.printf("osascript -e \"do shell script \\\"java -jar '" + app + "' '" + f.getAbsolutePath() + "' " + args + "\\\" with administrator privileges\"\r\n");
+        script.close();
+        
+        Process p = new ProcessBuilder(new String[] {"chmod", "+x", "'" + f.getAbsolutePath() + "'"} ).start(); p.waitFor();
+
+        p = new ProcessBuilder(new String[] {"sh", "" + f.getAbsolutePath() + ""} ).start();
+
+        //Test if a new process started as administrator.
+
+        while( p.isAlive() ) { if( !f.exists() ) { return( true ); } }
+
+        //User declined run as administrator.
+      
+        f.delete();
+      }
+      catch (Exception ex) { System.out.println(ex.getMessage()); }
+    }
+
     //User declined run as administrator, or operation failed.
 
     return( false );
