@@ -111,6 +111,11 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   //Note that Virtual address must be compared as unsigned.
   
   private long VAddress = 0x0000000000000000L;
+
+  //Keep a reference of the read data.
+
+  private static byte[] d;
+  private static String o = "";
   
   //Positions of an file can be mapped into ram address space locations.
   //The file pointer can not address offsets as unsigned. So comparing file offsets as unsigned is not necessary.
@@ -703,8 +708,12 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
     return( b );
   }
   
-  //Read and write events.
+  //New read method stores read bytes. Allowing the read data to be changed to different types.
   
+  public int read( int len ) throws IOException { syncR(); d = new byte[len]; return( read( d ) ); } 
+
+  //Default read and write methods.
+
   @Override public int read() throws IOException { syncR(); return( super.read() ); }
   
   @Override public int read( byte[] b ) throws IOException { syncR(); return( super.read( b ) ); }
@@ -716,6 +725,86 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   @Override public void write( byte[] b ) throws IOException { syncW(); super.write( b ); }
   
   @Override public void write( byte[] b, int off, int len ) throws IOException { syncW(); super.write( b, off, len ); }
+
+  //Methods to convert read data to different types.
+
+  public String toHex()
+  {
+    o = ""; for( int i = 0; i < d.length; i++ )
+    {
+      o += String.format( "%1$02X", d[i] ) + " ";
+    }
+
+    return( o );
+  }
+
+  public String toText8()
+  {
+    o = ""; for( int i = 0; i < d.length; i++ )
+    {
+      o += ((char)d[i]);
+    }
+
+    return( o );
+  }
+
+  public String toText16()
+  {
+    o = ""; for( int i = 0; i < d.length; i += 2 )
+    {
+      o += (char)( d[ i + 1 ] | ( d[ i ] << 8 ) );
+    }
+
+    return( o );
+  }
+
+  public String toLText16()
+  {
+    o = ""; for( int i = 0; i < d.length; i += 2 )
+    {
+      o += (char)( d[i] | ( d[ i + 1 ] << 8 ) );
+    }
+
+    return( o );
+  }
+
+  public boolean toBoolean() { return( d[0] == (byte)0xFF ); }
+
+  public byte toByte() { return( d[0] ); }
+
+  public short toShort() { return( (short)( ( d[1] & 0xFF ) | ( ( d[0] << 8 ) & 0xFF00 ) ) ); }
+
+  public short toLShort() { return( (short)( ( d[0] & 0xFF ) | ( ( d[1] << 8 ) & 0xFF00 ) ) ); }
+
+  public int toInt() { return( ( d[3] & 0xFF ) | ( (d[2] << 8) & 0xFF00 ) | ( (d[1] << 16) & 0xFF0000 ) | ( (d[0] << 24) & 0xFF000000 ) ); }
+
+  public int toLInt() { return( ( d[0] & 0xFF ) | ( (d[1] << 8) & 0xFF00 ) | ( (d[2] << 16) & 0xFF0000 ) | ( (d[3] << 24) & 0xFF000000 ) ); }
+
+  public long toLong()
+  {
+    return( ( (long)d[7] & 0xFFL ) | ( ((long)d[6] << 8) & 0xFF00L ) | ( ((long)d[5] << 16) & 0xFF0000L ) | ( ((long)d[4] << 24) & 0xFF000000L ) |
+     ( ( (long)d[3] << 32 ) & 0xFF00000000L ) | ( ( (long)d[2] << 40 ) & 0xFF0000000000L ) | ( ( (long)d[1] << 48 ) & 0xFF000000000000L ) | ( ( (long)d[0] << 56 ) & 0xFF00000000000000L ) );
+  }
+
+  public long toLLong()
+  {
+    return( ( (long)d[0] & 0xFFL ) | ( ((long)d[1] << 8) & 0xFF00L ) | ( ((long)d[2] << 16) & 0xFF0000L ) | ( ((long)d[3] << 24) & 0xFF000000L ) |
+     ( ( (long)d[4] << 32 ) & 0xFF00000000L ) | ( ( (long)d[5] << 40 ) & 0xFF0000000000L ) | ( ( (long)d[6] << 48 ) & 0xFF000000000000L ) | ( ( (long)d[7] << 56 ) & 0xFF00000000000000L ) );
+  }
+
+  public float toFloat() { return( Float.intBitsToFloat( toInt() ) ); }
+
+  public float toLFloat() { return( Float.intBitsToFloat( toLInt() ) ); }
+
+  public double toDouble() { return( Double.longBitsToDouble( toLong() ) ); }
+
+  public double toLDouble() { return( Double.longBitsToDouble( toLLong() ) ); }
+
+  public char toChar8() { return( (char)d[0] ); }
+
+  public char toChar16() { return( (char)( d[1] | ( d[0] << 8 ) ) ); }
+
+  public char toLChar16() { return( (char)( d[0] | ( d[1] << 8 ) ) ); }
   
   //Debug The address mapped memory.
   
