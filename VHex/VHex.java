@@ -62,9 +62,17 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   private long offset = 0;
 
+  //Element based selection.
+
+  private boolean elSelection = false;
+
   //Start and end index of selected bytes.
 
   private long sel = 0, sele = 0;
+  private long elPos = 0, elLen = 0;
+
+  //slide animation.
+
   private byte slide = 0;
 
   //The address column.
@@ -310,6 +318,10 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   public long selectEnd() { return( Long.compareUnsigned( sel, sele ) >= 0 ? sel : sele ); }
 
+  //Get selected element pos.
+
+  public long selectEl() { return( elPos ); }
+
   //Set selected bytes.
 
   public void setSelected( long start, long end )
@@ -326,6 +338,19 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
     if( !Virtual || IOStream.isMaped() ) { sele = end; repaint(); }
   }
 
+  //Element selection. A group of bytes that create the data type.
+
+  public void setSelectedEl( long pos, long len )
+  {
+    SelectC = new Color( 57, 105, 138, 128 );
+    
+    if( !Virtual || IOStream.isMaped() ) { elSelection = true; elPos = pos; elLen = len; repaint(); }
+  }
+
+  //set selection mode.
+
+  public void setSelectMode( boolean m ) { elSelection = !m; }
+
   //Enable, or disable the text editor.
 
   public void enableText( boolean set )
@@ -338,6 +363,10 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
     validate();
   }
+
+  //Check if editing data.
+
+  public boolean isEditing() { return( emode ); }
 
   //Initialize the draw area and component size.
 
@@ -510,6 +539,10 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   private void Selection( Graphics g )
   {
     g.setColor(SelectC);
+
+    //Only select length bytes when element selection is enabled.
+
+    if( elSelection ) { sel = elPos; sele = sel + elLen; }
 
     if( sel > sele ) { t = sele; sele = sel; sel = t; }
     
@@ -780,9 +813,40 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
      }
    }
 
-   //Exit edit mode if byte is undefined.
+   //Editable bytes.
 
-   private void canEdit() { int x = (int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset ); if( x < data.length && x > 0 && udata[x] ) { endEdit(); } }
+   private boolean canEdit()
+   {
+     //Limit the user to only modify the bytes, of a data type element.
+
+     long x = ( ecellX >> 1 ) + ( ecellY << 4 );
+
+     if( elSelection )
+     {
+       if( x > ( elPos + elLen ) )
+       {
+         x = ( elPos + elLen );
+
+         ecellX = ( ( x & 0xF ) << 1 ) + 1; ecellY = ( x & 0xFFFFFFFFFFFFFFF0L ) >> 4;
+
+         return( false );
+       }
+       else if( x < elPos )
+       {
+         x = elPos;
+
+         ecellX = ( x & 0xF ) << 1; ecellY = ( x & 0xFFFFFFFFFFFFFFF0L ) >> 4;
+
+         return( false );
+       }
+     }
+
+     //Exit edit mode if byte is undefined.
+
+     x -= offset; if( x < data.length && x > 0 && udata[(int)x] ) { endEdit(); return( false ); }
+
+     return( true );
+   }
 
    //End edit mode safely.
 
@@ -840,15 +904,25 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
        else if( c == e.VK_ENTER || c == e.VK_ESCAPE ) { endEdit(); }
        else
        {
+         //If events are not disabled we can possibly trigger an event and have out data wrote to the wrong location.
+
+         IOStream.Events = false;
+
          //Validate text input.
 
          if( etext && c >= 0x20 )
          {
+           try { canEdit(); IOStream.seek( ( ( ecellX >> 1 ) + ( ecellY << 4 ) ) ); } catch( Exception er ) { }
+
            x = (int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset );
 
-           data[x] = (byte)e.getKeyChar(); try { IOStream.write( data[x] ); } catch( Exception er ) { }
+           data[x] = (byte)e.getKeyChar();
+             
+           try { IOStream.Events = true; IOStream.write( data[x] ); } catch( Exception er ) { }
 
            ecellX += 2; if( ecellX > 31 ){ ecellX = 0; ecellY += 1; }
+
+           canEdit();
          }
 
          //Validate hex input.
@@ -857,15 +931,17 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
          {
            c = c <= 0x39 ? c & 0x0F : c - 0x37;
 
+           try { canEdit(); IOStream.seek( ( ( ecellX >> 1 ) + ( ecellY << 4 ) ) ); } catch( Exception er ) { }
+
            x = (int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset );
 
            data[x] = (byte)( ecellX & 1 ) > 0 ? (byte)( ( data[x] & 0xF0 ) | c ) : (byte) ( ( data[x] & 0x0F ) | c << 4 );
 
            ecellX += 1; if( ecellX > 31 ){ ecellX = 0; ecellY += 1; }
 
-           try { if( ecellX % 2 == 0 ) { IOStream.write( data[x] ); wr = false; } else { wr = true; } } catch( Exception er ) { }
+           try { if( ecellX % 2 == 0 || elSelection ) { IOStream.Events = true; IOStream.write( data[x] ); wr = false; } else { wr = true; } } catch( Exception er ) { }
 
-           repaint();
+           canEdit(); repaint();
          }
        }
      }

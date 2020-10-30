@@ -29,11 +29,11 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
   //length of each data type.
 
-  private static final int[] len = new int[]{1,1,1,2,2,4,4,8,8,4,8,1,2};
+  private static final int[] len = new int[]{1,1,1,2,2,4,4,8,8,4,8,1,2,-1};
 
   //Remember the users selected type.
 
-  private int type = 0;
+  private int type = len.length - 1;
 
   //Data type names.
 
@@ -51,10 +51,11 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     "Float32",
     "Float64",
     "Char8",
-    "Char16"
+    "Char16",
+    "Use No Data type"
   };
 
-  private static String[] ddata = new String[13];
+  private static String[] ddata = new String[14];
 
   //Fields for data entry
 
@@ -83,7 +84,11 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
       try { t = d.getFilePointer(); } catch(Exception e) {}
 
-      WindowCompoents.Offset.setSelected( t, t + len[row] - 1 );
+      if( len[type] > 0 ) { WindowCompoents.Offset.setSelectedEl( t, len[type] - 1 ); }
+      else
+      {
+        WindowCompoents.Offset.setSelectMode( true );
+      }
 
       return ( false );
     }
@@ -162,15 +167,13 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     try { d.seek(d.getFilePointer()); } catch( java.io.IOException e ) { }
   }
 
-  //Event handling.
+  //Updating the data inspector.
 
-  public void onSeek( IOEvent e )
+  public void update()
   {
-    d.Events = false;
-
     if (td.isEditing()) { td.getCellEditor().cancelCellEditing(); }
     
-    try { t = d.getFilePointer(); d.read(8); d.seek( t ); } catch( java.io.IOException er ) { }
+    try { t = d.getFilePointer(); if( len[type] > 0 && WindowCompoents.Offset.isEditing() ) { d.seek( WindowCompoents.Offset.selectEl() ); } d.read(8); d.seek( t ); } catch( java.io.IOException er ) { }
 
     b = d.toByte(); if ( littleEndian ) {  s = d.toLShort(); i = d.toLInt(); l = d.toLLong(); } else { s = d.toShort(); i = d.toInt(); l = d.toLong(); }
 
@@ -192,9 +195,36 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
     dataModel.fireTableDataChanged();
 
-    td.setRowSelectionInterval(type, type); WindowCompoents.Offset.setSelected( t, t + len[type] - 1 );
+    td.setRowSelectionInterval(type, type);
+    
+    if( len[type] > 0 && !WindowCompoents.Offset.isEditing() ) { WindowCompoents.Offset.setSelectedEl( t, len[type] - 1 ); }
+  }
+
+  //Event handling.
+
+  public void onSeek( IOEvent e )
+  {
+    d.Events = false;
+
+    update();
 
     d.Events = true;
+  }
+  
+  public void onRead( IOEvent e )
+  {
+  }
+
+  public void onWrite( IOEvent e )
+  {
+    if( len[type] > 0 )
+    {
+      d.Events = false;
+
+      update();
+
+      d.Events = true;
+    }
   }
 
   //String.format is not flexible enough.
@@ -218,16 +248,6 @@ public class dataInspector extends JComponent implements IOEventListener, Action
   }
 
   private float toFloat(long v) { if( v < 0 ) { return( ( (float)(v & 0x7FFFFFFFFFFFFFFFL) ) + 9223372036854775808f ); } return( (float)v ); }
-  
-  public void onRead( IOEvent e )
-  {
-  
-  }
-
-  public void onWrite( IOEvent e )
-  {
-  
-  }
   
   public void actionPerformed(ActionEvent e)
   {
