@@ -4,8 +4,10 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.event.*;
+import java.util.*;
 
 import RandomAccessFileV.*;
+import VHex.*;
 import WindowCompoents.*;
 
 public class dataInspector extends JComponent implements IOEventListener, ActionListener
@@ -30,6 +32,11 @@ public class dataInspector extends JComponent implements IOEventListener, Action
   //length of each data type.
 
   private static final int[] len = new int[]{1,1,1,2,2,4,4,8,8,4,8,1,2,-1};
+
+  //Weather data is virtual, or offset.
+
+  private static boolean mode = false;
+  private static boolean emode = false;
 
   //Remember the users selected type.
 
@@ -61,6 +68,16 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
   private static JTable td;
 
+  //Linked editors if any.
+
+  protected java.util.List<VHex> h = new ArrayList<VHex>();
+
+  private VHex e;
+
+  private boolean v;
+
+  public void addEditor( VHex editor ) { h.add( editor ); }
+
   //The main hex editor display.
 
   AbstractTableModel dataModel = new AbstractTableModel()
@@ -82,12 +99,29 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     {
       type = row;
 
-      try { t = d.getFilePointer(); } catch(Exception e) {}
+      try { t = mode ? d.getVirtualPointer() : d.getFilePointer(); } catch(Exception e) {}
 
-      if( len[type] > 0 ) { WindowCompoents.Offset.setSelectedEl( t, len[type] - 1 ); }
+      if( len[type] > 0 )
+      {
+        for( int i = 0; i < h.size(); i++ )
+        {
+          if( h.get(i).isVirtual() == mode )
+          {
+            h.get(i).setSelectedEl( t, len[type] - 1 );
+          }
+        }
+
+        for( int i = 0; i < h.size(); i++ )
+        {
+          if( h.get(i).isVirtual() != mode )
+          {
+            try { h.get(i).setSelectedEl( mode ? d.getFilePointer() : d.getVirtualPointer(), len[type] - 1 ); } catch( Exception e ) { }
+          }
+        }
+      }
       else
       {
-        WindowCompoents.Offset.setSelectMode( true );
+        for( int i = 0; i < h.size(); i++ ) { h.get(i).setSelectMode( true ); }
       }
 
       return ( false );
@@ -157,6 +191,14 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     try { d.seek(d.getFilePointer()); } catch( java.io.IOException e ) { }
   }
 
+  //Disable events when component is not visible.
+
+  @Override public void setVisible( boolean v )
+  {
+    if( v ) { d.addIOEventListener( this ); } else { d.removeIOEventListener(this); }
+    super.setVisible( v );
+  }
+
   //Set new target.
 
   public void setTarget( RandomAccessFileV data )
@@ -171,9 +213,21 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
   public void update()
   {
+    d.Events = false;
+
     if (td.isEditing()) { td.getCellEditor().cancelCellEditing(); }
-    
-    try { t = d.getFilePointer(); if( len[type] > 0 && WindowCompoents.Offset.isEditing() ) { d.seek( WindowCompoents.Offset.selectEl() ); } d.read(8); d.seek( t ); } catch( java.io.IOException er ) { }
+
+    try
+    {
+      t = mode ? d.getVirtualPointer() : d.getFilePointer();
+
+      checkEdit(); if( emode ) { setBaseEl(); }
+
+      if( mode ) { d.readV(8); d.seekV( t ); } else { d.read(8); d.seek( t ); }
+    }
+    catch( java.io.IOException er ) { er.printStackTrace(); }
+
+    //Convert read bytes to different types.
 
     b = d.toByte(); if ( littleEndian ) {  s = d.toLShort(); i = d.toLInt(); l = d.toLLong(); } else { s = d.toShort(); i = d.toInt(); l = d.toLong(); }
 
@@ -193,11 +247,62 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
     ddata[11] = ( (char)b ) + ""; ddata[12] = ( (char)s ) + "";
 
-    dataModel.fireTableDataChanged();
+    dataModel.fireTableDataChanged(); td.setRowSelectionInterval(type, type);
 
-    td.setRowSelectionInterval(type, type);
-    
-    if( len[type] > 0 && !WindowCompoents.Offset.isEditing() ) { WindowCompoents.Offset.setSelectedEl( t, len[type] - 1 ); }
+    //Update hex editors based on selected type.
+
+    if( !emode ) { setEl(); }
+
+    d.Events = true;
+  }
+
+  //Check if any editors are in edit mode.
+
+  private void checkEdit() { emode = false; for( int i = 0; i < h.size(); i++ ) { if( h.get(i).isEditing() ) { emode = true; } } }
+
+  //Update editors to the base of selected element being edited.
+
+  private void setBaseEl()
+  {
+    try
+    {
+      for( int i = h.size(); i > 0; i++ )
+      {
+        e = h.get(i); v = e.isVirtual();
+      
+        if( len[type] > 0 ) { if( v ) { d.seekV( e.selectEl() ); } else { d.seek( e.selectEl() ); } }
+      }
+    } catch( Exception e ) { }
+  }
+
+  //Set selected element.
+
+  private void setEl()
+  {
+    for( int i = 0; i < h.size(); i++ )
+    {
+      e = h.get(i); v = e.isVirtual();
+
+      //Only set selected element, for the editors that match the event mode.
+
+      if( len[type] > 0 && !e.isEditing() )
+      {
+        if( v == mode ) { e.setSelectedEl( t, len[type] - 1 ); }
+      }
+    }
+
+    for( int i = 0; i < h.size(); i++ )
+    {
+      e = h.get(i); v = e.isVirtual();
+
+      //Else set the other hex editors based on offset potion.
+          
+      try
+      {
+        if( len[type] > 0 && v != mode ) { if( mode ) { e.setSelectedEl( d.getFilePointer(), len[type] - 1 ); } else { e.setSelectedEl( d.getVirtualPointer(), len[type] - 1 ); } }
+      }
+      catch( Exception er ) { }
+    }
   }
 
   //Event handling.
@@ -206,14 +311,12 @@ public class dataInspector extends JComponent implements IOEventListener, Action
   {
     d.Events = false;
 
-    update();
+    mode = e.isVirtual(); update();
 
     d.Events = true;
   }
   
-  public void onRead( IOEvent e )
-  {
-  }
+  public void onRead( IOEvent e ) { }
 
   public void onWrite( IOEvent e )
   {
@@ -221,7 +324,7 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     {
       d.Events = false;
 
-      update();
+      mode = e.isVirtual(); update();
 
       d.Events = true;
     }

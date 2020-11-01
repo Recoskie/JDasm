@@ -482,9 +482,11 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       if(!HInit)
       {
-        Virtual = new VHex( file, true ); Offset = new VHex( file, false ); ds = new dataInspector( file );
-        Offset.enableText( textV ); Virtual.enableText( textV );
-        HInit = true;
+        ds = new dataInspector( file );
+            
+        Virtual = new VHex( file, ds, true ); Offset = new VHex( file, ds, false );
+
+        Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
       }
       else
       {
@@ -503,6 +505,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     }
     catch(Exception er)
     {
+      er.printStackTrace();
       if(!admin)
       {
         JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file, or File is open by another process.");
@@ -535,9 +538,11 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         {
           if(!HInit)
           {
-            Virtual = new VHex( file, true ); Offset = new VHex( file, false ); ds = new dataInspector( file );
-            Offset.enableText( textV ); Virtual.enableText( textV );
-            HInit = true;
+            ds = new dataInspector( file );
+            
+            Virtual = new VHex( file, ds, true ); Offset = new VHex( file, ds, false );
+            
+            Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
           }
           else
           {

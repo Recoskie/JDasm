@@ -30,6 +30,10 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   //Event trigger.
   
   private boolean Trigger = false;
+
+  //Weather last command was virtual, or offset.
+
+  private boolean TriggerV = false;
   
   //Read or write event.
   
@@ -60,7 +64,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
     
     //If all event listeners are removed. Disable event thread.
     
-    Running = ( list.getListenerList().length > 0 ); Events = false;
+    Running = ( list.getListenerList().length > 0 );
   }
   
   //Fire the event to all my graphics components, for editing the stream, or decoding data types.
@@ -395,7 +399,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public void seekV( long Address ) throws IOException
   {
-    while( Events && Trigger ) { EventThread.interrupt(); }
+    syncV();
 
     long r = 0;
 
@@ -460,7 +464,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
       }
     }
     
-    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0, getVirtualPointer(), 0 ) );
+    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0, getVirtualPointer(), 0, TriggerV ) );
   }
   
   public int readV() throws IOException
@@ -578,6 +582,10 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
     return( Pos - off );
   }
 
+  //New read method stores read bytes. Allowing the read data to be changed to different types.
+  
+  public int readV( int len ) throws IOException { d = new byte[len]; return( readV( d ) ); } 
+
   //Next Virtual address with data.
 
   public long endV()
@@ -694,7 +702,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   @Override public void seek( long Offset ) throws IOException
   {
-    sync(); super.seek( Offset ); fireIOEventSeek( new IOEvent( this, Offset, 0, getVirtualPointer(), 0 ) );
+    sync(); super.seek( Offset ); fireIOEventSeek( new IOEvent( this, Offset, 0, getVirtualPointer(), 0, TriggerV ) );
   }
   
   //Seek. Same as seek, but is a little faster of a read ahead trick.
@@ -703,7 +711,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   {
     sync(); int b = super.skipBytes( n );
     
-    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0,  getVirtualPointer(), 0 ) );
+    fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0,  getVirtualPointer(), 0, TriggerV ) );
     
     return( b );
   }
@@ -899,14 +907,19 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
 
   public final void sync()
   {
-    while( Events && Trigger ) { EventThread.interrupt(); }
+    TriggerV = false; while( Events && Trigger ) { EventThread.interrupt(); }
+  }
+
+  public final void syncV()
+  {
+    TriggerV = true; while( Events && Trigger ) { EventThread.interrupt(); }
   }
 
   public final void syncR() throws IOException
   {
     //Trigger writing event.
     
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
+    TriggerV = false; while( Events && Trigger && !Read ) { EventThread.interrupt(); }
     
     //Start read event tracing.
     
@@ -917,7 +930,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   {
     //Trigger read event.
     
-    while( Events && Trigger && Read ) { EventThread.interrupt(); }
+    TriggerV = false; while( Events && Trigger && Read ) { EventThread.interrupt(); }
     
     //Start write event tracing.
     
@@ -928,7 +941,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   {
     //Trigger writing event.
     
-    while( Events && Trigger && !Read ) { EventThread.interrupt(); }
+    TriggerV = true; while( Events && Trigger && !Read ) { EventThread.interrupt(); }
     
     //Start read event tracing.
     
@@ -939,7 +952,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   {
     //Trigger read event.
     
-    while( Events && Trigger && Read ) { EventThread.interrupt(); }
+    TriggerV = true; while( Events && Trigger && Read ) { EventThread.interrupt(); }
     
     //Start write event tracing.
     
@@ -964,7 +977,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
           {
             if( pos == super.getFilePointer() )
             {
-              fireIOEvent( new IOEvent( this, TPos, pos - 1, TPosV, posV - 1 ) );
+              fireIOEvent( new IOEvent( this, TPos, pos - 1, TPosV, posV - 1, TriggerV ) );
               Trigger = false;
             }
             else{ pos = super.getFilePointer(); posV = getVirtualPointer(); }

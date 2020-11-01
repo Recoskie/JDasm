@@ -11,12 +11,18 @@ public class IOEvent extends EventObject
   private long End = 0;
   private long PosV = 0;
   private long EndV = 0;
+  private boolean Virtual = false;
   
   public IOEvent( Object source ) { super( source ); }
   
-  public IOEvent( Object source, long Pos, long End, long PosV, long EndV )
+  public IOEvent( Object source, long Pos, long End, long PosV, long EndV, boolean v )
   {
-    super( source ); this.Pos = Pos; this.End = End; this.PosV = PosV; this.EndV = EndV;
+    super( source );
+    
+    this.Pos = Pos; this.End = End;
+    this.PosV = PosV; this.EndV = EndV;
+
+    this.Virtual = v;
   }
   
   public long SPos(){ return( Pos ); }
@@ -30,4 +36,6 @@ public class IOEvent extends EventObject
   public long length(){ return( End - Pos ); }
 
   public long lengthV(){ return( EndV - PosV ); }
+
+  public boolean isVirtual(){ return( Virtual ); }
 }

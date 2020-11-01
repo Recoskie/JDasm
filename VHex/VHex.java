@@ -268,6 +268,14 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
       super.setMaximum( exstend ? 0x7FFFFFF0 : (int) ( ( v + 15 ) & 0x7FFFFFF0 ) );
     }
   }
+
+  //Add data type tool to hex editor.
+
+  public VHex(RandomAccessFileV f, dataInspector.dataInspector d, boolean mode) { this(f, mode); d.addEditor( this ); }
+
+  //Add data type tool to hex editor. If no mode setting then assume offset mode.
+
+  public VHex(RandomAccessFileV f, dataInspector.dataInspector d) { this(f, false); d.addEditor( this ); }
   
   //If no mode setting then assume offset mode.
 
@@ -308,6 +316,14 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
       font = Font.createFont( Font.TRUETYPE_FONT, VHex.class.getResourceAsStream("Font/DOS.ttf") ).deriveFont( 16f );
     }
     catch( Exception er ) { font = new Font( "Monospaced", Font.BOLD, 16 ); }
+  }
+
+  //Disable events when component is not visible.
+
+  @Override public void setVisible( boolean v )
+  {
+    if( v ) { IOStream.addIOEventListener( this ); } else { IOStream.removeIOEventListener(this); }
+    super.setVisible( v );
   }
 
   //Get selected byte index.
@@ -367,6 +383,10 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   //Check if editing data.
 
   public boolean isEditing() { return( emode ); }
+
+  //check if virtual mode.
+
+  public boolean isVirtual() { return( Virtual ); }
 
   //Initialize the draw area and component size.
 
