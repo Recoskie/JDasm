@@ -1,172 +1,159 @@
 package Format.EXEDecode;
 
-import javax.swing.*;
 import java.io.*;
-import javax.swing.tree.*;
-import java.awt.*;
 import RandomAccessFileV.*;
+
+import dataTools.*;
+import core.x86.*;
+import WindowCompoents.*;
 
 public class Headers extends Data
 {
   //*********************************creates the data of the MZ header***********************************
 
-  public javax.swing.table.DefaultTableModel readMZ(RandomAccessFileV b) throws IOException
+  public Descriptor readMZ(RandomAccessFileV b) throws IOException
   {
-    javax.swing.table.DefaultTableModel mzData = new javax.swing.table.DefaultTableModel();
+    Descriptor mz = new Descriptor( b );
 
-    mzData.addColumn("Usage"); mzData.addColumn("Hex"); mzData.addColumn("Dec");
+    mz.String8( "SIGNATRUE", 2 ); String sig = mz.value + "";
+    mz.LUINT16( "Size of Last Page" );
+    mz.LUINT16( "Number of 512 byte pages in file" );
+    mz.LUINT16( "Number of Relocation Entries" );
+    mz.LUINT16( "Header size in Paragraphs" );
+    mz.LUINT16( "Minimum additional Memory required in paragraphs" );
+    mz.LUINT16( "Maximum additional Memory required in paragraphs" );
+    mz.LUINT16( "Initial SS relative to start of file" );
+    mz.LUINT16( "Initial SP" );
+    mz.LUINT16( "Checksum (unused)" );
+    mz.LUINT16( "Initial IP" );
+    mz.LUINT16( "Initial CS relative to start of file" );
+    mz.LUINT16( "Offset within Header of Relocation Table" );
+    mz.LUINT16( "Overlay Number" );
+    mz.Other( "Reserved", 8 );
+    mz.LUINT16( "ID" );
+    mz.LUINT16( "INFO" );
+    mz.Other( "Reserved", 20 );
+    mz.LUINT32( "PE Header Location" ); PE = ((Integer)mz.value).longValue();
 
-    b.read(b2); String MZ = toHex( b2 ); mzData.addRow( new Object[]{ "SIGNATRUE", MZ, toText( b2 ) } );
-    b.read(b2); mzData.addRow( new Object[]{ "Size of Last Page", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Number of 512 byte pages in file", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Number of Relocation Entries", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Header size in Paragraphs", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Minimum additional Memory required in paragraphs", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Maximum additional Memory required in paragraphs", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Initial SS relative to start of file", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Initial SP", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Checksum (unused)", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Initial IP", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Initial CS relative to start of file", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Offset within Header of Relocation Table", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "Overlay Number", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b8); mzData.addRow( new Object[]{ "Reserved", toHex(b8), "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "ID", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    b.read(b2); mzData.addRow( new Object[]{ "INFO", toHex(b2), Short.toUnsignedInt( toShort(b2) ) + "" } );
-    byte[] bd = new byte[20]; b.read(bd); mzData.addRow( new Object[]{ "Reserved", toHex(bd), "" } );
-    b.read(b4); PE = toInt(b4); mzData.addRow( new Object[]{ "PE Header Location", toHex(b4), PE + "" } );
+    b.addV( b.getFilePointer(), PE - mz.length, 256, PE - mz.length );
 
-    //Map the dos program in virtual space.
+    mz.Other( "8086 16-bit", (int)(PE - mz.length) );
 
-    bd = new byte[ (int)( PE - 64 ) ]; b.addV( b.getFilePointer(), bd.length, 256, bd.length );
+    mz.setEvent(this::mzInfo);
 
-    //The section before the PE header is the small MZ dos program.
-    
-    b.read(bd); mzData.addRow( new Object[]{ "8086 16-bit", toHex(bd), "" } );
-    
-    //Return Table data.
-    
-    if( !MZ.equals("4D 5A ") ) { Data.error = true; }; return( mzData );
+    Data.error = !sig.equals("MZ"); return( mz );
   }
 
   //*********************************creates the nicely styled data of the PE header***********************************
 
-  public javax.swing.table.DefaultTableModel readPE(RandomAccessFileV b) throws IOException
+  public Descriptor readPE(RandomAccessFileV b) throws IOException
   {
-    javax.swing.table.DefaultTableModel peData = new javax.swing.table.DefaultTableModel();
-
-    peData.addColumn( "Usage" ); peData.addColumn( "Hex" ); peData.addColumn( "Dec" );
+    Descriptor pe = new Descriptor( b );
 
     //data decode to table
 
-    b.read(b4); String PES = toHex(b4); peData.addRow( new Object[]{ "SIGNATRUE", PES, "" } );
-    b.read(b2); coreType = toShort(b2) & 0xFFFF; peData.addRow( new Object[]{ "Machine", toHex(b2), "" } );
-    b.read(b2); NOS = toShort( b2 ); peData.addRow( new Object[]{ "Number Of Sections", toHex(b2), NOS + "" } );
-    b.read(b4); peData.addRow( new Object[]{ "Time Date Stamp", toHex(b4), toInt(b4) + "" } );
-    b.read(b4); peData.addRow( new Object[]{ "Pointer To Symbol Table", toHex(b4), toInt(b4) + "" } );
-    b.read(b4); peData.addRow( new Object[]{ "Number Of Symbols", toHex(b4), toInt(b4) + "" } );
-    b.read(b2); peData.addRow( new Object[]{ "Size Of OP Header", toHex(b2), toShort(b2) + "" } );
-    b.read(b2); peData.addRow( new Object[]{ "Characteristics", toHex(b2), "" } );
+    pe.String8( "SIGNATRUE", 4 ); byte[] sig = ( pe.value + "" ).getBytes();
+    pe.LUINT16( "Machine" ); coreType = ((Short)pe.value).shortValue();
+    pe.LUINT16( "Number Of Sections" ); NOS = ((Short)pe.value).shortValue();
+    pe.LUINT32( "Time Date Stamp" );
+    pe.LUINT32( "Pointer To Symbol Table" );
+    pe.LUINT32( "Number Of Symbols" );
+    pe.LUINT16( "Size Of OP Header" );
+    pe.Other( "Characteristics", 2 );
 
-    //Test if PE header was read correctly.
-
-    if( !PES.equals("50 45 00 00 ") ) { Data.error = true; }; return( peData );
+    pe.setEvent(this::peInfo);
+    
+    Data.error = !( sig[0] == 0x50 && sig[1] == 0x45 && sig[2] == 0 && sig[3] == 0 ); return( pe );
   }
 
   //************************************************READ OP HEADER********************************************
 
-  public javax.swing.table.DefaultTableModel readOP(RandomAccessFileV b) throws IOException
+  public Descriptor readOP(RandomAccessFileV b) throws IOException
   {
-    javax.swing.table.DefaultTableModel opData = new javax.swing.table.DefaultTableModel();
-
-    opData.addColumn( "Usage" ); opData.addColumn( "Hex" ); opData.addColumn( "Dec" );
+    Descriptor op = new Descriptor(b);
 
     //The OP header has different signature meanings.
     //OP = 0B 01 is a 32 bit program, and 0B 02 is a 64 bit one. Additional 01 07 is a ROM image.
     //Note I could compare numbers 267 for 32 bit, 523 for 64 bit, and 263 for a ROM image.
 
-    b.read(b2); String OPS = toHex(b2); opData.addRow( new Object[]{ "SIGNATRUE", OPS, "" } );
+    op.Other( "SIGNATRUE", 2 ); byte[] OPS = ( op.value + "" ).getBytes();
 
-    is64bit = OPS.equals("0B 02 ");
+    is64bit = OPS[0] == 0x0B && OPS[1] == 0x02;
 
-    b.read(b1); opData.addRow( new Object[]{ "Major Linker Version", toHex(b1), ((int)b1[0]) + "" } );
-    b.read(b1); opData.addRow( new Object[]{ "Minor Linker Version", toHex(b1), ((int)b1[0]) + "" } );
+    op.UINT8( "Major Linker Version" );
+    op.UINT8( "Minor Linker Version" );
 
-    b.read(b4); sizeOfCode = toInt(b4); opData.addRow( new Object[]{ "Size Of Code", toHex(b4), sizeOfCode + "" } );
-    b.read(b4); opData.addRow( new Object[]{ "Size Of Initialized Data", toHex(b4), toInt(b4) + "" } );
-    b.read(b4); opData.addRow( new Object[]{ "Size Of Uninitialized Data", toHex(b4), toInt(b4) + "" } );
-    b.read(b4); startOfCode = toInt(b4); opData.addRow( new Object[]{ "Start Of Code.", toHex(b4), startOfCode + "" } );
-    b.read(b4); baseOfCode = toInt(b4); opData.addRow( new Object[]{ "Base Of Code", toHex(b4), baseOfCode + "" } );
+    op.LUINT32( "Size Of Code" ); sizeOfCode = ((Integer)op.value).intValue();
+    op.LUINT32( "Size Of Initialized Data" );
+    op.LUINT32( "Size Of Uninitialized Data" );
+    op.LUINT32( "Start Of Code." ); startOfCode = ((Integer)op.value).intValue();
+    op.LUINT32( "Base Of Code" ); baseOfCode = ((Integer)op.value).intValue();
 
-    if(!is64bit) { b.read(b4); opData.addRow( new Object[]{ "Base Of Data", toHex(b4), toInt(b4) + "" } ); } //32 bit only.
+    //32 bit only.
 
-    //64 bit.
+    if(!is64bit) { op.LUINT32( "Base Of Data" ); }
 
-    if(is64bit)
-    {
-      b.read(b8); imageBase = toLong(b8); opData.addRow( new Object[]{ "Base Address", toHex(b8), imageBase + "" } );
-    }
+    //64 bit base address.
+
+    if(is64bit) { op.LUINT64( "Base Address" ); imageBase = ((Long)op.value).longValue(); }
     
-    //32 bit.
+    //32 bit base address.
 
-    else
-    {
-      b.read(b4); imageBase = toInt(b4); opData.addRow( new Object[]{ "Base Address", toHex(b4), imageBase + "" } );
-    }
+    else { op.UINT32( "Base Address" ); imageBase = ((Integer)op.value).intValue(); }
 
-    b.read(b4); opData.addRow( new Object[]{ "Section Alignment", toHex(b4), toInt(b4) + "" } );
-    b.read(b4); opData.addRow( new Object[]{ "File Alignment", toHex(b4), toInt(b4) + "" } );
+    op.LUINT32( "Section Alignment" );
+    op.LUINT32( "File Alignment" );
 
-    b.read(b2); opData.addRow( new Object[]{ "Major Operating System Version", toHex(b2), toShort(b2) + "" } );
-    b.read(b2); opData.addRow( new Object[]{ "Minor Operating System Version", toHex(b2), toShort(b2) + "" } );
-    b.read(b2); opData.addRow( new Object[]{ "Major Image Version", toHex(b2), toShort(b2) + "" } );
-    b.read(b2); opData.addRow( new Object[]{ "Minor Image Version", toHex(b2), toShort(b2) + "" } );
-    b.read(b2); opData.addRow( new Object[]{ "Major Sub system Version", toHex(b2), toShort(b2) + "" } );
-    b.read(b2); opData.addRow( new Object[]{ "Minor Sub system Version", toHex(b2), toShort(b2) + "" } );
+    op.LUINT16( "Major Operating System Version" );
+    op.LUINT16( "Minor Operating System Version" );
+    op.LUINT16( "Major Image Version" );
+    op.LUINT16( "Minor Image Version" );
+    op.LUINT16( "Major Sub system Version" );
+    op.LUINT16( "Minor Sub system Version" );
 
-    b.read(b4); opData.addRow( new Object[]{ "Win 32 Version Value", toHex(b4), toInt(b4) + "" } );
-    b.read(b4); opData.addRow( new Object[]{ "Size Of Image", toHex(b4), toInt(b4) + "" } );
-    b.read(b4); opData.addRow( new Object[]{ "Size Of Headers", toHex(b4), toInt(b4) + "" } );
-    b.read(b4); opData.addRow( new Object[]{ "Check Sum", toHex(b4), toInt(b4) + "" } );
+    op.LUINT32( "Win 32 Version Value" );
+    op.LUINT32( "Size Of Image" );
+    op.LUINT32( "Size Of Headers" );
+    op.LUINT32( "Check Sum" );
 
-    b.read(b2); opData.addRow( new Object[]{ "Sub system", toHex(b2), "" } );
-    b.read(b2); opData.addRow( new Object[]{ "Dll Characteristics", toHex(b2), toShort(b2) + "" } );
+    op.LUINT16( "Sub system" );
+    op.Other( "Dll Characteristics", 2 );
 
-    //64 bit.
+    //64 bit stack.
 
     if(is64bit)
     {
-      b.read(b8); opData.addRow( new Object[]{ "Size Of Stack Reserve", toHex(b8), toLong(b8) + "" } );
-      b.read(b8); opData.addRow( new Object[]{ "Size Of Stack Commit", toHex(b8), toLong(b8) + "" } );
-      b.read(b8); opData.addRow( new Object[]{ "Size Of Heap Reserve", toHex(b8), toLong(b8) + "" } );
-      b.read(b8); opData.addRow( new Object[]{ "Size Of Heap Commit", toHex(b8), toLong(b8) + "" } );
+      op.LUINT64( "Size Of Stack Reserve" );
+      op.LUINT64( "Size Of Stack Commit" );
+      op.LUINT64( "Size Of Heap Reserve" );
+      op.LUINT64( "Size Of Heap Commit" );
     }
 
-    //32 bit.
+    //32 bit stack.
 
     else
     {
-      b.read(b4); opData.addRow( new Object[]{ "Size Of Stack Reserve", toHex(b4), toInt(b4) + "" } );
-      b.read(b4); opData.addRow( new Object[]{ "Size Of Stack Commit", toHex(b4), toInt(b4) + "" } );
-      b.read(b4); opData.addRow( new Object[]{ "Size Of Heap Reserve", toHex(b4), toInt(b4) + "" } );
-      b.read(b4); opData.addRow( new Object[]{ "Size Of Heap Commit", toHex(b4), toInt(b4) + "" } );
+      op.LUINT32( "Size Of Stack Reserve" );
+      op.LUINT32( "Size Of Stack Commit" );
+      op.LUINT32( "Size Of Heap Reserve" );
+      op.LUINT32( "Size Of Heap Commit" );
     }
 
-    b.read(b4); opData.addRow( new Object[]{ "Loader Flags", toHex(b4), toInt(b4) } );
-    b.read(b4); DDS = toInt(b4); opData.addRow( new Object[]{ "Data Directory Array Size", toHex(b4), DDS } );
+    op.Other( "Loader Flags", 4 );
+    op.LUINT32( "Data Directory Array Size" ); DDS = ((Integer)op.value).intValue();
 
-    DDS *= 3;
+    op.setEvent(this::opInfo);
 
     //If op header was read properly.
 
-    if( !OPS.equals("0B 01 ") && !is64bit ) { Data.error = true; }; return( opData );
+    Data.error = !( OPS[0] == 0x0B && OPS[1] == 0x01 ) && !is64bit; return( op );
   }
 
   //************************************************READ Data Directory Array********************************************
   //Each section is given in virtual address position if used. Sections that are not used have a virtual address of 0.
   //The next header defines the sections that are to be read and placed in ram memory.
 
-  public javax.swing.table.DefaultTableModel readDataDrectory(RandomAccessFileV b) throws IOException
+  public Descriptor readDataDrectory(RandomAccessFileV b) throws IOException
   {
     //Names of the data array locations
 
@@ -189,71 +176,292 @@ public class Headers extends Data
 
     //Create table data.
 
-    javax.swing.table.DefaultTableModel ddData = new javax.swing.table.DefaultTableModel();
-
-    ddData.addColumn("Usage"); ddData.addColumn("Hex"); ddData.addColumn("Dec");
+    Descriptor dd = new Descriptor(b);
 
     //The Number of data Directory array sections.
 
-    DataDir = new long[ ( ( DDS / 3 ) * 2 ) ]; DataDirUsed = new boolean[ ( DDS / 3 ) ];
+    DataDir = new long[ DDS * 2 ]; DataDirUsed = new boolean[ DDS ];
 
     //Create the table data.
 
-    for( int i=0, i2=0, i3=0; i < DDS; i+=3, i2+=2, i3++ )
+    for( int i = 0, i2 = 0; i < DDS; i++, i2 += 2 )
     {
-      ddData.addRow( new Object[]{ "Array Element " + ( i / 3 ) + "", ( ( i / 3 ) < Types.length ) ? Types[ ( i / 3 ) ] : "Unknown use", "" } );
+      dd.Array( ( i < Types.length ) ? Types[ i ] : "Unknown use", 8 );
 
-      b.read(b4); DataDir[ i2 ] = toInt(b4); ddData.addRow( new Object[]{ "Virtual Address", toHex( b4 ), DataDir[ i2 ] + "" } );
-      
-      b.read(b4); DataDir[ i2 + 1 ] = toInt(b4); ddData.addRow( new Object[]{ "Size", toHex( b4 ), DataDir[ i2 + 1 ] + "" } );
+      dd.LUINT32( "Virtual Address" ); DataDir[ i2 ] = ((Integer)dd.value).intValue();
+      dd.LUINT32( "Size" ); DataDir[ i2 + 1 ] = ((Integer)dd.value).intValue();
 
       //Test if data Dir Is used.
 
-      DataDirUsed[ i3 ] = ( DataDir[ i2 ] > 0 ) && ( DataDir[ i2 + 1 ] > 0 ); DataDir[ i2 ] += imageBase;
+      DataDirUsed[ i ] = ( DataDir[ i2 ] > 0 ) && ( DataDir[ i2 + 1 ] > 0 ); DataDir[ i2 ] += imageBase;
     }
 
-    return(ddData);
+    dd.setEvent(this::ddInfo); return( dd );
   }
 
   //****************************************Read the Mapped Sections of executable, or dll*******************************************
   //The PE header defines the number of sections. Without this the virtual addresses of each section in DataDrectory is useless.
 
-  public javax.swing.table.DefaultTableModel readSections(RandomAccessFileV b) throws IOException
+  public Descriptor readSections(RandomAccessFileV b) throws IOException
   {
-    byte[] bd = new byte[ 12 ]; long virtualSize = 0, virtualOffset = 0, size = 0, offset = 0;
+    byte[] bd = new byte[ 12 ];
+    
+    long virtualSize = 0, virtualOffset = 0, size = 0, offset = 0;
 
     //Create table data.
 
-    javax.swing.table.DefaultTableModel sData = new javax.swing.table.DefaultTableModel();
+    Descriptor sd = new Descriptor(b);
 
-    sData.addColumn("Usage"); sData.addColumn("Data Type"); sData.addColumn("Decode");
-
-    for( int i = 0, i2 = 0; i < ( NOS * 7 ); i += 7, i2 += 4 )
+    for( int i = 0; i < NOS; i++ )
     {
+      sd.Array( "Section Array element " + i + "", 40 );
+
       //Section name.
       
-      b.read(b8); sData.addRow( new Object[]{ "Section Name", "ASCII 8 Bytes", toText( b8 ) } );
+      sd.String8( "Section Name", 8 );
 
       //Virtual address.
 
-      b.read(b4); virtualSize = toInt(b4); sData.addRow( new Object[]{ "Section Size Loaded In Ram", "DWORD", virtualSize + "" } );
-      b.read(b4); virtualOffset = toInt(b4); sData.addRow( new Object[]{ "Where to Store Bytes in Ram", "DWORD", virtualOffset + "" } );
-      b.read(b4); size = toInt(b4); sData.addRow( new Object[]{ "Byte length to read from EXE file", "DWORD", size + "" } );
-      b.read(b4); offset = toInt(b4); sData.addRow( new Object[]{ "Position to Start Reading EXE", "DWORD", offset + "" } );
+      sd.LUINT32( "Section Size Loaded In Ram" ); virtualSize = ((Integer)sd.value).intValue();
+      sd.LUINT32( "Where to Store Bytes in Ram"); virtualOffset = ((Integer)sd.value).intValue();
+      sd.LUINT32( "Byte length to read from EXE file"); size = ((Integer)sd.value).intValue();
+      sd.LUINT32( "Position to Start Reading EXE" ); offset = ((Integer)sd.value).intValue();
 
       //Reserved section.
 
-      b.read(bd); sData.addRow( new Object[]{ "Reserved 12 bytes", "Hex", toHex(bd) } );
+      sd.Other( "Reserved", 12 );
 
       //Section FLAGS.
 
-      b.read(b4); sData.addRow( new Object[]{ "Section flags", "FLAG Hex", toHex(b4) } );
+      sd.Other( "Section flags", 4 );
 
       //Add virtual address to IO system.
 
       b.addV( offset, size, virtualOffset + imageBase, virtualSize );
     }
 
-    return(sData);
+    sd.setEvent(this::sdInfo); return(sd);
+  }
+
+  //Detailed description of the MZ header.
+
+  public static final String res = "A section that is reserved, is skipped. So that some day the empty space may be used for something new.";
+  
+  public static final String stack = "The SP (stack pointer) is a place that CPU uses to store data. Each thing wrote into the stack increments the stack pointer.<br /><br />" +
+  "Each thing read from the stack deincrements the stack pointer. Thus the first thing read is the last thing added to the stack.<br /><br />" +
+  "The stack is used between method calls. As the stack is a convenient place to put things that function, or method uses as input.<br /><br />" +
+  "It is important that the stack pointer is adjusted away from the program. So the stack does not write into the programs machine code in virtual space.";
+
+  public static final String Instruct = "The instruction pointer is the position the CPU is set with the binary code.<br /><br />" +
+  "The CPU reads the memory at the position of the instruction pointer, and does a operation.<br /><br />" +
+  "Instruction pointer increments after completing a single operation. To fetch the next instruction. This repeats in a cycle.<br /><br />" +
+  "The instruction pointer is built into the CPU in order to run software.";
+  
+  public static final String sseg = "SS (Stack segment) is a value that is multiplied by 16 plus the SP (stack pointer) to forum the stack pointer position.<br /><br />" +
+  "This was done to make the address space bigger in 16 bit computers.<br /><br />" +
+  "Thus 32 bit, and 64 bit systems no longer use a segment. Unless set 16 bit mode.<br /><br />";
+
+  public static final String cseg = "CS (Code segment) is a value that is multiplied by 16 plus the IP (Instruction pointer) to forum the Instruction pointer position.<br /><br />" +
+  "This was done to make the address space bigger in 16 bit computers.<br /><br />" +
+  "Thus 32 bit, and 64 bit systems no longer use a segment. Unless set 16 bit mode.<br /><br />";
+
+  public static final String[] MZinfo = new String[]{"<html><p>The signature must always be 4D 5A = MZ.<br /><br />" + 
+  "It must be at the start of any windows binary.<br /><br />" +
+  "If the file does not pass this test. Then it is corrupted.<br /><br />" + 
+  "Or is a different file type disguise as a windows binary.</p></html>",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "<html><p>" + sseg + stack + "</p></html>",
+  "<html><p>" + sseg + stack + "</p></html>",
+  "",
+  "<html><p>" + cseg + Instruct + "</p></html>",
+  "<html><p>" + cseg + Instruct + "</p></html>",
+  "",
+  "",
+  "<html><p>" + res + "</p></html>",
+  "",
+  "",
+  "<html><p>" + res + "</p></html>",
+  "<html><p>" + res + "<br /><br />Instead of adding to DOS. Microsoft created a new system that uses the reserved section to locate to the PE header.</p></html>",
+  "<p>This is a x86 binary that gets loaded by DOS in 16 bit.<br /><br />The new \"Windows\" system used the PE location to go to the new PE header.<br /><br />"};
+
+  public void mzInfo( int el )
+  {
+    //Disassemble 16 bit section.
+
+    if( el == 19 )
+    {
+      String t = "", t1 = "", t2 = "";
+
+      int Dos_exit = 0; //DOS has a exit code.
+
+      //16 bit x86 DOS.
+
+      X86 temp = new X86( Data.stream ); temp.setBit( X86.x86_16 );
+
+      temp.setSeg( (short)0x0010 ); //Sets the code segment.
+
+      try
+      {
+        //Disassemble till end, or return from application.
+        //Note that more can be added here such as the jump operation.
+
+        temp.setPosV( 256 );
+
+        while( temp.getPos() < Data.PE )
+        {
+          t1 = temp.posV(); t2 = temp.disASM();
+          
+          if( Dos_exit == 0 && t2.equals("MOV AX,4C01") ) { Dos_exit = 1; }
+          else if( Dos_exit == 1 && t2.equals("INT 21") ) { Dos_exit = 2; }
+          
+          t += t1 + " " + t2 + "<br />";
+
+          if( Dos_exit == 2 ) { break; }
+        }
+
+        long pos = temp.getPos() - 1, posV = temp.getPosV() - 1;
+        
+        Data.stream.seekV( 256 );
+        WindowCompoents.Virtual.setSelectedEnd( posV ); WindowCompoents.Offset.setSelectedEnd( pos );
+        
+        WindowCompoents.info( "<html>" + MZinfo[ el ] + t + "</html>" );
+      }
+      catch( Exception e ) { }
+    }
+
+    else
+    {
+      WindowCompoents.info( MZinfo[ el ] );
+    }
+  }
+
+  //Detailed description of the PE header.
+
+  public static final String[] PEinfo = new String[]{"<html><p>The PE header must start with PE = 50 45 00 00.<br /><br />If it does not pass the signature test then the windows binary is corrupted.</p></html>",
+  "<html><p>Windows does not translate binary to match other cores. It sets a core to the start of the program if CPU is compatible.<br /><br /><table border='1'>" +
+  "<tr><td>Value</td><td>Type</td></tr>" +
+  "<tr><td>4C 01</td><td>Intel 386</td></tr>" +
+  "<tr><td>64 86</td><td>Intel x64, and AMD x64</td></tr>" +
+  "<tr><td>62 01</td><td>MIPS R3000</td></tr>" +
+  "<tr><td>68 01</td><td>MIPS R10000</td></tr>" +
+  "<tr><td>69 01</td><td>MIPS little endian WCI v2</td></tr>" +
+  "<tr><td>83 01</td><td>old Alpha AXP</td></tr>" +
+  "<tr><td>84 01</td><td>Alpha AXP</td></tr>" +
+  "<tr><td>A2 01</td><td>Hitachi SH3</td></tr>" +
+  "<tr><td>A3 01</td><td>Hitachi SH3 DSP</td></tr>" +
+  "<tr><td>A6 01</td><td>Hitachi SH4</td></tr>" +
+  "<tr><td>A8 01</td><td>Hitachi SH5</td></tr>" +
+  "<tr><td>C0 01</td><td>ARM little endian</td></tr>" +
+  "<tr><td>C2 01</td><td>Thumb</td></tr>" +
+  "<tr><td>C4 01</td><td>ARMv7 (Thumb-2)</td></tr>" +
+  "<tr><td>D3 01</td><td>Matsushita AM33</td></tr>" +
+  "<tr><td>F0 01</td><td>PowerPC little endian</td></tr>" +
+  "<tr><td>F1 01</td><td>PowerPC with floating point support</td></tr>" +
+  "<tr><td>F2 01</td><td>PowerPC 64-bit little endian</td></tr>" +
+  "<tr><td>00 02</td><td>Intel IA64</td></tr>" +
+  "<tr><td>66 02</td><td>MIPS16</td></tr>" +
+  "<tr><td>68 02</td><td>Motorola 68000 series</td></tr>" +
+  "<tr><td>84 02</td><td>Alpha AXP 64-bit</td></tr>" +
+  "<tr><td>66 03</td><td>MIPS with FPU</td></tr>" +
+  "<tr><td>66 04</td><td>MIPS16 with FPU</td></tr>" +
+  "<tr><td>BC 0E</td><td>EFI Byte Code</td></tr>" +
+  "<tr><td>41 90</td><td>Mitsubishi M32R little endian</td></tr>" +
+  "<tr><td>64 AA</td><td>ARM64 little endian</td></tr>" +
+  "<tr><td>EE C0</td><td>clr pure MSIL</td></tr>" +
+  "</table><br />Generally Windows is wrote in x86 machine code. So the only two settings you will ever see used are.<br /><br />" +
+  "4C 01 = Intel 386 is 32 bit x86 machine code.<br />64 86 = Intel x64, and AMD x64 is 64 bit x86 machine code.<br /><br />A 64 bit x86 core can run 32 bit by setting operation size 32 bits when running code.<br /><br />" +
+  "However a 32 bit x86 core can not be forced to do 64 bit in length operations. Even though the machine code is the same.<br /><br />" +
+  "There is also windows RT. Which RT is a ARM core compilation of windows. In which case you might see Machine ARM.</p></html>",
+  "<html><p>This is the number of sections to read after the OP header. In the \"Mapped SECTOINS TO RAM\".<br /><br />" +
+  "The sections specify a position to read the file, and virtual address to place the section, from the windows binary in RAM.</p></html>",
+  "<html>A date time stamp is in seconds. The seconds are added to the starting date \"Wed Dec 31 7:00:00PM 1969\".<br /><br />" +
+  "If the time date stamp is \"37\" in value, then it is plus 37 second giving \"Wed Dec 31 7:00:37PM 1969\".</html>",
+  "",
+  "",
+  "",
+  "",
+  ""};
+
+  public void peInfo( int el )
+  {
+    WindowCompoents.info( PEinfo[ el ] );
+  }
+
+  //Detailed description of the OP header.
+
+  public static final String Ver = "Major, and Minor are put together to forum the version number.<br /><br />Example.<br /><br />Major version = 5<br /><br />Minor version = 12<br /><br />Would mean version 5.12V.";
+  
+  public static final String[] OPinfo = new String[]{"<html><p>The Optional header has three different possible signatures.<br /><br />" +
+  "0B 01 = 32 Bit binary.<br /><br />0B 02 = 64 Bit binary<br /><br />07 01 = ROM Image file.<br /><br />" +
+  "The only time the OP header changes format is the 64 bit version of the Header.<br /><br />" +
+  "If this section does not test true, for any of the three signatures, then the file is corrupted.</p></html>",
+  "<html>" + Ver + "<br /><br />The linker links the sections together into a EXE, or DLL.</html>",
+  "<html>" + Ver + "<br /><br />The linker links the sections together into a EXE, or DLL.</html>",
+  "<html>Adding this to \"Base of code\" marks the end of the machine code. Plus the \"Base Address\".</html>",
+  "",
+  "",
+  "<html>Start of the binaries machine code in virtual space. Plus the \"Base Address\".</html>",
+  "<html>The beginning of the machine code section. Plus the \"Base Address\".<br /><br />The start position does not have to be at the very start of the machine code section.</html>",
+  "<html>The Data section is a safe spot to put results from operations without writing over program machine code.<br /><br />In code these are called variables.</html>",
+  "<html>Base address is added to all virtual addresses. It is the preferred address to load the mapped sections in RAM from this file.<br /><br />Windows may add to this number to space programs apart in virtual space.</html>",
+  "",
+  "",
+  "<html>" + Ver + "<br /><br />The version number of the required operating system.</html>",
+  "<html>" + Ver + "<br /><br />The version number of the required operating system.</html>",
+  "<html>" + Ver + "<br /><br />The version number of this file.</html>",
+  "<html>" + Ver + "<br /><br />The version number of this file.</html>",
+  "<html>" + Ver + "<br /><br />The subsystem version.</html>",
+  "<html>" + Ver + "<br /><br />The subsystem version.</html>",
+  "<html>The win 32 Value has never been used.</html>",
+  "<html>The size of this file.</html>",
+  "<html>The size of the headers, for setting up the virtual space of this binary. Excluding the rest of the data.</html>",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "<html><p>Data Directory Array can be made bigger than it's default size 16.<br /><br />Which allows for more features to be added to the windows application format.<p></html>"};
+
+  public void opInfo( int el )
+  {
+    WindowCompoents.info( OPinfo[ el ] );
+  }
+
+  //Detailed description of the data Directory Array.
+
+  public static final String[] DDinfo = new String[]{"<html>Array element consisting of two 32 bit values.</html>",
+  "<html>Virtual Address of section.<br /><br />Plus the programs base address. The Base address is defined in OP header.</html>",
+  "<html>Size of section data.</html>"};
+
+  public void ddInfo( int el )
+  {
+    WindowCompoents.info( DDinfo[ el % 3 ] );
+  }
+
+  //Detailed description of the sections to RAM memory.
+
+  public static final String[] Sinfo = new String[]{"<html>Array element consisting of A section name, and some 32 bit values, for the location to put the data in memory.</html>",
+  "<html><p>The 8 bytes can be given any text based name you like. It is not used for anything by the system.<br /><br />" +
+  "The names can be very deceiving. As x86 compilers can compile out the code section giving it a \".text\" name.<br /><br />" +
+  "Don't worry about the names. The data Directory Array defines what each section is after it is in virtual space.<br /><br />" +
+  "Thus the OP header marks the machine code in it's \"Start of code\" value. Which is a virtual address position.</p></html>",
+  "<html>Number of bytes to put in virtual space. This reflects the sections actual size.<br /><br />As number of bytes read from file may be padded by the linker that linked the section together.</html>",
+  "<html>The virtual address is added to the programs \"Base Address\".<br /><br />The programs \"Base Address\" is defined by the OP header.</html>",
+  "<html>Number of bytes to read from file.<br /><br />The number of bytes read, may not all be put in RAM. If Number of bytes to put in virtual space is smaller.<br /><br />This happens, because sections are aligned in multiples by the linker.</html>",
+  "<html>The position of the file to read.</html>",
+  "<html><p>" + res + "</p></html>",
+  ""};
+
+  public void sdInfo( int el )
+  {
+    WindowCompoents.info( Sinfo[ el % 8 ] );
   }
 }

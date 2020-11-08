@@ -8,6 +8,8 @@ import Format.EXEDecode.*;
 import RandomAccessFileV.*;
 import WindowCompoents.*;
 
+import dataTools.*;
+
 //Processor cores.
 
 import core.x86.*; //X86.
@@ -20,8 +22,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   //The new Descriptor table allows a description of clicked data.
 
-  public Descriptor des = new Descriptor( new Object[][] {{}}, new Object[]{} );
-  public javax.swing.table.DefaultTableModel TData[] = new javax.swing.table.DefaultTableModel[5];
+  public Descriptor[] des = new Descriptor[5];
 
   //Nodes that can be added to when Adding section format readers.
 
@@ -49,7 +50,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
   //public DLLImport DLL = new DLLImport();
   //public Resource RSRC = new Resource();
 
-  public EXE() { UsedDecoder = this; out = des; out.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); }
+  public EXE() { UsedDecoder = this; }
 
   //plug in the separate decoders of the exe format together
 
@@ -71,11 +72,11 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     try
     {
-      TData[0] = Header.readMZ( b );
-      if(!Data.error) { TData[1] = Header.readPE( b ); }
-      if(!Data.error) { TData[2] = Header.readOP( b ); }
-      if(!Data.error) { TData[3] = Header.readDataDrectory( b ); }
-      if(!Data.error) { TData[4] = Header.readSections( b ); }
+      des[0] = Header.readMZ( b );
+      if(!Data.error) { des[1] = Header.readPE( b ); }
+      if(!Data.error) { des[2] = Header.readOP( b ); }
+      if(!Data.error) { des[3] = Header.readDataDrectory( b ); }
+      if(!Data.error) { des[4] = Header.readSections( b ); }
     }
     catch(java.io.IOException e) { Data.error = true; }
 
@@ -212,9 +213,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     else if( h.equals("MZ Header.h") )
     {
-      try{ b.seek( 0 ); } catch( IOException er ) { } Offset.setSelectedEnd( data.PE - 1 );
-      
-      des.setType( Descriptor.MZ ); if(TData[0] != null) { out.setModel( TData[0] ); } else { errDecode(); }
+      ds.setDescriptor( des[0] );
 
       info("<html><p>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
       "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
@@ -222,48 +221,34 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     }
     else if( h.equals("PE Header.h") )
     {
-      try{ b.seek( data.PE ); } catch( IOException er ) { } Offset.setSelectedEnd( data.PE + 23 );
-
-      des.setType( Descriptor.PE ); if(TData[1] != null) { out.setModel( TData[1] ); } else { errDecode(); }
+      ds.setDescriptor( des[1] );
 
       info("<html><p>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
       "This header specifies the number of sections to map in virtual space. The processor type, and date of compilation.</p></html>");
     }
     else if( h.equals("OP Header.h") )
     {
-      try{ b.seek(data.PE + 24); } catch( IOException er ) { } Offset.setSelectedEnd( data.is64bit ? data.PE + 135 : data.PE + 119 );
-
-      des.setType( Descriptor.OP ); if(TData[2] != null) { out.setModel( TData[2] ); } else { errDecode(); }
+      ds.setDescriptor( des[2] );
 
       info("<html><p>At the end of the PE header is the start of the Optional header. However, this header is not optional.</p></html>");
     }
     else if( h.equals("Data Directory Array.h") )
     {
-      long pos = data.is64bit ? data.PE + 136 : data.PE + 120;
-
-      try{ b.seek( pos ); } catch( IOException er ) { } Offset.setSelectedEnd( pos + ( ( data.DDS / 3 ) << 3 ) - 1 );
-
-      des.setType( Descriptor.dataDirectoryArray ); if(TData[3] != null) { out.setModel( TData[3] ); } else { errDecode(); }
+      ds.setDescriptor( des[3] );
 
       info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
       "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.<br /><br />Anything that is 0, is not used.</p></html>");
     }
     else if( h.equals("Mapped SECTOINS TO RAM.h") )
     {
-      long pos = ( data.is64bit ? data.PE + 136 : data.PE + 120 ) + ( ( data.DDS / 3 ) << 3 );
-
-      try{ b.seek( pos ); } catch( IOException er ) { } Offset.setSelectedEnd( pos + ( data.NOS * 40 ) - 1 );
-
-      des.setType( Descriptor.sections ); if(TData[4] != null) { out.setModel( TData[4] ); } else { errDecode(); }
+      ds.setDescriptor( des[4] );
 
       info("<html><p>The PE header specifies the number of sections to read.<br /><br />Each section specifies where to read the file, and size, and at what address to place the data in virtual Memory, and size.<br /><br />" +
       "Each virtual address is added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.</p></html>");
     }
     else if( h.equals("Header Data") )
     {
-      long pos = ( data.is64bit ? data.PE + 136 : data.PE + 120 ) + ( ( data.DDS / 3 ) << 3 );
-
-      try{ b.seek(0); } catch( IOException er ) { } Offset.setSelectedEnd( pos + ( data.NOS * 40 ) - 1 );
+      Offset.setSelected( 0, ( des[0].length + des[1].length + des[2].length + des[3].length + des[4].length ) - 1 );
 
       info("<html><p>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
       "Export Table can not be located.<br /><br />" +
@@ -489,20 +474,20 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public void noDecode()
   { 
-    info(""); out.setModel(new JTable( ( new Object[][] { { "NO DECODER" } } ), ( new Object[]{ "NO DECODER HAS BEN MADE YET" } ) ).getModel());
+    info("<html>No reader for this section yet.</html>");
   }
 
   //Error while reading file.
 
   public void errDecode()
   { 
-    out.setModel(new JTable( ( new Object[][] { { "Error" } } ), ( new Object[]{ "Error" } ) ).getModel());
+    info("<html>Error occurred while reading this header.</html>");
   }
 
-  //Processor core not supported.
+  //Processor core is not supported.
 
   public void noCore()
   { 
-    info("<html>The processor core is not supported.</html>"); out.setModel(new JTable().getModel());
+    info("<html>The processor core is not supported.</html>");
   }
 }

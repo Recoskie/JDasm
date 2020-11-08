@@ -1,4 +1,4 @@
-package dataInspector;
+package dataTools;
 
 import java.awt.*;
 import javax.swing.*;
@@ -25,13 +25,21 @@ public class dataInspector extends JComponent implements IOEventListener, Action
   private static int i = 0;
   private static long l = 0;
 
+  //String.
+
+  private static String s1, s2;
+
+  //String length.
+
+  private static int sLen = 0;
+
   //Position.
   
   private static long t;
 
   //length of each data type.
 
-  private static final int[] len = new int[]{1,1,1,2,2,4,4,8,8,4,8,1,2,-1};
+  private int[] len = new int[]{1,1,1,2,2,4,4,8,8,4,8,1,2,0,0,-1};
 
   //Weather data is virtual, or offset.
 
@@ -59,10 +67,12 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     "Float64",
     "Char8",
     "Char16",
+    "String8",
+    "String16",
     "Use No Data type"
   };
 
-  private static String[] ddata = new String[14];
+  private static String[] ddata = new String[16];
 
   //Fields for data entry
 
@@ -80,7 +90,7 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
   //The main hex editor display.
 
-  AbstractTableModel dataModel = new AbstractTableModel()
+  private AbstractTableModel dataModel = new AbstractTableModel()
   {
     public int getColumnCount() { return( 2 ); }
 
@@ -97,7 +107,7 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
     public boolean isCellEditable( int row, int col )
     {
-      type = row;
+      type = row; System.out.println("TEST");
 
       try { t = mode ? d.getVirtualPointer() : d.getFilePointer(); } catch(Exception e) {}
 
@@ -209,6 +219,24 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     try { d.seek(d.getFilePointer()); } catch( java.io.IOException e ) { }
   }
 
+  public void setType( int row ) { type = row; update(); }
+
+  public void setOther( int l )
+  {
+    type = len.length - 1; td.setRowSelectionInterval(type, type);
+
+    long p = 0;
+
+    try { p = mode ? d.getVirtualPointer() : d.getFilePointer(); } catch( java.io.IOException er ) { }
+
+    for( int i = 0; i < h.size(); i++ )
+    {
+      e = h.get(i); if( mode == e.isVirtual() ) { e.setSelected( p, ( p + l ) - 1 ); }
+
+      e.setSelectMode( true );
+    }
+  }
+
   //Updating the data inspector.
 
   public void update()
@@ -223,13 +251,15 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
       checkEdit(); if( emode ) { setBaseEl(); }
 
-      if( mode ) { d.readV(8); d.seekV( t ); } else { d.read(8); d.seek( t ); }
+      if( mode ) { d.readV( sLen <= 8 ? 8 : sLen ); d.seekV( t ); } else { d.read( sLen <= 8 ? 8 : sLen ); d.seek( t ); }
     }
     catch( java.io.IOException er ) { er.printStackTrace(); }
 
     //Convert read bytes to different types.
 
-    b = d.toByte(); if ( littleEndian ) {  s = d.toLShort(); i = d.toLInt(); l = d.toLLong(); } else { s = d.toShort(); i = d.toInt(); l = d.toLong(); }
+    b = d.toByte(); s1 = d.toText8(0,sLen);
+    
+    if ( littleEndian ) { s = d.toLShort(); i = d.toLInt(); l = d.toLLong(); s2 = d.toLText16(0,sLen); } else { s = d.toShort(); i = d.toInt(); l = d.toLong(); s2 = d.toText16(0,sLen); }
 
     //Update table cells.
 
@@ -246,6 +276,8 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     ddata[9] = Float.intBitsToFloat(i) + ""; ddata[10] = Double.longBitsToDouble(l) + "";
 
     ddata[11] = ( (char)b ) + ""; ddata[12] = ( (char)s ) + "";
+
+    ddata[13] = s1; ddata[14] = s2;
 
     dataModel.fireTableDataChanged(); td.setRowSelectionInterval(type, type);
 
@@ -329,6 +361,10 @@ public class dataInspector extends JComponent implements IOEventListener, Action
       d.Events = true;
     }
   }
+
+  //Set string length;
+
+  public void setStringLen( int n ){ len[13] = n; len[14] = n; sLen = n; }
 
   //String.format is not flexible enough.
 

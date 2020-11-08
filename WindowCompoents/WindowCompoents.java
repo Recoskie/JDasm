@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import javax.swing.tree.*;
 import VHex.*;
-import dataInspector.*;
+import dataTools.*;
 
 public class WindowCompoents
 {
@@ -24,10 +24,6 @@ public class WindowCompoents
 
   public static JTree tree;
 
-  //Output of a decoded section of a file format in table. Set by file reader.
-
-  public static JTable out;
-
   //Additional detailed information output. For data in table cells, or section.
   //Also disassembly output.
 
@@ -39,7 +35,11 @@ public class WindowCompoents
 
   //Data type inspector tool.
 
-  public static dataInspector ds;
+  public static dataInspector di;
+
+  //Data descriptor tool.
+
+  public static dataDescriptor ds;
 
   //Once hex editor is initialized. Then the target is set afterwards for new files.
 
@@ -86,7 +86,7 @@ public class WindowCompoents
 
     f.setLayout(new GridLayout(1,1));
 
-    JSplitPane p1 = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JScrollPane( tree ), new JScrollPane( out ) ), new JScrollPane(infoData) );
+    JSplitPane p1 = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JScrollPane( tree ), new JScrollPane( ds ) ), new JScrollPane(infoData) );
 
     //Binary tools.
 
@@ -102,7 +102,7 @@ public class WindowCompoents
     
     c.weightx = 1000; p2.add( Offset, c );
     
-    c.weightx = 1000000; c.weighty = 1; p2.add( ds, c );
+    c.weightx = 1000000; c.weighty = 1; p2.add( di, c );
 
     //Septate the two panels.
 
@@ -131,7 +131,7 @@ public class WindowCompoents
     
     c.weightx = 1000; c.gridx = 1; p1.add( Offset, c );
     
-    c.weightx = 1000000; c.gridx = 2; c.weighty = 1; p1.add( ds, c );
+    c.weightx = 1000000; c.gridx = 2; c.weighty = 1; p1.add( di, c );
 
     f.add( new JScrollPane( p1, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED ) );
 

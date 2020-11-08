@@ -891,6 +891,8 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   public char toLChar16() { return( (char)( d[0] | ( d[1] << 8 ) ) ); }
 
   public char toLChar16( int off ) { return( (char)( d[off] | ( d[off + 1] << 8 ) ) ); }
+
+  public byte[] toBytes() { return( d ); }
   
   //Debug The address mapped memory.
   

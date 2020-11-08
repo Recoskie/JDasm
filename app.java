@@ -12,7 +12,7 @@ import WindowCompoents.*;
 
 import RandomAccessFileV.*;
 import VHex.*;
-import dataInspector.*;
+import dataTools.*;
 
 public class app extends WindowCompoents implements TreeWillExpandListener, TreeSelectionListener, ActionListener, MouseListener
 {
@@ -451,7 +451,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     else if( e.getActionCommand().equals("Toggle Data Inspector") )
     {
-      ds.setVisible(!ds.isVisible());
+      di.setVisible(!di.isVisible());
     }
   }
 
@@ -482,15 +482,15 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
       if(!HInit)
       {
-        ds = new dataInspector( file );
+        di = new dataInspector( file ); ds = new dataDescriptor( di );
             
-        Virtual = new VHex( file, ds, true ); Offset = new VHex( file, ds, false );
+        Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
 
         Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
       }
       else
       {
-        Offset.setTarget( file ); Virtual.setTarget( file ); ds.setTarget( file );
+        Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
       }
 
       if( I >= 0 )
@@ -538,15 +538,15 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         {
           if(!HInit)
           {
-            ds = new dataInspector( file );
+            di = new dataInspector( file );
             
-            Virtual = new VHex( file, ds, true ); Offset = new VHex( file, ds, false );
+            Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
             
             Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
           }
           else
           {
-            Offset.setTarget( file ); Virtual.setTarget( file ); ds.setTarget( file );
+            Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
           }
         
           editMode();
