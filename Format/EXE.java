@@ -89,7 +89,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       {
         data.core = new X86( b ); data.core.setBit( X86.x86_32 ); data.coreLoaded = true;
       }
-      else if( Data.coreType == 0x8664 )
+      else if( Data.coreType == (short)0x8664 )
       {
         data.core = new X86( b ); data.core.setBit( X86.x86_64 ); data.coreLoaded = true;
       }
