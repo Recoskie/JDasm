@@ -3,15 +3,25 @@ JFH-Disassembly.
 
 Welcome to Java Forensics Hex editor.
 
-This is a platform independent application built in Java.
+This tool is designed to be user friendly. For both prelesional, and absolute beginners.
 
-Allowing you to decompile software, hex editing, and forensics, of binary files.
+This tool makes binary files, and formats visual, and also easy to understand, and modify.
 
-This application currently supports Microsoft binaries .exe, .dll, .sys, .drv, .ocx.
+Is designed, for anyone new leaning how binary files are read, or prelesional.
 
-This project makes binary formats visual, easy to map, and modify.
+The tools are explained in help, and documentation.
 
-This project is meant to support different binary file formats, and application formats.
+------------------------------------------------------------
+
+This tool allows you to decompile software. Allowing you to create source code, of binary files.
+
+It is also a hex editor, and data forensics tool, for binary files.
+
+You can also read disk drives sector by sector.
+
+This application currently supports Microsoft binaries formats .exe, .dll, .sys, .drv, .ocx.
+
+This project is meant to support many different binary file formats, and application formats.
 
 ------------------------------------------------------------
 Help, and documentation.
@@ -28,7 +38,7 @@ To run the application you only need the <a href="https://github.com/Recoskie/JF
 
 You can also download the project. Clone the entire project if you wish to make changes, or have a copy of the source code.
 
-You also need java 8, or higher.
+You also need java 8, or higher. Which added support, for unsignified numbers.
 
 ------------------------------------------------------------
 IMPORTANT.
@@ -54,7 +64,7 @@ The improved address mapper can be found <a href="https://github.com/Recoskie/Ra
 
 Without it you do not have a nice virtually mapped binary application in it's proper address space.
 
-Also without it you would not be able to accurately make changes to sections of a program, or read it.
+Also without it. You would not be able to accurately make changes to sections of a program, or read it.
 
 ------------------------------------------------------------
 Virtual memory view, and hex editor.
