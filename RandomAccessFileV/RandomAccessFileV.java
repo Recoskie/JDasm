@@ -1,6 +1,7 @@
 package RandomAccessFileV;
 import java.io.*;
 import java.util.*;
+import java.nio.charset.StandardCharsets;
 import javax.swing.event.*;
 
 public class RandomAccessFileV extends RandomAccessFile implements Runnable
@@ -697,6 +698,10 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
       }
     }
   }
+
+  //New write method writes stored bytes.
+  
+  public void writeV( int len, int off ) throws IOException { syncWV(); writeV( d, off, len );  } 
   
   //fire seek event.
   
@@ -720,13 +725,19 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public int read( int len ) throws IOException { syncR(); d = new byte[len]; return( read( d ) ); } 
 
-  //Default read and write methods.
+  //Default read methods.
 
   @Override public int read() throws IOException { syncR(); return( super.read() ); }
   
   @Override public int read( byte[] b ) throws IOException { syncR(); return( super.read( b ) ); }
   
   @Override public int read( byte[] b, int off, int len ) throws IOException { syncR(); return( super.read( b, off, len ) ); }
+
+  //New write method. Allowing the read data to be written.
+
+  public void write( int off, int len ) throws IOException { syncW(); super.write( d, off, len ); } 
+
+  //Default write methods.
   
   @Override public void write( int b ) throws IOException { syncW(); super.write( b ); }
   
@@ -756,65 +767,17 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
     return( o );
   }
 
-  public String toText8()
-  {
-    o = ""; for( int i = 0; i < d.length; i++ )
-    {
-      o += ((char)d[i]);
-    }
+  public String toText8() { return( new String( d, StandardCharsets.UTF_8 ) ); }
 
-    return( o );
-  }
+  public String toText8( int off, int end ) { return( new String( d, StandardCharsets.UTF_8 ).substring( off, end ) ); }
 
-  public String toText8( int off, int end )
-  {
-    o = ""; for( int i = off; i < end; i++ )
-    {
-      o += ((char)d[i]);
-    }
+  public String toText16() { return( new String( d, StandardCharsets.UTF_16BE ) ); }
 
-    return( o );
-  }
+  public String toText16( int off, int end ) { return( new String( d, StandardCharsets.UTF_16BE ).substring( off, end ) ); }
 
-  public String toText16()
-  {
-    o = ""; for( int i = 0; i < d.length; i += 2 )
-    {
-      o += (char)( d[ i + 1 ] | ( d[ i ] << 8 ) );
-    }
+  public String toLText16() { return( new String( d, StandardCharsets.UTF_16LE ) ); }
 
-    return( o );
-  }
-
-  public String toText16( int off, int end )
-  {
-    o = ""; for( int i = off; i < end; i += 2 )
-    {
-      o += (char)( d[ i + 1 ] | ( d[ i ] << 8 ) );
-    }
-
-    return( o );
-  }
-
-  public String toLText16()
-  {
-    o = ""; for( int i = 0; i < d.length; i += 2 )
-    {
-      o += (char)( d[i] | ( d[ i + 1 ] << 8 ) );
-    }
-
-    return( o );
-  }
-
-  public String toLText16( int off, int end )
-  {
-    o = ""; for( int i = off; i < end; i += 2 )
-    {
-      o += (char)( d[i] | ( d[ i + 1 ] << 8 ) );
-    }
-
-    return( o );
-  }
+  public String toLText16( int off, int end ) { return( new String( d, StandardCharsets.UTF_16LE ).substring( off, end ) ); }
 
   public boolean toBoolean() { return( d[0] == (byte)0xFF ); }
 
@@ -893,6 +856,82 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   public char toLChar16( int off ) { return( (char)( d[off] | ( d[off + 1] << 8 ) ) ); }
 
   public byte[] toBytes() { return( d ); }
+
+  //Methods to change read data.
+
+  private byte[] td;
+
+  public void modText8( String s ) {  }
+
+  public void modText8( String s, int off ) {  }
+
+  public void modText16( String s ) {  }
+
+  public void modText16( String s, int off ) {  }
+
+  public void modLText16( String s ) {  }
+
+  public void modLText16( String s, int off ) {  }
+
+  public void modBoolean( boolean b ) { d[0] = b ? (byte)-1 : (byte)0; }
+
+  public void modBoolean( boolean b, int off ) { d[off] = b ? (byte)-1 : (byte)0; }
+
+  public void modByte( byte b ) { d[0] = b; }
+
+  public void modByte( byte b, int off ) { d[off] = b; }
+
+  public void modShort( short s ) { d[0] = (byte)(s&0xFF); d[1] = (byte)((s>>8)&0xFF); }
+
+  public void modShort( short s, int off ) { d[ off ] = (byte)(s&0xFF); d[ off + 1 ] = (byte)((s>>8)&0xFF); }
+
+  public void modLShort( short s ) { d[1] = (byte)(s&0xFF); d[0] = (byte)((s>>8)&0xFF);  }
+
+  public void modLShort( short s, int off ) { d[1] = (byte)(s&0xFF); d[0] = (byte)((s>>8)&0xFF); }
+
+  public void modInt( int i ) { d[0] = (byte)(i&0xFF); d[1] = (byte)((i>>8)&0xFF); d[2] = (byte)((i>>16)&0xFF); d[3] = (byte)((i>>24)&0xFF); }
+
+  public void modInt( int i, int off ) { d[ off ] = (byte)(i&0xFF); d[ off + 1 ] = (byte)((i>>8)&0xFF); d[ off + 2 ] = (byte)((i>>16)&0xFF); d[ off + 3 ] = (byte)((i>>24)&0xFF); }
+
+  public void modLInt( int i ) { d[3] = (byte)(i&0xFF); d[2] = (byte)((i>>8)&0xFF); d[1] = (byte)((i>>16)&0xFF); d[0] = (byte)((i>>24)&0xFF); }
+
+  public void modLInt( int i, int off ) { d[ off + 3 ] = (byte)(i&0xFF); d[ off + 2 ] = (byte)((i>>8)&0xFF); d[ off + 1 ] = (byte)((i>>16)&0xFF); d[ off ] = (byte)((i>>24)&0xFF); }
+
+  public void modLong( long l ) { d[0] = (byte)(l&0xFF); d[1] = (byte)((l>>8)&0xFF); d[2] = (byte)((l>>16)&0xFF); d[3] = (byte)((l>>24)&0xFF); d[4] = (byte)((l>>32)&0xFF); d[5] = (byte)((l>>40)&0xFF); d[6] = (byte)((l>>48)&0xFF); d[7] = (byte)((l>>56)&0xFF); }
+
+  public void modLong( long l, int off ) { d[ off ] = (byte)(l&0xFF); d[ off + 1 ] = (byte)((l>>8)&0xFF); d[ off + 2 ] = (byte)((l>>16)&0xFF); d[ off + 3 ] = (byte)((l>>24)&0xFF); d[ off + 4 ] = (byte)((l>>32)&0xFF); d[ off + 5 ] = (byte)((l>>40)&0xFF); d[ off + 6 ] = (byte)((l>>48)&0xFF); d[ off + 7 ] = (byte)((l>>56)&0xFF); }
+
+  public void modLLong( long l ) { d[7] = (byte)(l&0xFF); d[6] = (byte)((l>>8)&0xFF); d[5] = (byte)((l>>16)&0xFF); d[4] = (byte)((l>>24)&0xFF); d[3] = (byte)((l>>32)&0xFF); d[2] = (byte)((l>>40)&0xFF); d[1] = (byte)((l>>48)&0xFF); d[0] = (byte)((l>>56)&0xFF); }
+
+  public void modLLong( long l, int off ) { d[ off + 7 ] = (byte)(l&0xFF); d[ off + 6 ] = (byte)((l>>8)&0xFF); d[ off + 5 ] = (byte)((l>>16)&0xFF); d[ off + 4 ] = (byte)((l>>24)&0xFF); d[ off + 3 ] = (byte)((l>>32)&0xFF); d[ off + 2 ] = (byte)((l>>40)&0xFF); d[ off + 1 ] = (byte)((l>>48)&0xFF); d[ off ] = (byte)((l>>56)&0xFF); }
+
+  public void modFloat( float ff ) { int f = Float.floatToIntBits(ff); d[0] = (byte)(f&0xFF); d[1] = (byte)((f>>8)&0xFF); d[2] = (byte)((f>>16)&0xFF); d[3] = (byte)((f>>24)&0xFF); }
+
+  public void modFloat( float ff, int off ) { int f = Float.floatToIntBits(ff); d[ off ] = (byte)(f&0xFF); d[ off + 1 ] = (byte)((f>>8)&0xFF); d[ off + 2 ] = (byte)((f>>16)&0xFF); d[ off + 3 ] = (byte)((f>>24)&0xFF); }
+
+  public void modLFloat( float ff ) { int f = Float.floatToIntBits(ff); d[3] = (byte)(f&0xFF); d[2] = (byte)((f>>8)&0xFF); d[1] = (byte)((f>>16)&0xFF); d[0] = (byte)((f>>24)&0xFF); }
+
+  public void modLFloat( float ff, int off ) { int f = Float.floatToIntBits(ff); d[ off + 3 ] = (byte)(f&0xFF); d[ off + 2 ] = (byte)((f>>8)&0xFF); d[ off + 1 ] = (byte)((f>>16)&0xFF); d[ off ] = (byte)((f>>24)&0xFF); }
+
+  public void modDouble( double dd ) { long D = Double.doubleToLongBits(dd); d[0] = (byte)(D&0xFF); d[1] = (byte)((D>>8)&0xFF); d[2] = (byte)((D>>16)&0xFF); d[3] = (byte)((D>>24)&0xFF); d[4] = (byte)((D>>32)&0xFF); d[5] = (byte)((D>>40)&0xFF); d[6] = (byte)((D>>48)&0xFF); d[7] = (byte)((D>>56)&0xFF); }
+
+  public void modDouble( double dd, int off ) { long D = Double.doubleToLongBits(dd); d[ off ] = (byte)(D&0xFF); d[ off + 1 ] = (byte)((D>>8)&0xFF); d[ off + 2 ] = (byte)((D>>16)&0xFF); d[ off + 3 ] = (byte)((D>>24)&0xFF); d[ off + 4 ] = (byte)((D>>32)&0xFF); d[ off + 5 ] = (byte)((D>>40)&0xFF); d[ off + 6 ] = (byte)((D>>48)&0xFF); d[ off + 7 ] = (byte)((D>>56)&0xFF); }
+
+  public void modLDouble( double dd ) { long D = Double.doubleToLongBits(dd); d[7] = (byte)(D&0xFF); d[6] = (byte)((D>>8)&0xFF); d[5] = (byte)((D>>16)&0xFF); d[4] = (byte)((D>>24)&0xFF); d[3] = (byte)((D>>32)&0xFF); d[2] = (byte)((D>>40)&0xFF); d[1] = (byte)((D>>48)&0xFF); d[0] = (byte)((D>>56)&0xFF); }
+
+  public void modLDouble( double dd, int off ) { long D = Double.doubleToLongBits(dd); d[ off + 7 ] = (byte)(D&0xFF); d[ off + 6 ] = (byte)((D>>8)&0xFF); d[ off + 5 ] = (byte)((D>>16)&0xFF); d[ off + 4 ] = (byte)((D>>24)&0xFF); d[ off + 3 ] = (byte)((D>>32)&0xFF); d[ off + 2 ] = (byte)((D>>40)&0xFF); d[ off + 1 ] = (byte)((D>>48)&0xFF); d[ off ] = (byte)((D>>56)&0xFF); }
+
+  public void modChar8( char c ) { d[0]=(byte)c; }
+
+  public void modChar8( char c, int off ) { d[off]=(byte)c; }
+
+  public void modChar16( char c ) { short s = (short)c; d[0] = (byte)(s&0xFF); d[1] = (byte)((s>>8)&0xFF); }
+
+  public void modChar16( char c, int off ) { short s = (short)c; d[ off ] = (byte)(s&0xFF); d[ off + 1 ] = (byte)((s>>8)&0xFF); }
+
+  public void modLChar16( char c ) { short s = (short)c; d[1] = (byte)(s&0xFF); d[0] = (byte)((s>>8)&0xFF); }
+
+  public void modLChar16( char c, int off ) { short s = (short)c; d[ off + 1 ] = (byte)(s&0xFF); d[ off ] = (byte)((s>>8)&0xFF); }
   
   //Debug The address mapped memory.
   

@@ -58,6 +58,8 @@ public class EXE extends WindowCompoents implements ExploerEventListener
   {
     b = file; data.stream = file;
 
+    data.stream.Events = false;
+
     //Root node is now the target file.
  
     ((DefaultTreeModel)tree.getModel()).setRoot(null);
@@ -167,7 +169,13 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     if( data.DataDirUsed[14] ) { root.add(COM); }
 
-    ((DefaultTreeModel)tree.getModel()).setRoot(root); f.setVisible(true);
+    ((DefaultTreeModel)tree.getModel()).setRoot(root);
+
+    data.stream.Events = true;
+
+    tree.setSelectionPath( new TreePath( Headers.getPath() ) ); elementOpen("Header Data");
+    
+    f.setVisible(true);
   }
 
   //Change What To Display Based on what the user clicks on
@@ -248,7 +256,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     }
     else if( h.equals("Header Data") )
     {
-      Offset.setSelected( 0, ( des[0].length + des[1].length + des[2].length + des[3].length + des[4].length ) - 1 );
+      Offset.setSelected( 0, ( des[4].pos + des[4].length ) - 1 );
 
       info("<html><p>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
       "Export Table can not be located.<br /><br />" +

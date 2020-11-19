@@ -28,6 +28,10 @@ public class dataDescriptor extends JComponent
 
   private String[] cols = new String[]{"Use", "Raw Data", "Value"}; 
 
+  //Data type.
+
+  private int type = 0;
+
   //The main display.
 
   private AbstractTableModel dModel = new AbstractTableModel()
@@ -40,20 +44,20 @@ public class dataDescriptor extends JComponent
     
     public Object getValueAt(int row, int col)
     {
-      return( data.data[row][col] );
+      return( data.data.get(row)[col] );
     }
 
     public boolean isCellEditable( int row, int col )
     {
-      data.loc( row );
+      data.loc( row ); type = data.type.get(row);
 
-      if ( data.type[row] < 13 ) { di.setType( data.type[row] ); }
+      if ( type < 13 ) { di.setType( type ); }
 
-      else if( data.type[row] == 13 || data.type[row] == 14 ) { di.setStringLen( data.rpos[row + 1] - data.rpos[row] ); di.setType( data.type[row] ); }
+      else if( type == 13 || type == 14 ) { di.setStringLen( data.rpos.get(row + 1) - data.rpos.get(row) ); di.setType( type ); }
       
-      else if( data.type[row] == 15 ) { di.setOther( data.rpos[row + 1] - data.rpos[row] ); }
+      else if( type == 15 ) { di.setOther( data.rpos.get(row + 1) - data.rpos.get(row) ); }
 
-      else if( data.type[row] == 16 ) { di.setOther( data.apos[row + 1] - data.rpos[row]  ); }
+      else if( type == 16 ) { di.setOther( data.apos.get(row + 1) - data.rpos.get(row) ); }
 
       data.Event.accept( row );
 
