@@ -7,7 +7,7 @@ This tool is designed to be user friendly. For both prelesional, and absolute be
 
 This tool makes binary files, and formats visual, and also easy to understand, and modify.
 
-Is designed, for anyone new leaning how binary files are read, or prelesional.
+Is designed, for anyone new leaning how binary files are read, or professional use.
 
 The tools are explained in help, and documentation.
 
