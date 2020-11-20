@@ -23,6 +23,8 @@ This application currently supports Microsoft binaries formats .exe, .dll, .sys,
 
 This project is meant to support many different binary file formats, and application formats.
 
+However only supports Microsoft binary format at the moment. If you wish to contribute a Format. Put it under the format folder.
+
 ------------------------------------------------------------
 Help, and documentation.
 ------------------------------------------------------------
