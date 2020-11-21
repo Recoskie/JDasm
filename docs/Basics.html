@@ -23,7 +23,7 @@
 
   <br /><br />
 
-  However in order to use it properly, you need to understand how the information is displayed.
+  However in order to use it properly. You need to understand how the information is displayed.
 
   <br /><br />
 
@@ -46,7 +46,7 @@
   
   <br /><br />  
   
-  For example 19FE is 0001 1001 1111 1110 binary. One last example 00611 is 0000 0000 0110 0001 0001.
+  For example 19FE is 0001 1001 1111 1110 binary. Also 00611 is 0000 0000 0110 0001 0001.
 
   <br /><br />
 
@@ -175,6 +175,10 @@
 
   <br /><br />
 
+  Clicking a data type limits the hex editor to editing the bytes that make the data type. Double clicking a data type will let you enter a value manually.
+
+  <br /><br />
+
   <image style="float:left;margin:10px;" src="Figs\fig4.gif" />
 
   <h2>Data Length.</h2>
@@ -183,7 +187,7 @@
 
   <br /><br />
 
-  Originally two bytes created a "word". Thus two words created a "double word" shortened to DWORD. Also tow DWORD created a quad word called QWORD.
+  Originally two bytes created a "word". Thus two words created a "double word" shortened to DWORD. Also tow DWORD created a "quad word" called QWORD.
   
   <br /><br />
   
@@ -191,7 +195,7 @@
 
   <br /><br />
 
-  Today these words are no longer used. Except, for in machine code translation, of their original meaning when reading data by CPU.
+  Today these words are no longer used. Except, for in machine code translation. As the original meaning is used when reading data by CPU.
 
   <br /><br />
 
@@ -214,6 +218,10 @@
   As a byte is still a byte of memory no matter what the system architecture is. The lengths of data are also still in word size. Thus integers are still the same.
 
   <br /><br />
+  
+  The processor must be able to do arithmetic, and operations with the standard primitive data types. In order to work with file formats. Which are the building blocks, for all format types.
+
+  <br /><br />
 
   The only thing that can change between different system processors, and architectures is the byte order.
 
@@ -223,15 +231,15 @@
 
   <br /><br />
 
+  In a system that reads bytes in little endian byte order: Bytes are read in reverse order = 44, 33, 22, 11.
+
+  <br /><br />
+
   In a processor that reads bytes in big endian order = 11, 22, 33, 44.
 
   <br /><br />
 
-  Where in a little endian systems. Bytes are read in reverse order = 44, 33, 22, 11.
-
-  <br /><br />
-
-  Big endian is not used much if at all. Thus systems that are big endian switch the byte order using arithmetic operations to maintain compatibility.
+  Big endian is not used much if at all anymore. Thus systems that are big endian switch the byte order using arithmetic operations to maintain compatibility.
 
   <br /><br />
 
@@ -483,7 +491,7 @@
 
   <br /><br />
 
-  This is how the to string method is implemented in all programming languages to convert any number to any number base 2 to 36.</strong>
+  This is how the <em>toString</em> method is implemented in all programming languages to convert any number to any number base 2 to 36.</strong>
 
   <br /><br />
 
@@ -507,7 +515,7 @@
 
   <br /><br />
 
-  There is also unicode text. Which is rarely used. It reads a word instead of a byte. This way there are 2^16-1=65535 combinations to represent characters.
+  There is also Unicode text, also called UTF16 text. Which is rarely used. It reads a word instead of a byte. This way there are 2^16-1=65535 combinations to represent characters.
 
   <br /><br />
   
@@ -667,7 +675,11 @@
 
   <br /><br />
 
-  Each number in the array can locate to a string, or another array in the case of a 2D array.
+  All primitive data types can be read one after another linearly in an array. Which gives the best performance. However it can get more complicated.
+
+  <br /><br />
+
+  Each number in the array can locate to a string. Which a string is a variable in length array built on char, or another array in the case of a 2D array.
 
   <br /><br />
 
@@ -706,18 +718,18 @@
     <tr>
       <td>Java</td>
       <td>
-        Java assumes that all integers are signed, so the regular to string method splits the number into two from center, and adds the sing.
+        Java assumes that all integers are signed, so the regular <em>toString</em> method splits the number into two from center, and adds the sing.
 
         <br /><br />
 
-        In Java 8, and later. A new unsigned to string method was added to convert to a string that shows the integer as is. As a unsigned value.
+        In Java 8, and later. A new unsigned <em>toString</em> method was added to convert to a string that shows the integer as is. As a unsigned value.
 
         <br /><br />
 
         Adding, and subtracting singed, and unsigned numbers are the same as regular numbers. All that changes is how we display the value as characters.
       </td>
     </tr>
-    <tr><td>Languages C, and C++</td><td>Lets you pick how you want a integer to be treated in code. All data types are also the same.</td></tr>
+    <tr><td>Languages C, and C++</td><td>Lets you pick how you want a integer to be treated in code. All data types are also the same with better control.</td></tr>
   </table>
 
   <br />
@@ -832,11 +844,11 @@
   
   <br /><br />
   
-  The header defines the speed each byte is given to the PCM (Pulse-code modulation) device.
+  The header defines the speed each integer is given to the PCM (Pulse-code modulation) device.
 
   <br /><br />
 
-  Where dword is 32 binary digits giving a range of control of 2^32-1. The value is the current that is given to the coil controlling the magnet to move further in, or out by value.
+  Where dword is 32 binary digits giving a range of control 2^32-1. The value is the current that is given to the coil controlling the magnet to move further in, or out by value.
   
   <br /><br />
   
@@ -844,7 +856,7 @@
   
   <br /><br />
   
-  The faster the sample rate, then the more precise the audio reproduction is. Anyway this is how uncompressed audio works. Also bitmap is a lossless format as the colors are stored as they are in graphics.
+  The faster the sample rate. Then the more precise the audio reproduction is. Anyway this is how uncompressed audio works. Also bitmap is a lossless format as the colors are stored as they are in graphics.
   
   <br /><br />
   
