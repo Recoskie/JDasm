@@ -139,7 +139,7 @@ public class Descriptor
   {
     data.add(new String[]{ use, "No Data", "No value" } );
     
-    rpos.add( length ); apos.add( length + len ); apos.add( 0 );
+    rpos.add( length ); apos.add( length + len );
     
     type.add( 16 ); rows += 1;
   }

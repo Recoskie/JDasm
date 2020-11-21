@@ -132,7 +132,7 @@ public class dataInspector extends JComponent implements IOEventListener, Action
         for( int i = 0; i < h.size(); i++ ) { h.get(i).setSelectMode( true ); }
       }
 
-      return ( col != 0 && row != ( len.length - 1 ) );
+      return ( d.readOnly ? false : col != 0 && row != ( len.length - 1 ) );
     }
 
     private long v = 0;
@@ -361,6 +361,18 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
   private boolean littleEndian = true;
 
+  //Fixes table sizing bug.
+
+  public class JScrollPaneBug extends JScrollPane
+  {
+    public JScrollPaneBug( JComponent c )
+    {
+      super( c );
+    }
+
+    public Dimension getMinimumSize() { return( new Dimension( super.getPreferredSize() ) ); }
+  };
+
   //Create controls.
 
   public dataInspector( RandomAccessFileV data )
@@ -422,7 +434,7 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
     GridBagConstraints c = new GridBagConstraints(); c.anchor = GridBagConstraints.PAGE_START;
 
-    c.gridy = 0; super.add( new JScrollPane( td ), c );
+    c.gridy = 0; super.add( new JScrollPaneBug( td ), c );
     
     c.gridy = 1; c.fill = GridBagConstraints.HORIZONTAL; super.add( p1, c );
 

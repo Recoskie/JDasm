@@ -538,7 +538,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         {
           if(!HInit)
           {
-            di = new dataInspector( file );
+            di = new dataInspector( file ); ds = new dataDescriptor( di );
             
             Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
             

@@ -436,7 +436,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   {
     if( charWidth[0] == 0 ) { init(); }
 
-    return( new Dimension( endw + scrollBarSize, Math.max( super.getParent().getHeight(), lineHeight << 3 ) ) );
+    return( new Dimension( endw + scrollBarSize, Math.max( super.getHeight(), lineHeight << 3 ) ) );
   }
   
   //Render the component.

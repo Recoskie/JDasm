@@ -98,11 +98,11 @@ public class WindowCompoents
 
     //Hex editor view, or additional binary tools.
 
-    c.weightx = 1; p2.add( Virtual , c );
+    c.weightx = 1; c.gridx = 0; p2.add( Virtual , c );
     
-    c.weightx = 1000; p2.add( Offset, c );
+    c.weightx = 1000; c.gridx = 1; p2.add( Offset, c );
     
-    c.weightx = 1000000; c.weighty = 1; p2.add( di, c );
+    c.weightx = 1000000; c.gridx = 2; c.weighty = 1; p2.add( di, c );
 
     //Septate the two panels.
 
@@ -133,7 +133,7 @@ public class WindowCompoents
     
     c.weightx = 1000000; c.gridx = 2; c.weighty = 1; p1.add( di, c );
 
-    f.add( new JScrollPane( p1, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED ) );
+    f.add( p1 );
 
     f.setJMenuBar(bdBar);
     
