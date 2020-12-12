@@ -181,7 +181,7 @@ public class dataInspector extends JComponent implements IOEventListener, Action
           else if( type == 9 ) { d.modFloat( f32 ); } else if( type == 10 ) { d.modDouble( f64 ); }
           else
           {
-            //if( type % 2 == 1 ){ d.write( o.getBytes() ); } else { d.writeChars( o ); }
+            //if( type % 2 == 1 ){ d.modChar8( o ); } else { d.modChar16( o ); }
           }
         }
         else
@@ -192,7 +192,7 @@ public class dataInspector extends JComponent implements IOEventListener, Action
           else if( type == 9 ) { d.modLFloat( f32 ); } else if( type == 10 ) { d.modLDouble( f64 ); }
           else
           {
-            //if( type % 2 == 1 ){ d.write( o.getBytes() ); } else { d.writeChars( o ); }
+            //if( type % 2 == 1 ){ d.modChar8( o ); } else { d.modLChar16( o ); }
           }
         }
 

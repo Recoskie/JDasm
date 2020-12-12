@@ -22,10 +22,15 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   //The new Descriptor table allows a description of clicked data.
 
-  public Descriptor[] des = new Descriptor[5];
+  public Descriptor[] des = new Descriptor[6];
+
+  //Data descriptor for DLL import table.
+
+  public Descriptor[] DLL_des;
 
   //Nodes that can be added to when Adding section format readers.
 
+  DefaultMutableTreeNode root;
   DefaultMutableTreeNode Export = new DefaultMutableTreeNode("function Export Table.h");
   DefaultMutableTreeNode Import = new DefaultMutableTreeNode("DLL Import Table.h");
   DefaultMutableTreeNode RE = new DefaultMutableTreeNode("Resource Files.h");
@@ -46,8 +51,8 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public static Data data = new Data();
   public Headers Header = new Headers();
-
-  //public DLLImport DLL = new DLLImport();
+  public DLLImport DLL = new DLLImport();
+  
   //public Resource RSRC = new Resource();
 
   public EXE() { UsedDecoder = this; }
@@ -64,7 +69,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
  
     ((DefaultTreeModel)tree.getModel()).setRoot(null);
     tree.setRootVisible(true);tree.setShowsRootHandles(true);
-    DefaultMutableTreeNode root = new DefaultMutableTreeNode( F );
+    root = new DefaultMutableTreeNode( F );
 
     //header data folder to organize exe setup information.
   
@@ -280,20 +285,35 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       noDecode();
     }
-    else if( h.equals("DLL Import Table.h") )
+    else if( h.startsWith( "DLL Import Table", 0 ) )
     {
       try
       {
         b.seekV(data.DataDir[2]);b.seekV(data.DataDir[2]);
+
+        //Decode import table.
+
+        if( DLL_des == null )
+        {
+          b.Events = false;
+          
+          Import.setUserObject("DLL Import Table"); DLL_des = DLL.LoadDLLImport( b, Import );
+          
+          b.Events = true;
+        }
+
         Virtual.setSelected( data.DataDir[2], data.DataDir[2] + data.DataDir[3] - 1 );
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[3] - 1 );
       }
       catch( IOException e ) { }
 
-      //Decoder goes here.
+      //Update the tree.
 
-      noDecode();
+      ((DefaultTreeModel)tree.getModel()).nodeChanged( Import ); tree.expandPath( new TreePath( Import.getPath() ) );
     }
+    else if( h.equals( "DLL IMPORT ARRAY DECODE.H" ) ) { ds.setDescriptor( DLL_des[DLL_des.length-1] ); }
+    else if( h.startsWith( "Function Array Decode.H", 0 ) ) { ds.setDescriptor( DLL_des[ Integer.parseInt( h.split("#")[1] ) ] ); }
+
     else if( h.equals("Resource Files.h") )
     {
       try
@@ -475,6 +495,15 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       //Decoder goes here.
 
       noDecode();
+    }
+
+    else
+    {
+      try
+      {
+        long s = Long.parseLong( h.split("#")[1] ); b.seekV(s);
+      }
+      catch( IOException e ) { }
     }
   }
 

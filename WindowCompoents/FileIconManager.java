@@ -108,6 +108,11 @@ public class FileIconManager extends DefaultTreeCellRenderer
   {
     if( f.lastIndexOf(46) > 0 )
     {
+      if( f.lastIndexOf(35) > 0 )
+      {
+        return( f.substring( f.lastIndexOf(46), f.lastIndexOf(35) ).toLowerCase() );
+      }
+
       return( f.substring( f.lastIndexOf(46), f.length() ).toLowerCase() );
     }
       
