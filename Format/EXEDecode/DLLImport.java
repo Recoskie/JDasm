@@ -14,11 +14,9 @@ public class DLLImport extends Data
 
     java.util.LinkedList<Descriptor> des = new java.util.LinkedList<Descriptor>();
 
-    System.out.println( "DLL RVA ARRAY POSITION " + b.getVirtualPointer() + "" );
-
     //for dll names, and function list.
 
-    IMPORT.add( new DefaultMutableTreeNode( "DLL IMPORT ARRAY DECODE.H" ) );
+    IMPORT.add( new DefaultMutableTreeNode( "DLL Import Array Decode.h" ) );
 
     Descriptor DLLArray = new Descriptor( b, true );
     Descriptor FuncArray;
@@ -36,11 +34,11 @@ public class DLLImport extends Data
     while( ( d1 | d2 | d3 | d4 | d5 ) != 0 )
     {
       DLLArray.Array( "Array Element " + DLLS + "", 20 );
-      DLLArray.LUINT32("Original Array DLL Functions"); d1 = ((Integer)DLLArray.value).intValue(); //Location to function list.
+      DLLArray.LUINT32("DLL Array Functions Location"); d1 = ((Integer)DLLArray.value).intValue(); //Location to function list.
       DLLArray.LUINT32("Time Date Stamp"); d2 = ((Integer)DLLArray.value).intValue();
       DLLArray.LUINT32("Forward Chain"); d3 = ((Integer)DLLArray.value).intValue();
       DLLArray.LUINT32("DLL Name Location"); d4 = ((Integer)DLLArray.value).intValue(); //The name of the library.
-      DLLArray.LUINT32("DLL Functions"); d5 = ((Integer)DLLArray.value).intValue();
+      DLLArray.LUINT32("DLL Functions Location"); d5 = ((Integer)DLLArray.value).intValue();
 
       //DLL Name.
 
@@ -60,7 +58,7 @@ public class DLLImport extends Data
 
         b.seekV( d1 + imageBase ); FuncArray = new Descriptor( b, true );
 
-        DLLFunc.add( new DefaultMutableTreeNode( "Function Array Decode.H#" + ( DLLS ) ) );
+        DLLFunc.add( new DefaultMutableTreeNode( "Function Array Decode.h#" + ( DLLS ) ) );
         
         d1 = 0; pos = 1;
 
@@ -68,10 +66,10 @@ public class DLLImport extends Data
         {
           //Function name location.
 
-          FuncArray.Array( "Array Element " + d1 + "", 8 );
+          FuncArray.Array( "Array Element " + d1 + "", is64bit ? 8 : 4 );
 
-          if( is64bit ) { FuncArray.LUINT64("Location to ASCII Function Import Name"); pos = ((Long)FuncArray.value).longValue(); }
-          else { FuncArray.LUINT32("Location to ASCII Function Import Name"); pos = ((Integer)FuncArray.value).intValue(); }
+          if( is64bit ) { FuncArray.LUINT64("Location Import Name"); pos = ((Long)FuncArray.value).longValue(); }
+          else { FuncArray.LUINT32("Location Import Name"); pos = ((Integer)FuncArray.value).intValue(); }
           
           d1 += 1;
 

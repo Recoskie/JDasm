@@ -300,19 +300,19 @@ public class EXE extends WindowCompoents implements ExploerEventListener
           Import.setUserObject("DLL Import Table"); DLL_des = DLL.LoadDLLImport( b, Import );
           
           b.Events = true;
+
+          //Update the tree.
+
+          ((DefaultTreeModel)tree.getModel()).nodeChanged( Import ); tree.expandPath( new TreePath( Import.getPath() ) );
         }
 
         Virtual.setSelected( data.DataDir[2], data.DataDir[2] + data.DataDir[3] - 1 );
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[3] - 1 );
       }
       catch( IOException e ) { }
-
-      //Update the tree.
-
-      ((DefaultTreeModel)tree.getModel()).nodeChanged( Import ); tree.expandPath( new TreePath( Import.getPath() ) );
     }
-    else if( h.equals( "DLL IMPORT ARRAY DECODE.H" ) ) { ds.setDescriptor( DLL_des[DLL_des.length-1] ); }
-    else if( h.startsWith( "Function Array Decode.H", 0 ) ) { ds.setDescriptor( DLL_des[ Integer.parseInt( h.split("#")[1] ) ] ); }
+    else if( h.equals( "DLL Import Array Decode.h" ) ) { ds.setDescriptor( DLL_des[DLL_des.length-1] ); }
+    else if( h.startsWith( "Function Array Decode.h", 0 ) ) { ds.setDescriptor( DLL_des[ Integer.parseInt( h.split("#")[1] ) ] ); }
 
     else if( h.equals("Resource Files.h") )
     {
