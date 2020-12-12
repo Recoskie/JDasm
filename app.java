@@ -79,14 +79,14 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         try
         {
           f = new File (Root + ( r == 0 && Zero ? "" : r ) + ""); check = f.exists(); new RandomAccessFile( f, "r");
-          root.add( new DefaultMutableTreeNode( type + r + "#" + Root + ( r == 0 && Zero ? "" : r ) + ".disk" ) );
+          root.add( new DefaultMutableTreeNode( type + r + ".disk#" + Root + ( r == 0 && Zero ? "" : r ) ) );
           r += 1; disks += 1;
         }
         catch( Exception er )
         {
           if( check || er.getMessage().indexOf("Access is denied") > 0 )
           {
-            root.add( new DefaultMutableTreeNode( type + r + "#" + Root + ( r == 0 && Zero ? "" : r ) + ".disk" ) );
+            root.add( new DefaultMutableTreeNode( type + r + ".disk#" + Root + ( r == 0 && Zero ? "" : r ) ) );
             r += 1; disks += 1;
           }
           else
@@ -635,7 +635,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     {
       String t = tree.getLastSelectedPathComponent().toString();
       
-      openDisk( t.substring( t.lastIndexOf(35) + 1, t.lastIndexOf(46) ) );
+      openDisk( t.substring( t.lastIndexOf( 35 ) + 1, t.length() ) );
     }
     else if( !Open && r != -1 )
     {

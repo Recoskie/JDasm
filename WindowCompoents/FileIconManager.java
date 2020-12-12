@@ -64,7 +64,7 @@ public class FileIconManager extends DefaultTreeCellRenderer
       if( n != -1 )
       {
         setIcon( LoadedPic[n] );
-        setText( FilterRefrence( FilterExstntion( name ) ) );
+        setText( FilterExstntion( FilterRefrence( name ) ) );
         return( true );
       }
     }
@@ -108,10 +108,7 @@ public class FileIconManager extends DefaultTreeCellRenderer
   {
     if( f.lastIndexOf(46) > 0 )
     {
-      if( f.lastIndexOf(35) > 0 )
-      {
-        return( f.substring( f.lastIndexOf(46), f.lastIndexOf(35) ).toLowerCase() );
-      }
+      if( f.lastIndexOf(35) > 0 ) { f = f.substring( 0, f.lastIndexOf(35) ); }
 
       return( f.substring( f.lastIndexOf(46), f.length() ).toLowerCase() );
     }
