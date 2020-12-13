@@ -312,7 +312,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       catch( IOException e ) { }
     }
     else if( h.equals( "DLL Import Array Decode.h" ) ) { ds.setDescriptor( DLL_des[DLL_des.length-1] ); }
-    else if( h.startsWith( "Function Array Decode.h", 0 ) ) { ds.setDescriptor( DLL_des[ Integer.parseInt( h.split("#")[1] ) ] ); }
 
     else if( h.equals("Resource Files.h") )
     {
@@ -499,11 +498,20 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     else
     {
-      try
+      String[] type = h.split("#")[1].split(",");
+
+      if( type[0].equals("D") )
       {
-        long s = Long.parseLong( h.split("#")[1] ); b.seekV(s);
+        ds.setDescriptor( DLL_des[ Integer.parseInt( type[1] ) ] );
       }
-      catch( IOException e ) { }
+      else if( type[0].equals("O") )
+      {
+        try
+        {
+          b.seekV( Long.parseLong( type[1] ) );
+        }
+        catch( IOException e ) { }
+      }
     }
   }
 

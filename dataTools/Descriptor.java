@@ -95,7 +95,7 @@ public class Descriptor
 
     data.add(new String[]{ use, IOStream.toHex(), Long.toUnsignedString( ((Long)value).longValue() ) } );
     
-    length += 4; type.add( 6 ); rpos.add( length ); apos.add( 0 ); rows += 1;
+    length += 8; type.add( 8 ); rpos.add( length ); apos.add( 0 ); rows += 1;
   }
 
   //String data.

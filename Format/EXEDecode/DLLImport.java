@@ -19,26 +19,29 @@ public class DLLImport extends Data
     IMPORT.add( new DefaultMutableTreeNode( "DLL Import Array Decode.h" ) );
 
     Descriptor DLLArray = new Descriptor( b, true );
-    Descriptor FuncArray;
+    Descriptor FuncArray1, FuncArray2;
 
-    int d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 1, DLLS = 0, code = 0;
+    int d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 1, ref = 0, dllEl = 0, code = 0;
 
     long t = 0, t2 = 0;
 
     String o = "";
 
-    long pos= 1;
+    long pos = 1;
 
     DefaultMutableTreeNode DLLFunc;
 
     while( ( d1 | d2 | d3 | d4 | d5 ) != 0 )
     {
-      DLLArray.Array( "Array Element " + DLLS + "", 20 );
-      DLLArray.LUINT32("DLL Array Functions Location"); d1 = ((Integer)DLLArray.value).intValue(); //Location to function list.
+      //Note that there are two lists of import functions.
+      //The two lists should match. If not then the import table is corrupted.
+
+      DLLArray.Array( "Array Element " + dllEl + "", 20 );
+      DLLArray.LUINT32("DLL Array Functions Location 1"); d1 = ((Integer)DLLArray.value).intValue(); //Location to function list.
       DLLArray.LUINT32("Time Date Stamp"); d2 = ((Integer)DLLArray.value).intValue();
       DLLArray.LUINT32("Forward Chain"); d3 = ((Integer)DLLArray.value).intValue();
       DLLArray.LUINT32("DLL Name Location"); d4 = ((Integer)DLLArray.value).intValue(); //The name of the library.
-      DLLArray.LUINT32("DLL Functions Location"); d5 = ((Integer)DLLArray.value).intValue();
+      DLLArray.LUINT32("DLL Array Functions Location 2"); d5 = ((Integer)DLLArray.value).intValue(); //Location to function list.
 
       //DLL Name.
 
@@ -48,17 +51,39 @@ public class DLLImport extends Data
 
       o = ""; code = 1; while( code != 0 ){ code = b.read(); if( code != 0 ) { o += (char)code; } }
 
-      //Load Function list.
+      //Load the two Function list.
 
-      DLLFunc = new DefaultMutableTreeNode( o + "#" + ( d4  + imageBase ) );
+      DLLFunc = new DefaultMutableTreeNode( o + "#O," + ( d4  + imageBase ) );
       
       if( ( d1 | d2 | d3 | d4 | d5 ) != 0 )
       {
-        //Function list location.
+        //Function list First location.
 
-        b.seekV( d1 + imageBase ); FuncArray = new Descriptor( b, true );
+        b.seekV( d1 + imageBase ); FuncArray1 = new Descriptor( b, true );
 
-        DLLFunc.add( new DefaultMutableTreeNode( "Function Array Decode.h#" + ( DLLS ) ) );
+        DLLFunc.add( new DefaultMutableTreeNode( "Function Array Decode 1.h#D," + ref ) );
+        
+        d1 = 0; pos = 1;
+
+        while( pos != 0 )
+        {
+          //Function locations list 1.
+
+          FuncArray1.Array( "Array Element " + d1 + "", is64bit ? 8 : 4 );
+
+          if( is64bit ) { FuncArray1.LUINT64("Import Name Location"); pos = ((Long)FuncArray1.value).longValue(); }
+          else { FuncArray1.LUINT32("Import Name Location"); pos = ((Integer)FuncArray1.value).intValue(); }
+          
+          d1 += 1;
+        }
+
+        ref += 1;
+
+        //Function location list 2.
+
+        b.seekV( d5 + imageBase ); FuncArray2 = new Descriptor( b, true );
+
+        DLLFunc.add( new DefaultMutableTreeNode( "Function Array Decode 2.h#D," + ref ) );
         
         d1 = 0; pos = 1;
 
@@ -66,10 +91,10 @@ public class DLLImport extends Data
         {
           //Function name location.
 
-          FuncArray.Array( "Array Element " + d1 + "", is64bit ? 8 : 4 );
+          FuncArray2.Array( "Array Element " + d1 + "", is64bit ? 8 : 4 );
 
-          if( is64bit ) { FuncArray.LUINT64("Location Import Name"); pos = ((Long)FuncArray.value).longValue(); }
-          else { FuncArray.LUINT32("Location Import Name"); pos = ((Integer)FuncArray.value).intValue(); }
+          if( is64bit ) { FuncArray2.LUINT64("Import Name Location"); pos = ((Long)FuncArray2.value).longValue(); }
+          else { FuncArray2.LUINT32("Import Name Location"); pos = ((Integer)FuncArray2.value).intValue(); }
           
           d1 += 1;
 
@@ -81,41 +106,40 @@ public class DLLImport extends Data
 
             b.seekV( pos + imageBase ); b.read(2); o = ""; code = 1; while( code != 0 ){ code = b.read(); if( code != 0 ) { o += (char)code; } }
 
-            DLLFunc.add( new DefaultMutableTreeNode( o + "().dll#"+ ( pos  + imageBase ) ) );
-
-            b.seekV( t2 );
+            DLLFunc.add( new DefaultMutableTreeNode( o + "().dll#O,"+ ( pos  + imageBase ) ) ); b.seekV(t2);
           }
-
-          //If past 60 methods/functions then something really went wrong.
-
-          if( d1 > 60 ){ break; }
         }
 
-        des.add( FuncArray ); IMPORT.add( DLLFunc );
+        des.add( FuncArray1 ); des.add( FuncArray2 ); ref += 1;
+
+        IMPORT.add( DLLFunc );
       }
       
-      DLLS++; b.seekV(t);
+      dllEl++; b.seekV(t);
 
       //If 60 DLL's then something really went wrong.
       
-      if( DLLS > 60 ){ break; }
+      if( dllEl > 60 ){ break; }
     }
 
     DLLArray.setEvent( this::arrayInfo ); des.add( DLLArray );
-    
     
     return( des.toArray( new Descriptor[ des.size() ] ) );
   }
 
   //Detailed description DLL.
 
-  public static final String[] Arrayinfo = new String[] { "<html>Array element consisting of A DLL name, and tow Lists for which methods.</html>",
-    "<html></html>",
-    "<html></html>",
-    "<html></html>",
-    "<html></html>",
-    "<html></html>",
-    "<html></html>"
+  public static final String[] Arrayinfo = new String[] { "<html>Array element consisting of A DLL name location, and tow Lists locations, for which methods to load from the files export table.<br /><br />" + 
+    "Two lists are used, for which methods to import from the DLL. The lists should match. If they do not, then the import table is corrupted.<br /><br />" +
+    "The first Element that has no locations, and is all zero is the end of the DLL import table.</html>",
+    "<html>The location to a list, of which methods to import from the DLL from export table.<br /><br />" + 
+    "There are two lists That are in different locations, but should locate to the same import names.</html>",
+    "<html>A date time stamp is in seconds. The seconds are added to the starting date \"Wed Dec 31 7:00:00PM 1969\".<br /><br />" +
+    "If the time date stamp is \"37\" in value, then it is plus 37 second giving \"Wed Dec 31 7:00:37PM 1969\".</html>",
+    "<html>Forward Chain is generally not used by linkers, and compilers.</html>",
+    "<html>The location of the DLL name to start importing methods from.</html>",
+    "<html>The location to a list, of which methods to import from the DLL from export table.<br /><br />" + 
+    "There are two lists That are in different locations, but should locate to the same import names.</html>",
   };
 
   public void arrayInfo( int el )
