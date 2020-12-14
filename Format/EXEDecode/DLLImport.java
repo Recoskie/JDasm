@@ -16,12 +16,12 @@ public class DLLImport extends Data
 
     //for dll names, and function list.
 
-    IMPORT.add( new DefaultMutableTreeNode( "DLL Import Array Decode.h" ) );
+    IMPORT.add( new DefaultMutableTreeNode( "DLL Import Array Decode.h#D,0" ) );
 
     Descriptor DLLArray = new Descriptor( b, true );
-    Descriptor FuncArray1, FuncArray2;
+    Descriptor DLLName, FuncArray1, FuncArray2, Method;
 
-    int d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 1, ref = 0, dllEl = 0, code = 0;
+    int d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 1, ref = 1, dllEl = 0, code = 0;
 
     long t = 0, t2 = 0;
 
@@ -49,19 +49,17 @@ public class DLLImport extends Data
 
       //Read the name.
 
-      o = ""; code = 1; while( code != 0 ){ code = b.read(); if( code != 0 ) { o += (char)code; } }
+      DLLName = new Descriptor( b, true ); DLLName.String8("DLL Name", (byte)0x00 );
 
       //Load the two Function list.
 
-      DLLFunc = new DefaultMutableTreeNode( o + "#O," + ( d4  + imageBase ) );
+      DLLFunc = new DefaultMutableTreeNode( DLLName.value + "#D," + ref ); des.add( DLLName ); ref += 1;
       
       if( ( d1 | d2 | d3 | d4 | d5 ) != 0 )
       {
         //Function list First location.
 
         b.seekV( d1 + imageBase ); FuncArray1 = new Descriptor( b, true );
-
-        DLLFunc.add( new DefaultMutableTreeNode( "Function Array Decode 1.h#D," + ref ) );
         
         d1 = 0; pos = 1;
 
@@ -77,13 +75,9 @@ public class DLLImport extends Data
           d1 += 1;
         }
 
-        ref += 1;
-
         //Function location list 2.
 
         b.seekV( d5 + imageBase ); FuncArray2 = new Descriptor( b, true );
-
-        DLLFunc.add( new DefaultMutableTreeNode( "Function Array Decode 2.h#D," + ref ) );
         
         d1 = 0; pos = 1;
 
@@ -102,15 +96,21 @@ public class DLLImport extends Data
           {
             t2 = b.getVirtualPointer();
 
-            //Read Hint ID, and Function name.
+            //Read HInit ID, and Function name.
 
-            b.seekV( pos + imageBase ); b.read(2); o = ""; code = 1; while( code != 0 ){ code = b.read(); if( code != 0 ) { o += (char)code; } }
+            b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("HInit"); Method.String8( "Method name", (byte)0x00 ); des.add( Method );
 
-            DLLFunc.add( new DefaultMutableTreeNode( o + "().dll#O,"+ ( pos  + imageBase ) ) ); b.seekV(t2);
+            DLLFunc.add( new DefaultMutableTreeNode( Method.value + "().dll#D,"+ ref ) ); ref += 1; b.seekV(t2);
           }
         }
 
-        des.add( FuncArray1 ); des.add( FuncArray2 ); ref += 1;
+        DLLFunc.insert( new DefaultMutableTreeNode( "Function Array Decode 1.h#D," + ref ), 0 );
+
+        des.add( FuncArray1 ); ref += 1;
+        
+        DLLFunc.insert( new DefaultMutableTreeNode( "Function Array Decode 2.h#D," + ref ), 1 );
+        
+        des.add( FuncArray2 ); ref += 1;
 
         IMPORT.add( DLLFunc );
       }
@@ -122,14 +122,14 @@ public class DLLImport extends Data
       if( dllEl > 60 ){ break; }
     }
 
-    DLLArray.setEvent( this::arrayInfo ); des.add( DLLArray );
+    DLLArray.setEvent( this::arrayInfo ); des.add( 0, DLLArray );
     
     return( des.toArray( new Descriptor[ des.size() ] ) );
   }
 
   //Detailed description DLL.
 
-  public static final String[] Arrayinfo = new String[] { "<html>Array element consisting of A DLL name location, and tow Lists locations, for which methods to load from the files export table.<br /><br />" + 
+  public static final String[] Arrayinfo = new String[] { "<html>Array elements consisting of A DLL name location, and tow Lists locations, for which methods to load from the DLL export table.<br /><br />" + 
     "Two lists are used, for which methods to import from the DLL. The lists should match. If they do not, then the import table is corrupted.<br /><br />" +
     "The first Element that has no locations, and is all zero is the end of the DLL import table.</html>",
     "<html>The location to a list, of which methods to import from the DLL from export table.<br /><br />" + 
@@ -144,6 +144,8 @@ public class DLLImport extends Data
 
   public void arrayInfo( int el )
   {
+    el = el < 0 ? 0 : el;
+
     WindowCompoents.info( Arrayinfo[ el % 6 ] );
   }
 }

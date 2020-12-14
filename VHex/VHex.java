@@ -342,14 +342,14 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   public void setSelected( long start, long end )
   {
-    SelectC = new Color( 57, 105, 138, 128 );
+    elSelection = false; SelectC = new Color( 57, 105, 138, 128 );
     
     if( !Virtual || IOStream.isMaped() ) { sel = start; sele = end; repaint(); }
   }
 
   public void setSelectedEnd( long end )
   {
-    SelectC = new Color( 57, 105, 138, 128 );
+    elSelection = false; SelectC = new Color( 57, 105, 138, 128 );
     
     if( !Virtual || IOStream.isMaped() ) { sele = end; repaint(); }
   }

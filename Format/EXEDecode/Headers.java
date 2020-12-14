@@ -291,6 +291,13 @@ public class Headers extends Data
 
   public void mzInfo( int el )
   {
+    if( el < 0 )
+    {
+      WindowCompoents.info("<html><p>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
+        "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
+        "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.</p></html>");
+    }
+
     //Disassemble 16 bit section.
 
     if( el == 19 )
@@ -389,6 +396,12 @@ public class Headers extends Data
 
   public void peInfo( int el )
   {
+    if( el < 0 )
+    {
+      WindowCompoents.info("<html><p>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
+        "This header specifies the number of sections to map in virtual space. The processor type, and date of compilation.</p></html>");
+    }
+
     WindowCompoents.info( PEinfo[ el ] );
   }
 
@@ -432,6 +445,11 @@ public class Headers extends Data
 
   public void opInfo( int el )
   {
+    if( el < 0 )
+    {
+      WindowCompoents.info("<html><p>At the end of the PE header is the start of the Optional header. However, this header is not optional.</p></html>");
+    }
+
     WindowCompoents.info( OPinfo[ el ] );
   }
 
@@ -443,6 +461,12 @@ public class Headers extends Data
 
   public void ddInfo( int el )
   {
+    if( el < 0 )
+    {
+      WindowCompoents.info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
+        "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.<br /><br />Anything that is 0, is not used.</p></html>");
+    }
+
     WindowCompoents.info( DDinfo[ el % 3 ] );
   }
 

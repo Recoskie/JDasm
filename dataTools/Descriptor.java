@@ -133,6 +133,23 @@ public class Descriptor
     type.add( 14 ); rows += 1;
   }
 
+  //Read a string till termination code.
+
+  int code = 0; String s = "", h = "";
+
+  public void String8( String use, byte c ) throws java.io.IOException
+  {
+    code = ~c; s = ""; h = "";
+
+    while ( code != c ) { code = IOStream.read(); if( code != 0 ) { s += (char)code; h += String.format( "%1$02X", code ) + " "; } }; value = s;
+
+    data.add(new String[]{ use, h, value + "" } );
+    
+    length += s.length(); rpos.add( length ); apos.add( 0 );
+    
+    type.add( 13 ); rows += 1;
+  }
+
   //Array type.
 
   public void Array( String use, int len ) throws java.io.IOException

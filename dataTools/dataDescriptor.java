@@ -85,5 +85,7 @@ public class dataDescriptor extends JComponent
     if( !set ) { set = true; td.setModel( dModel ); }
     
     dModel.fireTableDataChanged();
+
+    data.Event.accept( -1 ); //Initial description of data structure.
   }
 }

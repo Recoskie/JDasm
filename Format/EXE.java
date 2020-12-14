@@ -22,7 +22,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   //The new Descriptor table allows a description of clicked data.
 
-  public Descriptor[] des = new Descriptor[6];
+  public Descriptor[] Header_des = new Descriptor[6];
 
   //Data descriptor for DLL import table.
 
@@ -79,11 +79,11 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     try
     {
-      des[0] = Header.readMZ( b );
-      if(!Data.error) { des[1] = Header.readPE( b ); }
-      if(!Data.error) { des[2] = Header.readOP( b ); }
-      if(!Data.error) { des[3] = Header.readDataDrectory( b ); }
-      if(!Data.error) { des[4] = Header.readSections( b ); }
+      Header_des[0] = Header.readMZ( b );
+      if(!Data.error) { Header_des[1] = Header.readPE( b ); }
+      if(!Data.error) { Header_des[2] = Header.readOP( b ); }
+      if(!Data.error) { Header_des[3] = Header.readDataDrectory( b ); }
+      if(!Data.error) { Header_des[4] = Header.readSections( b ); }
     }
     catch(java.io.IOException e) { Data.error = true; }
 
@@ -102,11 +102,11 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
     }
 
-    Headers.add(new DefaultMutableTreeNode("MZ Header.h"));
-    Headers.add(new DefaultMutableTreeNode("PE Header.h"));
-    Headers.add(new DefaultMutableTreeNode("OP Header.h"));
-    Headers.add(new DefaultMutableTreeNode("Data Directory Array.h"));
-    Headers.add(new DefaultMutableTreeNode("Mapped SECTOINS TO RAM.h"));
+    Headers.add(new DefaultMutableTreeNode("MZ Header.h#H,0"));
+    Headers.add(new DefaultMutableTreeNode("PE Header.h#H,1"));
+    Headers.add(new DefaultMutableTreeNode("OP Header.h#H,2"));
+    Headers.add(new DefaultMutableTreeNode("Data Directory Array.h#H,3"));
+    Headers.add(new DefaultMutableTreeNode("Mapped SECTOINS TO RAM.h#H,4"));
 
     root.add( Headers );
 
@@ -187,9 +187,41 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public void elementOpen(String h)
   {
+    //Data descriptors, for data structures.
+
+    if( h.indexOf("#") > 0 )
+    {
+      String[] type = h.split("#")[1].split(",");
+
+      //Headers.
+
+      if( type[0].equals("H") )
+      {
+        ds.setDescriptor( Header_des[ Integer.parseInt( type[1] ) ] );
+      }
+
+      //DLL import data structures.
+
+      else if( type[0].equals("D") )
+      {
+        ds.setDescriptor( DLL_des[ Integer.parseInt( type[1] ) ] );
+      }
+
+      //Offset.
+
+      else if( type[0].equals("O") )
+      {
+        try
+        {
+          b.seekV( Long.parseLong( type[1] ) );
+        }
+        catch( IOException e ) { }
+      }
+    }
+
     //Start of application.
     
-    if( h.equals("Program Start (Machine code).h") )
+    else if( h.equals("Program Start (Machine code).h") )
     {
       if(Data.coreLoaded)
       {
@@ -224,44 +256,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     //Headers must be decoded before any other part of the program can be read.
 
-    else if( h.equals("MZ Header.h") )
-    {
-      ds.setDescriptor( des[0] );
-
-      info("<html><p>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
-      "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
-      "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.</p></html>");
-    }
-    else if( h.equals("PE Header.h") )
-    {
-      ds.setDescriptor( des[1] );
-
-      info("<html><p>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
-      "This header specifies the number of sections to map in virtual space. The processor type, and date of compilation.</p></html>");
-    }
-    else if( h.equals("OP Header.h") )
-    {
-      ds.setDescriptor( des[2] );
-
-      info("<html><p>At the end of the PE header is the start of the Optional header. However, this header is not optional.</p></html>");
-    }
-    else if( h.equals("Data Directory Array.h") )
-    {
-      ds.setDescriptor( des[3] );
-
-      info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
-      "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.<br /><br />Anything that is 0, is not used.</p></html>");
-    }
-    else if( h.equals("Mapped SECTOINS TO RAM.h") )
-    {
-      ds.setDescriptor( des[4] );
-
-      info("<html><p>The PE header specifies the number of sections to read.<br /><br />Each section specifies where to read the file, and size, and at what address to place the data in virtual Memory, and size.<br /><br />" +
-      "Each virtual address is added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.</p></html>");
-    }
     else if( h.equals("Header Data") )
     {
-      Offset.setSelected( 0, ( des[4].pos + des[4].length ) - 1 );
+      Offset.setSelected( 0, ( Header_des[4].pos + Header_des[4].length ) - 1 );
 
       info("<html><p>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
       "Export Table can not be located.<br /><br />" +
@@ -276,6 +273,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       try
       {
         b.seekV(data.DataDir[0]);b.seekV(data.DataDir[0]);
+
         Virtual.setSelected( data.DataDir[0], data.DataDir[0] + data.DataDir[1] - 1 );
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[1] - 1 );
       }
@@ -310,8 +308,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[3] - 1 );
       }
       catch( IOException e ) { }
+
+      info("<html><p>Methods that are import from other files using the export table.</p></html>");
     }
-    else if( h.equals( "DLL Import Array Decode.h" ) ) { ds.setDescriptor( DLL_des[DLL_des.length-1] ); }
 
     else if( h.equals("Resource Files.h") )
     {
@@ -494,24 +493,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       //Decoder goes here.
 
       noDecode();
-    }
-
-    else
-    {
-      String[] type = h.split("#")[1].split(",");
-
-      if( type[0].equals("D") )
-      {
-        ds.setDescriptor( DLL_des[ Integer.parseInt( type[1] ) ] );
-      }
-      else if( type[0].equals("O") )
-      {
-        try
-        {
-          b.seekV( Long.parseLong( type[1] ) );
-        }
-        catch( IOException e ) { }
-      }
     }
   }
 
