@@ -49,7 +49,7 @@ public class DLLImport extends Data
 
       //Read the name.
 
-      DLLName = new Descriptor( b, true ); DLLName.String8("DLL Name", (byte)0x00 );
+      DLLName = new Descriptor( b, true ); DLLName.String8("DLL Name", (byte)0x00 ); DLLName.setEvent( this::dllInfo );
 
       //Load the two Function list.
 
@@ -98,7 +98,9 @@ public class DLLImport extends Data
 
             //Read HInit ID, and Function name.
 
-            b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("HInit"); Method.String8( "Method name", (byte)0x00 ); des.add( Method );
+            b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("HInit"); Method.String8( "Method name", (byte)0x00 );
+            
+            Method.setEvent( this::methodInfo ); des.add( Method );
 
             DLLFunc.add( new DefaultMutableTreeNode( Method.value + "().dll#D,"+ ref ) ); ref += 1; b.seekV(t2);
           }
@@ -106,11 +108,11 @@ public class DLLImport extends Data
 
         DLLFunc.insert( new DefaultMutableTreeNode( "Function Array Decode 1.h#D," + ref ), 0 );
 
-        des.add( FuncArray1 ); ref += 1;
+        FuncArray1.setEvent( this::funcInfo ); des.add( FuncArray1 ); ref += 1;
         
         DLLFunc.insert( new DefaultMutableTreeNode( "Function Array Decode 2.h#D," + ref ), 1 );
         
-        des.add( FuncArray2 ); ref += 1;
+        FuncArray2.setEvent( this::funcInfo ); des.add( FuncArray2 ); ref += 1;
 
         IMPORT.add( DLLFunc );
       }
@@ -144,8 +146,22 @@ public class DLLImport extends Data
 
   public void arrayInfo( int el )
   {
-    el = el < 0 ? 0 : el;
+    el = el < 0 ? 0 : el; WindowCompoents.info( Arrayinfo[ el % 6 ] );
+  }
 
-    WindowCompoents.info( Arrayinfo[ el % 6 ] );
+  public void dllInfo( int el )
+  {
+    WindowCompoents.info( "<html>The DLL name location. The end of each name ends with code 00 hex.<br /><br />Each DLL Array element contains a DLL Name location, and tow method lists locations.</html>" );
+  }
+
+  public void funcInfo( int el )
+  {
+    WindowCompoents.info( "<html>Locations to each method name. The first location that is all 0 is the end of the list.<br /><br />Each DLL Array element contains a DLL Name location, and tow method lists locations.<br /><br />" +
+      "The tow method lists should locate to the same method names. If they do not match then there might be something wrong with the import table.</html>" );
+  }
+
+  public void methodInfo( int el )
+  {
+    WindowCompoents.info( "<html>Each method name contains a HInit value, and then its name. The end of each method name ends with code 00 hex.</html>" );
   }
 }
