@@ -21,13 +21,9 @@ public class DLLImport extends Data
     Descriptor DLLArray = new Descriptor( b, true );
     Descriptor DLLName, FuncArray1, FuncArray2, Method;
 
-    int d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 1, ref = 1, dllEl = 0, code = 0;
+    int d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 1, ref = 1, dllEl = 0;
 
-    long t = 0, t2 = 0;
-
-    String o = "";
-
-    long pos = 1;
+    long t = 0, t2 = 0, pos = 1;
 
     DefaultMutableTreeNode DLLFunc;
 
@@ -131,17 +127,19 @@ public class DLLImport extends Data
 
   //Detailed description DLL.
 
-  public static final String[] Arrayinfo = new String[] { "<html>Array elements consisting of A DLL name location, and tow Lists locations, for which methods to load from the DLL export table.<br /><br />" + 
+  public static final String ListInfo = "<html>The location to a list, of which methods to import from the DLL export table.<br /><br />" + 
+    "There are two lists That are in different locations, but should locate to the same method names.</html>";
+
+  public static final String[] Arrayinfo = new String[] { "<html>Array elements consisting of A DLL name location, and tow List locations.<br /><br />" + 
     "Two lists are used, for which methods to import from the DLL. The lists should match. If they do not, then the import table is corrupted.<br /><br />" +
-    "The first Element that has no locations, and is all zero is the end of the DLL import table.</html>",
-    "<html>The location to a list, of which methods to import from the DLL from export table.<br /><br />" + 
-    "There are two lists That are in different locations, but should locate to the same import names.</html>",
+    "The first Element that has no locations, and is all zeros is the end of the DLL import table.</html>",
+    ListInfo,
     "<html>A date time stamp is in seconds. The seconds are added to the starting date \"Wed Dec 31 7:00:00PM 1969\".<br /><br />" +
-    "If the time date stamp is \"37\" in value, then it is plus 37 second giving \"Wed Dec 31 7:00:37PM 1969\".</html>",
-    "<html>Forward Chain is generally not used by linkers, and compilers.</html>",
-    "<html>The location of the DLL name to start importing methods from.</html>",
-    "<html>The location to a list, of which methods to import from the DLL from export table.<br /><br />" + 
-    "There are two lists That are in different locations, but should locate to the same import names.</html>",
+    "If the time date stamp is \"37\" in value, then it is plus 37 seconds giving \"Wed Dec 31 7:00:37PM 1969\".</html>",
+    "<html>Forward Chain is a list of methods that must be loaded from the DLL file before the import methods may be usable.<br /><br />" +
+    "This is only if the method we want to use depends on other methods. This is all zeros if not used.</html>",
+    "<html>The location of the DLL name to start importing methods from it's export table.</html>",
+    ListInfo
   };
 
   public void arrayInfo( int el )
@@ -151,12 +149,12 @@ public class DLLImport extends Data
 
   public void dllInfo( int el )
   {
-    WindowCompoents.info( "<html>The DLL name location. The end of each name ends with code 00 hex.<br /><br />Each DLL Array element contains a DLL Name location, and tow method lists locations.</html>" );
+    WindowCompoents.info( "<html>The DLL name location. The end of each name ends with code 00 hex.<br /><br />Each DLL Array element contains a DLL Name location, and tow method list locations.</html>" );
   }
 
   public void funcInfo( int el )
   {
-    WindowCompoents.info( "<html>Locations to each method name. The first location that is all 0 is the end of the list.<br /><br />Each DLL Array element contains a DLL Name location, and tow method lists locations.<br /><br />" +
+    WindowCompoents.info( "<html>Locations to each method name. The first location that is all 0 is the end of the list.<br /><br />Each DLL Array element contains a DLL Name location, and tow method list locations.<br /><br />" +
       "The tow method lists should locate to the same method names. If they do not match then there might be something wrong with the import table.</html>" );
   }
 
