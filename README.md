@@ -43,12 +43,6 @@ You can also download the project. Clone the entire project if you wish to make 
 You also need java 8, or higher. Which added support, for unsignified numbers.
 
 ------------------------------------------------------------
-IMPORTANT.
-------------------------------------------------------------
-
-Resource Reader still has to be redesigned, for the new system.
-
-------------------------------------------------------------
 The Microcode Disassembler.
 ------------------------------------------------------------
 
