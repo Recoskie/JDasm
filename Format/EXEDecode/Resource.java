@@ -1,162 +1,126 @@
 package Format.EXEDecode;
-import javax.swing.*;
 import java.io.*;
 import javax.swing.tree.*;
-import java.awt.*;
-import java.util.*;
+
+import dataTools.*;
+import RandomAccessFileV.*;
+import WindowCompoents.*;
 
 public class Resource extends Data
 {
-java.util.Vector<String> Files=new java.util.Vector<String>();
-java.util.Vector<String> Folders=new java.util.Vector<String>();
-boolean exist=false;
+  //Data structure data descriptors.
 
-public DefaultMutableTreeNode Decode(DefaultMutableTreeNode RE,VraReader b)
-{
-Folders.add("$0");
+  java.util.LinkedList<Descriptor> des = new java.util.LinkedList<Descriptor>();
 
-while(Folders.size()>0){ScanDIR(Folders.get(0),b);Folders.remove(0);}
+  //Read files, and folders.
 
-FileTree(RE);
+  int ref = 0;
 
-return(RE);
+  public Descriptor[] readFiles( RandomAccessFileV b, DefaultMutableTreeNode Resource ) throws IOException
+  {
+    readDir( Resource, 0, b ); //Read DIR at current position.
 
-}
+    return( des.toArray( new Descriptor[ des.size() ] ) );
+  }
 
-public void ScanDIR(String in,VraReader b)
-{
-long l=0x80000000L;
-long E1=0,E2=0;
+  //Each DIR contains a list to another Dir list, or File.
 
-int BASE=(int)DataDir[4];
-int POS=0;
+  DefaultMutableTreeNode nDir;
+  long t = 0;
 
-String[] fix=new String[2];
-fix[0]=in.substring(0,in.indexOf("$"));
-fix[1]=in.substring((in.indexOf("$")+1),in.length());
-in=fix[0];
-POS=Integer.parseInt(fix[1],10);
-fix=null;
+  public void readDir( DefaultMutableTreeNode Dir, long pos, RandomAccessFileV b ) throws IOException
+  {
+    Descriptor des_Dir, Entries;
 
-System.out.println("Scan DIR = "+in+"");
-System.out.println("Drectory Position IN RAM = "+(BASE+POS)+"");
+    int rref = ref;
 
-Object[] Folder=new Object[6];
-Folder[0]=b.ReadDWORD((BASE+POS));
-Folder[1]=b.ReadDWORD((BASE+(POS+4)));
-Folder[2]=b.ReadWORD((BASE+(POS+8)));
-Folder[3]=b.ReadWORD((BASE+(POS+10)));
-Folder[4]=b.ReadWORD((BASE+(POS+12)));
-Folder[5]=b.ReadWORD((BASE+(POS+14)));
-int Enterys=(((int)b.ReadWORD((BASE+(POS+12))))+((int)b.ReadWORD((BASE+(POS+14)))));
+    //Number of DIR/File locations under this DIR.
 
-System.out.println("Drectory = Files/Folders = "+Enterys);POS+=16;
+    int  size = 0;
+    
+    //The position of the current DIR.
+    
+    long Pos = pos;
 
-try{for(int i=0;i<Enterys;i++){E1=b.ReadDWORD((BASE+POS));E2=b.ReadDWORD((BASE+(POS+4)));POS+=8;
+    //The position of the DIR. IF 0 use current IO position.
 
-//****************************String Name****************************
-if((E1-l)>0)
-{
-//Folder
-if((E2-l)>0)
-{String Name=b.ReadASCIIUND(((int)(BASE+(E1-l))));
-Folders.add(in+Name+"/$"+(E2-l)+"");}
+    if( pos != 0 ) { b.seekV( pos ); }
 
-//File
-else{String Name=b.ReadASCIIUND(((int)(BASE+(E1-l))));
-Files.add(in+Name+".h#R"+E2+"");}
-}
+    //The DIR info descriptor.
 
-//******************************ID Name******************************
-else
-{
-//Folder
-if((E2-l)>0)
-{Folders.add(in+E1+"/$"+(E2-l)+"");}
+    des_Dir = new Descriptor( b, true );
 
-//File
-else{Files.add(in+E1+".h#R"+E2+"");}
-}
-}
-}catch(Exception e){System.out.println(e+"");}
-}
+    des_Dir.LUINT32("Characteristics");
+    des_Dir.LUINT32("Time Date Stamp");
+    des_Dir.LUINT16("Major Version");
+    des_Dir.LUINT16("Minor Version");
+    des_Dir.LUINT16("Number Of Named Entries"); size = ((Short)des_Dir.value).intValue();
+    des_Dir.LUINT16("Number Of Id Entries"); size += ((Short)des_Dir.value).intValue();
 
-//Decode the Files Array into Folders And Files Leading to the Files
+    des.add(des_Dir);
 
-public void FileTree(DefaultMutableTreeNode R)
-{for(int i=0;i<Files.size();i++){AddFile(Files.get(i),R);}
-Folders=null;}
+    Dir.add( new DefaultMutableTreeNode( "Directory Info.h#R," + rref + "" ) ); ref += 1; rref = ref;
 
-public DefaultMutableTreeNode DirMatch(String folder,DefaultMutableTreeNode temp)
-{exist=false;DefaultMutableTreeNode nobe=new DefaultMutableTreeNode("");
-Enumeration e=temp.children();while(e.hasMoreElements())
-{nobe=((DefaultMutableTreeNode)e.nextElement());
-if((nobe+"").equals(folder)){exist=true;break;}}
-if(!exist){nobe=temp.getLastLeaf();if((nobe+"").equals(folder)){exist=true;}}return(nobe);}
+    //Read the entires.
 
-public void AddFile(String d2,DefaultMutableTreeNode d)
-{DefaultMutableTreeNode temp1=d;DefaultMutableTreeNode temp2=d;
-String[] D=d2.split("/");for(int i=0;i<D.length;i++)
-{temp2=DirMatch(D[i],temp1);if(exist){temp1=temp2;}
-else{temp1.add(new DefaultMutableTreeNode(D[i]));i--;}}}
+    Entries = new Descriptor( b, true ); des.add( Entries );
+    Dir.add( new DefaultMutableTreeNode( "Directory Array.h#R," + rref + "" ) ); ref += 1; rref = ref;
 
-public void ExtractFile(int pos,String Name,VraReader b)
-{
-int v=JOptionPane.showConfirmDialog(null,"Extract File "+Name,"Resouce Decoder",JOptionPane.YES_NO_OPTION);
+    for( int i = 0; i < size; i++ )
+    {
+      Entries.Array("Array Element " + i + "", 8 );
 
-if(v==JOptionPane.YES_OPTION)
-{
-try{int BASE=(int)DataDir[4];
-Object[] FileH=new Object[4];
-long Pos=b.ReadDWORD((BASE+pos));
-long Size=b.ReadDWORD(((BASE+pos)+4));
-long l=0x80000000L;
+      Entries.LUINT32("Name, or ID");
 
-if(Pos>=l){Pos-=l;//Pos+=BASE;
-System.out.println("RVA POS = "+Pos+"");}
+      t = ( (Integer)Entries.value );
 
-File outFile=new File(Name+".txt");
-BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream(outFile));
+      //Negative value locates to a string name.
 
-//read(long pos,int length)
+      if( t < 0 )
+      {
+        nDir = new DefaultMutableTreeNode( "Named Entire" );
+      }
 
-try{out.write(b.read(Pos,((int)Size)));}catch(Exception e){System.out.println("EX 5");}
+      //Positive value is a ID name.
 
-System.out.println("Finished");out.close();}
-catch(Exception e){System.out.println(e+"");}
+      else { nDir = new DefaultMutableTreeNode( t + "" ); }
 
-}
+      Dir.add( nDir );
 
-}
+      Entries.LUINT32("Directory, or File");
+      
+      pos = ((Integer)Entries.value).intValue();
 
-public void ExtractFileAsIcon(int pos,String Name,VraReader b)
-{
-int v=JOptionPane.showConfirmDialog(null,"Extract File "+Name,"Resouce Decoder",JOptionPane.YES_NO_OPTION);
+      //Factorial.
 
-if(v==JOptionPane.YES_OPTION)
-{
-try{int BASE=(int)DataDir[4];
-Object[] FileH=new Object[4];
-long Pos=b.ReadDWORD((BASE+pos));
-long Size=b.ReadDWORD(((BASE+pos)+4));
-long l=0x80000000L;
+      if( pos < 0 )
+      {
+        Pos = b.getVirtualPointer();
+        
+        readDir( nDir, ( pos & 0x7FFFFFFF ) + DataDir[4], b );
+        
+        b.seekV( Pos );
+      }
+      
+      //File info.
+      
+      else
+      {
+        nDir.setUserObject( new DefaultMutableTreeNode( t + "#R," + rref + "" ) ); ref += 1; rref = ref;
+        
+        t = b.getVirtualPointer(); b.seekV( pos + DataDir[4] );
 
-if(Pos>=l){Pos-=l;//Pos+=BASE;
-System.out.println("RVA POS = "+Pos+"");}
+        Descriptor File = new Descriptor( b, true );
 
-byte[] b2=new byte[]{0x00,0x00,0x01,0x00,0x01,0x00,0x30,0x30,0x00,0x00,0x01,0x00,0x00,0x00,(byte)(Size&0xFF),(byte)((Size>>8)&0xFF),(byte)((Size>>16)&0xFF),(byte)(Size>>24),0x16,0x00,0x00,0x00};
+        File.LUINT32("File location");
+        File.LUINT32("File size");
+        File.LUINT32("Code Page");
+        File.LUINT32("Reserved");
 
-File outFile=new File(Name+".ico");
-BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream(outFile));
-out.write(b2);
+        des.add( File );
 
-try{out.write(b.read(Pos,((int)Size)));}catch(Exception e){System.out.println("EX 5");}
-
-System.out.println("Finished");out.close();}
-catch(Exception e){System.out.println(e+"");}
-
-}
-
-}
-
+        b.seekV( t );
+      }
+    }
+  }
 }

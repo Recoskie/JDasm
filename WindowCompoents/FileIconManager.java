@@ -68,6 +68,10 @@ public class FileIconManager extends DefaultTreeCellRenderer
         return( true );
       }
     }
+    else
+    {
+      setText( FilterRefrence( name ) );
+    }
       
     return(false);
   }

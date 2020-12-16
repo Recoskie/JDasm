@@ -28,6 +28,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public Descriptor[] DLL_des;
 
+  //Data descriptor for resource reader.
+
+  public Descriptor[] RSRC_des;
+
   //Nodes that can be added to when Adding section format readers.
 
   DefaultMutableTreeNode root;
@@ -36,7 +40,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
   DefaultMutableTreeNode RE = new DefaultMutableTreeNode("Resource Files.h");
   DefaultMutableTreeNode EX = new DefaultMutableTreeNode("Exception Table.h");
   DefaultMutableTreeNode Security = new DefaultMutableTreeNode("Security Level Settings.h");
-  DefaultMutableTreeNode RELOC = new DefaultMutableTreeNode("Relocation/Patching.h");
+  DefaultMutableTreeNode RELOC = new DefaultMutableTreeNode("Relocations.h");
   DefaultMutableTreeNode DEBUG = new DefaultMutableTreeNode("DEBUG TABLE.h");
   DefaultMutableTreeNode Decription = new DefaultMutableTreeNode("Description/Architecture.h");
   DefaultMutableTreeNode MV = new DefaultMutableTreeNode("Machine Value.h");
@@ -52,8 +56,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
   public static Data data = new Data();
   public Headers Header = new Headers();
   public DLLImport DLL = new DLLImport();
-  
-  //public Resource RSRC = new Resource();
+  public Resource RSRC = new Resource();
 
   public EXE() { UsedDecoder = this; }
 
@@ -207,6 +210,13 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         ds.setDescriptor( DLL_des[ Integer.parseInt( type[1] ) ] );
       }
 
+      //Resource reader data structures.
+
+      else if( type[0].equals("R") )
+      {
+        ds.setDescriptor( RSRC_des[ Integer.parseInt( type[1] ) ] );
+      }
+
       //Offset.
 
       else if( type[0].equals("O") )
@@ -223,7 +233,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     
     else if( h.equals("Program Start (Machine code).h") )
     {
-      if(Data.coreLoaded)
+      if( Data.coreLoaded )
       {
         String t = "", t1 = "", t2 ="";
 
@@ -287,7 +297,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[2]);b.seekV(data.DataDir[2]);
+        b.seekV( data.DataDir[2] ); b.seekV( data.DataDir[2] );
 
         //Decode import table.
 
@@ -312,13 +322,14 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       info("<html><p>Methods that are import from other files using the export table.</p></html>");
     }
 
-    else if( h.equals("Resource Files.h") )
+    else if( h.equals("function Export Table.h") )
     {
       try
       {
-        b.seekV(data.DataDir[4]);b.seekV(data.DataDir[4]);
-        Virtual.setSelected( data.DataDir[4], data.DataDir[4] + data.DataDir[5] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[5] - 1 );
+        b.seekV(data.DataDir[0]);b.seekV(data.DataDir[0]);
+
+        Virtual.setSelected( data.DataDir[0], data.DataDir[0] + data.DataDir[1] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[1] - 1 );
       }
       catch( IOException e ) { }
 
@@ -326,6 +337,37 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       noDecode();
     }
+
+    else if( h.startsWith( "Resource Files", 0 ) )
+    {
+      try
+      {
+        b.seekV( data.DataDir[4] ); b.seekV( data.DataDir[4] );
+
+        //Read Resource files.
+
+        if( RSRC_des == null )
+        {
+          b.Events = false;
+          
+          RE.setUserObject("Resource Files"); RSRC_des = RSRC.readFiles( b, RE );
+          
+          b.Events = true;
+
+          //Update the tree.
+
+          ((DefaultTreeModel)tree.getModel()).nodeChanged( RE ); tree.expandPath( new TreePath( RE.getPath() ) );
+        }
+
+        Virtual.setSelected( data.DataDir[4], data.DataDir[4] + data.DataDir[5] - 1 );
+        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[5] - 1 );
+      }
+      catch( IOException e ) { }
+
+      info("<html><p>Files that can be read within the application, or DLL. Such as pictures, images, audio files.<br /><br />The first Icon that is read is the programs ICon image.<br /><br />" +
+      "Each address location is added to the start of the resource section.</p></html>");
+    }
+
     else if( h.equals("Exception Table.h") )
     {
       try
@@ -354,7 +396,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       noDecode();
     }
-    else if( h.equals("Relocation/Patching.h") )
+    else if( h.equals("Relocations.h") )
     {
       try
       {
