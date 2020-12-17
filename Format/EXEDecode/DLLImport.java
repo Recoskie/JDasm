@@ -8,7 +8,7 @@ import WindowCompoents.*;
 
 public class DLLImport extends Data
 {
-  public Descriptor[] LoadDLLImport( RandomAccessFileV b, DefaultMutableTreeNode IMPORT ) throws IOException
+  public Descriptor[] LoadDLLImport( DefaultMutableTreeNode IMPORT, RandomAccessFileV b ) throws IOException
   {
     //get the physical address to data directory array links to dll import table
 

@@ -305,7 +305,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         {
           b.Events = false;
           
-          Import.setUserObject("DLL Import Table"); DLL_des = DLL.LoadDLLImport( b, Import );
+          Import.setUserObject("DLL Import Table"); DLL_des = DLL.LoadDLLImport( Import, b );
           
           b.Events = true;
 
@@ -350,7 +350,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         {
           b.Events = false;
           
-          RE.setUserObject("Resource Files"); RSRC_des = RSRC.readFiles( b, RE );
+          RE.setUserObject("Resource Files"); RSRC_des = RSRC.readResource( RE, b );
           
           b.Events = true;
 
