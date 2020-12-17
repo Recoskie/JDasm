@@ -66,7 +66,7 @@ public class Descriptor
   {
     IOStream.read(4); value = IOStream.toInt();
 
-    data.add(new String[]{ use, IOStream.toHex(), ( ( ((Integer)value).longValue() ) & 0xFFFFFFFF ) + "" } );
+    data.add(new String[]{ use, IOStream.toHex(), ( ( ((Integer)value).longValue() ) & 0xFFFFFFFFL ) + "" } );
     
     length += 4; type.add( 6 ); rpos.add( length ); apos.add( 0 ); rows += 1;
   }
@@ -84,7 +84,7 @@ public class Descriptor
   {
     IOStream.read(4); value = IOStream.toLInt();
 
-    data.add(new String[]{ use, IOStream.toHex(), ( ( ((Integer)value).longValue() ) & 0xFFFFFFFF ) + "" } );
+    data.add(new String[]{ use, IOStream.toHex(), ( ( ((Integer)value).longValue() ) & 0xFFFFFFFFL ) + "" } );
     
     length += 4; type.add( 6 ); rpos.add( length ); apos.add( 0 ); rows += 1;
   }
@@ -96,6 +96,60 @@ public class Descriptor
     data.add(new String[]{ use, IOStream.toHex(), Long.toUnsignedString( ((Long)value).longValue() ) } );
     
     length += 8; type.add( 8 ); rpos.add( length ); apos.add( 0 ); rows += 1;
+  }
+
+  public void INT8( String use ) throws java.io.IOException
+  {
+    IOStream.read(1); value = IOStream.toByte();
+
+    data.add(new String[]{ use, IOStream.toHex(), ((Byte)value) + "" } );
+    
+    length += 1; type.add( 1 ); rpos.add( length ); apos.add( 0 ); rows += 1;
+  }
+
+  public void INT16( String use ) throws java.io.IOException
+  {
+    IOStream.read(2); value = IOStream.toShort();
+
+    data.add(new String[]{ use, IOStream.toHex(), ((Short)value) + "" } );
+    
+    length += 2; type.add( 3 ); rpos.add( length ); apos.add( 0 ); rows += 1;
+  }
+
+  public void INT32( String use ) throws java.io.IOException
+  {
+    IOStream.read(4); value = IOStream.toInt();
+
+    data.add(new String[]{ use, IOStream.toHex(), ((Integer)value) + "" } );
+    
+    length += 4; type.add( 5 ); rpos.add( length ); apos.add( 0 ); rows += 1;
+  }
+
+  public void LINT16( String use ) throws java.io.IOException
+  {
+    IOStream.read(2); value = IOStream.toLShort();
+
+    data.add(new String[]{ use, IOStream.toHex(), ((Short)value) + "" } );
+    
+    length += 2; type.add( 3 ); rpos.add( length ); apos.add( 0 ); rows += 1;
+  }
+
+  public void LINT32( String use ) throws java.io.IOException
+  {
+    IOStream.read(4); value = IOStream.toLInt();
+
+    data.add(new String[]{ use, IOStream.toHex(), ((Integer)value) + "" } );
+    
+    length += 4; type.add( 5 ); rpos.add( length ); apos.add( 0 ); rows += 1;
+  }
+
+  public void LINT64( String use ) throws java.io.IOException
+  {
+    IOStream.read(8); value = IOStream.toLLong();
+
+    data.add(new String[]{ use, IOStream.toHex(), ((Long)value) + "" } );
+    
+    length += 8; type.add( 7 ); rpos.add( length ); apos.add( 0 ); rows += 1;
   }
 
   //String data.

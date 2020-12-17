@@ -63,7 +63,7 @@ public class Resource extends Data
     {
       des_Dir.Array("Array Element " + i + "", 8 );
 
-      des_Dir.LUINT32("Name, or ID");
+      des_Dir.LINT32("Name, or ID");
 
       t = ( (Integer)des_Dir.value );
 
@@ -88,7 +88,7 @@ public class Resource extends Data
 
       Dir.add( nDir );
 
-      des_Dir.LUINT32("Directory, or File");
+      des_Dir.LINT32("Directory, or File");
       
       pos = ((Integer)des_Dir.value).intValue();
 
