@@ -26,13 +26,12 @@ public class Resource extends Data
   //Each DIR contains a list to another Dir list, or File.
 
   DefaultMutableTreeNode nDir;
+  Descriptor File_Str;
   long t = 0;
 
   public void readDir( DefaultMutableTreeNode Dir, long pos, RandomAccessFileV b ) throws IOException
   {
-    Descriptor des_Dir, Entries;
-
-    int rref = ref;
+    Descriptor des_Dir;
 
     //Number of DIR/File locations under this DIR.
 
@@ -59,26 +58,29 @@ public class Resource extends Data
 
     des.add(des_Dir);
 
-    Dir.add( new DefaultMutableTreeNode( "Directory Info.h#R," + rref + "" ) ); ref += 1; rref = ref;
-
-    //Read the entires.
-
-    Entries = new Descriptor( b, true ); des.add( Entries );
-    Dir.add( new DefaultMutableTreeNode( "Directory Array.h#R," + rref + "" ) ); ref += 1; rref = ref;
+    Dir.add( new DefaultMutableTreeNode( "Directory Info.h#R," + ref + "" ) ); ref += 1;
 
     for( int i = 0; i < size; i++ )
     {
-      Entries.Array("Array Element " + i + "", 8 );
+      des_Dir.Array("Array Element " + i + "", 8 );
 
-      Entries.LUINT32("Name, or ID");
+      des_Dir.LUINT32("Name, or ID");
 
-      t = ( (Integer)Entries.value );
+      t = ( (Integer)des_Dir.value );
 
       //Negative value locates to a string name.
 
       if( t < 0 )
       {
-        nDir = new DefaultMutableTreeNode( "Named Entire" );
+        pos = t & 0x7FFFFFFF; t = b.getVirtualPointer(); b.seekV( pos + DataDir[4] );
+
+        File_Str = new Descriptor( b, true ); des.add( File_Str );
+
+        File_Str.LUINT16("Name length"); File_Str.LString16("Entire Name", ((Short)File_Str.value).intValue() );
+        
+        nDir = new DefaultMutableTreeNode( File_Str.value + "#R," + ref + "" ); ref += 1;
+
+        b.seekV( t );
       }
 
       //Positive value is a ID name.
@@ -87,9 +89,9 @@ public class Resource extends Data
 
       Dir.add( nDir );
 
-      Entries.LUINT32("Directory, or File");
+      des_Dir.LUINT32("Directory, or File");
       
-      pos = ((Integer)Entries.value).intValue();
+      pos = ((Integer)des_Dir.value).intValue();
 
       //Factorial.
 
@@ -106,18 +108,18 @@ public class Resource extends Data
       
       else
       {
-        nDir.setUserObject( new DefaultMutableTreeNode( t + "#R," + rref + "" ) ); ref += 1; rref = ref;
+        nDir.setUserObject( new DefaultMutableTreeNode( t + "#R," + ref + "" ) ); ref += 1;
         
         t = b.getVirtualPointer(); b.seekV( pos + DataDir[4] );
 
-        Descriptor File = new Descriptor( b, true );
+        File_Str = new Descriptor( b, true );
 
-        File.LUINT32("File location");
-        File.LUINT32("File size");
-        File.LUINT32("Code Page");
-        File.LUINT32("Reserved");
+        File_Str.LUINT32("File location");
+        File_Str.LUINT32("File size");
+        File_Str.LUINT32("Code Page");
+        File_Str.LUINT32("Reserved");
 
-        des.add( File );
+        des.add( File_Str );
 
         b.seekV( t );
       }

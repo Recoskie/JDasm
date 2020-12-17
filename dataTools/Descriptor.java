@@ -113,7 +113,7 @@ public class Descriptor
 
   public void String16( String use, int len ) throws java.io.IOException
   {
-    IOStream.read( len ); value = IOStream.toText16();
+    len <<= 1; IOStream.read( len ); value = IOStream.toText16();
 
     data.add(new String[]{ use, IOStream.toHex(), value + "" } );
     
@@ -124,7 +124,7 @@ public class Descriptor
 
   public void LString16( String use, int len ) throws java.io.IOException
   {
-    IOStream.read( len ); value = IOStream.toLText16();
+    len <<= 1; IOStream.read( len ); value = IOStream.toLText16();
 
     data.add(new String[]{ use, IOStream.toHex(), value + "" } );
     

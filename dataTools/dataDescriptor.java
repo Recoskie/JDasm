@@ -53,8 +53,16 @@ public class dataDescriptor extends JComponent
 
       if ( type < 13 ) { di.setType( type ); }
 
-      else if( type == 13 || type == 14 ) { di.setStringLen( data.rpos.get(row + 1) - data.rpos.get(row) ); di.setType( type ); }
+      else if( type == 13 )
+      {
+        di.setStringLen( data.rpos.get(row + 1) - data.rpos.get(row) ); di.setType( type );
+      }
       
+      else if( type == 14 )
+      {
+        di.setStringLen( ( data.rpos.get(row + 1) - data.rpos.get(row) ) >> 1 ); di.setType( type );
+      }
+
       else if( type == 15 ) { di.setOther( data.rpos.get(row + 1) - data.rpos.get(row) ); }
 
       else if( type == 16 ) { di.setOther( data.apos.get(row + 1) - data.rpos.get(row) ); }
