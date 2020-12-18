@@ -114,7 +114,7 @@ public class Resource extends Data
         File_Str = new Descriptor( b, true ); File_Str.setEvent( this::fileInfo );
 
         File_Str.LUINT32("File location"); pos = ((Integer)File_Str.value).longValue() + imageBase;
-        File_Str.LUINT32("File size"); nDir.add( new DefaultMutableTreeNode( "File Data location#Sv," + pos + "," + ( pos + (((Integer)File_Str.value).longValue()) ) + "" ) );
+        File_Str.LUINT32("File size"); nDir.add( new DefaultMutableTreeNode( "File Data location#Sv," + pos + "," + ( pos + (((Integer)File_Str.value).longValue()) - 1 ) + "" ) );
 
         File_Str.LUINT32("Code Page");
         File_Str.LUINT32("Reserved");
