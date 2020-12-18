@@ -32,6 +32,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public Descriptor[] RSRC_des;
 
+  //A blank data Descriptor.
+
+  public Descriptor blank;
+
   //Nodes that can be added to when Adding section format readers.
 
   DefaultMutableTreeNode root;
@@ -64,7 +68,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public void read( String F, RandomAccessFileV file )
   {
-    b = file; data.stream = file;
+    b = file; data.stream = file; blank = new Descriptor( file );
 
     data.stream.Events = false;
 
@@ -240,6 +244,8 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         }
         catch( IOException e ) { }
       }
+
+      return;
     }
 
     //Start of application.
@@ -549,6 +555,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       noDecode();
     }
+    else { info(""); }
+
+    ds.clear( blank );
   }
 
   //No Decoder.

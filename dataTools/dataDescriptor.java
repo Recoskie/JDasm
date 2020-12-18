@@ -96,4 +96,11 @@ public class dataDescriptor extends JComponent
 
     data.Event.accept( -1 ); //Initial description of data structure.
   }
+
+  //Main use is for setting a blank data model.
+
+  public void clear( Descriptor d )
+  {
+    data = d; dModel.fireTableDataChanged();
+  }
 }
