@@ -107,14 +107,15 @@ public class Resource extends Data
       
       else
       {
-        nDir.setUserObject( new DefaultMutableTreeNode( t + "#R," + ref ) ); ref += 1;
+        nDir.add( new DefaultMutableTreeNode( "File Info#R," + ref ) ); ref += 1;
         
         t = b.getVirtualPointer(); b.seekV( pos + DataDir[4] );
 
         File_Str = new Descriptor( b, true ); File_Str.setEvent( this::fileInfo );
 
-        File_Str.LUINT32("File location");
-        File_Str.LUINT32("File size");
+        File_Str.LUINT32("File location"); pos = ((Integer)File_Str.value).longValue() + imageBase;
+        File_Str.LUINT32("File size"); nDir.add( new DefaultMutableTreeNode( "File Data location#Sv," + pos + "," + ( pos + (((Integer)File_Str.value).longValue()) ) + "" ) );
+
         File_Str.LUINT32("Code Page");
         File_Str.LUINT32("Reserved");
 
@@ -129,7 +130,7 @@ public class Resource extends Data
 
   public static final String res = "A section that is reserved, is skipped. So that some day the empty space may be used for something new.";
 
-public static final String Ver = "Major, and Minor are put together to forum the version number.<br /><br />Example.<br /><br />Major version = 5<br /><br />Minor version = 12<br /><br />Would mean version 5.12V.";
+  public static final String Ver = "Major, and Minor are put together to forum the version number.<br /><br />Example.<br /><br />Major version = 5<br /><br />Minor version = 12<br /><br />Would mean version 5.12V.";
 
   public static final String[] DirInfo = new String[] {"<html>Characteristics are reserved, for future use.<br /><br />" + res + "</html>",
     "<html>A date time stamp is in seconds. The seconds are added to the starting date \"Wed Dec 31 7:00:00PM 1969\".<br /><br />" +
@@ -161,7 +162,7 @@ public static final String Ver = "Major, and Minor are put together to forum the
     }
   }
 
-  public static final String[] FileInfo = new String[] {"<html>The location to the file.</html>",
+  public static final String[] FileInfo = new String[] {"<html>The location to the file. This location is added to the base address of the program.</html>",
     "<html>The size of the file.</html>",
     "<html></html>",
     "<html>" + res + "</html>"

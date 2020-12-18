@@ -227,6 +227,19 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         }
         catch( IOException e ) { }
       }
+
+      //Select virtual offset.
+
+      else if( type[0].equals("Sv") )
+      {
+        try
+        {
+          b.seekV( Long.parseLong( type[1] ) );b.seekV( Long.parseLong( type[1] ) );
+
+          Virtual.setSelected( Long.parseLong( type[1] ), Long.parseLong( type[2] ) );
+        }
+        catch( IOException e ) { }
+      }
     }
 
     //Start of application.
