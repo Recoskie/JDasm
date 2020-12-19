@@ -24,6 +24,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public Descriptor[] Header_des = new Descriptor[6];
 
+  //Exportable methods.
+
+  public Descriptor[] Export_des;
+
   //Data descriptor for DLL import table.
 
   public Descriptor[] DLL_des;
@@ -59,6 +63,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public static Data data = new Data();
   public Headers Header = new Headers();
+  public DLLExport DLL_ex = new DLLExport();
   public DLLImport DLL = new DLLImport();
   public Resource RSRC = new Resource();
 
@@ -207,6 +212,13 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         ds.setDescriptor( Header_des[ Integer.parseInt( type[1] ) ] );
       }
 
+      //Export data structures.
+
+      else if( type[0].equals("E") )
+      {
+        ds.setDescriptor( Export_des[ Integer.parseInt( type[1] ) ] );
+      }
+
       //DLL import data structures.
 
       else if( type[0].equals("D") )
@@ -227,7 +239,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       {
         try
         {
-          b.seekV( Long.parseLong( type[1] ) );
+          b.seekV( Long.parseLong( type[1] ) ); b.seekV( Long.parseLong( type[1] ) );
         }
         catch( IOException e ) { }
       }
@@ -238,7 +250,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       {
         try
         {
-          b.seekV( Long.parseLong( type[1] ) );b.seekV( Long.parseLong( type[1] ) );
+          b.seekV( Long.parseLong( type[1] ) ); b.seekV( Long.parseLong( type[1] ) );
 
           Virtual.setSelected( Long.parseLong( type[1] ), Long.parseLong( type[2] ) );
         }
@@ -297,21 +309,36 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     //Seek virtual address position. Thus begin reading section.
 
-    else if( h.equals("function Export Table.h") )
+    else if( h.startsWith( "function Export Table", 0 ) )
     {
       try
       {
-        b.seekV(data.DataDir[0]);b.seekV(data.DataDir[0]);
+        b.seekV( data.DataDir[0] ); b.seekV( data.DataDir[0] );
+
+        //Read Exportable methods.
+
+        if( Export_des == null )
+        {
+          b.Events = false;
+          
+          Export.setUserObject("function Export Table"); Export_des = DLL_ex.LoadExport( Export, b );
+          
+          b.Events = true;
+
+          //Update the tree.
+
+          ((DefaultTreeModel)tree.getModel()).nodeChanged( Export ); tree.expandPath( new TreePath( Export.getPath() ) );
+        }
 
         Virtual.setSelected( data.DataDir[0], data.DataDir[0] + data.DataDir[1] - 1 );
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[1] - 1 );
       }
       catch( IOException e ) { }
 
-      //Decoder goes here.
+      info("<html><p>Methods names followed by machine code to load for method name.</p></html>");
 
-      noDecode();
     }
+
     else if( h.startsWith( "DLL Import Table", 0 ) )
     {
       try
@@ -339,22 +366,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       catch( IOException e ) { }
 
       info("<html><p>Methods that are import from other files using the export table.</p></html>");
-    }
-
-    else if( h.equals("function Export Table.h") )
-    {
-      try
-      {
-        b.seekV(data.DataDir[0]);b.seekV(data.DataDir[0]);
-
-        Virtual.setSelected( data.DataDir[0], data.DataDir[0] + data.DataDir[1] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[1] - 1 );
-      }
-      catch( IOException e ) { }
-
-      //Decoder goes here.
-
-      noDecode();
     }
 
     else if( h.startsWith( "Resource Files", 0 ) )
