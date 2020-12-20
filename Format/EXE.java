@@ -124,7 +124,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     //Start of code.
 
-    if( data.baseOfCode != 0 )  { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h")); }
+    if( data.baseOfCode != 0 )  { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h#Dis," + ( data.imageBase + data.baseOfCode ) + "" )); }
 
     //Location of the export directory
 
@@ -205,9 +205,42 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       String[] type = h.split("#")[1].split(",");
 
+      //Start Disassembling instructions.
+    
+      if( type[0].equals("Dis") )
+      {
+        if( Data.coreLoaded )
+        {
+          String t = "", t1 = "", t2 ="";
+
+          try
+          {
+            b.seekV( Long.parseLong( type[1] ) ); b.seekV( Long.parseLong( type[1] ) );
+
+            //Disassemble till return from application.
+            //Note that more can be added here such as the jump operation.
+
+            while( t2.indexOf("RET") != 0 )
+            {
+              t1 = data.core.posV(); t2 = data.core.disASM(); t += t1 + " " + t2 + "<br />";
+            }
+
+            long f = b.getFilePointer() - 1, v = b.getVirtualPointer() - 1;
+
+            b.seekV( Long.parseLong( type[1] ) ); b.seekV( Long.parseLong( type[1] ) );
+            
+            Virtual.setSelected( Long.parseLong( type[1] ), v ); Offset.setSelected( b.getFilePointer(), f );
+
+            info( "<html>" + t + "</html>" );
+          }
+          catch( Exception e ) { }
+        }
+        else { noCore(); }
+      }
+
       //Headers.
 
-      if( type[0].equals("H") )
+      else if( type[0].equals("H") )
       {
         ds.setDescriptor( Header_des[ Integer.parseInt( type[1] ) ] );
       }
@@ -260,41 +293,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       return;
     }
 
-    //Start of application.
-    
-    else if( h.equals("Program Start (Machine code).h") )
-    {
-      if( Data.coreLoaded )
-      {
-        String t = "", t1 = "", t2 ="";
-
-        try
-        {
-          b.seekV( data.imageBase + data.startOfCode );
-
-          //Disassembler.
-
-          long end = data.imageBase + data.baseOfCode + data.sizeOfCode;
-
-          //Disassemble till end, or return from application.
-          //Note that more can be added here such as the jump operation.
-
-          while( t2.indexOf("RET") != 0 && b.getVirtualPointer() < end )
-          {
-            t1 = data.core.posV(); t2 = data.core.disASM(); t += t1 + " " + t2 + "<br />";
-          }
-
-          long f = b.getFilePointer() - 1, v = b.getVirtualPointer() - 1;
-
-          b.seekV( data.imageBase + data.startOfCode ); Virtual.setSelected( data.imageBase + data.startOfCode, v ); Offset.setSelected( b.getFilePointer(), f );
-
-          info( "<html>" + t + "</html>" );
-        }
-        catch( Exception e ) { }
-      }
-      else { noCore(); }
-    }
-
     //Headers must be decoded before any other part of the program can be read.
 
     else if( h.equals("Header Data") )
@@ -335,8 +333,11 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      info("<html><p>Methods names followed by machine code to load for method name.</p></html>");
-
+      info("<html><p>The headers set up the program sections in virtual space. See the header sections for details.<br /><br />" +
+      "The Export section is a list of names that locate to a machine code in RAM.<br /><br />" +
+      "A import table specifies which files to load to memory. If not already loaded.<br /><br />" +
+      "The method list in the import table is replaced with the export locations in RAM from the other file.<br /><br />" +
+      "This allows the other binary to directly run methods by using the import location as a relative address.</p></html>");
     }
 
     else if( h.startsWith( "DLL Import Table", 0 ) )
@@ -365,7 +366,11 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      info("<html><p>Methods that are import from other files using the export table.</p></html>");
+      info("<html><p>Methods that are imported from other files using the export table section.<br /><br />" +
+      "Each import file is loaded to RAM memory. Each import has two method lists.<br /><br />" +
+      "The first list is wrote over in RAM with the location to each export method location.<br /><br />" +
+      "This allows the binary to directly run methods without rewriting, or changing machine code.<br /><br />" +
+      "It is easy to map when a method call is done in machine code.</p></html>");
     }
 
     else if( h.startsWith( "Resource Files", 0 ) )

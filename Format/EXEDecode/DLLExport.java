@@ -99,7 +99,7 @@ public class DLLExport extends Data
 
       Method_loc = new DefaultMutableTreeNode( Str.value + "#E," + des.size() + "" );
 
-      Method_loc.add( new DefaultMutableTreeNode( "Method location#O," + loc[i] + "" ) );
+      Method_loc.add( new DefaultMutableTreeNode( "Method location#Dis," + loc[i] + "" ) );
 
       Methods.add( Method_loc );
 
