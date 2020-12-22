@@ -18,7 +18,9 @@ public class DLLExport extends Data
 
     //Export.
 
-    int size = 0, asize = 0;
+    int ref = 0;
+
+    int size = 0, asize = 0, base = 0;
 
     long name_List = 0, ordinal_List = 0, address_List = 0, name = 0, t = 0;
 
@@ -28,7 +30,7 @@ public class DLLExport extends Data
 
     //Begin reeding, and mapping the export method locations.
 
-    Export.add( new DefaultMutableTreeNode( "Export info.h#E,0" ) );
+    Export.add( new DefaultMutableTreeNode( "Export info.h#E," + ref + "" ) ); ref += 1;
 
     Data = new Descriptor( b, true ); Data.setEvent( this::exportInfo );
 
@@ -37,7 +39,7 @@ public class DLLExport extends Data
     Data.LUINT16("Major Version");
     Data.LUINT16("Minor Version");
     Data.LUINT32("Export Name location"); name = ( (Integer)Data.value ).longValue() + imageBase;
-    Data.LUINT32("Base");
+    Data.LUINT32("Base"); base = ((Integer)Data.value).intValue() - 1;
     Data.LUINT32("Number Of Functions"); asize = ((Integer)Data.value).intValue(); loc = new long[ asize ];
     Data.LUINT32("Number Of Names, and ordinals."); size = ((Integer)Data.value).intValue();
     Data.LUINT32("Address list location"); address_List = ((Integer)Data.value).longValue() + imageBase;
@@ -52,9 +54,9 @@ public class DLLExport extends Data
 
     Str.String8("Export Name.", ((byte)0x00));
 
-    Methods = new DefaultMutableTreeNode( Str.value + "#E,1" ); des.add( Str ); Str.setEvent( this::strInfo );
+    Methods = new DefaultMutableTreeNode( Str.value + "#E," + ref + "" ); des.add( Str ); Str.setEvent( this::strInfo ); ref += 1;
 
-    Methods.add( new DefaultMutableTreeNode( "Address list location.h#E,2" ) );
+    Methods.add( new DefaultMutableTreeNode( "Address list location.h#E," + ref + "" ) ); ref += 1;
 
     //The location of each export method.
     
@@ -66,25 +68,25 @@ public class DLLExport extends Data
       Data.LUINT32("Method Location."); loc[i] = ((Integer)Data.value).longValue() + imageBase;
     }
 
-    //Names are in alphabetical order. So we use a Data list for which order the methods are arranged in.
+    //Put the address locations in order to each name using the ordinal list.
 
     tloc = new long[ size ]; b.seekV( ordinal_List ); Data = new Descriptor( b, true );
 
     for( int i = 0; i < size; i++ )
     {
       Data.Array( "Array Element " + i + "", 2 );
-      Data.LUINT16("Address index"); tloc[((Short)Data.value).intValue()] = loc[i]; 
+      Data.LUINT16("Address index"); tloc[ ((Short)Data.value).intValue()] = loc[ base + i ]; 
     }
 
     loc = tloc; tloc = null;
 
-    Methods.add( new DefaultMutableTreeNode( "Order list location.h#E," + des.size() ) ); des.add( Data ); Data.setEvent( this::OlistInfo );
+    Methods.add( new DefaultMutableTreeNode( "Order list location.h#E," + ref ) ); des.add( Data ); Data.setEvent( this::OlistInfo ); ref += 1;
 
     //Names. Our sorted location list should now locate to each method.
     
     b.seekV( name_List ); Data = new Descriptor( b, true );
 
-    Methods.insert( new DefaultMutableTreeNode( "Name list location.h#E," + des.size() ), 1 ); des.add( Data ); Data.setEvent( this::MlistInfo );
+    Methods.insert( new DefaultMutableTreeNode( "Name list location.h#E," + ref + "" ), 1 ); des.add( Data ); Data.setEvent( this::MlistInfo ); ref += 1;
 
     for( int i = 0; i < size; i++ )
     {
@@ -97,7 +99,7 @@ public class DLLExport extends Data
 
       Str.String8("Name.", ((byte)0x00)); b.seekV( t );
 
-      Method_loc = new DefaultMutableTreeNode( Str.value + "#E," + des.size() + "" );
+      Method_loc = new DefaultMutableTreeNode( Str.value + "#E," + ref + "" ); ref += 1;
 
       Method_loc.add( new DefaultMutableTreeNode( "Method location#Dis," + loc[i] + "" ) );
 
@@ -123,10 +125,11 @@ public class DLLExport extends Data
     "<html>" + Ver + "</html>",
     "<html>" + Ver + "</html>",
     "<html>Location to the export file name.<br /><br />Should be the name of the binary file.</html>",
-    "<html>Base is usually 1.<br /><br />If base is larger than one. Then Base is added with the order numbers.<br /><br />For which address is the location of a method name.<br /><br />" +
-    "In very rare cases the address list is bigger.<br /><br />The first few addresses are skipped using Base.<br /><br />As some methods can only be imported by ordinal number.</html>",
-    "<html>Number of address locations in address list.<br /><br />Can be bigger than named methods.<br /><br />With base set bigger than 1 to skip the first few addresses.<br /><br />" +
-    "As some methods can only be imported by ordinal number.</html>",
+    "<html>Base is usually set one = zero.<br /><br />If base is 3, then it is 2 in value.<br /><br />" +
+    "Base is added to the address list. It allows us to skip addresses at the start of the address list.<br /><br />" +
+    "In very rare cases, the address list is bigger than the \"Name list, and order list\".<br /><br />Some methods can only be imported by number.</html>",
+    "<html>Number of address locations in address list.<br /><br />Can be bigger than \"named methods, and order list\".<br /><br />With base set bigger than 1 to skip the first few addresses.<br /><br />" +
+    "As some methods can only be imported by number.</html>",
     "<html>Size of named methods, and order list.</html>",
     "<html>Location to the address list.</html>",
     "<html>Location to the Method list names.</html>",
@@ -139,8 +142,8 @@ public class DLLExport extends Data
     if( el < 0 )
     {
       WindowCompoents.info( "<html>The export section has a name location that should be the file name.<br /><br />" +
-      "Export section uses three lists.<br /><br />The name list, and order list match in length.<br /><br />" +
-      "The method names are sorted in alphabetical order.<br /><br />The order list shows the original order before sorting the names.<br /><br />" +
+      "The Export section uses three lists locations.<br /><br />The name list, and order list match in length.<br /><br />" +
+      "The method names are sorted in alphabetical order.<br /><br />The order list is the original order before sorting the names.<br /><br />" +
       "If method 5 moved to the start of the names list. The first value in the order list then would be 5.<br /><br />" +
       "This would mean the fifth address in the address list is then the methods location.<br /><br />" +
       "Today compilers sort both the address list, and method names.<br /><br >So the order list generally goes in order from 0 to last address.</html>" );
@@ -163,7 +166,7 @@ public class DLLExport extends Data
 
   public void OlistInfo( int el )
   {
-    WindowCompoents.info( "<html>The order each method name is in.<br /><br />Generally goes in order.<br /><br />If addresses are sorted along with the method names in alphabetical order.</html>" );
+    WindowCompoents.info( "<html>The order each method name is in plus base.<br /><br />Generally goes in order.<br /><br />If addresses are sorted along with the method names in alphabetical order.</html>" );
   }
 
   public void strInfo( int el )

@@ -195,7 +195,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     f.setVisible(true);
   }
 
-  //Change What To Display Based on what the user clicks on
+  //Change What To Display Based on what the user clicks on.
 
   public void elementOpen(String h)
   {
@@ -333,7 +333,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      info("<html><p>The headers set up the program sections in virtual space. See the header sections for details.<br /><br />" +
+      info("<html><p>Once the headers are read, then the program in setup in virtual space.<br /><br />" +
       "The Export section is a list of names that locate to a machine code in RAM.<br /><br />" +
       "A import table specifies which files to load to memory. If not already loaded.<br /><br />" +
       "The method list in the import table is replaced with the export locations in RAM from the other file.<br /><br />" +
