@@ -130,7 +130,7 @@ public class DLLExport extends Data
     "<html>Size of named methods, and order list.</html>",
     "<html>Location to the address list.</html>",
     "<html>Location to the Method list names.</html>",
-    "<html>The order each method name is in. Method names, and order list are the same in length.<br /><br />The order number tells us which address to use, for which name in the address list.<br /><br />" +
+    "<html>The order each method name is in. Method names, and order list are the same in length.<br /><br />The order number tells us which address to use from address list.<br /><br />" +
     "On modern compilers the order values should go from first to last in order.</html>"
   };
 
