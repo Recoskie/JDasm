@@ -123,14 +123,15 @@ public class DLLExport extends Data
     "<html>" + Ver + "</html>",
     "<html>" + Ver + "</html>",
     "<html>Location to the export file name.<br /><br />Should be the name of the binary file.</html>",
-    "<html>Base is usually 1.<br /><br />If base is larger than one, then Base is added with the order number.<br /><br />For which address is the location of a method name.<br /><br />" +
-    "In very rare cases the address list is bigger.<br /><br />The first few addresses can be spiked using Base.<br /><br />As some methods can only be imported by ordinal number.</html>",
+    "<html>Base is usually 1.<br /><br />If base is larger than one. Then Base is added with the order numbers.<br /><br />For which address is the location of a method name.<br /><br />" +
+    "In very rare cases the address list is bigger.<br /><br />The first few addresses are skipped using Base.<br /><br />As some methods can only be imported by ordinal number.</html>",
     "<html>Number of address locations in address list.<br /><br />Can be bigger than named methods.<br /><br />With base set bigger than 1 to skip the first few addresses.<br /><br />" +
     "As some methods can only be imported by ordinal number.</html>",
     "<html>Size of named methods, and order list.</html>",
     "<html>Location to the address list.</html>",
     "<html>Location to the Method list names.</html>",
-    "<html>The order each method name is in.<br /><br />Tells us which address to use for which name in the address list.</html>"
+    "<html>The order each method name is in. Method names, and order list are the same in length.<br /><br />The order number tells us which address to use, for which name in the address list.<br /><br />" +
+    "On modern compilers the order values should go from first to last in order.</html>"
   };
 
   public void exportInfo( int el )
