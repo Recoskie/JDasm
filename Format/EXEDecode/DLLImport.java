@@ -131,7 +131,7 @@ public class DLLImport extends Data
     "There are two lists That are in different locations, but should locate to the same method names.</html>";
 
   public static final String[] Arrayinfo = new String[] { "<html>Array elements consisting of A DLL name location, and tow List locations.<br /><br />" + 
-    "Two lists are used, for which methods to import from the DLL. The lists should match. If they do not, then the import table is corrupted.<br /><br />" +
+    "Two lists are used, for which methods to import from the DLL.<br /><br />The lists should match. If they do not, then the import table is corrupted.<br /><br />" +
     "The first Element that has no locations, and is all zeros is the end of the DLL import table.</html>",
     ListInfo,
     "<html>A date time stamp is in seconds. The seconds are added to the starting date \"Wed Dec 31 7:00:00PM 1969\".<br /><br />" +
@@ -155,7 +155,7 @@ public class DLLImport extends Data
   public void funcInfo( int el )
   {
     WindowCompoents.info( "<html>Locations to each method name. The first location that is all 0 is the end of the list.<br /><br />Each DLL Array element contains a DLL Name location, and tow method list locations.<br /><br />" +
-      "The tow method lists should locate to the same method names. If they do not match then there might be something wrong with the import table.</html>" );
+      "The tow method lists should locate to the same method names.<br /><br />If they do not match then there might be something wrong with the import table.</html>" );
   }
 
   public void methodInfo( int el )

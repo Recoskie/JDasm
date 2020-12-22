@@ -421,7 +421,7 @@ public class Headers extends Data
   "<html>Start of the binaries machine code in virtual space. Plus the \"Base Address\".</html>",
   "<html>The beginning of the machine code section. Plus the \"Base Address\".<br /><br />The start position does not have to be at the very start of the machine code section.</html>",
   "<html>The Data section is a safe spot to put results from operations without writing over program machine code.<br /><br />In code these are called variables.</html>",
-  "<html>Base address is added to all virtual addresses. It is the preferred address to load the mapped sections in RAM from this file.<br /><br />Windows may add to this number to space programs apart in virtual space.</html>",
+  "<html>Base address is added to all virtual addresses.<br /><br />It is the preferred address to load the mapped sections in RAM from this file.<br /><br />Windows may add to this number to space programs apart in virtual space.</html>",
   "",
   "",
   "<html>" + Ver + "<br /><br />The version number of the required operating system.</html>",
@@ -450,7 +450,7 @@ public class Headers extends Data
       WindowCompoents.info("<html><p>At the end of the PE header is the start of the Optional header. However, this header is not optional.</p></html>");
     }
 
-    WindowCompoents.info( OPinfo[ el ] );
+    WindowCompoents.info( OPinfo[ el >= 8 && is64bit ? el + 1 : el ] );
   }
 
   //Detailed description of the data Directory Array.
