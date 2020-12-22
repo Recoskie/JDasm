@@ -52,13 +52,13 @@ public class DLLExport extends Data
 
     Str.String8("Export Name.", ((byte)0x00));
 
-    Methods = new DefaultMutableTreeNode( Str.value + "#E,1" ); des.add( Str );  Str.setEvent( this::strInfo );
+    Methods = new DefaultMutableTreeNode( Str.value + "#E,1" ); des.add( Str ); Str.setEvent( this::strInfo );
 
     Methods.add( new DefaultMutableTreeNode( "Address list location.h#E,2" ) );
 
     //The location of each export method.
     
-    b.seekV( address_List ); Data = new Descriptor( b, true ); des.add( Data );
+    b.seekV( address_List ); Data = new Descriptor( b, true ); des.add( Data ); Data.setEvent( this::AlistInfo );
 
     for( int i = 0; i < asize; i++ )
     {
@@ -78,13 +78,13 @@ public class DLLExport extends Data
 
     loc = tloc; tloc = null;
 
-    Methods.add( new DefaultMutableTreeNode( "Order list location.h#E," + des.size() ) ); des.add( Data );
+    Methods.add( new DefaultMutableTreeNode( "Order list location.h#E," + des.size() ) ); des.add( Data ); Data.setEvent( this::OlistInfo );
 
     //Names. Our sorted location list should now locate to each method.
     
     b.seekV( name_List ); Data = new Descriptor( b, true );
 
-    Methods.add( new DefaultMutableTreeNode( "Name list location.h#E," + des.size() ) ); des.add( Data );
+    Methods.insert( new DefaultMutableTreeNode( "Name list location.h#E," + des.size() ), 1 ); des.add( Data ); Data.setEvent( this::MlistInfo );
 
     for( int i = 0; i < size; i++ )
     {
@@ -149,6 +149,21 @@ public class DLLExport extends Data
     {
       WindowCompoents.info( ExportInfo[ el ] );
     }
+  }
+
+  public void AlistInfo( int el )
+  {
+    WindowCompoents.info( "<html>Location to each method.<br /><br />Method name list might not match the address order.<br /><br />Which is why we have both a name list, and order list.</html>" );
+  }
+
+  public void MlistInfo( int el )
+  {
+    WindowCompoents.info( "<html>The locations to each method name.</html>" );
+  }
+
+  public void OlistInfo( int el )
+  {
+    WindowCompoents.info( "<html>The order each method name is in.<br /><br />Generally goes in order.<br /><br />If addresses are sorted along with the method names in alphabetical order.</html>" );
   }
 
   public void strInfo( int el )
