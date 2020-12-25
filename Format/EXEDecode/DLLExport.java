@@ -104,8 +104,6 @@ public class DLLExport extends Data
       Method_loc.add( new DefaultMutableTreeNode( "Method location#Dis," + loc[i] + "" ) );
 
       Methods.add( Method_loc );
-
-      des.add( Str );
     }
 
     Export.add( Methods );

@@ -434,6 +434,8 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
           if( curVra.Len > 0 ) { super.seek( r + e.Pos ); }
           
           VAddress = Address - super.getFilePointer();
+
+          fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0, getVirtualPointer(), 0, TriggerV ) );
           
           return;
         }
@@ -459,6 +461,8 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
           if( curVra.Len > 0 ) { super.seek( r + e.Pos ); }
           
           VAddress = Address - super.getFilePointer();
+
+          fireIOEventSeek( new IOEvent( this, super.getFilePointer(), 0, getVirtualPointer(), 0, TriggerV ) );
           
           return;
         }
