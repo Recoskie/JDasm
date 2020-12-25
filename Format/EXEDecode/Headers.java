@@ -401,8 +401,7 @@ public class Headers extends Data
       WindowCompoents.info("<html><p>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
         "This header specifies the number of sections to map in virtual space. The processor type, and date of compilation.</p></html>");
     }
-
-    WindowCompoents.info( PEinfo[ el ] );
+    else { WindowCompoents.info( PEinfo[ el ] ); }
   }
 
   //Detailed description of the OP header.
@@ -449,8 +448,7 @@ public class Headers extends Data
     {
       WindowCompoents.info("<html><p>At the end of the PE header is the start of the Optional header. However, this header is not optional.</p></html>");
     }
-
-    WindowCompoents.info( OPinfo[ el >= 8 && is64bit ? el + 1 : el ] );
+    else { WindowCompoents.info( OPinfo[ el >= 8 && is64bit ? el + 1 : el ] ); }
   }
 
   //Detailed description of the data Directory Array.
@@ -466,8 +464,7 @@ public class Headers extends Data
       WindowCompoents.info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
         "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.<br /><br />Anything that is 0, is not used.</p></html>");
     }
-
-    WindowCompoents.info( DDinfo[ el % 3 ] );
+    else { WindowCompoents.info( DDinfo[ el % 3 ] ); }
   }
 
   //Detailed description of the sections to RAM memory.
@@ -486,6 +483,11 @@ public class Headers extends Data
 
   public void sdInfo( int el )
   {
-    WindowCompoents.info( Sinfo[ el % 8 ] );
+    if( el < 0 )
+    {
+      WindowCompoents.info("<html><p>Number of sections to read was defined in the OP header.<br /><br />The virtual address positions are useless without setting up the mapped sections.<br /><br />" +
+        "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.</p></html>");
+    }
+    else { WindowCompoents.info( Sinfo[ el % 8 ] ); }
   }
 }
