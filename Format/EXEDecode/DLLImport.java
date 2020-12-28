@@ -100,9 +100,9 @@ public class DLLImport extends Data
 
             b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("Export Address list number");
             
-            Method.setEvent( this::methodInfo ); des.add( Method );
+            Method.setEvent( this::unnamedMathodInfo ); des.add( Method );
 
-            DLLFunc.add( new DefaultMutableTreeNode( "Export#" + ( ((Short)Method.value).intValue() & 0xFFFF ) + "().dll#D,"+ ref ) );
+            DLLFunc.add( new DefaultMutableTreeNode( "No_Name() #" + ( ((Short)Method.value).intValue() & 0xFFFF ) + ".dll#D,"+ ref ) );
             
             Method.LUINT32( "HInt" );
             
@@ -119,7 +119,7 @@ public class DLLImport extends Data
 
             b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("HInit"); Method.String8( "Method name", (byte)0x00 );
             
-            Method.setEvent( this::methodInfo ); des.add( Method );
+            Method.setEvent( this::namedMethodInfo ); des.add( Method );
 
             DLLFunc.add( new DefaultMutableTreeNode( Method.value + "().dll#D,"+ ref ) ); ref += 1; b.seekV(t2);
           }
@@ -183,8 +183,16 @@ public class DLLImport extends Data
       "The tow method lists should locate to the same method names.<br /><br />If they do not match then there might be something wrong with the import table.</html>" );
   }
 
-  public void methodInfo( int el )
+  public void namedMethodInfo( int el )
   {
     WindowCompoents.info( "<html>Each method name contains a HInit value, and then its name. The end of each method name ends with code 00 hex.</html>" );
+  }
+
+  public void unnamedMathodInfo( int el )
+  {
+    WindowCompoents.info( "<html>Export table has a address list. The address to use from address list is after \"No_Name\".<br /><br />" +
+    "It takes less time to import methods by number.<br /><br />As the method name does not have to be found in the method name list.<br /><br />" +
+    "Each name has a number that tells us which address to use from the address list.<br /><br />" +
+    "Using the address list number skips the two steps.<br /><br />Some methods can only be imported by number as they are not given names.</html>" );
   }
 }

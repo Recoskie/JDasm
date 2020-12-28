@@ -333,9 +333,9 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      info("<html><p>Once the headers are read, then the program in setup in virtual space.<br /><br />" +
+      info("<html><p>Once the headers are read, then the program is setup in virtual space.<br /><br />" +
       "The Export section is a list of names that locate to a machine code in RAM.<br /><br />" +
-      "Methods can be imported by name, or by number they are in the Address list.<br /><br />" +
+      "Methods can be imported by name, or by number they are in the export Address list.<br /><br />" +
       "A import table specifies which files to load to memory. If not already loaded.<br /><br />" +
       "The method list in the import table is replaced with the export locations in RAM from the other file.<br /><br />" +
       "This allows the other binary to directly run methods by using the import location as a relative address.</p></html>");
