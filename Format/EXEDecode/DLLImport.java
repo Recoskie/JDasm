@@ -65,8 +65,8 @@ public class DLLImport extends Data
 
           FuncArray1.Array( "Array Element " + d1 + "", is64bit ? 8 : 4 );
 
-          if( is64bit ) { FuncArray1.LUINT64("Import Name Location"); pos = ((Long)FuncArray1.value).longValue(); }
-          else { FuncArray1.LUINT32("Import Name Location"); pos = ((Integer)FuncArray1.value).intValue(); }
+          if( is64bit ) { FuncArray1.LINT64("Import Name Location"); pos = ((Long)FuncArray1.value).longValue(); }
+          else { FuncArray1.LINT32("Import Name Location"); pos = ((Integer)FuncArray1.value).intValue(); }
           
           d1 += 1;
         }
@@ -83,12 +83,35 @@ public class DLLImport extends Data
 
           FuncArray2.Array( "Array Element " + d1 + "", is64bit ? 8 : 4 );
 
-          if( is64bit ) { FuncArray2.LUINT64("Import Name Location"); pos = ((Long)FuncArray2.value).longValue(); }
-          else { FuncArray2.LUINT32("Import Name Location"); pos = ((Integer)FuncArray2.value).intValue(); }
+          if( is64bit ) { FuncArray2.LINT64("Import Name Location"); pos = ((Long)FuncArray2.value).longValue(); }
+          else { FuncArray2.LINT32("Import Name Location"); pos = ((Integer)FuncArray2.value).intValue(); }
           
           d1 += 1;
 
-          if( pos != 0 )
+          //If pos is < 0 then it is a import using export address list number.
+
+          if( pos < 0 )
+          {
+            pos = is64bit ? pos & 0x7FFFFFFFFFFFFFFFL : pos & 0x7FFFFFFF;
+
+            t2 = b.getVirtualPointer();
+
+            //Read HInit ID, and method number from export address list.
+
+            b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("Export Address list number");
+            
+            Method.setEvent( this::methodInfo ); des.add( Method );
+
+            DLLFunc.add( new DefaultMutableTreeNode( "Export#" + ( ((Short)Method.value).intValue() & 0xFFFF ) + "().dll#D,"+ ref ) );
+            
+            Method.LUINT32( "HInt" );
+            
+            ref += 1; b.seekV(t2);
+          }
+
+          //Else grater than 0, and not zero. Then it is a named import method. 
+
+          else if ( pos != 0 )
           {
             t2 = b.getVirtualPointer();
 
@@ -154,7 +177,9 @@ public class DLLImport extends Data
 
   public void funcInfo( int el )
   {
-    WindowCompoents.info( "<html>Locations to each method name. The first location that is all 0 is the end of the list.<br /><br />Each DLL Array element contains a DLL Name location, and tow method list locations.<br /><br />" +
+    WindowCompoents.info( "<html>Locations to each method name. If the location is not Negative.<br /><br />" +
+    "If negative. The sing is removed. The location is then which number from the address list in the files export table.<br /><br />" +
+    "The first location that is all 0 is the end of the list.<br /><br />Each DLL Array element contains a DLL Name location, and tow method list locations.<br /><br />" +
       "The tow method lists should locate to the same method names.<br /><br />If they do not match then there might be something wrong with the import table.</html>" );
   }
 

@@ -203,7 +203,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     if( h.indexOf("#") > 0 )
     {
-      String[] type = h.split("#")[1].split(",");
+      String[] type = h.substring( h.lastIndexOf("#") + 1, h.length() ).split(",");
 
       //Start Disassembling instructions.
     
@@ -335,6 +335,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       info("<html><p>Once the headers are read, then the program in setup in virtual space.<br /><br />" +
       "The Export section is a list of names that locate to a machine code in RAM.<br /><br />" +
+      "Methods can be imported by name, or by number they are in the Address list.<br /><br />" +
       "A import table specifies which files to load to memory. If not already loaded.<br /><br />" +
       "The method list in the import table is replaced with the export locations in RAM from the other file.<br /><br />" +
       "This allows the other binary to directly run methods by using the import location as a relative address.</p></html>");

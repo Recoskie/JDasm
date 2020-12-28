@@ -24,7 +24,19 @@ public class DLLExport extends Data
 
     long name_List = 0, ordinal_List = 0, address_List = 0, name = 0, t = 0;
 
-    long[] loc, tloc;
+    //Regular address list. May be bigger than the method name list.
+
+    long[] loc;
+    
+    //Each method name specifies which address to use from the address list.
+    //tloc is each address related to each name in order.
+
+    int[] order; long[] tloc;
+
+    //The order list does not have to use addresses in order from the address list for each named method.
+    //Named is set true for each address in address list that is named.
+
+    boolean[] named;
 
     DefaultMutableTreeNode Methods, Method_loc;
 
@@ -40,15 +52,34 @@ public class DLLExport extends Data
     Data.LUINT16("Minor Version");
     Data.LUINT32("Export Name location"); name = ( (Integer)Data.value ).longValue() + imageBase;
     Data.LUINT32("Base"); base = ((Integer)Data.value).intValue() - 1;
-    Data.LUINT32("Number Of Functions"); asize = ((Integer)Data.value).intValue(); loc = new long[ asize ];
-    Data.LUINT32("Number Of Names, and ordinals."); size = ((Integer)Data.value).intValue();
+    Data.LUINT32("Number Of Functions");
+    
+    asize = ((Integer)Data.value).intValue(); //Number of addresses.
+    
+    //Address list. Can be bigger than the order list and name list.
+
+    loc = new long[ asize ];
+    
+    //The order list tells us which address is which method name from the method name list.
+    //Not all addresses in the address list are named.
+
+    named = new boolean[ asize ];
+    
+    Data.LUINT32("Number Of Names, and ordinals.");
+    
+    //The method list and the order list match in size, for which address to use for each named method.
+
+    size = ((Integer)Data.value).intValue(); order = new int[ size ]; tloc = new long[ size ];
+
+    //The three list that forum the export table.
+    
     Data.LUINT32("Address list location"); address_List = ((Integer)Data.value).longValue() + imageBase;
     Data.LUINT32("Method list location"); name_List = ((Integer)Data.value).longValue() + imageBase;
     Data.LUINT32("Method order location"); ordinal_List = ((Integer)Data.value).longValue() + imageBase;
 
     des.add( Data );
 
-    //Read the export name.
+    //Read the export binary file.
 
     b.seekV( name ); Str = new Descriptor( b, true );
 
@@ -58,7 +89,7 @@ public class DLLExport extends Data
 
     Methods.add( new DefaultMutableTreeNode( "Address list location.h#E," + ref + "" ) ); ref += 1;
 
-    //The location of each export method.
+    //The Address list.
     
     b.seekV( address_List ); Data = new Descriptor( b, true ); des.add( Data ); Data.setEvent( this::AlistInfo );
 
@@ -70,19 +101,21 @@ public class DLLExport extends Data
 
     //Put the address locations in order to each name using the ordinal list.
 
-    tloc = new long[ size ]; b.seekV( ordinal_List ); Data = new Descriptor( b, true );
+    b.seekV( ordinal_List ); Data = new Descriptor( b, true );
 
     for( int i = 0; i < size; i++ )
     {
       Data.Array( "Array Element " + i + "", 2 );
-      Data.LUINT16("Address index"); tloc[ ((Short)Data.value).intValue()] = loc[ base + i ]; 
-    }
+      Data.LUINT16("Address index");
 
-    loc = tloc; tloc = null;
+      order[i] = ( ((Short)Data.value).intValue() & 0xFFFF ) + base;
+
+      tloc[ i ] = loc[ order[i] ]; named[ order[i] ] = true;
+    }
 
     Methods.add( new DefaultMutableTreeNode( "Order list location.h#E," + ref ) ); des.add( Data ); Data.setEvent( this::OlistInfo ); ref += 1;
 
-    //Names. Our sorted location list should now locate to each method.
+    //Names. Our sorted location list should now locate to each named method.
     
     b.seekV( name_List ); Data = new Descriptor( b, true );
 
@@ -99,11 +132,25 @@ public class DLLExport extends Data
 
       Str.String8("Name.", ((byte)0x00)); b.seekV( t );
 
-      Method_loc = new DefaultMutableTreeNode( Str.value + "#E," + ref + "" ); ref += 1;
+      Method_loc = new DefaultMutableTreeNode( Str.value + "() #" + order[i] + "#E," + ref + "" ); ref += 1;
 
-      Method_loc.add( new DefaultMutableTreeNode( "Method location#Dis," + loc[i] + "" ) );
+      Method_loc.add( new DefaultMutableTreeNode( "Method location#Dis," + tloc[i] + "" ) );
 
       Methods.add( Method_loc );
+    }
+
+    //Methods that are not named.
+
+    for( int i = 0; i < asize; i++ )
+    {
+      if( !named[i] )
+      {
+        Method_loc = new DefaultMutableTreeNode( "No_Name() #" + i + "#" );
+
+        Method_loc.add( new DefaultMutableTreeNode( "Method location#Dis," + loc[i] + "" ) );
+
+        Methods.add( Method_loc );
+      }
     }
 
     Export.add( Methods );
@@ -124,14 +171,13 @@ public class DLLExport extends Data
     "<html>" + Ver + "</html>",
     "<html>Location to the export file name.<br /><br />Should be the name of the binary file.</html>",
     "<html>Base is usually set one = zero.<br /><br />If base is 3, then it is 2 in value.<br /><br />" +
-    "Base is added to the address list. It allows us to skip addresses at the start of the address list.<br /><br />" +
-    "In very rare cases, the address list is bigger than the \"Name list, and order list\".<br /><br />Some methods can only be imported by number.</html>",
-    "<html>Number of address locations in address list.<br /><br />Can be bigger than \"named methods, and order list\".<br /><br />With base set bigger than 1 to skip the first few addresses.<br /><br />" +
-    "As some methods can only be imported by number.</html>",
+    "Base is added to the address list. It allows us to skip addresses at the start of the address list.</html>",
+    "<html>Number of address locations in address list.<br /><br />Can be bigger than \"named methods, and order list\"." +
+    "As some methods can only be imported by number they are in the address list.</html>",
     "<html>Size of named methods, and order list.</html>",
     "<html>Location to the address list.</html>",
     "<html>Location to the Method list names.</html>",
-    "<html>The order each method name is in. Method names, and order list are the same in length.<br /><br />The order number tells us which address to use from address list.<br /><br />" +
+    "<html>The order each method name is in. Method names, and order list are the same in length.<br /><br />The order number tells us which address to use from address list plus Base.<br /><br />" +
     "On modern compilers the order values should go from first to last in order.</html>"
   };
 
@@ -174,6 +220,8 @@ public class DLLExport extends Data
 
   public void mstrInfo( int el )
   {
-    WindowCompoents.info( "<html>Location to the export method name, from the method name list. The name ends with code 00 hex.</html>" );
+    WindowCompoents.info( "<html>Location to the export method name, from the method name list. The name ends with code 00 hex.<br /><br />" +
+    "The order number is next to the name.<br /><br />The order number is which address from the address list is the methods location.<br /><br />" +
+    "Methods can be imported by both number in the address list, or by name.<br /><br />In some cases some export methods are not given names.</html>" );
   }
 }
