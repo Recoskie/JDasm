@@ -29,9 +29,8 @@ public class DLLExport extends Data
     long[] loc;
     
     //Each method name specifies which address to use from the address list.
-    //tloc is each address related to each name in order.
 
-    int[] order; long[] tloc;
+    int[] order;
 
     //The order list does not have to use addresses in order from the address list for each named method.
     //Named is set true for each address in address list that is named.
@@ -60,8 +59,7 @@ public class DLLExport extends Data
 
     loc = new long[ asize ];
     
-    //The order list tells us which address is which method name from the method name list.
-    //Not all addresses in the address list are named.
+    //Addresses that are named.
 
     named = new boolean[ asize ];
     
@@ -69,7 +67,7 @@ public class DLLExport extends Data
     
     //The method list and the order list match in size, for which address to use for each named method.
 
-    size = ((Integer)Data.value).intValue(); order = new int[ size ]; tloc = new long[ size ];
+    size = ((Integer)Data.value).intValue(); order = new int[ size ];
 
     //The three list that forum the export table.
     
@@ -79,7 +77,7 @@ public class DLLExport extends Data
 
     des.add( Data );
 
-    //Read the export binary file.
+    //Read the export binary file name.
 
     b.seekV( name ); Str = new Descriptor( b, true );
 
@@ -108,9 +106,7 @@ public class DLLExport extends Data
       Data.Array( "Array Element " + i + "", 2 );
       Data.LUINT16("Address index");
 
-      order[i] = ( ((Short)Data.value).intValue() & 0xFFFF ) + base;
-
-      tloc[ i ] = loc[ order[i] ]; named[ order[i] ] = true;
+      order[i] = ( ((Short)Data.value).intValue() & 0xFFFF ); named[ order[i] + base ] = true;
     }
 
     Methods.add( new DefaultMutableTreeNode( "Order list location.h#E," + ref ) ); des.add( Data ); Data.setEvent( this::OlistInfo ); ref += 1;
@@ -120,6 +116,8 @@ public class DLLExport extends Data
     b.seekV( name_List ); Data = new Descriptor( b, true );
 
     Methods.insert( new DefaultMutableTreeNode( "Name list location.h#E," + ref + "" ), 1 ); des.add( Data ); Data.setEvent( this::MlistInfo ); ref += 1;
+
+    //The named methods.
 
     for( int i = 0; i < size; i++ )
     {
@@ -134,7 +132,14 @@ public class DLLExport extends Data
 
       Method_loc = new DefaultMutableTreeNode( Str.value + "() #" + order[i] + "#E," + ref + "" ); ref += 1;
 
-      Method_loc.add( new DefaultMutableTreeNode( "Method location#Dis," + tloc[i] + "" ) );
+      if( loc[ order[i] + base ] > imageBase )
+      {
+        Method_loc.add( new DefaultMutableTreeNode( "Method (Disassembly).h#Dis," + loc[ order[i] + base ] + "" ) );
+      }
+      else
+      {
+        Method_loc.add( new DefaultMutableTreeNode( "No Data" ) );
+      }
 
       Methods.add( Method_loc );
     }
@@ -147,7 +152,14 @@ public class DLLExport extends Data
       {
         Method_loc = new DefaultMutableTreeNode( "No_Name() #" + i + "#" );
 
-        Method_loc.add( new DefaultMutableTreeNode( "Method location#Dis," + loc[i] + "" ) );
+        if( loc[i] > imageBase )
+        {
+          Method_loc.add( new DefaultMutableTreeNode( "Method (Disassembly).h#Dis," + loc[i] + "" ) );
+        }
+        else
+        {
+          Method_loc.add( new DefaultMutableTreeNode( "No Data" ) );
+        }
 
         Methods.add( Method_loc );
       }
