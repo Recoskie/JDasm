@@ -92,21 +92,7 @@ public class DLLImport extends Data
 
           if( pos < 0 )
           {
-            pos = is64bit ? pos & 0x7FFFFFFFFFFFFFFFL : pos & 0x7FFFFFFF;
-
-            t2 = b.getVirtualPointer();
-
-            //Read HInit ID, and method number from export address list.
-
-            b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("Export Address list number");
-            
-            Method.setEvent( this::unnamedMathodInfo ); des.add( Method );
-
-            DLLFunc.add( new DefaultMutableTreeNode( "No_Name() #" + ( ((Short)Method.value).intValue() & 0xFFFF ) + ".dll#D,"+ ref ) );
-            
-            Method.LUINT32( "HInt" );
-            
-            ref += 1; b.seekV(t2);
+            DLLFunc.add( new DefaultMutableTreeNode( "No_Name() #" + ( pos & 0xFFFF ) + ".dll#" ) );
           }
 
           //Else grater than 0, and not zero. Then it is a named import method. 
@@ -119,7 +105,7 @@ public class DLLImport extends Data
 
             b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("HInit"); Method.String8( "Method name", (byte)0x00 );
             
-            Method.setEvent( this::namedMethodInfo ); des.add( Method );
+            Method.setEvent( this::methodInfo ); des.add( Method );
 
             DLLFunc.add( new DefaultMutableTreeNode( Method.value + "().dll#D,"+ ref ) ); ref += 1; b.seekV(t2);
           }
@@ -178,21 +164,13 @@ public class DLLImport extends Data
   public void funcInfo( int el )
   {
     WindowCompoents.info( "<html>Locations to each method name. If the location is not Negative.<br /><br />" +
-    "If negative. The sing is removed. The location is then which number from the address list in the files export table.<br /><br />" +
+    "If negative. The sing is removed. The last 16 bits is then which number from the address list in the files export table.<br /><br />" +
     "The first location that is all 0 is the end of the list.<br /><br />Each DLL Array element contains a DLL Name location, and tow method list locations.<br /><br />" +
-      "The tow method lists should locate to the same method names.<br /><br />If they do not match then there might be something wrong with the import table.</html>" );
+    "The tow method lists should locate to the same method names.<br /><br />If they do not match then there might be something wrong with the import table.</html>" );
   }
 
-  public void namedMethodInfo( int el )
+  public void methodInfo( int el )
   {
     WindowCompoents.info( "<html>Each method name contains a HInit value, and then its name. The end of each method name ends with code 00 hex.</html>" );
-  }
-
-  public void unnamedMathodInfo( int el )
-  {
-    WindowCompoents.info( "<html>Export table has a address list. The address to use from address list is after \"No_Name\".<br /><br />" +
-    "It takes less time to import methods by number.<br /><br />As the method name does not have to be found in the method name list.<br /><br />" +
-    "Each name has a number that tells us which address to use from the address list.<br /><br />" +
-    "Using the address list number skips the two steps.<br /><br />Some methods can only be imported by number as they are not given names.</html>" );
   }
 }
