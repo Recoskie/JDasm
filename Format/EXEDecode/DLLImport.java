@@ -65,8 +65,8 @@ public class DLLImport extends Data
 
           FuncArray1.Array( "Array Element " + d1 + "", is64bit ? 8 : 4 );
 
-          if( is64bit ) { FuncArray1.LINT64("Import Name Location"); pos = ((Long)FuncArray1.value).longValue(); }
-          else { FuncArray1.LINT32("Import Name Location"); pos = ((Integer)FuncArray1.value).intValue(); }
+          if( is64bit ) { FuncArray1.LINT64("Import Name Location, or Index"); pos = ((Long)FuncArray1.value).longValue(); }
+          else { FuncArray1.LINT32("Import Name Location, or Index"); pos = ((Integer)FuncArray1.value).intValue(); }
           
           d1 += 1;
         }
@@ -83,8 +83,8 @@ public class DLLImport extends Data
 
           FuncArray2.Array( "Array Element " + d1 + "", is64bit ? 8 : 4 );
 
-          if( is64bit ) { FuncArray2.LINT64("Import Name Location"); pos = ((Long)FuncArray2.value).longValue(); }
-          else { FuncArray2.LINT32("Import Name Location"); pos = ((Integer)FuncArray2.value).intValue(); }
+          if( is64bit ) { FuncArray2.LINT64("Import Name Location, or Index"); pos = ((Long)FuncArray2.value).longValue(); }
+          else { FuncArray2.LINT32("Import Name Location, or Index"); pos = ((Integer)FuncArray2.value).intValue(); }
           
           d1 += 1;
 
@@ -163,14 +163,16 @@ public class DLLImport extends Data
 
   public void funcInfo( int el )
   {
-    WindowCompoents.info( "<html>Locations to each method name. If the location is not Negative.<br /><br />" +
-    "If negative. The sing is removed. The last 16 bits is then which number from the address list in the files export table.<br /><br />" +
-    "The first location that is all 0 is the end of the list.<br /><br />Each DLL Array element contains a DLL Name location, and tow method list locations.<br /><br />" +
-    "The tow method lists should locate to the same method names.<br /><br />If they do not match then there might be something wrong with the import table.</html>" );
+    WindowCompoents.info( "<html>Locations to each method name, or by address list index.<br /><br />" +
+    "If the location is positive, it then locates to a method name.<br /><br />However, if the location is negative, then the sing is removed.<br /><br />It then imports by address list index.<br /><br />" +
+    "The export section has a name list, and address list.<br /><br />Each name specifies which index in the address list.<br /><br />" +
+    "This means we can lookup a name, for which address in the address list, or directly use it's address list number.<br /><br />" +
+    "The first location that is 0 is the end of the list.<br /><br />Each DLL Array element contains a DLL Name location, and tow method list locations.<br /><br />" +
+    "The tow method lists should locate to the same method names, or indexes.<br /><br />If they do not match then there might be something wrong with the import table.</html>" );
   }
 
   public void methodInfo( int el )
   {
-    WindowCompoents.info( "<html>Each method name contains a HInit value, and then its name. The end of each method name ends with code 00 hex.</html>" );
+    WindowCompoents.info( "<html>Each method name location contains a HInit value, and then its name. The end of each method name ends with code 00 hex.</html>" );
   }
 }
