@@ -134,7 +134,8 @@ public class DLLExport extends Data
 
       if( loc[ order[i] + base ] > imageBase )
       {
-        Method_loc.add( new DefaultMutableTreeNode( "Method (Disassembly).h#Dis," + loc[ order[i] + base ] + "" ) );
+        Method_loc.add( new DefaultMutableTreeNode( "Goto Location.h#Sv," + loc[ order[i] + base ] + "," + loc[ order[i] + base ] + "" ) );
+        Method_loc.add( new DefaultMutableTreeNode( "Disassemble Location.h#Dis," + loc[ order[i] + base ] + "" ) );
       }
       else
       {
@@ -154,7 +155,8 @@ public class DLLExport extends Data
 
         if( loc[i] > imageBase )
         {
-          Method_loc.add( new DefaultMutableTreeNode( "Method (Disassembly).h#Dis," + loc[i] + "" ) );
+          Method_loc.add( new DefaultMutableTreeNode( "Goto Location.h#Sv," + loc[i] + "," + loc[i] + "" ) );
+          Method_loc.add( new DefaultMutableTreeNode( "Disassemble Location.h#Dis," + loc[i] + "" ) );
         }
         else
         {
