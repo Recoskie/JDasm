@@ -103,7 +103,7 @@ public class DLLImport extends Data
 
             //Read HInit ID, and Function name.
 
-            b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("HInit"); Method.String8( "Method name", (byte)0x00 );
+            b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("Address list index."); Method.String8( "Method name", (byte)0x00 );
             
             Method.setEvent( this::methodInfo ); des.add( Method );
 
@@ -173,6 +173,7 @@ public class DLLImport extends Data
 
   public void methodInfo( int el )
   {
-    WindowCompoents.info( "<html>Each method name location contains a HInit value, and then its name. The end of each method name ends with code 00 hex.</html>" );
+    WindowCompoents.info( "<html>Each method name location contains a address list index, and then its name.<br /><br />The end of each method name ends with code 00 hex.<br /><br />" +
+    "The index is which address should be the method location in the export address list.<br /><br />This speeds up finding methods.</html>" );
   }
 }
