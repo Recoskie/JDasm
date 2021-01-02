@@ -124,7 +124,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     //Start of code.
 
-    if( data.baseOfCode != 0 )  { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h#Dis," + ( data.imageBase + data.baseOfCode ) + "" )); }
+    if( data.baseOfCode != 0 )  { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h#Dis," + ( data.imageBase + data.startOfCode ) + "" )); }
 
     //Location of the export directory
 
@@ -220,7 +220,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
             //Disassemble till return from application.
             //Note that more can be added here such as the jump operation.
 
-            while( t2.indexOf("RET") != 0 )
+            while( !( t2.indexOf("RET") == 0 || t2.indexOf("JMP") == 0 ) )
             {
               t1 = data.core.posV(); t2 = data.core.disASM(); t += t1 + " " + t2 + "<br />";
             }
