@@ -1133,8 +1133,7 @@ public class X86 extends X86Types implements core.Core
 
         if( ModRM[0] == 0 && ModRM[2] == 5 )
         {
-          Disp = 2;
-          DispType = 2;
+          Disp = 2; DispType = (byte)(BitMode == x86_64 ? 2 : 0);
         }
 
         //check if Base Register is 4 which goes into the SIB address system
@@ -1211,7 +1210,7 @@ public class X86 extends X86Types implements core.Core
         //else Base register is not 4 and does not go into the SIB ADDRESS.
         //Decode the Base register regularly plus it's Extended value if relative (RIP) disp32 is not used.
 
-        else if(DispType != 2)
+        else if(DispType != 2 && ( BitMode != x86_64 && DispType != 0 ))
         {
           out += REG[ AddressSize ][ BaseExtend & 8 | ModRM[2] ];
         }
