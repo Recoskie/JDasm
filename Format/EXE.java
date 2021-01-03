@@ -218,7 +218,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
             b.seekV( Long.parseLong( type[1] ) );
 
             //Disassemble till return from application.
-            //Note that more can be added here such as the jump operation.
 
             while( !( t2.indexOf("RET") == 0 || t2.indexOf("JMP") == 0 ) )
             {
@@ -414,8 +413,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      //Decoder goes here.
-
       noDecode();
     }
     else if( h.equals("Security Level Settings.h") )
@@ -427,8 +424,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[9] - 1 );
       }
       catch( IOException e ) { }
-
-      //Decoder goes here.
 
       noDecode();
     }
@@ -442,9 +437,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      //Decoder goes here.
-
-      noDecode();
+      info("<html><p>Relocations are used is if the program is not loaded at it's preferred base Address set in the op header.<br /><br />" +
+      "The difference is added to locations defined in the address list in this relocation section.<br /><br />" +
+      "Relocations are not needed. As the program is always mapped at it's preferred base address.<br /><br />" +
+      "A reader can be designed, for the relocation section, but is not really necessary.</p></html>");
     }
     else if( h.equals("DEBUG TABLE.h") )
     {
@@ -455,8 +451,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[13] - 1 );
       }
       catch( IOException e ) { }
-
-      //Decoder goes here.
 
       noDecode();
     }
@@ -470,8 +464,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      //Decoder goes here.
-
       noDecode();
     }
     else if( h.equals("Machine Value.h") )
@@ -483,8 +475,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[17] - 1 );
       }
       catch( IOException e ) { }
-
-      //Decoder goes here.
 
       noDecode();
     }
@@ -498,8 +488,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      //Decoder goes here.
-
       noDecode();
     }
     else if( h.equals("Load System Configuration.h") )
@@ -511,8 +499,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[21] - 1 );
       }
       catch( IOException e ) { }
-
-      //Decoder goes here.
 
       noDecode();
     }
@@ -526,8 +512,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      //Decoder goes here.
-
       noDecode();
     }
     else if( h.equals("Import Address Setup Table.h") )
@@ -539,8 +523,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[25] - 1 );
       }
       catch( IOException e ) { }
-
-      //Decoder goes here.
 
       noDecode();
     }
@@ -554,8 +536,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      //Decoder goes here.
-
       noDecode();
     }
     else if( h.equals("COM Runtime Descriptor.h") )
@@ -567,8 +547,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
         Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[29] - 1 );
       }
       catch( IOException e ) { }
-
-      //Decoder goes here.
 
       noDecode();
     }

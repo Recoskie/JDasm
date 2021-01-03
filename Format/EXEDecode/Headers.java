@@ -162,7 +162,7 @@ public class Headers extends Data
       "Resource Location to Files In DLL or EXE",
       "Exceptions",
       "Security",
-      "Relocation used for patching",
+      "Relocation",
       "Debug",
       "Description/Architecture",
       "Machine Value (MIPS GP)",
