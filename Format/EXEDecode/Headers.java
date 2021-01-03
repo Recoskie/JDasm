@@ -99,7 +99,7 @@ public class Headers extends Data
     
     //32 bit base address.
 
-    else { op.UINT32( "Base Address" ); imageBase = ((Integer)op.value).intValue(); }
+    else { op.LUINT32( "Base Address" ); imageBase = ((Integer)op.value).intValue(); }
 
     op.LUINT32( "Section Alignment" );
     op.LUINT32( "File Alignment" );

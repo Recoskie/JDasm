@@ -141,17 +141,31 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     JMenu fm = new JMenu("File");
     JMenu vm = new JMenu("View");
+    JMenu tm = new JMenu("Tools");
  
     JMenuItem f1 = new JMenuItem("Open new File");
+
+    //View options.
 
     JMenuItem v1 = new JMenuItem("Toggle text View");
     JMenuItem v2 = new JMenuItem("Toggle virtual space View");
     JMenuItem v3 = new JMenuItem("Toggle offset View");
     JMenuItem v4 = new JMenuItem("Toggle Data Inspector");
 
-    fm.add(f1); vm.add(v1); vm.add(v2); vm.add(v3); vm.add(v4);
+    //Tools.
 
-    bdBar.add(fm); bdBar.add(vm);
+    JMenuItem t1 = new JMenuItem("Goto Offset");
+    JMenuItem t2 = new JMenuItem("Goto Virtual");
+
+    //Create tool bar.
+
+    fm.add(f1);
+    
+    vm.add(v1); vm.add(v2); vm.add(v3); vm.add(v4);
+
+    tm.add(t1); tm.add(t2);
+
+    bdBar.add(fm); bdBar.add(vm); bdBar.add(tm);
   
     //add ActionListener to menuItems.
     
@@ -159,6 +173,8 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     
     v1.addActionListener(this); v2.addActionListener(this);
     v3.addActionListener(this); v4.addActionListener(this);
+
+    t1.addActionListener(this); t2.addActionListener(this);
 
     //The tree is used for file chooser, and for decoded data view.
 
@@ -452,6 +468,30 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     else if( e.getActionCommand().equals("Toggle Data Inspector") )
     {
       di.setVisible(!di.isVisible());
+    }
+
+    else if( e.getActionCommand().equals("Goto Offset") )
+    {
+      try
+      {
+        file.seek( Long.parseUnsignedLong( JOptionPane.showInputDialog("Enter Offset to seek (HEX): "), 16 ) );
+      }
+      catch( Exception err )
+      {
+        JOptionPane.showMessageDialog( null, "Bad Input. Hex only." );
+      }
+    }
+
+    else if( e.getActionCommand().equals("Goto Virtual") )
+    {
+      try
+      {
+        file.seekV( Long.parseUnsignedLong( JOptionPane.showInputDialog("Enter Offset to seek (HEX): "), 16 ) );
+      }
+      catch( Exception err )
+      {
+        JOptionPane.showMessageDialog( null, "Bad Input. Hex only." );
+      }
     }
   }
 
