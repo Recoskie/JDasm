@@ -789,6 +789,41 @@ public class X86 extends X86Types implements core.Core
   }
 
   /*-------------------------------------------------------------------------------------------------------------------------
+  Simple location mapping for imports. And other things.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  private class Loc
+  {
+    String name = "";
+    boolean map = false;
+    
+    public Loc( boolean mapped, String n )
+    {
+      map = mapped; name = n;
+    }
+  }
+
+  private Loc checkLoc( long loc )
+  {
+    //Check mapped locations. This has to be relocated to it's own method. Ill do this when I get back.
+
+    for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
+    {
+
+      if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
+      {
+        return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> 2 ) ) ) );
+      }
+
+      r += ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> 2;
+    }
+
+    //Unmapped locations are added to locations.
+
+    locations.add( loc ); return( new Loc( false, "" ) );
+  }
+
+  /*-------------------------------------------------------------------------------------------------------------------------
   When input type is value 0 decode the immediate input regularly to it's size setting for accumulator Arithmetic, and IO.
   When input type is value 1 decode the immediate input regularly, but zeros out the upper 4 bits for Register encoding.
   When input type is value 2 decode the immediate as a relative address used by jumps, and function calls.
@@ -859,13 +894,17 @@ public class X86 extends X86Types implements core.Core
 
     if ( type == 2 )
     {
-      //Calculate the Padded size for at the end of the function an Relative is padded to the size of the address based on bit mode.
-
-      if( BitMode == 0 ) { pad = "%1$04X"; } else if ( BitMode == 1 ) { pad = "%1$08X"; } else if( BitMode == 2 ) { pad = "%1$016X"; }
-
-      //Add current position.
+      //Add current position. Only if processor mode 64 bit.
     
       val += data.getVirtualPointer();
+
+      //Check if address is mapped.
+
+      Loc l = checkLoc( val ); if( l.map ){ return( l.name ); }
+
+      //Calculate the Padded size for at the end of the decode Immediate method. Relative is padded to the size of the address based on bit mode.
+
+      if( BitMode == 0 ) { pad = "%1$04X"; } else if ( BitMode == 1 ) { pad = "%1$08X"; } else if( BitMode == 2 ) { pad = "%1$016X"; }
     }
 
     /*---------------------------------------------------------------------------------------------------------------------------
@@ -1006,7 +1045,7 @@ public class X86 extends X86Types implements core.Core
       if ( BySize )
       {
         //-------------------------------------------------------------------------------------------------------------------------
-        //Check if it is not the non vectorized 128 which uses "Oword ptr".
+        //Check if it is not the non vectorized 128 which uses "OWord ptr".
         //-------------------------------------------------------------------------------------------------------------------------
 
         if ( Setting != 16 || Vect )
@@ -1015,7 +1054,7 @@ public class X86 extends X86Types implements core.Core
         }
 
         //-------------------------------------------------------------------------------------------------------------------------
-        //Non vectorized 128 uses "Oword ptr" alaises to "QWord ptr" in 32 bit mode, or lower.
+        //Non vectorized 128 uses "OWord ptr" aliases to "QWord ptr" in 32 bit mode, or lower.
         //-------------------------------------------------------------------------------------------------------------------------
 
         else if ( !Vect ) { Setting = (byte)( 11 - ( ( ( BitMode <= 1 ) ? 1 : 0 ) * 5 ) ); }
@@ -1210,7 +1249,7 @@ public class X86 extends X86Types implements core.Core
         //else Base register is not 4 and does not go into the SIB ADDRESS.
         //Decode the Base register regularly plus it's Extended value if relative (RIP) disp32 is not used.
 
-        else if(DispType != 2 && ( BitMode != x86_64 && DispType != 0 ))
+        else if( DispType != 2 && ( BitMode == x86_64 && ModRM[2] != 5 ) )
         {
           out += REG[ AddressSize ][ BaseExtend & 8 | ModRM[2] ];
         }
@@ -1218,7 +1257,23 @@ public class X86 extends X86Types implements core.Core
 
       //Finally the Immediate displacement is put into the Address last.
 
-      if( Disp >= 0 ) { out += decodeImmediate( DispType, false, Disp ); }
+      if( Disp >= 0 )
+      {
+        //Check if offset is a mapped address location.
+
+        if( ModRM[2] == 5 )
+        {
+          String s = decodeImmediate( DispType, false, Disp );
+
+          Loc l = checkLoc( Long.parseLong( s, 16 ) );
+        
+          out += l.map ? l.name : s;
+        }
+        else
+        {
+          out += decodeImmediate( DispType, false, Disp );
+        }
+      }
 
       //Put the right bracket on the address.
 

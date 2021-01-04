@@ -2,6 +2,10 @@ package core;
 
 public interface Core
 {
+  public java.util.LinkedList<String> mapped_loc = new java.util.LinkedList<String>();
+  public java.util.LinkedList<Long> mapped_pos = new java.util.LinkedList<Long>();
+  public java.util.LinkedList<Long> locations = new java.util.LinkedList<Long>(); //Used with data model for navigating code.
+
   //Disassemble a single operation.
 
   public String disASM() throws java.io.IOException;

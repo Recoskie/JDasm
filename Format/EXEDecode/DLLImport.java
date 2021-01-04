@@ -56,6 +56,8 @@ public class DLLImport extends Data
         //Function list First location.
 
         b.seekV( d1 + imageBase ); FuncArray1 = new Descriptor( b, true );
+
+        //read the list.
         
         d1 = 0; pos = 1;
 
@@ -74,6 +76,10 @@ public class DLLImport extends Data
         //Function location list 2.
 
         b.seekV( d5 + imageBase ); FuncArray2 = new Descriptor( b, true );
+
+        //Add the list to the decompiler.
+
+        core.mapped_pos.add( d5 + imageBase );
         
         d1 = 0; pos = 1;
 
@@ -92,6 +98,8 @@ public class DLLImport extends Data
 
           if( pos < 0 )
           {
+            core.mapped_loc.add( "Method #" + ( pos & 0xFFFF ) + "" );
+
             DLLFunc.add( new DefaultMutableTreeNode( "No_Name() #" + ( pos & 0xFFFF ) + ".dll#" ) );
           }
 
@@ -107,9 +115,13 @@ public class DLLImport extends Data
             
             Method.setEvent( this::methodInfo ); des.add( Method );
 
+            core.mapped_loc.add( Method.value + "" );
+
             DLLFunc.add( new DefaultMutableTreeNode( Method.value + "().dll#D,"+ ref ) ); ref += 1; b.seekV(t2);
           }
         }
+
+        core.mapped_pos.add( b.getVirtualPointer() );
 
         DLLFunc.insert( new DefaultMutableTreeNode( "Function Array Decode 1.h#D," + ref ), 0 );
 

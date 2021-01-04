@@ -439,8 +439,8 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       info("<html><p>Relocations are used is if the program is not loaded at it's preferred base Address set in the op header.<br /><br />" +
       "The difference is added to locations defined in the address list in this relocation section.<br /><br />" +
-      "Relocations are not needed. As the program is always mapped at it's preferred base address.<br /><br />" +
-      "A reader can be designed, for the relocation section, but is not really necessary.</p></html>");
+      "Relocations are not needed, for this disassembler as the program is always mapped at it's preferred base address.<br /><br />" +
+      "A reader can be designed for the relocation section, but is not really necessary.</p></html>");
     }
     else if( h.equals("DEBUG TABLE.h") )
     {
