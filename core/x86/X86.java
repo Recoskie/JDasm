@@ -805,6 +805,8 @@ public class X86 extends X86Types implements core.Core
 
   private Loc checkLoc( long loc )
   {
+    try
+    {
     //Check mapped locations. This has to be relocated to it's own method. Ill do this when I get back.
 
     for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
@@ -817,6 +819,7 @@ public class X86 extends X86Types implements core.Core
 
       r += ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> 2;
     }
+    } catch( Exception err ){ System.out.println( err + "" ); }
 
     //Unmapped locations are added to locations.
 
@@ -1249,7 +1252,7 @@ public class X86 extends X86Types implements core.Core
         //else Base register is not 4 and does not go into the SIB ADDRESS.
         //Decode the Base register regularly plus it's Extended value if relative (RIP) disp32 is not used.
 
-        else if( DispType != 2 && ( BitMode == x86_64 && ModRM[2] != 5 ) )
+        else if( ( ModRM[0] == 0 && ModRM[2] != 5 ) || ModRM[0] > 0 )
         {
           out += REG[ AddressSize ][ BaseExtend & 8 | ModRM[2] ];
         }
@@ -1261,11 +1264,11 @@ public class X86 extends X86Types implements core.Core
       {
         //Check if offset is a mapped address location.
 
-        if( ModRM[2] == 5 )
+        if( ModRM[0] == 0 && ModRM[2] == 5 )
         {
           String s = decodeImmediate( DispType, false, Disp );
 
-          Loc l = checkLoc( Long.parseLong( s, 16 ) );
+          Loc l = checkLoc( Long.parseUnsignedLong( s, 16 ) );
         
           out += l.map ? l.name : s;
         }
