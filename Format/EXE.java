@@ -52,7 +52,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
   DefaultMutableTreeNode DEBUG = new DefaultMutableTreeNode("DEBUG TABLE.h");
   DefaultMutableTreeNode Decription = new DefaultMutableTreeNode("Description/Architecture.h");
   DefaultMutableTreeNode MV = new DefaultMutableTreeNode("Machine Value.h");
-  DefaultMutableTreeNode TS = new DefaultMutableTreeNode("Thread Storage Lowcation.h");
+  DefaultMutableTreeNode TS = new DefaultMutableTreeNode("Thread Storage Location.h");
   DefaultMutableTreeNode ConFIG = new DefaultMutableTreeNode("Load System Configuration.h");
   DefaultMutableTreeNode BoundImport = new DefaultMutableTreeNode("Import Table of Functions inside program.h");
   DefaultMutableTreeNode ImportAddress = new DefaultMutableTreeNode("Import Address Setup Table.h");
@@ -106,11 +106,15 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       if( Data.coreType == 0x014C )
       {
-        data.core = new X86( b ); data.core.setBit( X86.x86_32 ); data.coreLoaded = true;
+        data.core = new X86( b ); data.core.setBit( X86.x86_32 );
+        
+        data.core.setEvent( this::Dis ); data.coreLoaded = true;
       }
       else if( Data.coreType == (short)0x8664 )
       {
-        data.core = new X86( b ); data.core.setBit( X86.x86_64 ); data.coreLoaded = true;
+        data.core = new X86( b ); data.core.setBit( X86.x86_64 );
+        
+        data.core.setEvent( this::Dis ); data.coreLoaded = true;
       }
     }
 
@@ -211,28 +215,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       {
         if( Data.coreLoaded )
         {
-          String t = "", t1 = "", t2 ="";
-
-          try
-          {
-            b.seekV( Long.parseLong( type[1] ) );
-
-            //Disassemble till return from application.
-
-            while( !( t2.indexOf("RET") == 0 || t2.indexOf("JMP") == 0 ) )
-            {
-              t1 = data.core.posV(); t2 = data.core.disASM(); t += t1 + " " + t2 + "<br />";
-            }
-
-            long f = b.getFilePointer() - 1, v = b.getVirtualPointer() - 1;
-
-            b.seekV( Long.parseLong( type[1] ) );
-            
-            Virtual.setSelected( Long.parseLong( type[1] ), v ); Offset.setSelected( b.getFilePointer(), f );
-
-            info( "<html>" + t + "</html>" );
-          }
-          catch( Exception e ) { }
+          Dis( Long.parseLong( type[1] ) ); ds.setDescriptor( data.core );
         }
         else { noCore(); }
       }
@@ -478,7 +461,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
       noDecode();
     }
-    else if( h.equals("Thread Storage Lowcation.h") )
+    else if( h.equals("Thread Storage Location.h") )
     {
       try
       {
@@ -555,6 +538,27 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     ds.clear( blank );
   }
 
+  //Disassembler.
+
+  public void Dis( long loc )
+  {
+    try
+    {
+      b.seekV( loc );
+
+      long floc = b.getFilePointer();
+
+      String d = data.core.disASM_Code();
+
+      info( "<html>" + d + "</html>" );
+
+      Virtual.setSelected( loc, b.getVirtualPointer() - 1 ); Offset.setSelected( floc, b.getFilePointer() - 1 );
+
+      ds.setDescriptor( data.core );
+    }
+    catch( IOException e ) { }
+  }
+
   //No Decoder.
 
   public void noDecode()
@@ -573,6 +577,6 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
   public void noCore()
   { 
-    info("<html>The processor core is not supported.</html>");
+    info("<html>The processor core engine is not supported.</html>");
   }
 }

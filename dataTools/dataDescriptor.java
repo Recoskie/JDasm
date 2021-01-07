@@ -20,19 +20,19 @@ public class dataDescriptor extends JComponent
 
   private static dataInspector di;
 
-  //data model is set.
+  //Allows us to switch, and set data models.
 
-  private boolean set = false;
+  private boolean set = false, cset = false;
 
   //Cols.
 
-  private String[] cols = new String[]{"Use", "Raw Data", "Value"}; 
+  private String[] cols = new String[]{"Use", "Raw Data", "Value"};
 
   //Data type.
 
   private int type = 0;
 
-  //The main display.
+  //The data descriptor model is for headers, and data.
 
   private AbstractTableModel dModel = new AbstractTableModel()
   {
@@ -73,6 +73,31 @@ public class dataDescriptor extends JComponent
     }
   };
 
+  //The core data model is for address mapping.
+
+  private static core.Core core;
+
+  private String[] coreCols = new String[] { "Operation", "Location" };
+
+  private AbstractTableModel coreModel = new AbstractTableModel()
+  {
+    public int getColumnCount() { return( 2 ); }
+
+    public int getRowCount() { return( core.locations.size() ); }
+
+    public String getColumnName( int col ) { return ( coreCols[ col ] ); }
+    
+    public Object getValueAt( int row, int col )
+    {
+      return( col == 0 ? "Disassemble" : "0x" + String.format( "%1$016X", core.locations.get( row ) ) );
+    }
+
+    public boolean isCellEditable( int row, int col )
+    {
+      core.DisLoc( row ); return ( false );
+    }
+  };
+
   //Create Data descriptor table.
 
   public dataDescriptor( dataInspector d )
@@ -90,11 +115,22 @@ public class dataDescriptor extends JComponent
   {
     data = d; data.loc( 0 ); di.setOther( data.length );
     
-    if( !set ) { set = true; td.setModel( dModel ); }
+    if( !set ) { cset = false; set = true; td.setModel( dModel ); }
     
     dModel.fireTableDataChanged();
 
     data.Event.accept( -1 ); //Initial description of data structure.
+  }
+
+  //Set a core disassembly model.
+
+  public void setDescriptor( core.Core d )
+  {
+    core = d;
+    
+    if( !cset ) { set = false; cset = true; td.setModel( coreModel ); }
+    
+    coreModel.fireTableDataChanged();
   }
 
   //Main use is for setting a blank data model.

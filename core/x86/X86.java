@@ -425,11 +425,6 @@ public class X86 extends X86Types implements core.Core
   Position.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  @Override public void setPos( long pos ) throws java.io.IOException { data.seek(pos); }
-  @Override public void setPosV( long pos ) throws java.io.IOException { data.seekV(pos); }
-  @Override public long getPos() throws java.io.IOException { return( data.getFilePointer() ); }
-  @Override public long getPosV() throws java.io.IOException { return( data.getVirtualPointer() ); }
-
   @Override public String pos() throws java.io.IOException
   {
     String pad = "";
@@ -792,6 +787,8 @@ public class X86 extends X86Types implements core.Core
   Simple location mapping for imports. And other things.
   -------------------------------------------------------------------------------------------------------------------------*/
 
+  private boolean Pointer = false;
+
   private class Loc
   {
     String name = "";
@@ -805,26 +802,49 @@ public class X86 extends X86Types implements core.Core
 
   private Loc checkLoc( long loc )
   {
+    int size = BitMode == x86_64 ? 3 : 2;
+
     try
     {
-    //Check mapped locations. This has to be relocated to it's own method. Ill do this when I get back.
+      //Check mapped locations. This has to be relocated to it's own method. Ill do this when I get back.
 
-    for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
-    {
-
-      if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
+      for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
       {
-        return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> 2 ) ) ) );
-      }
 
-      r += ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> 2;
-    }
+        if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
+        {
+          return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> size ) ) ) );
+        }
+
+        r += ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> size;
+      }
     } catch( Exception err ){ System.out.println( err + "" ); }
 
     //Unmapped locations are added to locations.
 
-    locations.add( loc ); return( new Loc( false, "" ) );
+    if( !Pointer ) { locations.add( loc ); }
+
+    //Else pointer addresses have to be looked up.
+
+    else
+    {
+    
+    }
+    
+    return( new Loc( false, "" ) );
   }
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Navigate to a mapped location.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  public java.util.function.LongConsumer Event = this::stud;
+
+  public void stud( long loc ) {  }
+
+  public void DisLoc( int loc ) { Event.accept( locations.get( loc ) ); }
+
+  public void setEvent( java.util.function.LongConsumer e ) { Event = e; }
 
   /*-------------------------------------------------------------------------------------------------------------------------
   When input type is value 0 decode the immediate input regularly to it's size setting for accumulator Arithmetic, and IO.
@@ -1266,6 +1286,8 @@ public class X86 extends X86Types implements core.Core
 
         if( ModRM[0] == 0 && ModRM[2] == 5 )
         {
+          Pointer = true;
+
           String s = decodeImmediate( DispType, false, Disp );
 
           Loc l = checkLoc( Long.parseUnsignedLong( s, 16 ) );
@@ -2518,7 +2540,7 @@ public class X86 extends X86Types implements core.Core
 
         //Set prefixes, and operands to empty strings, and set Instruction to UD.
 
-        PrefixG1 = "";PrefixG2 = ""; Instruction = "???"; InsOperands = "";
+        PrefixG1 = ""; PrefixG2 = ""; Instruction = "???"; InsOperands = "";
       }
 
       //Put the Instruction sequence together.
@@ -2542,6 +2564,30 @@ public class X86 extends X86Types implements core.Core
     data.Events = true;
 
     return( out );
+  }
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Disassembler till a jump, or return.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  String t = "", t1 = "", t2 ="";
+
+  public String disASM_Code() throws java.io.IOException
+  {
+    //Clear the location list.
+
+    t = ""; t1 = ""; t2 = ""; locations.clear();
+
+    //Disassemble till return from application, or JUMP.
+
+    while( !( Instruction.equals("RET") || Instruction.equals("JMP") ) )
+    {
+      t1 = posV(); t2 = disASM(); t += t1 + " " + t2 + "<br />";
+    }
+
+    reset();
+
+    return( t );
   }
 
   /*-------------------------------------------------------------------------------------------------------------------------
@@ -2586,7 +2632,7 @@ public class X86 extends X86Types implements core.Core
 
     //Reset Invalid operation code.
 
-    InvalidOp = false;
+    InvalidOp = false; Pointer = false;
 
     //Reset instruction hex because it is used to check if the instruction is longer than 15 bytes which is impossible for the X86 Decoder Circuit.
 
