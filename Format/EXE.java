@@ -128,7 +128,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     //Start of code.
 
-    if( data.baseOfCode != 0 )  { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h#Dis," + ( data.imageBase + data.baseOfCode ) + "" )); }
+    if( data.baseOfCode != 0 )  { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h#Dis," + ( data.imageBase + data.startOfCode ) + "" )); }
 
     //Location of the export directory
 
