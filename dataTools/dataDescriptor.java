@@ -83,18 +83,39 @@ public class dataDescriptor extends JComponent
   {
     public int getColumnCount() { return( 2 ); }
 
-    public int getRowCount() { return( core.locations.size() ); }
+    public int getRowCount() { return( core.locations.size() + core.data_off.size() >> 1); }
 
     public String getColumnName( int col ) { return ( coreCols[ col ] ); }
     
     public Object getValueAt( int row, int col )
     {
-      return( col == 0 ? "Disassemble" : "0x" + String.format( "%1$016X", core.locations.get( row ) ) );
+      if( row < core.locations.size() )
+      {
+        return( col == 0 ? "Disassemble" : "0x" + String.format( "%1$016X", core.locations.get( row ) ) );
+      }
+      else
+      {
+        row -= core.locations.size();
+        return( col == 0 ? "Data Location" : "0x" + String.format( "%1$016X", core.data_off.get( row << 1 ) ) );
+      }
     }
 
     public boolean isCellEditable( int row, int col )
     {
-      core.DisLoc( row ); return ( false );
+      if( row < core.locations.size() )
+      {
+        core.disLoc( row );
+      }
+      else
+      {
+        row -= core.locations.size(); row = row << 1;
+
+        try { core.setLoc( core.data_off.get( row ) ); } catch( Exception e ) { }
+
+        di.setOther( core.data_off.get( row + 1 ).intValue() );
+      }
+      
+      return ( false );
     }
   };
 

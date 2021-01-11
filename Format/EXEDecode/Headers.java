@@ -317,9 +317,9 @@ public class Headers extends Data
         //Disassemble till end, or return from application.
         //Note that more can be added here such as the jump operation.
 
-        temp.setPosV( 256 );
+        Data.stream.seekV( 256 );
 
-        while( temp.getPos() < Data.PE )
+        while( Data.stream.getFilePointer() < Data.PE )
         {
           t1 = temp.posV(); t2 = temp.disASM();
           
@@ -331,7 +331,7 @@ public class Headers extends Data
           if( Dos_exit == 2 ) { break; }
         }
 
-        long pos = temp.getPos() - 1, posV = temp.getPosV() - 1;
+        long pos = Data.stream.getFilePointer() - 1, posV = Data.stream.getVirtualPointer() - 1;
         
         Data.stream.seekV( 256 );
         WindowCompoents.Virtual.setSelectedEnd( posV ); WindowCompoents.Offset.setSelectedEnd( pos );

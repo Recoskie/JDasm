@@ -10,6 +10,7 @@ public interface Core
   //Used with data model for navigating code.
 
   public java.util.LinkedList<Long> locations = new java.util.LinkedList<Long>();
+  public java.util.LinkedList<Long> data_off = new java.util.LinkedList<Long>();
 
   //Disassemble a single operation.
 
@@ -34,7 +35,11 @@ public interface Core
 
   //reads location from list, and gives it to the set event handler.
 
-  public void DisLoc( int loc );
+  public void disLoc( int loc );
+
+  //Sets the location.
+
+  public void setLoc( long loc ) throws java.io.IOException;
 
   //Lets us set the event that is triggered when disassembling a new location.
 

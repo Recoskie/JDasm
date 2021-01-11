@@ -787,7 +787,7 @@ public class X86 extends X86Types implements core.Core
   Simple location mapping for imports. And other things.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  private boolean Pointer = false;
+  private int Pointer = 0;
 
   private class Loc
   {
@@ -802,7 +802,7 @@ public class X86 extends X86Types implements core.Core
 
   private Loc checkLoc( long loc )
   {
-    int size = BitMode == x86_64 ? 3 : 2;
+    int size = BitMode == x86_64 ? 8 : 4;
 
     try
     {
@@ -813,22 +813,38 @@ public class X86 extends X86Types implements core.Core
 
         if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
         {
-          return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> size ) ) ) );
+          return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) / size ) ) ) );
         }
 
-        r += ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> size;
+        r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) / size ) - 1;
       }
-    } catch( Exception err ){ System.out.println( err + "" ); }
+    } catch( Exception err ){ }
 
     //Unmapped locations are added to locations.
 
-    if( !Pointer ) { locations.add( loc ); }
+    if( Pointer == 0 ) { locations.add( loc ); }
 
-    //Else pointer addresses have to be looked up.
+    //Else pointer addresses to data.
 
     else
     {
-    
+      //Jump or call pointers have to be read to find location.
+
+      if( Lookup )
+      {
+        
+      }
+
+      //else Data.
+
+      else
+      {
+        data_off.add( loc );
+      
+        data_off.add( (long)( 1 << ( Pointer >> 1 ) ) );
+      }
+
+
     }
     
     return( new Loc( false, "" ) );
@@ -842,7 +858,9 @@ public class X86 extends X86Types implements core.Core
 
   public void stud( long loc ) {  }
 
-  public void DisLoc( int loc ) { Event.accept( locations.get( loc ) ); }
+  public void disLoc( int loc ) { Event.accept( locations.get( loc ) ); }
+
+  public void setLoc( long loc ) throws java.io.IOException { data.seekV( loc ); }
 
   public void setEvent( java.util.function.LongConsumer e ) { Event = e; }
 
@@ -1088,7 +1106,7 @@ public class X86 extends X86Types implements core.Core
       //Also if By size attribute is also true the selected by size index can not exceed 15 anyways which is the max combination the first four bits.
       //-------------------------------------------------------------------------------------------------------------------------
 
-      Setting = (byte)( Setting & 0x0F );
+      Setting = (byte)( Setting & 0x0F ); Pointer = Setting;
 
       //If Vector extended then MM is changed to QWORD.
 
@@ -1286,13 +1304,18 @@ public class X86 extends X86Types implements core.Core
 
         if( ModRM[0] == 0 && ModRM[2] == 5 )
         {
-          Pointer = true;
-
           String s = decodeImmediate( DispType, false, Disp );
 
-          Loc l = checkLoc( Long.parseUnsignedLong( s, 16 ) );
+          if( Disp != 2 )
+          {
+            Loc l = checkLoc( Long.parseUnsignedLong( s, 16 ) );
         
-          out += l.map ? l.name : s;
+            out += l.map ? l.name : s;
+          }
+          else
+          {
+            out += s;
+          }
         }
         else
         {
@@ -2350,6 +2373,10 @@ public class X86 extends X86Types implements core.Core
 
       decodeOpcode();
 
+      //If the jump or call operation uses a pointer. Then the pointer is the location and has to be read.
+
+      Lookup = Instruction.equals("CALL") || Instruction.equals("JMP");
+
       //If Extension is not 0 then add the vector extend "V" to the I.
       //During the decoding of the operands the I can be returned as invalid if it is an Arithmetic, or MM, ST I.
       //Vector mask Is start with K instead of V any I that starts with K and is an
@@ -2570,19 +2597,35 @@ public class X86 extends X86Types implements core.Core
   Disassembler till a jump, or return.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  String t = "", t1 = "", t2 ="";
+  private String t = "", t1 = "", t2 ="";
+  private long Code_start = 0, Code_end = 0;
+  private boolean Lookup = false;
 
   public String disASM_Code() throws java.io.IOException
   {
     //Clear the location list.
 
-    t = ""; t1 = ""; t2 = ""; locations.clear();
+    t = ""; t1 = ""; t2 = ""; locations.clear(); data_off.clear();
 
     //Disassemble till return from application, or JUMP.
+
+    Code_start = data.getVirtualPointer();
 
     while( !( Instruction.equals("RET") || Instruction.equals("JMP") ) )
     {
       t1 = posV(); t2 = disASM(); t += t1 + " " + t2 + "<br />";
+    }
+
+    Code_end = data.getVirtualPointer();
+
+    //Filter locations.
+
+    for( int i = 0; i < locations.size(); i++ )
+    {
+      if( locations.get(i) >= Code_start && locations.get(i) <= Code_end )
+      {
+        locations.remove(i); i -= 1;
+      }
     }
 
     reset();
@@ -2632,7 +2675,7 @@ public class X86 extends X86Types implements core.Core
 
     //Reset Invalid operation code.
 
-    InvalidOp = false; Pointer = false;
+    InvalidOp = false; Pointer = 0; Lookup = false;
 
     //Reset instruction hex because it is used to check if the instruction is longer than 15 bytes which is impossible for the X86 Decoder Circuit.
 
