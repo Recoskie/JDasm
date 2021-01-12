@@ -802,7 +802,7 @@ public class X86 extends X86Types implements core.Core
 
   private Loc checkLoc( long loc )
   {
-    int size = BitMode == x86_64 ? 8 : 4;
+    int size = BitMode == x86_64 ? 3 : 2;
 
     try
     {
@@ -813,10 +813,10 @@ public class X86 extends X86Types implements core.Core
 
         if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
         {
-          return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) / size ) ) ) );
+          return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> size ) ) ) );
         }
 
-        r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) / size ) - 1;
+        r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> size ) - 1;
       }
     } catch( Exception err ){ }
 
@@ -2594,7 +2594,7 @@ public class X86 extends X86Types implements core.Core
   }
 
   /*-------------------------------------------------------------------------------------------------------------------------
-  Disassembler till a jump, or return.
+  Disassemble till a jump, or return.
   -------------------------------------------------------------------------------------------------------------------------*/
 
   private String t = "", t1 = "", t2 ="";

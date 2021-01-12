@@ -213,6 +213,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     
       if( type[0].equals("Dis") )
       {
+        //If import table is not loaded. It should be loaded to map method calls.
+
+        if( DLL_des == null ) { elementOpen("DLL Import Table"); }
+
         if( Data.coreLoaded )
         {
           Dis( Long.parseLong( type[1] ) ); ds.setDescriptor( data.core );

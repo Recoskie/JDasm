@@ -83,7 +83,7 @@ public class dataDescriptor extends JComponent
   {
     public int getColumnCount() { return( 2 ); }
 
-    public int getRowCount() { return( core.locations.size() + core.data_off.size() >> 1); }
+    public int getRowCount() { return( core.locations.size() + ( core.data_off.size() >> 1 ) ); }
 
     public String getColumnName( int col ) { return ( coreCols[ col ] ); }
     
