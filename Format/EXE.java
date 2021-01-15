@@ -217,9 +217,15 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
         if( DLL_des == null ) { elementOpen("DLL Import Table"); }
 
+        //Begin disassembly.
+
         if( Data.coreLoaded )
         {
-          Dis( Long.parseLong( type[1] ) ); ds.setDescriptor( data.core );
+          data.core.locations.clear(); data.core.data_off.clear();
+
+          data.core.locations.add( Long.parseLong( type[1] ) );
+
+          Dis( data.core.locations.get(0) ); ds.setDescriptor( data.core );
         }
         else { noCore(); }
       }

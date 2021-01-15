@@ -784,7 +784,7 @@ public class X86 extends X86Types implements core.Core
   }
 
   /*-------------------------------------------------------------------------------------------------------------------------
-  Simple location mapping for imports. And other things.
+  Simple location mapping, for method calls, And data.
   -------------------------------------------------------------------------------------------------------------------------*/
 
   private int Pointer = 0;
@@ -802,49 +802,58 @@ public class X86 extends X86Types implements core.Core
 
   private Loc checkLoc( long loc )
   {
-    int size = BitMode == x86_64 ? 3 : 2;
+    //Lookup is set true if it is a jump operation, or call.
 
-    try
+    if( Lookup )
     {
-      //Check mapped locations. This has to be relocated to it's own method. Ill do this when I get back.
+      //Jump or call pointers to mapped method calls.
 
-      for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
+      if( Pointer > 0 && SegOverride.equals("[") )
       {
+        int size = BitMode == x86_64 ? 3 : 2;
 
-        if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
+        for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
         {
-          return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> size ) ) ) );
+          if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
+          {
+            return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> size ) ) ) );
+          }
+
+          r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> size ) - 1;
         }
 
-        r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> size ) - 1;
-      }
-    } catch( Exception err ){ }
+        //Pointer has to be read to find it's actual jump, or call location.
 
-    //Unmapped locations are added to locations.
-
-    if( Pointer == 0 ) { locations.add( loc ); }
-
-    //Else pointer addresses to data.
-
-    else
-    {
-      //Jump or call pointers have to be read to find location.
-
-      if( Lookup )
-      {
-        
+        Pointer = 0;
       }
 
-      //else Data.
+      //Else pointer is not > 0. Is then jump/call location.
 
       else
       {
-        data_off.add( loc );
-      
-        data_off.add( (long)( 1 << ( Pointer >> 1 ) ) );
+        //Do not add duplicate addresses.
+
+        for( int i = 0; i < locations.size(); i++ )
+        {
+          if( locations.get(i) == loc ) { return( new Loc( false, "" ) ); }
+        }
+
+        locations.add( loc );
+      }
+    }
+
+    //Else pointer to data location.
+
+    else if( Pointer > 0 && SegOverride.equals("[") )
+    {
+      //Do not add duplicate addresses.
+
+      for( int i = 0; i < data_off.size(); i += 2 )
+      {
+        if( data_off.get(i) == loc ) { return( new Loc( false, "" ) ); }
       }
 
-
+      data_off.add( loc ); data_off.add( (long)( 1 << ( Pointer >> 1 ) ) ); Pointer = 0;
     }
     
     return( new Loc( false, "" ) );
@@ -936,12 +945,10 @@ public class X86 extends X86Types implements core.Core
     if ( type == 2 )
     {
       //Add current position. Only if processor mode 64 bit.
+
+      Lookup = true;
     
       val += data.getVirtualPointer();
-
-      //Check if address is mapped.
-
-      Loc l = checkLoc( val ); if( l.map ){ return( l.name ); }
 
       //Calculate the Padded size for at the end of the decode Immediate method. Relative is padded to the size of the address based on bit mode.
 
@@ -1000,6 +1007,10 @@ public class X86 extends X86Types implements core.Core
 
       Extend = ( 1 << Extend ) * 2;
     }
+
+    //Check if address is mapped.
+
+    Loc l = checkLoc( val ); if( l.map ){ return( l.name ); }
 
     //*Return the Imm.
 
@@ -1106,7 +1117,7 @@ public class X86 extends X86Types implements core.Core
       //Also if By size attribute is also true the selected by size index can not exceed 15 anyways which is the max combination the first four bits.
       //-------------------------------------------------------------------------------------------------------------------------
 
-      Setting = (byte)( Setting & 0x0F ); Pointer = Setting;
+      Setting = (byte)( Setting & 0x0F );
 
       //If Vector extended then MM is changed to QWORD.
 
@@ -1300,27 +1311,9 @@ public class X86 extends X86Types implements core.Core
 
       if( Disp >= 0 )
       {
-        //Check if offset is a mapped address location.
-
-        if( ModRM[0] == 0 && ModRM[2] == 5 )
-        {
-          String s = decodeImmediate( DispType, false, Disp );
-
-          if( Disp != 2 )
-          {
-            Loc l = checkLoc( Long.parseUnsignedLong( s, 16 ) );
+        Pointer = ( ModRM[0] == 0 && ModRM[2] == 5 ) ? Setting : 0;
         
-            out += l.map ? l.name : s;
-          }
-          else
-          {
-            out += s;
-          }
-        }
-        else
-        {
-          out += decodeImmediate( DispType, false, Disp );
-        }
+        out += decodeImmediate( DispType, false, Disp );
       }
 
       //Put the right bracket on the address.
@@ -2132,7 +2125,7 @@ public class X86 extends X86Types implements core.Core
         );
       }
 
-      //Else If the ModR/M type is 0 then it is a moffs address.
+      //Else If the ModR/M type is 0 then it is a offset address.
 
       else
       {
@@ -2141,7 +2134,7 @@ public class X86 extends X86Types implements core.Core
         if( X86Decoder[1].BySizeAttrubute )
         {
           AddrsSize = ( 1 << BitMode ) << 1;
-          s = getOperandSize( X86Decoder[1].Size ) << 1;
+          s = getOperandSize( X86Decoder[1].Size ) << 1; Pointer = AddrsSize;
         }
         else
         {
@@ -2605,7 +2598,7 @@ public class X86 extends X86Types implements core.Core
   {
     //Clear the location list.
 
-    t = ""; t1 = ""; t2 = ""; locations.clear(); data_off.clear();
+    t = ""; t1 = ""; t2 = "";
 
     //Disassemble till return from application, or JUMP.
 
@@ -2617,16 +2610,6 @@ public class X86 extends X86Types implements core.Core
     }
 
     Code_end = data.getVirtualPointer();
-
-    //Filter locations.
-
-    for( int i = 0; i < locations.size(); i++ )
-    {
-      if( locations.get(i) >= Code_start && locations.get(i) <= Code_end )
-      {
-        locations.remove(i); i -= 1;
-      }
-    }
 
     reset();
 
