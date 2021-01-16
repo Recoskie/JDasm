@@ -788,6 +788,7 @@ public class X86 extends X86Types implements core.Core
   -------------------------------------------------------------------------------------------------------------------------*/
 
   private int Pointer = 0;
+  private boolean rel = false;
 
   private class Loc
   {
@@ -804,58 +805,53 @@ public class X86 extends X86Types implements core.Core
   {
     //Lookup is set true if it is a jump operation, or call.
 
-    if( Lookup )
+    if( Pointer > 0 && SegOverride.equals("[") )
     {
-      //Jump or call pointers to mapped method calls.
+      int size = BitMode == x86_64 ? 3 : 2;
 
-      if( Pointer > 0 && SegOverride.equals("[") )
+      for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
       {
-        int size = BitMode == x86_64 ? 3 : 2;
-
-        for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
+        if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
         {
-          if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
-          {
-            Pointer = 0; Lookup = false; return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> size ) ) ) );
-          }
-
-          r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> size ) - 1;
+          Pointer = 0; Lookup = false; rel = false;
+          
+          return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> size ) ) ) );
         }
 
-        //Pointer has to be read to find it's actual jump, or call location.
-
-        Pointer = 0;
+        r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> size ) - 1;
       }
 
-      //Else pointer is not > 0. Is then jump/call location.
+      //Add variable data location if not jump, or call.
 
-      else
+      if( !Lookup )
       {
         //Do not add duplicate addresses.
 
-        for( int i = 0; i < locations.size(); i++ )
+        for( int i = 0; i < data_off.size(); i += 2 )
         {
-          if( locations.get(i) == loc ) { Lookup = false; return( new Loc( false, "" ) ); }
+          if( data_off.get(i) == loc ) { Pointer = 0; Lookup = false; rel = false; return( new Loc( false, "" ) ); }
         }
 
-        locations.add( loc ); Lookup = false;
+        data_off.add( loc ); data_off.add( (long)( 1 << ( Pointer >> 1 ) ) );
       }
     }
 
-    //Else pointer to data location.
+    //Else pointer is not > 0. Is then jump/call location.
 
-    else if( Pointer > 0 && SegOverride.equals("[") )
+    else if( rel )
     {
       //Do not add duplicate addresses.
 
-      for( int i = 0; i < data_off.size(); i += 2 )
+      for( int i = 0; i < locations.size(); i++ )
       {
-        if( data_off.get(i) == loc ) { Pointer = 0; Lookup = false; return( new Loc( false, "" ) ); }
+        if( locations.get(i) == loc ) { Lookup = false; rel = false; return( new Loc( false, "" ) ); }
       }
 
-      data_off.add( loc ); data_off.add( (long)( 1 << ( Pointer >> 1 ) ) ); Pointer = 0;
+      locations.add( loc );
     }
     
+    Pointer = 0; Lookup = false; rel = false;
+
     return( new Loc( false, "" ) );
   }
 
@@ -944,8 +940,6 @@ public class X86 extends X86Types implements core.Core
 
     if ( type == 2 )
     {
-      Lookup = true;
-
       //Most significant bit.
 
       long center = (long)( ( Math.pow( 2, ( n << 3 ) ) ) / 2 );
@@ -2047,6 +2041,8 @@ public class X86 extends X86Types implements core.Core
 
       else if( Code >= 6 && Code <= 8 && ImmOp <= 5 )
       {
+        rel = ( Code - 6 ) == 2;
+
         X86Decoder[ImmOp++].set( (byte)( Code - 6 ), BySize, (byte)Setting, (byte)OpNum++ );
       }
 
