@@ -816,7 +816,7 @@ public class X86 extends X86Types implements core.Core
         {
           if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
           {
-            return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> size ) ) ) );
+            Pointer = 0; Lookup = false; return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> size ) ) ) );
           }
 
           r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> size ) - 1;
@@ -835,10 +835,10 @@ public class X86 extends X86Types implements core.Core
 
         for( int i = 0; i < locations.size(); i++ )
         {
-          if( locations.get(i) == loc ) { return( new Loc( false, "" ) ); }
+          if( locations.get(i) == loc ) { Lookup = false; return( new Loc( false, "" ) ); }
         }
 
-        locations.add( loc );
+        locations.add( loc ); Lookup = false;
       }
     }
 
@@ -850,7 +850,7 @@ public class X86 extends X86Types implements core.Core
 
       for( int i = 0; i < data_off.size(); i += 2 )
       {
-        if( data_off.get(i) == loc ) { return( new Loc( false, "" ) ); }
+        if( data_off.get(i) == loc ) { Pointer = 0; Lookup = false; return( new Loc( false, "" ) ); }
       }
 
       data_off.add( loc ); data_off.add( (long)( 1 << ( Pointer >> 1 ) ) ); Pointer = 0;
@@ -929,7 +929,7 @@ public class X86 extends X86Types implements core.Core
 
     if( S == 0 ) { val = data.read() & 0xFF; }
     else if( S == 1 ) { val = (data.read() | (data.read() << 8)) & 0xFFFF; }
-    else if( S == 2 ) { val = (data.read() | (data.read() << 8) | (data.read() << 16) | (data.read() << 24)) & 0xFFFFFFFF; }
+    else if( S == 2 ) { val = (data.read() | (data.read() << 8) | (data.read() << 16) | (data.read() << 24)) & 0xFFFFFFFFL; }
     else if( S == 3 ) { val = data.read() | (data.read() << 8) | (data.read() << 16) | (data.read() << 24) | ((long)data.read() << 32) | ((long)data.read() << 40) | ((long)data.read() << 48) | ((long)data.read() << 56); }
 
     /*---------------------------------------------------------------------------------------------------------------------------
@@ -944,11 +944,20 @@ public class X86 extends X86Types implements core.Core
 
     if ( type == 2 )
     {
-      //Add current position. Only if processor mode 64 bit.
-
       Lookup = true;
+
+      //Most significant bit.
+
+      long center = (long)( ( Math.pow( 2, ( n << 3 ) ) ) / 2 );
     
-      val += data.getVirtualPointer();
+      if( Long.compareUnsigned( val, center ) >= 0 )
+      {
+        val = center - ( val - center ); val = data.getVirtualPointer() - val;
+      }
+      else
+      {
+        val += data.getVirtualPointer();
+      }
 
       //Calculate the Padded size for at the end of the decode Immediate method. Relative is padded to the size of the address based on bit mode.
 
