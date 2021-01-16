@@ -1585,7 +1585,7 @@ public class X86 extends X86Types implements core.Core
     {
       //If XOP
 
-      int Code = ( data.read() & 0x0F );
+      int Code = ( cb & 0x0F );
 
       if( Code >= 8 && Code <= 10 )
       {
