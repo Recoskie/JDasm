@@ -842,7 +842,9 @@ public class X86 extends X86Types implements core.Core
     {
       //Do not add duplicate addresses.
 
-      for( int i = 0; i < locations.size(); i++ )
+      int i;
+
+      for( i = 0; i < locations.size(); i++ )
       {
         if( locations.get(i) == loc ) { Lookup = false; rel = false; return( new Loc( false, "" ) ); }
       }
@@ -2615,6 +2617,40 @@ public class X86 extends X86Types implements core.Core
     }
 
     Code_end = data.getVirtualPointer();
+
+    long n1,n2;
+    boolean exists = false;
+
+    //It is possible that a section starts further back than it's first jump location to section.
+
+    for( int i1 = 0; i1 < code.size(); i1+=2 )
+    {
+      n1 = code.get( i1 ); n2 = code.get( i1 + 1 );
+
+      if( Code_start < n1 && Code_end == n2 ) { code.set( i1, Code_start ); exists = true; break; }
+    }
+
+    if( !exists ){ code.add( Code_start ); code.add( Code_end ); }
+
+    //Remove locations That are in the middle of code blocks.
+    //The only locations that really matter are the start of code blocks.
+
+    for( int i1 = 0; i1 < code.size(); i1+=2 )
+    {
+      Code_start = code.get( i1 ); Code_end = code.get( i1 + 1 );
+
+      for( int i2 = 0; i2 < locations.size(); i2++ )
+      {
+        n1 = locations.get( i2 );
+        
+        if( n1 > Code_start && n1 < Code_end )
+        {
+          locations.remove( i2 ); i2-=1;
+
+          //We should be making a list of locations that match other blocks of code.
+        }
+      }
+    }
 
     reset();
 

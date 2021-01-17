@@ -10,6 +10,7 @@ public interface Core
   //Used with data model for navigating code.
 
   public java.util.LinkedList<Long> locations = new java.util.LinkedList<Long>();
+  public java.util.LinkedList<Long> code = new java.util.LinkedList<Long>();
   public java.util.LinkedList<Long> data_off = new java.util.LinkedList<Long>();
 
   //Disassemble a single operation.
