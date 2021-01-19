@@ -658,7 +658,7 @@ public class X86 extends X86Types implements core.Core
   The variable SizeAttrSelect is separate from this function it is adjusted by prefixes that adjust Vector size, and General purpose registers.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  private byte getOperandSize( byte SizeAttribute )
+  private int getOperandSize( int SizeAttribute )
   {
     /*----------------------------------------------------------------------------------------------------------------------------------------
     Each S value goes in order to the vector length value in EVEX, and VEX Smallest to biggest in perfect alignment.
@@ -666,7 +666,7 @@ public class X86 extends X86Types implements core.Core
     In which if it is not an Vector I S2 acts as the mid default size attribute in 32 bit mode, and 64 bit mode for all Is.
     ----------------------------------------------------------------------------------------------------------------------------------------*/
 
-    byte S4 = 0, S3 = 0, S2 = 0, S1 = 0, S0 = -1, t = 0; //Note S0 is Vector size 1024, which is unused.
+    int S4 = 0, S3 = 0, S2 = 0, S1 = 0, S0 = -1, t = 0; //Note S0 is Vector size 1024, which is unused.
 
     /*----------------------------------------------------------------------------------------------------------------------------------------
     Lookup the Highest active bit in the SizeAttribute value giving the position the bit is in the number. S1 will be the biggest size attribute.
@@ -745,7 +745,7 @@ public class X86 extends X86Types implements core.Core
 
     //If an Vect is active, then EVEX.W, VEX.W, or XOP.W bit acts as 32/64.
 
-    if( ( Vect || Extension > 0 ) && ( ( S1 + S2 + S3 ) == 7 | ( S1 + S2 + S3 ) == 5 ) ) { Vect = false; return( ( new byte[]{ S2, S1 } )[ WidthBit ? 1 : 0 ] ); }
+    if( ( Vect || Extension > 0 ) && ( ( S1 + S2 + S3 ) == 7 | ( S1 + S2 + S3 ) == 5 ) ) { Vect = false; return( ( new int[]{ S2, S1 } )[ WidthBit ? 1 : 0 ] ); }
 
     //If it is an vector, and Bound is active vector goes max size.
 
@@ -757,105 +757,15 @@ public class X86 extends X86Types implements core.Core
     //Note the fourth size that is -1 in the returned size attribute is Vector length 11=3 which is invalid unless Intel decides to add 1024 bit vectors.
     //The only time S0 is not negative one is if vector broadcast round is active.
 
-    return( ( new byte[]{ S3, S2, S1, S0 } )[ SizeAttrSelect ] );
-  }
-
-  /*-------------------------------------------------------------------------------------------------------------------------
-  This function returns an array with three numbers.
-  ---------------------------------------------------------------------------------------------------------------------------
-  The first element is the two bits for the ModR/M byte for Register mode, Memory mode, and Displacement settings, or the SIB byte
-  scale as a number value 0 to 3 if it is not an ModR/M byte since they both use the same bit grouping.
-  The second element is the three bits for the ModR/M byte Opcode/Reg bits, or the SIB Index Register value as a number value 0 to 7.
-  The third element is the last three bits for the ModR/M byte the R/M bits, or the SIB Base Register value as a number value 0 to 7.
-  -------------------------------------------------------------------------------------------------------------------------*/
-
-  private byte[] decode_ModRM_SIB_Value() throws java.io.IOException
-  {
-    //Get the current position byte value
-
-    int v = data.read();
-
-    //return the array containing the decoded values of the byte.
-
-    return ( new byte[]{ (byte)( (v >> 6) & 0x03 ), //Mode.
-      (byte)( (v >> 3) & 0x07 ), //Register.
-      (byte)( v & 0x07 ) //Register.
-    } );
+    return( ( new int[]{ S3, S2, S1, S0 } )[ SizeAttrSelect ] );
   }
 
   /*-------------------------------------------------------------------------------------------------------------------------
   Simple location mapping, for method calls, And data.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  private int Pointer = 0;
-  private boolean rel = false;
-
-  private class Loc
-  {
-    String name = "";
-    boolean map = false;
-    
-    public Loc( boolean mapped, String n )
-    {
-      map = mapped; name = n;
-    }
-  }
-
-  private Loc checkLoc( long loc )
-  {
-    //Lookup is set true if it is a jump operation, or call.
-
-    if( Pointer > 0 && SegOverride.equals("[") )
-    {
-      int size = BitMode == x86_64 ? 3 : 2;
-
-      for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
-      {
-        if( loc >= mapped_pos.get( i ) && loc < mapped_pos.get( i + 1 ) )
-        {
-          Pointer = 0; Lookup = false; rel = false;
-          
-          return( new Loc( true, mapped_loc.get( r + (int)( ( loc - mapped_pos.get( i ) ) >> size ) ) ) );
-        }
-
-        r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> size ) - 1;
-      }
-
-      //Add variable data location if not jump, or call.
-
-      if( !Lookup )
-      {
-        //Do not add duplicate addresses.
-
-        for( int i = 0; i < data_off.size(); i += 2 )
-        {
-          if( data_off.get(i) == loc ) { Pointer = 0; Lookup = false; rel = false; return( new Loc( false, "" ) ); }
-        }
-
-        data_off.add( loc ); data_off.add( (long)( 1 << ( Pointer >> 1 ) ) );
-      }
-    }
-
-    //Else pointer is not > 0. Is then jump/call location.
-
-    else if( rel )
-    {
-      //Do not add duplicate addresses.
-
-      int i;
-
-      for( i = 0; i < locations.size(); i++ )
-      {
-        if( locations.get(i) == loc ) { Lookup = false; rel = false; return( new Loc( false, "" ) ); }
-      }
-
-      locations.add( loc );
-    }
-    
-    Pointer = 0; Lookup = false; rel = false;
-
-    return( new Loc( false, "" ) );
-  }
+  private int Pointer = 0; //The size of the pointer Read by ModR/M.
+  private boolean rel = false; //Restive positions such as loops and jumps.
 
   /*-------------------------------------------------------------------------------------------------------------------------
   Navigate to a mapped location.
@@ -884,31 +794,26 @@ public class X86 extends X86Types implements core.Core
   0=8,1=16,2=32,3=64 by size setting value.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  private String decodeImmediate( int type, boolean BySize, byte SizeSetting ) throws java.io.IOException
+  private long ImmVal = 0;
+  private int Size = 0;
+  private int Extend = 0;
+  private int Sing = 0;
+
+  private String decodeImmediate( int type, boolean BySize, int SizeSetting ) throws java.io.IOException
   {
-    //The 64 bit IMM.
-
-    long val = 0x0;
-
-    //*Initialize the Sing Extend variable size as 0 Some Immediate numbers Sing extend.
-
-    int Extend = 0;
-
     //*The variable S is the size of the Immediate.
 
-    byte S = (byte)( SizeSetting & 0x0F );
+    Size = (byte)( SizeSetting & 0x0F );
 
     //*Extend size.
 
-    Extend = SizeSetting >> 4;
-
-    byte Sing = 0;
+    Extend = SizeSetting >> 4; Sing = 0;
 
     //*If by Size attributes is set true.
 
     if ( BySize )
     {
-      S = getOperandSize( S );
+      Size = getOperandSize( Size );
 
       if ( Extend > 0 )
       {
@@ -923,18 +828,18 @@ public class X86 extends X86Types implements core.Core
     The Number of bytes to read is 2 to the power of S.
     -------------------------------------------------------------------------------------------------------------------------*/
 
-    int n = 1 << S; String pad = "%1$0" + ( n << 1 ) + "X";
+    int n = 1 << Size; String pad = "%1$0" + ( n << 1 ) + "X";
 
-    if( S == 0 ) { val = data.read() & 0xFF; }
-    else if( S == 1 ) { val = (data.read() | (data.read() << 8)) & 0xFFFF; }
-    else if( S == 2 ) { val = (data.read() | (data.read() << 8) | (data.read() << 16) | (data.read() << 24)) & 0xFFFFFFFFL; }
-    else if( S == 3 ) { val = data.read() | (data.read() << 8) | (data.read() << 16) | (data.read() << 24) | ((long)data.read() << 32) | ((long)data.read() << 40) | ((long)data.read() << 48) | ((long)data.read() << 56); }
+    if( Size == 0 ) { ImmVal = data.read() & 0xFF; }
+    else if( Size == 1 ) { ImmVal = (data.read() | (data.read() << 8)) & 0xFFFF; }
+    else if( Size == 2 ) { ImmVal = (data.read() | (data.read() << 8) | (data.read() << 16) | (data.read() << 24)) & 0xFFFFFFFFL; }
+    else if( Size == 3 ) { ImmVal = data.read() | (data.read() << 8) | (data.read() << 16) | (data.read() << 24) | ((long)data.read() << 32) | ((long)data.read() << 40) | ((long)data.read() << 48) | ((long)data.read() << 56); }
 
     /*---------------------------------------------------------------------------------------------------------------------------
     Remove the upper 4 bits if used as a register.
     ---------------------------------------------------------------------------------------------------------------------------*/
 
-    if( type == 1 ) { val &= ( 1 << ( ( n << 3 ) - 4 ) ) - 1; }
+    if( type == 1 ) { ImmVal &= ( 1 << ( ( n << 3 ) - 4 ) ) - 1; }
 
     /*---------------------------------------------------------------------------------------------------------------------------
     If the Immediate is an relative address calculation.
@@ -946,13 +851,13 @@ public class X86 extends X86Types implements core.Core
 
       long center = (long)( ( Math.pow( 2, ( n << 3 ) ) ) / 2 );
     
-      if( Long.compareUnsigned( val, center ) >= 0 )
+      if( Long.compareUnsigned( ImmVal, center ) >= 0 )
       {
-        val = center - ( val - center ); val = data.getVirtualPointer() - val;
+        ImmVal = center - ( ImmVal - center ); ImmVal = data.getVirtualPointer() - ImmVal;
       }
       else
       {
-        val += data.getVirtualPointer();
+        ImmVal += data.getVirtualPointer();
       }
 
       //Calculate the Padded size for at the end of the decode Immediate method. Relative is padded to the size of the address based on bit mode.
@@ -980,18 +885,18 @@ public class X86 extends X86Types implements core.Core
       Calculate the VSIB displacement size if it is a VSIB Disp8.
       -------------------------------------------------------------------------------------------------------------------------*/
 
-      if ( VSIB && S == 0 )
+      if ( VSIB && Size == 0 )
       {
-        int VScale = WidthBit ? 3 : 2; Center <<= VScale; val <<= VScale;
+        int VScale = WidthBit ? 3 : 2; Center <<= VScale; ImmVal <<= VScale;
       }
 
       //When the value is higher than the center it is negative.
 
-      if ( val >= Center )
+      if ( ImmVal >= Center )
       {
         //Convert the number to the negative side of the center point.
 
-        val = ( Center << 1 ) - val;
+        ImmVal = ( Center << 1 ) - ImmVal;
 
         //The Sing is negative.
 
@@ -1003,7 +908,7 @@ public class X86 extends X86Types implements core.Core
     Extend Imm if it's extend size is bigger than the Current Imm size.
     ---------------------------------------------------------------------------------------------------------------------------*/
 
-    if ( Extend != S )
+    if ( Extend != Size )
     {
       //Calculate number of bytes to Extend till by size.
 
@@ -1013,20 +918,69 @@ public class X86 extends X86Types implements core.Core
       Extend = ( 1 << Extend ) * 2;
     }
 
-    //Check if address is mapped.
+    //Check if the immediate is a pointer location.
 
-    Loc l = checkLoc( val ); if( l.map ){ return( l.name ); }
+    if( Pointer > 0 && SegOverride.equals("[") )
+    {
+      Size = BitMode == x86_64 ? 3 : 2;
+
+      for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
+      {
+        if( ImmVal >= mapped_pos.get( i ) && ImmVal < mapped_pos.get( i + 1 ) )
+        {
+          Pointer = 0; Lookup = false; rel = false;
+          
+          return( mapped_loc.get( r + (int)( ( ImmVal - mapped_pos.get( i ) ) >> Size ) ) );
+        }
+
+        r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> Size ) - 1;
+      }
+
+      //Add variable data location if not jump, or call.
+
+      if( !Lookup )
+      {
+        //Do not add duplicate addresses.
+
+        int i;
+
+        for( i = 0; i < data_off.size(); i += 2 )
+        {
+          if( data_off.get(i) == ImmVal ) { Pointer = 0; Lookup = false; rel = false; break; }
+        }
+
+        if( i == data_off.size() ) { data_off.add( ImmVal ); data_off.add( (long)( 1 << ( Pointer >> 1 ) ) ); }
+      }
+    }
+
+    //Else pointer is not > 0. Is then jump/call/loop location.
+
+    else if( rel )
+    {
+      //Do not add duplicate addresses.
+
+      int i;
+
+      for( i = 0; i < locations.size(); i++ )
+      {
+        if( locations.get(i) == ImmVal ) { Lookup = false; rel = false; break; }
+      }
+
+      if( i == locations.size() ) { locations.add( ImmVal ); }
+    }
+    
+    Pointer = 0; Lookup = false; rel = false;
 
     //*Return the Imm.
 
-    return ( ( Sing > 0 ? ( Sing > 1 ? "-" : "+" ) : "" ) + String.format( pad, val ) );
+    return ( ( Sing > 0 ? ( Sing > 1 ? "-" : "+" ) : "" ) + String.format( pad, ImmVal ) );
   }
 
   /*-------------------------------------------------------------------------------------------------------------------------
   Decode registers by Size attributes, or a select register index.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  private String decodeRegValue( int RValue, boolean BySize, byte Setting )
+  private String decodeRegValue( int RValue, boolean BySize, int Setting )
   {
     //If the I is a Vector I, and no extension is active like EVEX, VEX Make sure Size attribute uses the default vector size.
 
@@ -1079,10 +1033,15 @@ public class X86 extends X86Types implements core.Core
   and the higher four bits is the selected register.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  private String decode_ModRM_SIB_Address( byte[] ModRM, boolean BySize, byte Setting ) throws java.io.IOException
+  private String out = ""; //the variable out is what stores the decoded address pointer, or Register if Register mode.
+  private String S_C = "{"; //L1OM, and K1OM {SSS,CCCCC} setting decoding, or EVEX broadcast round.
+  private int AddressSize = 0, Disp = 0, DispType = 0, IndexReg = 0;
+  private int[] ModRM = new int[3];
+  private int[] SIB = new int[3];
+
+  private String decode_ModRM_SIB_Address( boolean BySize, int Setting ) throws java.io.IOException
   {
-    String out = ""; //the variable out is what stores the decoded address pointer, or Register if Register mode.
-    String S_C = "{"; //L1OM, and K1OM {SSS,CCCCC} setting decoding, or EVEX broadcast round.
+    out = ""; S_C = "{";
 
     //-------------------------------------------------------------------------------------------------------------------------
     //If the ModR/M is not in register mode decode it as an Effective address.
@@ -1151,11 +1110,11 @@ public class X86 extends X86Types implements core.Core
       //In both 32/64 the Address size goes down by one is size.
       //-------------------------------------------------------------------------------------------------------------------------
 
-      byte AddressSize = (byte)(BitMode + 1);
+      AddressSize = BitMode + 1;
 
       if (AddressOverride)
       {
-        AddressSize = (byte)(AddressSize - 1);
+        AddressSize = AddressSize - 1;
 
         //the only time the address size is 0 is if the BitMode is 16 bit's and is subtracted by one resulting in 0.
 
@@ -1173,7 +1132,7 @@ public class X86 extends X86Types implements core.Core
       In 32/64 the Mode Setting 2 for the effective address adds an displacement of 32 to the effective address.
       -------------------------------------------------------------------------------------------------------------------------*/
 
-      byte Disp = (byte)(ModRM[0] - 1); //Let disp relate size to mode value of the ModR/M.
+      Disp = ModRM[0] - 1; //Let disp relate size to mode value of the ModR/M.
 
       //if 32 bit and above, and if Mode is 2 then disp size is disp32.
 
@@ -1193,7 +1152,7 @@ public class X86 extends X86Types implements core.Core
       so some modes, and registers combinations where used for different Immediate displacements.
       -------------------------------------------------------------------------------------------------------------------------*/
 
-      byte DispType = 3; //by default the displacement size is added to the selected base register, or Index register if SIB byte combination is used.
+      DispType = 3; //by default the displacement size is added to the selected base register, or Index register if SIB byte combination is used.
 
       //-------------------------------------------16 Bit ModR/M address decode logic-------------------------------------------
 
@@ -1229,7 +1188,7 @@ public class X86 extends X86Types implements core.Core
 
         if( ModRM[0] == 0 && ModRM[2] == 5 )
         {
-          Disp = 2; DispType = (byte)(BitMode == x86_64 ? 2 : 0);
+          Disp = 2; DispType = BitMode == x86_64 ? 2 : 0;
         }
 
         //check if Base Register is 4 which goes into the SIB address system
@@ -1238,11 +1197,17 @@ public class X86 extends X86Types implements core.Core
         {
           //Decode the SIB byte.
 
-          byte[] SIB = decode_ModRM_SIB_Value();
+          int v = data.read();
+
+          //return the array containing the decoded values of the byte.
+
+          SIB[0] = (v >> 6) & 0x03; //Mode.
+          SIB[1] = (v >> 3) & 0x07; //Register.
+          SIB[2] = v & 0x07; //Register.
 
           //Calculate the Index register with it's Extended value because the index register will only cancel out if 4 in value.
 
-          int IndexReg = IndexExtend | SIB[1];
+          IndexReg = IndexExtend | SIB[1];
 
           //check if the base register is 5 in value in the SIB without it's added extended value, and that the ModR/M Mode is 0 this activates Disp32
 
@@ -2089,10 +2054,7 @@ public class X86 extends X86Types implements core.Core
 
     //This holds the decoded ModR/M byte from the "Decode_ModRM_SIB_Value()" function because the Register, and Address can decode differently.
 
-    byte[] ModRMByte = new byte[]{ -1, //Mode is set negative one used to check if the ModR/M has been decoded.
-      0, //The register value is decoded separately if used.
-      0 //the base register for the address location.
-    };
+    ModRM[0] = -1; //Mode is -1. Used to check ModRM has been decoded.
 
     int s = 0;
     int mxop = -1;
@@ -2124,9 +2086,15 @@ public class X86 extends X86Types implements core.Core
 
       if(X86Decoder[1].Type != 0)
       {
-        ModRMByte = decode_ModRM_SIB_Value(); //Decode the ModR/M byte.
+        int v = data.read();
+
+        //return the array containing the decoded values of the byte.
+
+        ModRM[0] = (v >> 6) & 0x03; //Mode.
+        ModRM[1] = (v >> 3) & 0x07; //Register.
+        ModRM[2] = v & 0x07; //Register.
+
         out[ X86Decoder[1].OpNum ] = decode_ModRM_SIB_Address(
-          ModRMByte, //The ModR/M byte.
           X86Decoder[1].BySizeAttrubute, //By size attribute or not.
           X86Decoder[1].Size //Size settings.
         );
@@ -2159,15 +2127,23 @@ public class X86 extends X86Types implements core.Core
     {
       mxop += 1;
 
-
       //If the ModR/M address is not used, and ModR/M byte was not previously decoded then decode it.
 
-      if( ModRMByte[0] == -1 ){ ModRMByte = decode_ModRM_SIB_Value(); }
+      if( ModRM[0] == -1 )
+      {
+        int v = data.read();
+
+        //return the array containing the decoded values of the byte.
+
+        ModRM[0] = (v >> 6) & 0x03; //Mode.
+        ModRM[1] = (v >> 3) & 0x07; //Register.
+        ModRM[2] = v & 0x07; //Register.
+      }
 
       //Decode only the Register Section of the ModR/M byte values.
 
       out[ X86Decoder[2].OpNum ] = decodeRegValue(
-        ( RegExtend | ( ModRMByte[1] & 0x07 ) ), //Register value.
+        ( RegExtend | ( ModRM[1] & 0x07 ) ), //Register value.
         X86Decoder[2].BySizeAttrubute, //By size attribute or not.
         X86Decoder[2].Size //Size settings.
       );
@@ -2290,8 +2266,10 @@ public class X86 extends X86Types implements core.Core
         {
           s = 3; //If 32, or 64 bit ModR/M.
           if( ( BitMode == 0 && !AddressOverride ) || ( BitMode == 1 && AddressOverride ) ){ s = 7; } //If 16 bit ModR/M.
+
+          ModRM[0] = 0; ModRM[1] = 0; ModRM[2] = s;
+
           out[ X86Decoder[i].OpNum ] = decode_ModRM_SIB_Address(
-            new byte[]{ 0, 0, (byte)s }, //the RBX register only for the pointer.
             X86Decoder[i].BySizeAttrubute, //By size attribute or not.
             X86Decoder[i].Size //size attributes.
           );
@@ -2303,8 +2281,10 @@ public class X86 extends X86Types implements core.Core
         {
           s = 1; //If 32, or 64 bit ModR/M.
           if( ( BitMode == 0 && !AddressOverride ) || ( BitMode == 1 & AddressOverride ) ) { s = -1; } //If 16 bit ModR/M.
+
+          ModRM[0] = 0; ModRM[1] = 0; ModRM[2] = X86Decoder[i].Type + s; //source and destination pointer register by type value.
+
           out[ X86Decoder[i].OpNum ] = decode_ModRM_SIB_Address(
-            new byte[]{ 0, 0, (byte)( X86Decoder[i].Type + s ) }, //source and destination pointer register by type value.
             X86Decoder[i].BySizeAttrubute, //By size attribute or not.
             X86Decoder[i].Size //size attributes.
           );

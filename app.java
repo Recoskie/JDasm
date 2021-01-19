@@ -165,6 +165,10 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     JMenuItem p2 = new JMenuItem("Copy raw data");
     JMenuItem p3 = new JMenuItem("Save as file");
 
+    //Set the action commands.
+
+    p1.setActionCommand("CP"); p2.setActionCommand("CPR");
+
     //Create tool bar.
 
     fm.add(f1);
@@ -508,13 +512,15 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
       }
     }
 
-    else if( e.getActionCommand().equals("Copy as hex") )
+    else if( e.getActionCommand().startsWith("CP") )
     {
       file.Events = false;
 
       String data = "";
 
       long pos, end, t;
+
+      boolean raw = e.getActionCommand().equals("CPR");
 
       try
       {
@@ -528,7 +534,14 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
           file.seekV(pos);
 
-          while( pos < end ) { data += String.format( "%1$02X", file.readV() ); pos += 1; }
+          if( raw )
+          {
+            while( pos < end ) { data += (char)file.readV(); pos += 1; }
+          }
+          else
+          {
+            while( pos < end ) { data += String.format( "%1$02X", file.readV() ); pos += 1; }
+          }
 
           file.seekV( t );
         }
@@ -538,49 +551,14 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
           file.seek(pos);
 
-          while( pos < end ) { data += String.format( "%1$02X", file.read() ); pos += 1; }
-
-          file.seek(pos);
-        }
-      
-        s = new java.awt.datatransfer.StringSelection( data ); c.setContents( s, s );
-      }
-      catch( IOException err ) {}
-
-      file.Events = true;
-    }
-
-    else if( e.getActionCommand().equals("Copy raw data") )
-    {
-      file.Events = false;
-
-      String data = "";
-
-      long pos, end, t;
-
-      try
-      {
-        java.awt.datatransfer.Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
-
-        java.awt.datatransfer.StringSelection s;
-
-        if( pm.getInvoker() == Virtual )
-        {
-          pos = Virtual.selectPos(); end = Virtual.selectEnd() + 1; t = file.getVirtualPointer();
-
-          file.seekV(pos);
-
-          while( pos < end ) { data += (char)file.readV(); pos += 1; }
-
-          file.seekV( t );
-        }
-        else
-        {
-          pos = Offset.selectPos(); end = Offset.selectEnd() + 1; t = file.getFilePointer();
-
-          file.seek(pos);
-
-          while( pos < end ) { data += (char)file.read(); pos += 1; }
+          if( raw )
+          {
+            while( pos < end ) { data += (char)file.read(); pos += 1; }
+          }
+          else
+          {
+            while( pos < end ) { data += String.format( "%1$02X", file.read() ); pos += 1; }
+          }
 
           file.seek(pos);
         }
@@ -603,7 +581,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
       OutputStream os;
 
       JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setDialogTitle("Specify a file to save selected data to");
+      fileChooser.setDialogTitle("Save data to new file, or overwrite a file");
  
       int userSelection = fileChooser.showSaveDialog( f );
  
@@ -616,8 +594,6 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
           if( pm.getInvoker() == Virtual )
           {
             pos = Virtual.selectPos(); end = Virtual.selectEnd() + 1; t = file.getVirtualPointer();
-            
-            buffer = new byte[4096];
 
             file.seekV( pos );
 
@@ -639,8 +615,6 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
           else
           {
             pos = Offset.selectPos(); end = Offset.selectEnd() + 1; t = file.getFilePointer();
-            
-            buffer = new byte[4096];
 
             file.seek( pos );
 
