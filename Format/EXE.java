@@ -221,7 +221,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
         if( Data.coreLoaded )
         {
-          data.core.locations.clear(); data.core.data_off.clear();
+          data.core.locations.clear(); data.core.data_off.clear(); data.core.code.clear();
 
           data.core.locations.add( Long.parseLong( type[1] ) );
 

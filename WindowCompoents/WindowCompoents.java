@@ -20,6 +20,10 @@ public class WindowCompoents
 
   public static JMenuBar bdBar;
 
+  //Menu item actions.
+
+  public static JPopupMenu pm;
+
   //File chooser tree, or data from a file format reader.
 
   public static JTree tree;

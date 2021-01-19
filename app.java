@@ -157,6 +157,14 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     JMenuItem t1 = new JMenuItem("Goto Offset");
     JMenuItem t2 = new JMenuItem("Goto Virtual");
 
+    //Hex editor operations.
+
+    pm = new JPopupMenu("Selected bytes.");
+
+    JMenuItem p1 = new JMenuItem("Copy as hex");
+    JMenuItem p2 = new JMenuItem("Copy raw data");
+    JMenuItem p3 = new JMenuItem("Save as file");
+
     //Create tool bar.
 
     fm.add(f1);
@@ -166,6 +174,10 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     tm.add(t1); tm.add(t2);
 
     bdBar.add(fm); bdBar.add(vm); bdBar.add(tm);
+
+    //Create the pop up menu.
+
+    pm.add( p1 ); pm.add( p2 ); pm.add( p3 );
   
     //add ActionListener to menuItems.
     
@@ -175,6 +187,8 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     v3.addActionListener(this); v4.addActionListener(this);
 
     t1.addActionListener(this); t2.addActionListener(this);
+
+    p1.addActionListener(this); p2.addActionListener(this); p3.addActionListener(this);
 
     //The tree is used for file chooser, and for decoded data view.
 
@@ -493,6 +507,167 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         JOptionPane.showMessageDialog( null, "Bad Input. Hex only." );
       }
     }
+
+    else if( e.getActionCommand().equals("Copy as hex") )
+    {
+      file.Events = false;
+
+      String data = "";
+
+      long pos, end, t;
+
+      try
+      {
+        java.awt.datatransfer.Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+        java.awt.datatransfer.StringSelection s;
+
+        if( pm.getInvoker() == Virtual )
+        {
+          pos = Virtual.selectPos(); end = Virtual.selectEnd() + 1; t = file.getVirtualPointer();
+
+          file.seekV(pos);
+
+          while( pos < end ) { data += String.format( "%1$02X", file.readV() ); pos += 1; }
+
+          file.seekV( t );
+        }
+        else
+        {
+          pos = Offset.selectPos(); end = Offset.selectEnd() + 1; t = file.getFilePointer();
+
+          file.seek(pos);
+
+          while( pos < end ) { data += String.format( "%1$02X", file.read() ); pos += 1; }
+
+          file.seek(pos);
+        }
+      
+        s = new java.awt.datatransfer.StringSelection( data ); c.setContents( s, s );
+      }
+      catch( IOException err ) {}
+
+      file.Events = true;
+    }
+
+    else if( e.getActionCommand().equals("Copy raw data") )
+    {
+      file.Events = false;
+
+      String data = "";
+
+      long pos, end, t;
+
+      try
+      {
+        java.awt.datatransfer.Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+        java.awt.datatransfer.StringSelection s;
+
+        if( pm.getInvoker() == Virtual )
+        {
+          pos = Virtual.selectPos(); end = Virtual.selectEnd() + 1; t = file.getVirtualPointer();
+
+          file.seekV(pos);
+
+          while( pos < end ) { data += (char)file.readV(); pos += 1; }
+
+          file.seekV( t );
+        }
+        else
+        {
+          pos = Offset.selectPos(); end = Offset.selectEnd() + 1; t = file.getFilePointer();
+
+          file.seek(pos);
+
+          while( pos < end ) { data += (char)file.read(); pos += 1; }
+
+          file.seek(pos);
+        }
+      
+        s = new java.awt.datatransfer.StringSelection( data ); c.setContents( s, s );
+      }
+      catch( IOException err ) {}
+
+      file.Events = true;
+    }
+
+    else if( e.getActionCommand().equals("Save as file") )
+    {
+      file.Events = false;
+
+      long pos, end, t;
+
+      byte[] buffer = new byte[4096];
+
+      OutputStream os;
+
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setDialogTitle("Specify a file to save selected data to");
+ 
+      int userSelection = fileChooser.showSaveDialog( f );
+ 
+      if (userSelection == JFileChooser.APPROVE_OPTION)
+      {
+        try
+        {
+          os = new FileOutputStream( fileChooser.getSelectedFile() );
+      
+          if( pm.getInvoker() == Virtual )
+          {
+            pos = Virtual.selectPos(); end = Virtual.selectEnd() + 1; t = file.getVirtualPointer();
+            
+            buffer = new byte[4096];
+
+            file.seekV( pos );
+
+            while ( pos < end )
+            {
+              file.readV( buffer );
+
+              if( ( pos + 4096 ) < end ) { os.write( buffer ); }
+              else
+              {
+                os.write( buffer, 0, (int)( end - pos ) );
+              }
+
+              pos += 4096;
+            }
+          
+            os.close(); file.seekV( t );
+          }
+          else
+          {
+            pos = Offset.selectPos(); end = Offset.selectEnd() + 1; t = file.getFilePointer();
+            
+            buffer = new byte[4096];
+
+            file.seek( pos );
+
+            while ( pos < end )
+            {
+              file.read( buffer );
+
+              if( ( pos + 4096 ) < end ) { os.write( buffer ); }
+              else
+              {
+                os.write( buffer, 0, (int)( end - pos ) );
+              }
+
+              pos += 4096;
+            }
+          
+            os.close(); file.seek( t );
+          }
+        }
+        catch( IOException err )
+        {
+          JOptionPane.showMessageDialog( null, "Unable to save file at location." );
+        }
+      }
+
+      file.Events = true;
+    }
   }
 
   //check the file type
@@ -525,6 +700,8 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         di = new dataInspector( file ); ds = new dataDescriptor( di );
             
         Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
+
+        Virtual.setComponentPopupMenu(pm); Offset.setComponentPopupMenu(pm);
 
         Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
       }
@@ -581,6 +758,8 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
             di = new dataInspector( file ); ds = new dataDescriptor( di );
             
             Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
+
+            Virtual.setComponentPopupMenu(pm); Offset.setComponentPopupMenu(pm);
             
             Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
           }

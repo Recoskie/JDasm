@@ -676,10 +676,68 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   public void mouseDragged( MouseEvent e )
   {
-    if( !emode )
+    if( SwingUtilities.isLeftMouseButton( e ) )
+    {
+      if( !emode )
+      {
+        x = e.getX();
+      
+        if( text && x > hexend )
+        {
+          if( x > endw - ( charWidth[1] ) ) { x = endw - ( ( charWidth[1] ) + 1 ); }
+
+          x -= textcol; if ( x < 0 ) { x = 0; }
+
+          x = ( x / charWidth[0] ) & 0xF;
+    
+          y = ( e.getY() / lineHeight ) - 1; y <<= 4;
+        }
+
+        else
+        {
+          if( x > hexend ) { x = hexend - 1; }
+
+          x -= addcol; if ( x < 0 ) { x = 0; }
+
+          x = ( x / cell ) & 0xF;
+    
+          y = ( e.getY() / lineHeight ) - 1; y <<= 4;
+        }
+
+        if( ( x + y ) > ( ( Rows - 1 ) << 4 ) )
+        {
+          sele = x + ( ( Rows - 1 ) << 4 ) + offset;
+
+          if( slide == 0 ) { new Thread(this).start(); }
+
+          slide = 1;
+        }
+        else if( x + y < 16 )
+        {
+          sele = x + offset;
+        
+          if( slide == 0 ) { new Thread(this).start(); }
+
+          slide = -1;
+        }
+      
+        else { slide = 0; sele = x + y + offset; repaint(); }
+      }
+    }
+  }
+
+  public void mouseExited( MouseEvent e ) { }
+
+  public void mouseEntered( MouseEvent e ) { }
+
+  public void mouseReleased( MouseEvent e ) { slide = 0; }
+
+  public void mousePressed( MouseEvent e )
+  {
+    if( SwingUtilities.isLeftMouseButton( e ) )
     {
       x = e.getX();
-      
+    
       if( text && x > hexend )
       {
         if( x > endw - ( charWidth[1] ) ) { x = endw - ( ( charWidth[1] ) + 1 ); }
@@ -702,141 +760,92 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
         y = ( e.getY() / lineHeight ) - 1; y <<= 4;
       }
 
-      if( ( x + y ) > ( ( Rows - 1 ) << 4 ) )
+      if( emode ) { checkEdit(); }
+
+      sel = x + y + offset;
+
+      if( text && emode && e.getX() > textcol && e.getX() < endw && e.getY() > lineHeight )
       {
-        sele = x + ( ( Rows - 1 ) << 4 ) + offset;
+        ecellX = ( ( e.getX() - textcol ) / charWidth[0] ) << 1;
 
-        if( slide == 0 ) { new Thread(this).start(); }
+        ecellY = ( e.getY() / lineHeight ) + (int)( offset >> 4 ); ecellY -= 1;
 
-        slide = 1;
+        if( !udata[(int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset )] )
+        {
+          setCursor(new Cursor(Cursor.TEXT_CURSOR));
+
+          if( !emode ) { emode = true; new Thread(this).start(); }
+
+          etext = true;
+
+          requestFocus(); repaint();
+        }
       }
-      else if( x + y < 16 )
+      else if( emode && e.getX() > addcol && e.getX() < hexend && e.getY() > lineHeight )
       {
-        sele = x + offset;
-        
-        if( slide == 0 ) { new Thread(this).start(); }
+        ecellX = ( e.getX() - addcol ) / cell;
 
-        slide = -1;
+        ecellX = (  ecellX << 1 ) + ( ( ( e.getX() - addcol ) % cell ) / ( cell >> 1 ) );
+
+        ecellY = ( e.getY() / lineHeight ) + (int)( offset >> 4 ); ecellY -= 1;
+
+        if( !udata[(int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset )] )
+        {
+          setCursor(new Cursor(Cursor.TEXT_CURSOR));
+
+          if( !emode ) { emode = true; new Thread(this).start(); }
+
+          etext = false;
+
+          requestFocus(); repaint();
+        }
       }
-      
-      else { slide = 0; sele = x + y + offset; repaint(); }
+
+      try{ if( !Virtual ) { IOStream.seek( x + y + offset ); } else { IOStream.seekV( x + y + offset ); } } catch( Exception er ) { }
     }
-  }
-
-  public void mouseExited( MouseEvent e ) { }
-
-  public void mouseEntered( MouseEvent e ) { }
-
-  public void mouseReleased( MouseEvent e ) { slide = 0; }
-
-  public void mousePressed( MouseEvent e )
-  {
-    x = e.getX();
-    
-    if( text && x > hexend )
-    {
-      if( x > endw - ( charWidth[1] ) ) { x = endw - ( ( charWidth[1] ) + 1 ); }
-
-      x -= textcol; if ( x < 0 ) { x = 0; }
-
-      x = ( x / charWidth[0] ) & 0xF;
-    
-      y = ( e.getY() / lineHeight ) - 1; y <<= 4;
-    }
-
-    else
-    {
-      if( x > hexend ) { x = hexend - 1; }
-
-      x -= addcol; if ( x < 0 ) { x = 0; }
-
-      x = ( x / cell ) & 0xF;
-    
-      y = ( e.getY() / lineHeight ) - 1; y <<= 4;
-    }
-
-    if( emode ) { checkEdit(); }
-
-    sel = x + y + offset;
-
-    if( text && emode && e.getX() > textcol && e.getX() < endw && e.getY() > lineHeight )
-    {
-      ecellX = ( ( e.getX() - textcol ) / charWidth[0] ) << 1;
-
-      ecellY = ( e.getY() / lineHeight ) + (int)( offset >> 4 ); ecellY -= 1;
-
-      if( !udata[(int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset )] )
-      {
-        setCursor(new Cursor(Cursor.TEXT_CURSOR));
-
-        if( !emode ) { emode = true; new Thread(this).start(); }
-
-        etext = true;
-
-        requestFocus(); repaint();
-      }
-    }
-    else if( emode && e.getX() > addcol && e.getX() < hexend && e.getY() > lineHeight )
-    {
-      ecellX = ( e.getX() - addcol ) / cell;
-
-      ecellX = (  ecellX << 1 ) + ( ( ( e.getX() - addcol ) % cell ) / ( cell >> 1 ) );
-
-      ecellY = ( e.getY() / lineHeight ) + (int)( offset >> 4 ); ecellY -= 1;
-
-      if( !udata[(int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset )] )
-      {
-        setCursor(new Cursor(Cursor.TEXT_CURSOR));
-
-        if( !emode ) { emode = true; new Thread(this).start(); }
-
-        etext = false;
-
-        requestFocus(); repaint();
-      }
-    }
-
-    try{ if( !Virtual ) { IOStream.seek( x + y + offset ); } else { IOStream.seekV( x + y + offset ); } } catch( Exception er ) { }
   }
 
   //Begin hex edit mode.
 
   public void mouseClicked( MouseEvent e )
   {
-    if( !IOStream.readOnly && e.getClickCount() == 2 && e.getX() > textcol && e.getX() < endw && e.getY() > lineHeight )
+    if( SwingUtilities.isLeftMouseButton( e ) )
     {
-      ecellX = ( ( e.getX() - textcol ) / charWidth[0] ) << 1;
-
-      ecellY = ( e.getY() / lineHeight ) + (int)( offset >> 4 ); ecellY -= 1;
-
-      if( !udata[(int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset )] )
+      if( !IOStream.readOnly && e.getClickCount() == 2 && e.getX() > textcol && e.getX() < endw && e.getY() > lineHeight )
       {
-        setCursor(new Cursor(Cursor.TEXT_CURSOR));
+        ecellX = ( ( e.getX() - textcol ) / charWidth[0] ) << 1;
 
-        if( !emode ) { emode = true; new Thread(this).start(); }
+        ecellY = ( e.getY() / lineHeight ) + (int)( offset >> 4 ); ecellY -= 1;
 
-        if( !etext ) { checkEdit(); etext = true; }
+        if( !udata[(int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset )] )
+        {
+          setCursor(new Cursor(Cursor.TEXT_CURSOR));
 
-        requestFocus(); repaint();
+          if( !emode ) { emode = true; new Thread(this).start(); }
+
+          if( !etext ) { checkEdit(); etext = true; }
+
+          requestFocus(); repaint();
+        }
       }
-    }
-    else if( !IOStream.readOnly && e.getClickCount() == 2 && e.getX() > addcol && e.getX() < hexend && e.getY() > lineHeight )
-    {
-      ecellX = ( e.getX() - addcol ) / cell;
-
-      ecellX = (  ecellX << 1 ) + ( ( ( e.getX() - addcol ) % cell ) / ( cell >> 1 ) );
-
-      ecellY = ( e.getY() / lineHeight ) + (int)( offset >> 4 ); ecellY -= 1;
-
-      if( !udata[(int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset )] )
+      else if( !IOStream.readOnly && e.getClickCount() == 2 && e.getX() > addcol && e.getX() < hexend && e.getY() > lineHeight )
       {
-        setCursor(new Cursor(Cursor.TEXT_CURSOR));
+        ecellX = ( e.getX() - addcol ) / cell;
 
-        if( !emode ) { emode = true; new Thread(this).start(); }
+        ecellX = (  ecellX << 1 ) + ( ( ( e.getX() - addcol ) % cell ) / ( cell >> 1 ) );
 
-        etext = false;
+        ecellY = ( e.getY() / lineHeight ) + (int)( offset >> 4 ); ecellY -= 1;
 
-        requestFocus(); repaint();
+        if( !udata[(int)( ( ecellX >> 1 ) + ( ecellY << 4 ) - offset )] )
+        {
+          setCursor(new Cursor(Cursor.TEXT_CURSOR));
+
+          if( !emode ) { emode = true; new Thread(this).start(); }
+
+          etext = false;
+
+          requestFocus(); repaint();
+        }
       }
     }
   }
