@@ -270,7 +270,7 @@ public class X86 extends X86Types implements core.Core
   private boolean Swizzle = false; //Swizzle based I. If false then Up, or Down conversion.
   private boolean Up = false; //Only used if Swizzle is false. If set false then it is an down conversion.
   private boolean Float = false; //If False Integer data is used.
-  private byte VectS = 0x00; //Stores the three vector settings Swizzle, Up, and Float, for faster comparison to special cases.
+  private int VectS = 0x00; //Stores the three vector settings Swizzle, Up, and Float, for faster comparison to special cases.
   
   /*-------------------------------------------------------------------------------------------------------------------------
   The Extension is set 2 during opcode 62 hex for EVEX in which the ^decodePrefixAdjustments()^ decodes the settings, but if
@@ -803,7 +803,7 @@ public class X86 extends X86Types implements core.Core
   {
     //*The variable S is the size of the Immediate.
 
-    Size = (byte)( SizeSetting & 0x0F );
+    Size = SizeSetting & 0x0F;
 
     //*Extend size.
 
@@ -817,7 +817,7 @@ public class X86 extends X86Types implements core.Core
 
       if ( Extend > 0 )
       {
-        Extend = getOperandSize( (byte)Extend );
+        Extend = getOperandSize( Extend );
       }
     }
 
@@ -1066,14 +1066,14 @@ public class X86 extends X86Types implements core.Core
 
         if ( Setting != 16 || Vect )
         {
-          Setting = (byte)( ( getOperandSize( Setting ) << 1 ) | ( FarPointer ? 1 : 0 ) );
+          Setting = ( getOperandSize( Setting ) << 1 ) | ( FarPointer ? 1 : 0 );
         }
 
         //-------------------------------------------------------------------------------------------------------------------------
         //Non vectorized 128 uses "OWord ptr" aliases to "QWord ptr" in 32 bit mode, or lower.
         //-------------------------------------------------------------------------------------------------------------------------
 
-        else if ( !Vect ) { Setting = (byte)( 11 - ( ( ( BitMode <= 1 ) ? 1 : 0 ) * 5 ) ); }
+        else if ( !Vect ) { Setting = 11 - ( ( ( BitMode <= 1 ) ? 1 : 0 ) * 5 ); }
       }
 
       //-------------------------------------------------------------------------------------------------------------------------
@@ -1081,7 +1081,7 @@ public class X86 extends X86Types implements core.Core
       //Also if By size attribute is also true the selected by size index can not exceed 15 anyways which is the max combination the first four bits.
       //-------------------------------------------------------------------------------------------------------------------------
 
-      Setting = (byte)( Setting & 0x0F );
+      Setting = Setting & 0x0F;
 
       //If Vector extended then MM is changed to QWORD.
 
@@ -1256,7 +1256,7 @@ public class X86 extends X86Types implements core.Core
         
           else if ( VSIB )
           {
-            Setting = (byte)( ( Setting < 8 ) ? 4 : Setting >> 1 );
+            Setting = ( Setting < 8 ) ? 4 : Setting >> 1;
 
             if( Opcode < 0x700 ) { IndexReg |= ( VectorRegister & 0x10 ); }
 
@@ -1353,7 +1353,7 @@ public class X86 extends X86Types implements core.Core
 
       //If the upper 4 bits are defined and by size is false then the upper four bits is the selected register.
 
-      if( ( ( Setting & 0xF0 ) > 0 ) && !BySize ) { Setting = (byte)( ( Setting >> 4 ) & 0x0F ); }
+      if( ( ( Setting & 0xF0 ) > 0 ) && !BySize ) { Setting = ( Setting >> 4 ) & 0x0F; }
 
       //Decode the register with Base expansion.
 
@@ -1963,7 +1963,7 @@ public class X86 extends X86Types implements core.Core
           if( Opcode >= 0x700 && RoundingSetting >= 0x10 ){ RoundMode |= 0x10; }
           VSIB = ( ( Setting >> 2 ) & 1 ) == 1;
           IgnoresWidthbit = ( ( Setting >> 3 ) & 1 ) == 1;
-          VectS = (byte)( ( Setting >> 4 ) & 7 );
+          VectS = ( Setting >> 4 ) & 7;
           Swizzle = ( ( VectS >> 2 ) & 1 ) == 1;
           Up = ( ( VectS >> 1 ) & 1 ) == 1;
           Float = ( VectS & 1 ) == 1;
@@ -1983,14 +1983,14 @@ public class X86 extends X86Types implements core.Core
 
       else if( Code == 1 )
       {
-        X86Decoder[0].set( (byte)0, BySize, (byte)Setting, (byte)OpNum++ );
+        X86Decoder[0].set( 0, BySize, Setting, OpNum++ );
       }
 
       //if it is a ModR/M, or Far pointer ModR/M, or Moffs address then second decoder element is set.
 
       else if( Code >= 2 && Code <= 4 )
       {
-        X86Decoder[1].set( (byte)( Code - 2 ), BySize, (byte)Setting, (byte)OpNum++ );
+        X86Decoder[1].set( Code - 2, BySize, Setting, OpNum++ );
         if( Code == 4 ){ FarPointer = true; } //If code is 4 it is a far pointer.
       }
 
@@ -2000,7 +2000,7 @@ public class X86 extends X86Types implements core.Core
 
       else if( Code == 5 )
       {
-        X86Decoder[2].set( (byte)0, BySize, (byte)Setting, (byte)OpNum++ );
+        X86Decoder[2].set( 0, BySize, Setting, OpNum++ );
       }
 
       //Immediate input one. The immediate input is just a number input it is decoded last unless the instruction does not use a
@@ -2010,7 +2010,7 @@ public class X86 extends X86Types implements core.Core
       {
         rel = ( Code - 6 ) == 2;
 
-        X86Decoder[ImmOp++].set( (byte)( Code - 6 ), BySize, (byte)Setting, (byte)OpNum++ );
+        X86Decoder[ImmOp++].set( Code - 6, BySize, Setting, OpNum++ );
       }
 
       //Vector register. If the instruction uses this register it will not be decoded or displayed unless one of the vector extension codes are
@@ -2019,7 +2019,7 @@ public class X86 extends X86Types implements core.Core
 
       else if( Code == 9 && ( Extension > 0 || Opcode >= 0x700 ) )
       {
-        X86Decoder[6].set( (byte)0, BySize, (byte)Setting, (byte)OpNum++ );
+        X86Decoder[6].set( 0, BySize, Setting, OpNum++ );
       }
 
       //The upper four bits of the Immediate is used as an register. The variable IMM stores the last immediate byte that is read by ^DecodeImmediate()^.
@@ -2027,7 +2027,7 @@ public class X86 extends X86Types implements core.Core
 
       else if( Code == 10 )
       {
-        X86Decoder[7].set( (byte)0, BySize, (byte)Setting, (byte)OpNum++ );
+        X86Decoder[7].set( 0, BySize, Setting, OpNum++ );
       }
 
       //Else any other encoding type higher than 13 is an explicit operand selection.
@@ -2035,7 +2035,7 @@ public class X86 extends X86Types implements core.Core
 
       else if( Code >= 11 && ExplicitOp <= 11)
       {
-        X86Decoder[ExplicitOp].set( (byte)( Code - 11 ), BySize, (byte)Setting, (byte)OpNum++ );
+        X86Decoder[ExplicitOp].set( Code - 11, BySize, Setting, OpNum++ );
         ExplicitOp++; //move to the next Explicit operand.
       }
     }
@@ -2117,7 +2117,7 @@ public class X86 extends X86Types implements core.Core
           s = X86Decoder[1].Size;
         }
         out[ X86Decoder[1].OpNum ] = PTR[ s ];
-        out[ X86Decoder[1].OpNum ] += SegOverride + decodeImmediate( 0, X86Decoder[1].BySizeAttrubute, (byte)AddrsSize ) + "]";
+        out[ X86Decoder[1].OpNum ] += SegOverride + decodeImmediate( 0, X86Decoder[1].BySizeAttrubute, AddrsSize ) + "]";
       }
     }
 
@@ -2227,7 +2227,7 @@ public class X86 extends X86Types implements core.Core
     {
       mxop += 1;
 
-      if( !IMM_Used ) { decodeImmediate(0, false, (byte)0); } //forces IMM8 if no Immediate has been used.
+      if( !IMM_Used ) { decodeImmediate(0, false, 0); } //forces IMM8 if no Immediate has been used.
       out[ X86Decoder[7].OpNum ] = decodeRegValue(
         ( ( ( IMMValue & 0xF0 ) >> 4 ) | ( ( IMMValue & 0x08 ) << 1 ) ), //Register value.
         X86Decoder[7].BySizeAttrubute, //By size attribute or not.

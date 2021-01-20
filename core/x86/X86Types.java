@@ -82,19 +82,19 @@ public class X86Types
   
   public static class Operand
   {
-    public byte Type = 0; //The operand type some operands have different formats like DecodeImmediate() which has a type input.
+    public int Type = 0; //The operand type some operands have different formats like DecodeImmediate() which has a type input.
     
     public boolean BySizeAttrubute = false; //Effects how size is used depends on which operand type for which operand across the decoder array.
     
-    public byte Size = 0x00; //The Setting.
+    public int Size = 0x00; //The Setting.
     
-    public byte OpNum = 0; //The operand number basically the order each operand is read in the operand string.
+    public int OpNum = 0; //The operand number basically the order each operand is read in the operand string.
     
     public boolean Active = false; //This is set by the set function not all operand are used across the decoder array.
     
     //set the operands attributes then set it active in the decoder array.
     
-    public void set( byte T, boolean BySize, byte Settings, byte OperandNumber )
+    public void set( int T, boolean BySize, int Settings, int OperandNumber )
     {
       Type = T;
       BySizeAttrubute = BySize;
