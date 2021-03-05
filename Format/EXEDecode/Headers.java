@@ -5,7 +5,7 @@ import RandomAccessFileV.*;
 
 import dataTools.*;
 import core.x86.*;
-import WindowCompoents.*;
+import WindowComponents.*;
 
 public class Headers extends Data
 {
@@ -15,7 +15,7 @@ public class Headers extends Data
   {
     Descriptor mz = new Descriptor( b );
 
-    mz.String8( "SIGNATRUE", 2 ); String sig = mz.value + "";
+    mz.String8( "SIGNATURE", 2 ); String sig = mz.value + "";
     mz.LUINT16( "Size of Last Page" );
     mz.LUINT16( "Number of 512 byte pages in file" );
     mz.LUINT16( "Number of Relocation Entries" );
@@ -52,7 +52,7 @@ public class Headers extends Data
 
     //data decode to table
 
-    pe.String8( "SIGNATRUE", 4 ); byte[] sig = ( pe.value + "" ).getBytes();
+    pe.String8( "SIGNATURE", 4 ); byte[] sig = ( pe.value + "" ).getBytes();
     pe.LUINT16( "Machine" ); coreType = ((Short)pe.value).shortValue();
     pe.LUINT16( "Number Of Sections" ); NOS = ((Short)pe.value).shortValue();
     pe.LUINT32( "Time Date Stamp" );
@@ -76,7 +76,7 @@ public class Headers extends Data
     //OP = 0B 01 is a 32 bit program, and 0B 02 is a 64 bit one. Additional 01 07 is a ROM image.
     //Note I could compare numbers 267 for 32 bit, 523 for 64 bit, and 263 for a ROM image.
 
-    op.Other( "SIGNATRUE", 2 ); byte[] OPS = ( op.value + "" ).getBytes();
+    op.Other( "SIGNATURE", 2 ); byte[] OPS = ( op.value + "" ).getBytes();
 
     is64bit = OPS[0] == 0x0B && OPS[1] == 0x02;
 
@@ -265,37 +265,37 @@ public class Headers extends Data
   "This was done to make the address space bigger in 16 bit computers.<br /><br />" +
   "Thus 32 bit, and 64 bit systems no longer use a segment. Unless set 16 bit mode.<br /><br />";
 
-  public static final String[] MZinfo = new String[]{"<html><p>The signature must always be 4D 5A = MZ.<br /><br />" + 
+  public static final String[] MZinfo = new String[]{"<html>The signature must always be 4D 5A = MZ.<br /><br />" + 
   "It must be at the start of any windows binary.<br /><br />" +
   "If the file does not pass this test. Then it is corrupted.<br /><br />" + 
-  "Or is a different file type disguise as a windows binary.</p></html>",
+  "Or is a different file type disguise as a windows binary.</html>",
   "",
   "",
   "",
   "",
   "",
   "",
-  "<html><p>" + sseg + stack + "</p></html>",
-  "<html><p>" + sseg + stack + "</p></html>",
+  "<html>" + sseg + stack + "</html>",
+  "<html>" + sseg + stack + "</html>",
   "",
-  "<html><p>" + cseg + Instruct + "</p></html>",
-  "<html><p>" + cseg + Instruct + "</p></html>",
-  "",
-  "",
-  "<html><p>" + res + "</p></html>",
+  "<html>" + cseg + Instruct + "</html>",
+  "<html>" + cseg + Instruct + "</html>",
   "",
   "",
-  "<html><p>" + res + "</p></html>",
-  "<html><p>" + res + "<br /><br />Instead of adding to DOS. Microsoft created a new system that uses the reserved section to locate to the PE header.</p></html>",
-  "<p>This is a x86 binary that gets loaded by DOS in 16 bit.<br /><br />The new \"Windows\" system used the PE location to go to the new PE header.<br /><br />"};
+  "<html>" + res + "</html>",
+  "",
+  "",
+  "<html>" + res + "</html>",
+  "<html>" + res + "<br /><br />Instead of adding to DOS. Microsoft created a new system that uses the reserved section to locate to the PE header.</html>",
+  "This is a x86 binary that gets loaded by DOS in 16 bit.<br /><br />The new \"Windows\" system used the PE location to go to the new PE header.<br /><br />"};
 
   public void mzInfo( int el )
   {
     if( el < 0 )
     {
-      WindowCompoents.info("<html><p>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
+      WindowComponents.info("<html>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
         "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
-        "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.</p></html>");
+        "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.</html>");
     }
 
     //Disassemble 16 bit section.
@@ -334,23 +334,23 @@ public class Headers extends Data
         long pos = Data.stream.getFilePointer() - 1, posV = Data.stream.getVirtualPointer() - 1;
         
         Data.stream.seekV( 256 );
-        WindowCompoents.Virtual.setSelectedEnd( posV ); WindowCompoents.Offset.setSelectedEnd( pos );
+        WindowComponents.Virtual.setSelectedEnd( posV ); WindowComponents.Offset.setSelectedEnd( pos );
         
-        WindowCompoents.info( "<html>" + MZinfo[ el ] + t + "</html>" );
+        WindowComponents.info( "<html>" + MZinfo[ el ] + t + "</html>" );
       }
       catch( Exception e ) { }
     }
 
     else
     {
-      WindowCompoents.info( MZinfo[ el ] );
+      WindowComponents.info( MZinfo[ el ] );
     }
   }
 
   //Detailed description of the PE header.
 
-  public static final String[] PEinfo = new String[]{"<html><p>The PE header must start with PE = 50 45 00 00.<br /><br />If it does not pass the signature test then the windows binary is corrupted.</p></html>",
-  "<html><p>Windows does not translate binary to match other cores. It sets a core to the start of the program if CPU is compatible.<br /><br /><table border='1'>" +
+  public static final String[] PEinfo = new String[]{"<html>The PE header must start with PE = 50 45 00 00.<br /><br />If it does not pass the signature test then the windows binary is corrupted.</html>",
+  "<html>Windows does not translate binary to match other cores. It sets a core to the start of the program if CPU is compatible.<br /><br /><table border='1'>" +
   "<tr><td>Value</td><td>Type</td></tr>" +
   "<tr><td>4C 01</td><td>Intel 386</td></tr>" +
   "<tr><td>64 86</td><td>Intel x64, and AMD x64</td></tr>" +
@@ -383,9 +383,9 @@ public class Headers extends Data
   "</table><br />Generally Windows is wrote in x86 machine code. So the only two settings you will ever see used are.<br /><br />" +
   "4C 01 = Intel 386 is 32 bit x86 machine code.<br />64 86 = Intel x64, and AMD x64 is 64 bit x86 machine code.<br /><br />A 64 bit x86 core can run 32 bit by setting operation size 32 bits when running code.<br /><br />" +
   "However a 32 bit x86 core can not be forced to do 64 bit in length operations. Even though the machine code is the same.<br /><br />" +
-  "There is also windows RT. Which RT is a ARM core compilation of windows. In which case you might see Machine ARM.</p></html>",
-  "<html><p>This is the number of sections to read after the OP header. In the \"Mapped SECTOINS TO RAM\".<br /><br />" +
-  "The sections specify a position to read the file, and virtual address to place the section, from the windows binary in RAM.</p></html>",
+  "There is also windows RT. Which RT is a ARM core compilation of windows. In which case you might see Machine ARM.</html>",
+  "<html>This is the number of sections to read after the OP header. In the \"Mapped SECTIONS TO RAM\".<br /><br />" +
+  "The sections specify a position to read the file, and virtual address to place the section, from the windows binary in RAM.</html>",
   "<html>A date time stamp is in seconds. The seconds are added to the starting date \"Wed Dec 31 7:00:00PM 1969\".<br /><br />" +
   "If the time date stamp is \"37\" in value, then it is plus 37 second giving \"Wed Dec 31 7:00:37PM 1969\".</html>",
   "",
@@ -398,20 +398,20 @@ public class Headers extends Data
   {
     if( el < 0 )
     {
-      WindowCompoents.info("<html><p>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
-        "This header specifies the number of sections to map in virtual space. The processor type, and date of compilation.</p></html>");
+      WindowComponents.info("<html>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
+        "This header specifies the number of sections to map in virtual space. The processor type, and date of compilation.</html>");
     }
-    else { WindowCompoents.info( PEinfo[ el ] ); }
+    else { WindowComponents.info( PEinfo[ el ] ); }
   }
 
   //Detailed description of the OP header.
 
   public static final String Ver = "Major, and Minor are put together to forum the version number.<br /><br />Example.<br /><br />Major version = 5<br /><br />Minor version = 12<br /><br />Would mean version 5.12V.";
   
-  public static final String[] OPinfo = new String[]{"<html><p>The Optional header has three different possible signatures.<br /><br />" +
+  public static final String[] OPinfo = new String[]{"<html>The Optional header has three different possible signatures.<br /><br />" +
   "0B 01 = 32 Bit binary.<br /><br />0B 02 = 64 Bit binary<br /><br />07 01 = ROM Image file.<br /><br />" +
   "The only time the OP header changes format is the 64 bit version of the Header.<br /><br />" +
-  "If this section does not test true, for any of the three signatures, then the file is corrupted.</p></html>",
+  "If this section does not test true, for any of the three signatures, then the file is corrupted.</html>",
   "<html>" + Ver + "<br /><br />The linker links the sections together into a EXE, or DLL.</html>",
   "<html>" + Ver + "<br /><br />The linker links the sections together into a EXE, or DLL.</html>",
   "<html>Adding this to \"Base of code\" marks the end of the machine code. Plus the \"Base Address\".</html>",
@@ -440,15 +440,15 @@ public class Headers extends Data
   "",
   "",
   "",
-  "<html><p>Data Directory Array can be made bigger than it's default size 16.<br /><br />Which allows for more features to be added to the windows application format.<p></html>"};
+  "<html>Data Directory Array can be made bigger than it's default size 16.<br /><br />Which allows for more features to be added to the windows application format.</html>"};
 
   public void opInfo( int el )
   {
     if( el < 0 )
     {
-      WindowCompoents.info("<html><p>At the end of the PE header is the start of the Optional header. However, this header is not optional.</p></html>");
+      WindowComponents.info("<html>At the end of the PE header is the start of the Optional header. However, this header is not optional.</html>");
     }
-    else { WindowCompoents.info( OPinfo[ el >= 8 && is64bit ? el + 1 : el ] ); }
+    else { WindowComponents.info( OPinfo[ el >= 8 && is64bit ? el + 1 : el ] ); }
   }
 
   //Detailed description of the data Directory Array.
@@ -461,33 +461,33 @@ public class Headers extends Data
   {
     if( el < 0 )
     {
-      WindowCompoents.info("<html><p>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
-        "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.<br /><br />Anything that is 0, is not used.</p></html>");
+      WindowComponents.info("<html>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
+        "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.<br /><br />Anything that is 0, is not used.</html>");
     }
-    else { WindowCompoents.info( DDinfo[ el % 3 ] ); }
+    else { WindowComponents.info( DDinfo[ el % 3 ] ); }
   }
 
   //Detailed description of the sections to RAM memory.
 
   public static final String[] Sinfo = new String[]{"<html>Array element consisting of A section name, and some 32 bit values, for the location to put the data in memory.</html>",
-  "<html><p>The 8 bytes can be given any text based name you like. It is not used for anything by the system.<br /><br />" +
+  "<html>The 8 bytes can be given any text based name you like. It is not used for anything by the system.<br /><br />" +
   "The names can be very deceiving. As x86 compilers can compile out the code section giving it a \".text\" name.<br /><br />" +
   "Don't worry about the names. The data Directory Array defines what each section is after it is in virtual space.<br /><br />" +
-  "Thus the OP header marks the machine code in it's \"Start of code\" value. Which is a virtual address position.</p></html>",
+  "Thus the OP header marks the machine code in it's \"Start of code\" value. Which is a virtual address position.</html>",
   "<html>Number of bytes to put in virtual space. This reflects the sections actual size.<br /><br />As number of bytes read from file may be padded by the linker that linked the section together.</html>",
   "<html>The virtual address is added to the programs \"Base Address\".<br /><br />The programs \"Base Address\" is defined by the OP header.</html>",
   "<html>Number of bytes to read from file.<br /><br />The number of bytes read, may not all be put in RAM. If Number of bytes to put in virtual space is smaller.<br /><br />This happens, because sections are aligned in multiples by the linker.</html>",
   "<html>The position of the file to read.</html>",
-  "<html><p>" + res + "</p></html>",
+  "<html>" + res + "</html>",
   ""};
 
   public void sdInfo( int el )
   {
     if( el < 0 )
     {
-      WindowCompoents.info("<html><p>Number of sections to read was defined in the OP header.<br /><br />The virtual address positions are useless without setting up the mapped sections.<br /><br />" +
-        "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.</p></html>");
+      WindowComponents.info("<html>Number of sections to read was defined in the OP header.<br /><br />The virtual address positions are useless without setting up the mapped sections.<br /><br />" +
+        "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.</html>");
     }
-    else { WindowCompoents.info( Sinfo[ el % 8 ] ); }
+    else { WindowComponents.info( Sinfo[ el % 8 ] ); }
   }
 }

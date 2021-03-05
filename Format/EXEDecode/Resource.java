@@ -4,7 +4,7 @@ import javax.swing.tree.*;
 
 import dataTools.*;
 import RandomAccessFileV.*;
-import WindowCompoents.*;
+import WindowComponents.*;
 
 public class Resource extends Data
 {
@@ -151,13 +151,13 @@ public class Resource extends Data
   {
     if( el < 0 )
     {
-      WindowCompoents.info( "<html>A directory consisting, of characteristics, time date stamp, and number of files, or folders.</html>" );
+      WindowComponents.info( "<html>A directory consisting, of characteristics, time date stamp, and number of files, or folders.</html>" );
     }
     else
     {
       if( el > 6 ) { el = ( ( el - 6 ) % 3 ) + 6; }
 
-      WindowCompoents.info( DirInfo[ el ] );
+      WindowComponents.info( DirInfo[ el ] );
     }
   }
 
@@ -171,11 +171,11 @@ public class Resource extends Data
   {
     if( el < 0 )
     {
-      WindowCompoents.info( "<html>Each file location. Has a location to the actual data, size, and code page.</html>" );
+      WindowComponents.info( "<html>Each file location. Has a location to the actual data, size, and code page.</html>" );
     }
     else
     {
-      WindowCompoents.info( FileInfo[ el ] );
+      WindowComponents.info( FileInfo[ el ] );
     }
   }
 
@@ -187,11 +187,11 @@ public class Resource extends Data
   {
     if( el < 0 )
     {
-      WindowCompoents.info( "<html>Location to the named Folder, or File.</html>" );
+      WindowComponents.info( "<html>Location to the named Folder, or File.</html>" );
     }
     else
     {
-      WindowCompoents.info( StrInfo[ el ] );
+      WindowComponents.info( StrInfo[ el ] );
     }
   }
 }

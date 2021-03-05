@@ -6,7 +6,7 @@ import javax.swing.tree.*;
 import java.awt.*;
 import Format.EXEDecode.*;
 import RandomAccessFileV.*;
-import WindowCompoents.*;
+import WindowComponents.*;
 
 import dataTools.*;
 
@@ -14,7 +14,7 @@ import dataTools.*;
 
 import core.x86.*; //X86.
 
-public class EXE extends WindowCompoents implements ExploerEventListener
+public class EXE extends WindowComponents implements ExploerEventListener
 {
   //file system.
 
@@ -50,7 +50,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
   DefaultMutableTreeNode Security = new DefaultMutableTreeNode("Security Level Settings.h");
   DefaultMutableTreeNode RELOC = new DefaultMutableTreeNode("Relocations.h");
   DefaultMutableTreeNode DEBUG = new DefaultMutableTreeNode("DEBUG TABLE.h");
-  DefaultMutableTreeNode Decription = new DefaultMutableTreeNode("Description/Architecture.h");
+  DefaultMutableTreeNode Description = new DefaultMutableTreeNode("Description/Architecture.h");
   DefaultMutableTreeNode MV = new DefaultMutableTreeNode("Machine Value.h");
   DefaultMutableTreeNode TS = new DefaultMutableTreeNode("Thread Storage Location.h");
   DefaultMutableTreeNode ConFIG = new DefaultMutableTreeNode("Load System Configuration.h");
@@ -122,7 +122,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     Headers.add(new DefaultMutableTreeNode("PE Header.h#H,1"));
     Headers.add(new DefaultMutableTreeNode("OP Header.h#H,2"));
     Headers.add(new DefaultMutableTreeNode("Data Directory Array.h#H,3"));
-    Headers.add(new DefaultMutableTreeNode("Mapped SECTOINS TO RAM.h#H,4"));
+    Headers.add(new DefaultMutableTreeNode("Mapped SECTIONS TO RAM.h#H,4"));
 
     root.add( Headers );
 
@@ -160,7 +160,7 @@ public class EXE extends WindowCompoents implements ExploerEventListener
 
     //Description/Architecture
 
-    if( data.DataDirUsed[7] ) { root.add(Decription); }
+    if( data.DataDirUsed[7] ) { root.add(Description); }
 
     //Machine Value
 
@@ -291,10 +291,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
     {
       Offset.setSelected( 0, ( Header_des[4].pos + Header_des[4].length ) - 1 );
 
-      info("<html><p>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
+      info("<html>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
       "Export Table can not be located.<br /><br />" +
       "Files that are included in the binary. Called Resource Files. Also can not be located.<br /><br />" +
-      "Nether can the machine code Start position.</p></html>");
+      "Nether can the machine code Start position.</html>");
     }
 
     //Seek virtual address position. Thus begin reading section.
@@ -325,12 +325,12 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      info("<html><p>Once the headers are read, then the program is setup in virtual space.<br /><br />" +
+      info("<html>Once the headers are read, then the program is setup in virtual space.<br /><br />" +
       "The Export section is a list of names that locate to a machine code in RAM.<br /><br />" +
       "Methods can be imported by name, or by number they are in the export Address list.<br /><br />" +
       "A import table specifies which files to load to memory. If not already loaded.<br /><br />" +
       "The method list in the import table is replaced with the export locations in RAM from the other file.<br /><br />" +
-      "This allows the other binary to directly run methods by using the import location as a relative address.</p></html>");
+      "This allows the other binary to directly run methods by using the import location as a relative address.</html>");
     }
 
     else if( h.startsWith( "DLL Import Table", 0 ) )
@@ -359,11 +359,11 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      info("<html><p>Methods that are imported from other files using the export table section.<br /><br />" +
+      info("<html>Methods that are imported from other files using the export table section.<br /><br />" +
       "Each import file is loaded to RAM memory. Each import has two method lists.<br /><br />" +
       "The first list is wrote over in RAM with the location to each export method location.<br /><br />" +
       "This allows the binary to directly run methods without rewriting, or changing machine code.<br /><br />" +
-      "It is easy to map when a method call is done in machine code.</p></html>");
+      "It is easy to map when a method call is done in machine code.</html>");
     }
 
     else if( h.startsWith( "Resource Files", 0 ) )
@@ -392,8 +392,8 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      info("<html><p>Files that can be read within the application, or DLL. Such as pictures, images, audio files.<br /><br />The first Icon that is read is the programs ICon image.<br /><br />" +
-      "Each address location is added to the start of the resource section.</p></html>");
+      info("<html>Files that can be read within the application, or DLL. Such as pictures, images, audio files.<br /><br />The first Icon that is read is the programs ICon image.<br /><br />" +
+      "Each address location is added to the start of the resource section.</html>");
     }
 
     else if( h.equals("Exception Table.h") )
@@ -430,10 +430,10 @@ public class EXE extends WindowCompoents implements ExploerEventListener
       }
       catch( IOException e ) { }
 
-      info("<html><p>Relocations are used if the program is not loaded at it's preferred base Address set in the op header.<br /><br />" +
+      info("<html>Relocations are used if the program is not loaded at it's preferred base Address set in the op header.<br /><br />" +
       "The difference is added to locations defined in the address list in this relocation section.<br /><br />" +
       "Relocations are not needed, for this disassembler as the program is always mapped at it's preferred base address.<br /><br />" +
-      "A reader can be designed for the relocation section, but is not really necessary.</p></html>");
+      "A reader can be designed for the relocation section, but is not really necessary.</html>");
     }
     else if( h.equals("DEBUG TABLE.h") )
     {

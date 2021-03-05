@@ -4,7 +4,7 @@ import javax.swing.tree.*;
 
 import dataTools.*;
 import RandomAccessFileV.*;
-import WindowCompoents.*;
+import WindowComponents.*;
 
 public class DLLImport extends Data
 {
@@ -165,17 +165,17 @@ public class DLLImport extends Data
 
   public void arrayInfo( int el )
   {
-    el = el < 0 ? 0 : el; WindowCompoents.info( Arrayinfo[ el % 6 ] );
+    el = el < 0 ? 0 : el; WindowComponents.info( Arrayinfo[ el % 6 ] );
   }
 
   public void dllInfo( int el )
   {
-    WindowCompoents.info( "<html>The DLL name location. The end of each name ends with code 00 hex.<br /><br />Each DLL Array element contains a DLL Name location, and tow method list locations.</html>" );
+    WindowComponents.info( "<html>The DLL name location. The end of each name ends with code 00 hex.<br /><br />Each DLL Array element contains a DLL Name location, and tow method list locations.</html>" );
   }
 
   public void funcInfo( int el )
   {
-    WindowCompoents.info( "<html>Locations to each method name, or by address list index.<br /><br />" +
+    WindowComponents.info( "<html>Locations to each method name, or by address list index.<br /><br />" +
     "If the location is positive, it then locates to a method name.<br /><br />However, if the location is negative, then the sing is removed.<br /><br />It then imports by address list index.<br /><br />" +
     "The export section has a name list, and address list.<br /><br />Each name specifies which index in the address list.<br /><br />" +
     "This means we can lookup a name, for which address in the address list, or directly use it's address list number.<br /><br />" +
@@ -185,7 +185,7 @@ public class DLLImport extends Data
 
   public void methodInfo( int el )
   {
-    WindowCompoents.info( "<html>Each method name location contains a address list index, and then its name.<br /><br />The end of each method name ends with code 00 hex.<br /><br />" +
+    WindowComponents.info( "<html>Each method name location contains a address list index, and then its name.<br /><br />The end of each method name ends with code 00 hex.<br /><br />" +
     "The index is which address should be the method location in the export address list.<br /><br />This speeds up finding methods.</html>" );
   }
 }

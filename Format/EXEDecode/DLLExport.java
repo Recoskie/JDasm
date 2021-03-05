@@ -4,7 +4,7 @@ import javax.swing.tree.*;
 
 import dataTools.*;
 import RandomAccessFileV.*;
-import WindowCompoents.*;
+import WindowComponents.*;
 
 public class DLLExport extends Data
 {
@@ -199,7 +199,7 @@ public class DLLExport extends Data
   {
     if( el < 0 )
     {
-      WindowCompoents.info( "<html>The export section has a name location that should be the file name.<br /><br />" +
+      WindowComponents.info( "<html>The export section has a name location that should be the file name.<br /><br />" +
       "The Export section uses three lists locations.<br /><br />The name list, and order list match in length.<br /><br />" +
       "The method names are sorted in alphabetical order.<br /><br />The order list is the original order before sorting the names.<br /><br />" +
       "If method 5 moved to the start of the names list. The first value in the order list then would be 5.<br /><br />" +
@@ -208,33 +208,33 @@ public class DLLExport extends Data
     }
     else
     {
-      WindowCompoents.info( ExportInfo[ el ] );
+      WindowComponents.info( ExportInfo[ el ] );
     }
   }
 
   public void AlistInfo( int el )
   {
-    WindowCompoents.info( "<html>Location to each method.<br /><br />Method name list might not match the address order.<br /><br />Which is why we have both a name list, and order list.</html>" );
+    WindowComponents.info( "<html>Location to each method.<br /><br />Method name list might not match the address order.<br /><br />Which is why we have both a name list, and order list.</html>" );
   }
 
   public void MlistInfo( int el )
   {
-    WindowCompoents.info( "<html>The locations to each method name.</html>" );
+    WindowComponents.info( "<html>The locations to each method name.</html>" );
   }
 
   public void OlistInfo( int el )
   {
-    WindowCompoents.info( "<html>The order each method name is in plus base.<br /><br />Generally goes in order.<br /><br />If addresses are sorted along with the method names in alphabetical order.</html>" );
+    WindowComponents.info( "<html>The order each method name is in plus base.<br /><br />Generally goes in order.<br /><br />If addresses are sorted along with the method names in alphabetical order.</html>" );
   }
 
   public void strInfo( int el )
   {
-    WindowCompoents.info( "<html>The export name location. The name ends with code 00 hex.</html>" );
+    WindowComponents.info( "<html>The export name location. The name ends with code 00 hex.</html>" );
   }
 
   public void mstrInfo( int el )
   {
-    WindowCompoents.info( "<html>Location to the export method name, from the method name list. The name ends with code 00 hex.<br /><br />" +
+    WindowComponents.info( "<html>Location to the export method name, from the method name list. The name ends with code 00 hex.<br /><br />" +
     "The order number is next to the name.<br /><br />The order number is which address from the address list is the methods location.<br /><br />" +
     "Methods can be imported by both number in the address list, or by name.<br /><br />In some cases some export methods are not given names.</html>" );
   }

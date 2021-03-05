@@ -9,7 +9,6 @@ import java.util.*;
 
 import RandomAccessFileV.*;
 import VHex.*;
-import WindowCompoents.*;
 
 public class dataInspector extends JComponent implements IOEventListener, ActionListener
 {

@@ -1,12 +1,10 @@
 import javax.swing.*;
 import java.io.*;
-import java.util.*;
 import java.awt.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.awt.event.*;
-import java.lang.reflect.*;
-import WindowCompoents.*;
+import WindowComponents.*;
 
 //New file components.
 
@@ -14,7 +12,7 @@ import RandomAccessFileV.*;
 import VHex.*;
 import dataTools.*;
 
-public class app extends WindowCompoents implements TreeWillExpandListener, TreeSelectionListener, ActionListener, MouseListener
+public class app extends WindowComponents implements TreeWillExpandListener, TreeSelectionListener, ActionListener, MouseListener
 {
   //Current file path.
 
@@ -49,7 +47,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   //Supported file format extensions.
 
-  public String Suports[] = new String[] { ".exe", ".dll", ".sys", ".drv", ".ocx" };
+  public String Supports[] = new String[] { ".exe", ".dll", ".sys", ".drv", ".ocx" };
 
   //The file to load. To begin decoding file types.
 
@@ -110,8 +108,11 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     //Tool window.
 
-    infoData.setBorder( BorderFactory.createLineBorder( Color.BLUE, 3 ) );
-    infoData.setVerticalAlignment(JLabel.TOP); infoData.setHorizontalAlignment(JLabel.LEFT);
+    infoData.setContentType("text/html");
+    infoData.setBackground( new Color(238,238,238) );
+    infoData.setEditable(false);
+    javax.swing.text.DefaultCaret caret = (javax.swing.text.DefaultCaret) infoData.getCaret();
+    caret.setUpdatePolicy(javax.swing.text.DefaultCaret.NEVER_UPDATE);
 
     //File chooser controls.
 
@@ -200,7 +201,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   
     //Update the tree with a directory search for file chooser.
   
-    if( file == "" ) { dirSerach(); }
+    if( file == "" ) { dirSearch(); }
 
     //tree properties.
 
@@ -259,7 +260,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
   {
     if( !Open )
     {
-      Path += tree.getLastSelectedPathComponent().toString(); Path += Sep; dirSerach();
+      Path += tree.getLastSelectedPathComponent().toString(); Path += Sep; dirSearch();
     }
   }
 
@@ -267,7 +268,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   //Adjust the tree to current directory path.
 
-  public void dirSerach()
+  public void dirSearch()
   {
     //Only record file path history if in file chooser mode.
 
@@ -360,7 +361,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     {
       h-=1; Path = History[h];
       
-      REC = false; dirSerach(); REC = true;
+      REC = false; dirSearch(); REC = true;
     }
   }
 
@@ -372,7 +373,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     {
       h += 1; Path = History[h];
       
-      REC = false; dirSerach(); REC = true;
+      REC = false; dirSearch(); REC = true;
     }
   }
 
@@ -408,7 +409,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     }
     else
     {
-      JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); REC = false; dirSerach(); REC = true; 
+      JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); REC = false; dirSearch(); REC = true; 
     }
   }
 
@@ -422,9 +423,9 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
     
     if( e.getActionCommand() == "G" ) { diskMode = false; go(); }
     
-    if( e.getActionCommand() == "C" ) { diskMode = false; Path = ""; dirSerach(); }
+    if( e.getActionCommand() == "C" ) { diskMode = false; Path = ""; dirSearch(); }
     
-    if( e.getActionCommand() == "H" ) { diskMode = false; Path = System.getProperty("user.home") + Sep; dirSerach(); }
+    if( e.getActionCommand() == "H" ) { diskMode = false; Path = System.getProperty("user.home") + Sep; dirSearch(); }
 
     //Up one folder.
     
@@ -449,11 +450,11 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
           Path = "";
         }
           
-        dirSerach();
+        dirSearch();
       }
       else if( Path.length() > 0 )
       {
-        Path = ""; dirSerach();
+        Path = ""; dirSearch();
       }
     }
 
@@ -480,7 +481,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
     else if( e.getActionCommand().equals("Open new File") )
     {
-      diskMode = false; if( h < 0 ) { Path = ""; } else { Path = History[h]; } Reset(); REC = false; dirSerach(); REC = true;
+      diskMode = false; if( h < 0 ) { Path = ""; } else { Path = History[h]; } UsedDecoder = null; Reset(); REC = false; dirSearch(); REC = true;
     }
 
     else if( e.getActionCommand().equals("Toggle Data Inspector") )
@@ -842,7 +843,7 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
         }
       }
     }
-    else
+    else if( UsedDecoder != null )
     {
       ((ExploerEventListener)UsedDecoder).elementOpen(tree.getLastSelectedPathComponent().toString());
     }
@@ -852,9 +853,9 @@ public class app extends WindowCompoents implements TreeWillExpandListener, Tree
 
   public int DefaultProgram(String EX)
   {
-    for( int i = 0; i < Suports.length; i++ )
+    for( int i = 0; i < Supports.length; i++ )
     {
-      if( Suports[i].equals(EX) )
+      if( Supports[i].equals(EX) )
       {
         return(i);
       }
