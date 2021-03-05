@@ -607,7 +607,7 @@
 
   <h1>Self modifying code.</h1>
 
-  It turns out we can write self nonflying code. Once you understand the basics of a processor architecture. You can then write byte sequences out in memory, and run them directly.
+  It turns out we can write self modifying code. Once you understand the basics of a processor architecture. You can then write byte sequences out in memory, and run them directly.
 
   <br /><br />
 
@@ -623,7 +623,7 @@
 
   <br /><br />
   
-  It, however, makes it easy to write binary code that infects all systems. Since machine code is architecture based, and not Vernor, or company specific.
+  It, however, makes it easy to write binary code that infects all systems. Since machine code is architecture based, and not Vendor, or company specific.
 
   <br /><br />
 
@@ -631,14 +631,22 @@
 
   <br /><br />
 
-  We came up with instruction set encryption. However it is not practical. It requires the encryption key set in the CPU core to change after, so much time.
+  We came up with instruction set encryption. It is not practical though as it requires the encryption key set in the CPU core to change after, so much time.
 
   <br /><br />
 
-  Each time the encryption key changes it has to decrypt, and re-encrypt the entire program. So if another code tries to write to a running binary, it then would have to know the current encryption key set in the CPU core.
+  Each time the encryption key changes it then has to decrypt, and re-encrypt the entire program. So if another code tries to write to a running binary, it then would have to know the current encryption key set in the CPU core.
 
   <br /><br />
 
   IT works good when security is a must. However it is slow, and is not practical.
+
+  <br /><br />
+
+  Also the following document, <a href="https://scholarworks.sjsu.edu/cgi/viewcontent.cgi?referer=https%3A%2F%2Fwww.google.com%2F&httpsredir=1&article=1154&context=etd_projects">APPROXIMATE DISASSEMBLY</a>, from the university of San Jose State University discusses how to detect such code.
+  
+  <br /><br />
+
+  Do take note that there is no such thing as 100% full proof way of detecting such code Malicious code.
 </body>
 </html>
