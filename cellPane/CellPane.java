@@ -392,9 +392,9 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
 
   //Point to element clicked.
 
-  int nx = 0, ny = 0;
-  int rh = 0, nrh = 0;
-  int eCol = -1, eRow = -1;
+  private int nx = 0, ny = 0;
+  private int rh = 0, nrh = 0;
+  private int eCol = -1, eRow = -1;
 
   public void mouseMoved(MouseEvent e) { }
 
@@ -424,26 +424,29 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
 
   public void mouseExited(MouseEvent e)
   {
-    this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    if( eRow < 0 ) { this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); }
   }
 
   public void mouseEntered(MouseEvent e)
   {
-    //If in alignment to a row.
-
-    int yp = e.getY();
-
-    for( int row = 0, y = 0; row < rows; row++ )
+    if( eRow < 0 )
     {
-      y += Rows.get(row).val + gap; if( yp >= ( y - gap ) && yp <= y )
+      //If in alignment to a row.
+
+      int yp = e.getY();
+
+      for( int row = 0, y = 0; row < rows; row++ )
       {
-        this.setCursor(new Cursor(Cursor.N_RESIZE_CURSOR)); eRow = 0; return;
+        y += Rows.get(row).val + gap; if( yp >= ( y - gap ) && yp <= y )
+        {
+          this.setCursor(new Cursor(Cursor.N_RESIZE_CURSOR)); return;
+        }
       }
+
+      //is a col.
+
+      eCol = 0; this.setCursor(new Cursor(Cursor.E_RESIZE_CURSOR));
     }
-
-    //is a col.
-
-    eCol = 0; this.setCursor(new Cursor(Cursor.E_RESIZE_CURSOR));
   }
 
   public void mouseReleased(MouseEvent e)
