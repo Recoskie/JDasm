@@ -3,8 +3,6 @@ package dataTools;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.*;
-import java.awt.event.*;
-import java.util.*;
 
 public class dataDescriptor extends JComponent
 {
@@ -158,6 +156,10 @@ public class dataDescriptor extends JComponent
 
   public void clear( Descriptor d )
   {
-    data = d; dModel.fireTableDataChanged();
+    data = d;
+    
+    if( !set ) { cset = false; set = true; td.setModel( dModel ); }
+
+    dModel.fireTableDataChanged();
   }
 }

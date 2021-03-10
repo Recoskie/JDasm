@@ -1,9 +1,7 @@
 package Format;
 
-import javax.swing.*;
 import java.io.*;
 import javax.swing.tree.*;
-import java.awt.*;
 import Format.EXEDecode.*;
 import RandomAccessFileV.*;
 import WindowComponents.*;
@@ -195,7 +193,7 @@ public class EXE extends WindowComponents implements ExploerEventListener
     data.stream.Events = true;
 
     tree.setSelectionPath( new TreePath( Headers.getPath() ) ); elementOpen("Header Data");
-    
+
     f.setVisible(true);
   }
 

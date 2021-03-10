@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import VHex.*;
 import dataTools.*;
+import cellPane.*;
 
 public class WindowComponents
 {
@@ -89,27 +90,19 @@ public class WindowComponents
 
     f.setLayout(new GridLayout(1,1));
 
-    JSplitPane p1 = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, new JScrollPane( tree ), new JScrollPane( ds ) ), new JScrollPane(infoData) );
+    CellPane cp = new CellPane();
+
+    //Data display tools.
+
+    cp.add( new JScrollPane( tree ) ); cp.add( ds ); cp.add( new JScrollPane( infoData ) ); cp.rowEnd();
 
     //Binary tools.
 
-    JPanel p2 = new JPanel(new GridBagLayout());
+    cp.add( Virtual ); cp.add( Offset ); cp.add( di ); cp.rowEnd();
 
-    GridBagConstraints c = new GridBagConstraints();
-    c.fill = GridBagConstraints.VERTICAL;
-    c.anchor = GridBagConstraints.FIRST_LINE_START;
+    //Add the new cellPane to window.
 
-    //Hex editor view, or additional binary tools.
-
-    c.weightx = 1; c.gridx = 0; p2.add( Virtual , c );
-    
-    c.weightx = 1000; c.gridx = 1; p2.add( Offset, c );
-    
-    c.weightx = 1000000; c.gridx = 2; c.weighty = 1; p2.add( di, c );
-
-    //Septate the two panels.
-
-    f.add( new JSplitPane(JSplitPane.VERTICAL_SPLIT, p1, p2) );
+    f.add( cp );
 
     f.setJMenuBar( bdBar );
     
@@ -124,21 +117,17 @@ public class WindowComponents
 
     f.setLayout(new GridLayout(1,1));
 
-    JPanel p1 = new JPanel(new GridBagLayout());
+    CellPane cp = new CellPane();
 
-    GridBagConstraints c = new GridBagConstraints();
-    c.fill = GridBagConstraints.VERTICAL;
-    c.anchor = GridBagConstraints.FIRST_LINE_START;
+    //Binary tools.
 
-    c.weightx = 1; c.gridx = 0; p1.add( Virtual , c );
-    
-    c.weightx = 1000; c.gridx = 1; p1.add( Offset, c );
-    
-    c.weightx = 1000000; c.gridx = 2; c.weighty = 1; p1.add( di, c );
+    cp.add( Virtual ); cp.add( Offset ); cp.add( di ); cp.rowEnd();
 
-    f.add( p1 );
+    //Add the new cellPane to window.
 
-    f.setJMenuBar(bdBar);
+    f.add( cp );
+
+    f.setJMenuBar( bdBar );
     
     f.validate();
   }
