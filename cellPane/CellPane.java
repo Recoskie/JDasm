@@ -178,10 +178,12 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
       Insets insets = parent.getInsets();
       int nComps = parent.getComponentCount();
       int x = 0, y = insets.top;
+
+      int lx = 0; //last visible col.
     
       if ( !layoutInitialized ) { updateSizes(parent); }
 
-      int len = rowLen.get(0);
+      int len = rowLen.get(0); for( lx = len; lx > 0; lx-- ){ if( parent.getComponent( lx ).isVisible() ){ break; } }
  
       for ( int col = 0, row = 0; col < nComps; col++ )
       {
@@ -189,7 +191,7 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
       
         if (c.isVisible())
         {
-          c.setBounds(x, y, col >= len ? parent.getWidth() - x : Cols.get( col ).val, Rows.get( row ).val );
+          c.setBounds(x, y, col >= lx ? parent.getWidth() - x : Cols.get( col ).val, Rows.get( row ).val );
 
           if( col < len )
           {
@@ -199,7 +201,7 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
           {
             x = 0; y += Rows.get(row).val + gap;
 
-            row += 1; if( row < rowLen.size() ) { len = rowLen.get( row ); }
+            row += 1; if( row < rowLen.size() ) { for( lx = rowLen.get( row ); lx > len; lx-- ){ if( parent.getComponent( lx ).isVisible() ){ break; } } len = rowLen.get( row ); }
           }
         }
       }
@@ -210,7 +212,24 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
 
   public void adj( int w, int h )
   {
-    if( layoutInitialized ) { eRow = rows - 1; ny = h; setRow(); }
+    if( layoutInitialized )
+    {
+      //last active row is resized.
+
+      int c = 0, i = 0;
+
+      for( c = this.getComponentCount() - 1; c > 0; c-- )
+      {
+        if( this.getComponent(c).isVisible() ) { break; }
+      }
+
+      for( i = 0; i < rows; i++ )
+      {
+        if( rowLen.get(i) >= c ) { eRow = i; break; }
+      }
+
+      ny = h; setRow();
+    }
 
     eCol = -1; eRow = -1;
   }
@@ -270,7 +289,7 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
       pos = c.getLocation();
       dim = c.getSize();
 
-      if( c.isVisible() )
+      if( c.isVisible() && Cols.get(col).val != -1 )
       {
         if( col >= len )
         {
@@ -393,7 +412,7 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
   //Point to element clicked.
 
   private int nx = 0, ny = 0;
-  private int rh = 0, nrh = 0;
+  private int rh = 0;
   private int eCol = -1, eRow = -1;
 
   public void mouseMoved(MouseEvent e) { }
