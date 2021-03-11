@@ -1,7 +1,5 @@
 package RandomAccessFileV;
-import java.io.*;
 import java.util.*;
-import javax.swing.event.*;
 
 //Basic IO Events.
 

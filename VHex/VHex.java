@@ -43,7 +43,6 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   //Basic graphics.
 
   private int scrollBarSize = 0; //Width of scroll bar.
-  private int index = 0; //Index when drawing bytes, or characters.
   private int cell = 0; //Size of each hex cell.
   private int addcol = 0; //The address column width.
   private int hexend = 0; //End of hex columns.

@@ -1,7 +1,6 @@
 package WindowComponents;
 
 import javax.swing.*;
-import java.awt.*;
 import VHex.*;
 import dataTools.*;
 import cellPane.*;
@@ -27,11 +26,13 @@ public class WindowComponents
   //File chooser tree, or data from a file format reader.
 
   public static JTree tree;
+  public static JScrollPane stree;
 
   //Additional detailed information output. For data in table cells, or section.
   //Also disassembly output.
 
   public static JTextPane infoData = new JTextPane();
+  public static JScrollPane iData;
 
   //Hex editor.
 
@@ -45,6 +46,10 @@ public class WindowComponents
 
   public static dataDescriptor ds;
 
+  //Component layout system.
+
+  public static CellPane tools;
+
   //Once hex editor is initialized. Then the target is set afterwards for new files.
 
   public static boolean HInit = false;
@@ -57,91 +62,7 @@ public class WindowComponents
 
   public static Object UsedDecoder;
 
-  //Back to file chooser.
-
-  public void fileChooser()
-  {
-    f.getContentPane().removeAll();
-
-    f.setLayout(new GridLayout(1,1));
-
-    f.add(tree);
-    
-    f.add(new JScrollPane(tree));
-    
-    tree.setShowsRootHandles(false);
-    
-    tree.setRootVisible(false);
-
-    f.setJMenuBar(fcBar);
-    
-    f.validate();
-  }
-
   //Additional info text.
 
   public static void info( String s ) { infoData.setText(s); }
-
-  //Update window when viewing decoded data.
-
-  public void openFile()
-  {
-    f.getContentPane().removeAll();
-
-    f.setLayout(new GridLayout(1,1));
-
-    CellPane cp = new CellPane();
-
-    //Data display tools.
-
-    cp.add( new JScrollPane( tree ) ); cp.add( ds ); cp.add( new JScrollPane( infoData ) ); cp.rowEnd();
-
-    //Binary tools.
-
-    cp.add( Virtual ); cp.add( Offset ); cp.add( di ); cp.rowEnd();
-
-    //Add the new cellPane to window.
-
-    f.add( cp );
-
-    f.setJMenuBar( bdBar );
-    
-    f.validate();
-  }
-
-  //Hex edit mode. Binary tools only.
-
-  public void editMode()
-  {
-    f.getContentPane().removeAll(); Virtual.setVisible(false);
-
-    f.setLayout(new GridLayout(1,1));
-
-    CellPane cp = new CellPane();
-
-    //Binary tools.
-
-    cp.add( Virtual ); cp.add( Offset ); cp.add( di ); cp.rowEnd();
-
-    //Add the new cellPane to window.
-
-    f.add( cp );
-
-    f.setJMenuBar( bdBar );
-    
-    f.validate();
-  }
-
-  //Loading.
-
-  public void loading()
-  {
-    f.getContentPane().removeAll();
-
-    f.setLayout( new GridLayout(1,1) );
-
-    f.add( new JLabel( "Loading...", SwingConstants.CENTER ) );
-    
-    f.validate();
-  }
 }

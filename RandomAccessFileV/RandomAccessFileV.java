@@ -256,11 +256,11 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   private static File TFile;
   
-  private static File mkf() throws IOException { TFile = File.createTempFile("",".tmp"); TFile.deleteOnExit(); return( TFile ); }
+  private static File mkf() throws IOException { TFile = File.createTempFile("random",".tmp"); TFile.deleteOnExit(); return( TFile ); }
   
   public RandomAccessFileV( byte[] data ) throws IOException
   {
-    super( mkf(), "r" ); this.readOnly = true; super.write( data );
+    super( mkf(), "rw" ); this.readOnly = true; super.write( data );
     
     addV( 0, data.length, 0, data.length );
     

@@ -180,6 +180,7 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
       int x = 0, y = insets.top;
 
       int lx = 0; //last visible col.
+      boolean rowVisible = false;
     
       if ( !layoutInitialized ) { updateSizes(parent); }
 
@@ -191,18 +192,18 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
       
         if (c.isVisible())
         {
-          c.setBounds(x, y, col >= lx ? parent.getWidth() - x : Cols.get( col ).val, Rows.get( row ).val );
-
-          if( col < len )
+          if( col > len )
           {
-            x += Cols.get(col).val + gap;
-          }
-          else
-          {
-            x = 0; y += Rows.get(row).val + gap;
+            x = 0; if( rowVisible ) { y += Rows.get(row).val + gap; }
 
             row += 1; if( row < rowLen.size() ) { for( lx = rowLen.get( row ); lx > len; lx-- ){ if( parent.getComponent( lx ).isVisible() ){ break; } } len = rowLen.get( row ); }
+
+            rowVisible = false;
           }
+
+          c.setBounds(x, y, col >= lx ? parent.getWidth() - x : Cols.get( col ).val, Rows.get( row ).val );
+
+          x += Cols.get(col).val + gap; rowVisible = true;
         }
       }
     }

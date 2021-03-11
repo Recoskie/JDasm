@@ -5,6 +5,7 @@ import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.awt.event.*;
 import WindowComponents.*;
+import cellPane.CellPane;
 
 //New file components.
 
@@ -102,7 +103,7 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
 
   //Create the application.
 
-  public app( String file )
+  public app( String Arg_file )
   {
     f = new JFrame("JFH-Disassembly"); f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -113,6 +114,7 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
     infoData.setEditable(false);
     javax.swing.text.DefaultCaret caret = (javax.swing.text.DefaultCaret) infoData.getCaret();
     caret.setUpdatePolicy(javax.swing.text.DefaultCaret.NEVER_UPDATE);
+    iData = new JScrollPane( infoData );
 
     //File chooser controls.
 
@@ -201,7 +203,7 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
   
     //Update the tree with a directory search for file chooser.
   
-    if( file == "" ) { dirSearch(); }
+    if( Arg_file == "" ) { dirSearch(); }
 
     //tree properties.
 
@@ -212,14 +214,49 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
     //Custom file Icon manager.
   
     tree.setCellRenderer(new FileIconManager());
+    stree = new JScrollPane( tree );
 
     //Simple grid layout, for the tree.
 
-    f.setLayout(new GridLayout(1,0)); f.add(tree);
+    f.setLayout(new GridLayout(1,0));
+    
+    //Initialize IO components.
+
+    try
+    {
+      file = new RandomAccessFileV( new byte[16] );
+
+      di = new dataInspector( file ); ds = new dataDescriptor( di );
+          
+      Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
+    }
+    catch(Exception e){ }
+
+    Virtual.setComponentPopupMenu(pm); Offset.setComponentPopupMenu(pm);
+
+    Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
+
+    //Set visibility to tree only.
+
+    ds.setVisible(false); iData.setVisible(false);
+    Virtual.setVisible(false); Offset.setVisible(false);
+    di.setVisible(false);
+    
+    //Add all the tools to window.
+
+    tools = new CellPane();
+
+    //Data display tools.
+
+    tools.add( stree ); tools.add( ds ); tools.add( iData ); tools.rowEnd();
+
+    //Binary tools.
+
+    tools.add( Virtual ); tools.add( Offset ); tools.add( di ); tools.rowEnd();
 
     //scroll bar for the tree.
 
-    f.add(new JScrollPane(tree));
+    f.add(tools);
 
     //set the menu bar controls for file chooser.
 
@@ -235,9 +272,9 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
 
     //open disk, or file.
 
-    if( file != "" )
+    if( Arg_file != "" )
     {
-      if( diskMode ) { openDisk( file ); } else { checkFT( file ); }
+      if( diskMode ) { openDisk( Arg_file ); } else { checkFT( Arg_file ); }
     }
 
     f.setVisible(true);
@@ -670,30 +707,26 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
     {
       file = new RandomAccessFileV( Path + Sep + ft, "rw" );
 
-      if(!HInit)
-      {
-        di = new dataInspector( file ); ds = new dataDescriptor( di );
-            
-        Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
+      Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
 
-        Virtual.setComponentPopupMenu(pm); Offset.setComponentPopupMenu(pm);
-
-        Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
-      }
-      else
-      {
-        Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
-      }
+      f.setJMenuBar( bdBar );
 
       if( I >= 0 )
       {
         ((ExploerEventListener)UsedDecoder).read( Path + Sep + ft, file );
 
-        openFile();
+        stree.setVisible(true); ds.setVisible(true); iData.setVisible(true);
+      
+        Virtual.setVisible(true); Offset.setVisible(true); di.setVisible(true);
       }
-      else { editMode(); }
+      else
+      {
+        stree.setVisible(false); ds.setVisible(false); iData.setVisible(false);
+      
+        Virtual.setVisible(false); Offset.setVisible(true); di.setVisible(true);
+      }
 
-      f.pack(); f.setLocationRelativeTo(null);
+      f.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
     catch(Exception er)
     {
@@ -719,31 +752,26 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
   //Open a disk.
 
   public void openDisk( String disk )
-  {
-    try{ file = new RandomAccessDevice( disk, "r" ); } catch( FileNotFoundException er ) { }
-        
-    loading(); new Thread(new Runnable()
+  {  
+    f.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) );
+    
+    new Thread(new Runnable()
     {
       @Override public void run()
       {
         try
         {
-          if(!HInit)
-          {
-            di = new dataInspector( file ); ds = new dataDescriptor( di );
-            
-            Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
+          file = new RandomAccessDevice( disk, "r" );
 
-            Virtual.setComponentPopupMenu(pm); Offset.setComponentPopupMenu(pm);
-            
-            Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
-          }
-          else
-          {
-            Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
-          }
-        
-          editMode();
+          Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
+
+          f.setContentPane( tools );
+
+          stree.setVisible(false); ds.setVisible(false); iData.setVisible(false);
+          
+          Virtual.setVisible(false); Offset.setVisible(true); di.setVisible(true);
+
+          f.setJMenuBar( bdBar );
         }
         catch(Exception er)
         {
@@ -798,7 +826,7 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
             }
           }
           
-          Reset();
+          f.setContentPane(tools); Reset();
         }
       }
     }).start();
@@ -808,7 +836,14 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
 
   public void Reset()
   {
-    Open = false; new FileIconManager().Open = false; fileChooser();
+    Open = false; new FileIconManager().Open = false;
+
+    tree.setRootVisible(false); tree.setShowsRootHandles(false);
+
+    stree.setVisible(true); ds.setVisible(false); iData.setVisible(false);
+    Virtual.setVisible(false); Offset.setVisible(false); di.setVisible(false);
+
+    f.setJMenuBar(fcBar);
   }
   
   public void mouseExited(MouseEvent e) { }
