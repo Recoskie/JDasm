@@ -194,7 +194,7 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
         {
           if( col > len )
           {
-            x = 0; if( rowVisible ) { y += Rows.get(row).val + gap; }
+            x = 0; if( rowVisible ) { y += Rows.get(row).val + gap; } else { Rows.get(row).val = -gap; }
 
             row += 1; if( row < rowLen.size() ) { for( lx = rowLen.get( row ); lx > len; lx-- ){ if( parent.getComponent( lx ).isVisible() ){ break; } } len = rowLen.get( row ); }
 
@@ -281,6 +281,7 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
     Point pos;
     Dimension dim;
     Component c;
+    int rowHeight = 0;
     
     len = rowLen.get(0);
 
@@ -290,18 +291,18 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
       pos = c.getLocation();
       dim = c.getSize();
 
-      if( c.isVisible() && Cols.get(col).val != -1 )
+      if( col >= len )
       {
-        if( col >= len )
-        {
-          row += 1; len = rowLen.get(row);
+        row += 1; len = rowLen.get(row);
 
-          g.fillRect( 0, pos.y + dim.height, this.getWidth(), gap );
-        }
-        else
-        {
-          g.fillRect( pos.x + dim.width, pos.y, gap, dim.height );
-        }
+        if( rowHeight > 0 ) { g.fillRect( 0, pos.y + rowHeight, this.getWidth(), gap ); }
+
+        rowHeight = 0;
+      }
+
+      if( c.isVisible() )
+      {
+        g.fillRect( pos.x + dim.width, pos.y, gap, dim.height ); rowHeight = dim.height;
       }
     }
   }
@@ -508,25 +509,25 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
     {
       c = this.getComponent( col ); pos = c.getLocation(); dim = c.getSize();
 
+      if( col >= len )
+      {
+        row += 1; len = rowLen.get(row);
+
+        if( rh > 0 && ny > rh + dim.height && ny < rh + dim.height + gap )
+        {
+          eCol = -1; eRow = row - 1; rowAdjustableSize(); return;
+        }
+
+        rh = 0;
+      }
+
       if( c.isVisible() )
       {
         rh = pos.y;
 
-        if( col >= len )
+        if( ( nx > pos.x + dim.width && nx < pos.x + dim.width + gap ) && ( ny > rh && ny < rh + dim.height ) )
         {
-          row += 1; len = rowLen.get(row);
-
-          if( ny > rh + dim.height && ny < rh + dim.height + gap )
-          {
-            eCol = -1; eRow = row - 1; rowAdjustableSize(); return;
-          }
-        }
-        else
-        {
-          if( ( nx > pos.x + dim.width && nx < pos.x + dim.width + gap ) && ( ny > rh && ny < rh + dim.height ) )
-          {
             eCol = col; eRow = row; colAdjustableSize(); return;
-          }
         }
       }
     }
