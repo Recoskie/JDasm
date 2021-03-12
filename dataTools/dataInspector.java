@@ -384,8 +384,6 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
     d = data; d.addIOEventListener( this );
 
-    super.setLayout( new GridBagLayout() );
-
     //Byte order panel.
 
     JRadioButton Little = new JRadioButton("Little Endian"); Little.setActionCommand("L"); Little.setSelected(true);
@@ -431,15 +429,19 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
     //Component layout.
 
-    GridBagConstraints c = new GridBagConstraints(); c.anchor = GridBagConstraints.PAGE_START;
+    JPanel comp = new JPanel( new GridBagLayout() );
 
-    c.gridy = 0; super.add( new JScrollPaneBug( td ), c );
+    GridBagConstraints c = new GridBagConstraints(); c.anchor = GridBagConstraints.FIRST_LINE_START;
+
+    c.gridy = 0; comp.add( new JScrollPaneBug( td ), c );
     
-    c.gridy = 1; c.fill = GridBagConstraints.HORIZONTAL; super.add( p1, c );
+    c.gridy = 1; c.fill = GridBagConstraints.HORIZONTAL; comp.add( p1, c );
 
-    c.gridy = 2; super.add( p2, c );
+    c.gridy = 2; comp.add( p2, c );
 
-    c.gridy = 3; c.weighty = 1; super.add( p3, c );
+    c.gridy = 3; c.weighty = 1; comp.add( p3, c );
+
+    super.setLayout( new FlowLayout( FlowLayout.LEFT ) ); super.add( comp );
 
     try { d.seek(d.getFilePointer()); } catch( java.io.IOException e ) { }
   }

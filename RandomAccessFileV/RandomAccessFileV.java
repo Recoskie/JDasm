@@ -260,7 +260,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public RandomAccessFileV( byte[] data ) throws IOException
   {
-    super( mkf(), "rw" ); this.readOnly = true; super.write( data );
+    super( mkf(), "rw" ); this.readOnly = false; super.write( data );
     
     addV( 0, data.length, 0, data.length );
     
@@ -269,7 +269,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public RandomAccessFileV( byte[] data, long Address ) throws IOException
   {
-    super( mkf(), "r" ); this.readOnly = true; super.write( data );
+    super( mkf(), "rw" ); this.readOnly = false; super.write( data );
     
     addV( 0, (long)data.length, Address, (long)data.length );
     
