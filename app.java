@@ -772,6 +772,8 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
           Virtual.setVisible(false); Offset.setVisible(true); di.setVisible(true);
 
           f.setJMenuBar( bdBar );
+
+          f.setExtendedState(JFrame.MAXIMIZED_BOTH);
         }
         catch(Exception er)
         {

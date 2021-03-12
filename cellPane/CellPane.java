@@ -513,12 +513,10 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
       {
         row += 1; len = rowLen.get(row);
 
-        if( rh > 0 && ny > rh + dim.height && ny < rh + dim.height + gap )
+        if( ny > rh + dim.height && ny < rh + dim.height + gap )
         {
           eCol = -1; eRow = row - 1; rowAdjustableSize(); return;
         }
-
-        rh = 0;
       }
 
       if( c.isVisible() )
