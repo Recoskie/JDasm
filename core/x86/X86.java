@@ -666,7 +666,7 @@ public class X86 extends X86Types implements core.Core
     In which if it is not an Vector I S2 acts as the mid default size attribute in 32 bit mode, and 64 bit mode for all Is.
     ----------------------------------------------------------------------------------------------------------------------------------------*/
 
-    int S4 = 0, S3 = 0, S2 = 0, S1 = 0, S0 = -1, t = 0; //Note S0 is Vector size 1024, which is unused.
+    int S3 = 0, S2 = 0, S1 = 0, S0 = -1, t = 0; //Note S0 is Vector size 1024, which is unused.
 
     /*----------------------------------------------------------------------------------------------------------------------------------------
     Lookup the Highest active bit in the SizeAttribute value giving the position the bit is in the number. S1 will be the biggest size attribute.

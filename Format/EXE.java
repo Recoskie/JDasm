@@ -1,24 +1,19 @@
 package Format;
 
 import java.io.*;
+import swingIO.*;
 import javax.swing.tree.*;
 import Format.EXEDecode.*;
 import RandomAccessFileV.*;
 import WindowComponents.*;
 
-import dataTools.*;
-
 //Processor cores.
 
 import core.x86.*; //X86.
 
-public class EXE extends WindowComponents implements ExploerEventListener
+public class EXE extends Data implements ExplorerEventListener
 {
-  //file system.
-
-  public RandomAccessFileV b;
-
-  //The new Descriptor table allows a description of clicked data.
+  //The new Descriptor table allows a description of clicked.
 
   public Descriptor[] Header_des = new Descriptor[6];
 
@@ -59,7 +54,6 @@ public class EXE extends WindowComponents implements ExploerEventListener
 
   //plug in the executable Readers
 
-  public static Data data = new Data();
   public Headers Header = new Headers();
   public DLLExport DLL_ex = new DLLExport();
   public DLLImport DLL = new DLLImport();
@@ -69,11 +63,11 @@ public class EXE extends WindowComponents implements ExploerEventListener
 
   //plug in the separate decoders of the exe format together
 
-  public void read( String F, RandomAccessFileV file )
+  public void read( String F, RandomAccessFileV notUsed )
   {
-    b = file; data.stream = file; blank = new Descriptor( file );
+    blank = new Descriptor( file );
 
-    data.stream.Events = false;
+    file.Events = false;
 
     //Root node is now the target file.
  
@@ -89,30 +83,30 @@ public class EXE extends WindowComponents implements ExploerEventListener
 
     try
     {
-      Header_des[0] = Header.readMZ( b );
-      if(!Data.error) { Header_des[1] = Header.readPE( b ); }
-      if(!Data.error) { Header_des[2] = Header.readOP( b ); }
-      if(!Data.error) { Header_des[3] = Header.readDataDrectory( b ); }
-      if(!Data.error) { Header_des[4] = Header.readSections( b ); }
+      Header_des[0] = Header.readMZ( file );
+      if(!error) { Header_des[1] = Header.readPE( file ); }
+      if(!error) { Header_des[2] = Header.readOP( file ); }
+      if(!error) { Header_des[3] = Header.readDataDrectory( file ); }
+      if(!error) { Header_des[4] = Header.readSections( file ); }
     }
-    catch(java.io.IOException e) { Data.error = true; }
+    catch(java.io.IOException e) { error = true; }
 
-    if( Data.error ) { data.DataDirUsed = new boolean[15]; } //Error.
+    if( error ) { DataDirUsed = new boolean[15]; } //Error.
     else
     {
       //Load processor core type.
 
-      if( Data.coreType == 0x014C )
+      if( coreType == 0x014C )
       {
-        data.core = new X86( b ); data.core.setBit( X86.x86_32 );
+        core = new X86( file ); core.setBit( X86.x86_32 );
         
-        data.core.setEvent( this::Dis ); data.coreLoaded = true;
+        core.setEvent( this::Dis ); coreLoaded = true;
       }
-      else if( Data.coreType == (short)0x8664 )
+      else if( coreType == (short)0x8664 )
       {
-        data.core = new X86( b ); data.core.setBit( X86.x86_64 );
+        core = new X86( file ); core.setBit( X86.x86_64 );
         
-        data.core.setEvent( this::Dis ); data.coreLoaded = true;
+        core.setEvent( this::Dis ); coreLoaded = true;
       }
     }
 
@@ -126,71 +120,71 @@ public class EXE extends WindowComponents implements ExploerEventListener
 
     //Start of code.
 
-    if( data.baseOfCode != 0 )  { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h#Dis," + ( data.imageBase + data.startOfCode ) + "" )); }
+    if( baseOfCode != 0 )  { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h#Dis," + ( imageBase + startOfCode ) + "" )); }
 
     //Location of the export directory
 
-    if( data.DataDirUsed[0] ) { root.add(Export); }
+    if( DataDirUsed[0] ) { root.add(Export); }
 
     //Location of the import directory
 
-    if( data.DataDirUsed[1] ) { root.add(Import); }
+    if( DataDirUsed[1] ) { root.add(Import); }
 
     //Location of the resource directory
 
-    if( data.DataDirUsed[2] ) { root.add(RE); }
+    if( DataDirUsed[2] ) { root.add(RE); }
 
     //Exception
 
-    if( data.DataDirUsed[3] ) { root.add(EX); }
+    if( DataDirUsed[3] ) { root.add(EX); }
 
     //Security
 
-    if( data.DataDirUsed[4] ) { root.add(Security); }
+    if( DataDirUsed[4] ) { root.add(Security); }
 
     //Relocation/Patching
 
-    if( data.DataDirUsed[5] ) { root.add(RELOC); }
+    if( DataDirUsed[5] ) { root.add(RELOC); }
 
     //Debug
 
-    if( data.DataDirUsed[6] ) { root.add(DEBUG); }
+    if( DataDirUsed[6] ) { root.add(DEBUG); }
 
     //Description/Architecture
 
-    if( data.DataDirUsed[7] ) { root.add(Description); }
+    if( DataDirUsed[7] ) { root.add(Description); }
 
     //Machine Value
 
-    if( data.DataDirUsed[8] ) { root.add(MV); }
+    if( DataDirUsed[8] ) { root.add(MV); }
 
     //Thread Storage
 
-    if( data.DataDirUsed[9] ) { root.add(TS); }
+    if( DataDirUsed[9] ) { root.add(TS); }
 
     //Load System Configuration
 
-    if( data.DataDirUsed[10] ) { root.add(ConFIG); }
+    if( DataDirUsed[10] ) { root.add(ConFIG); }
 
     //Location of alternate import-binding director
 
-    if( data.DataDirUsed[11] ) { root.add(BoundImport); }
+    if( DataDirUsed[11] ) { root.add(BoundImport); }
 
     //Import Address Table
 
-    if( data.DataDirUsed[12] ) { root.add(ImportAddress); }
+    if( DataDirUsed[12] ) { root.add(ImportAddress); }
 
     //Delayed Imports
 
-    if( data.DataDirUsed[13] ) { root.add(DelayImport); }
+    if( DataDirUsed[13] ) { root.add(DelayImport); }
 
     //COM Runtime Descriptor
 
-    if( data.DataDirUsed[14] ) { root.add(COM); }
+    if( DataDirUsed[14] ) { root.add(COM); }
 
     ((DefaultTreeModel)tree.getModel()).setRoot(root);
 
-    data.stream.Events = true;
+    file.Events = true;
 
     tree.setSelectionPath( new TreePath( Headers.getPath() ) ); elementOpen("Header Data");
 
@@ -217,13 +211,13 @@ public class EXE extends WindowComponents implements ExploerEventListener
 
         //Begin disassembly.
 
-        if( Data.coreLoaded )
+        if( coreLoaded )
         {
-          data.core.locations.clear(); data.core.data_off.clear(); data.core.code.clear();
+          core.locations.clear(); core.data_off.clear(); core.code.clear();
 
-          data.core.locations.add( Long.parseLong( type[1] ) );
+          core.locations.add( Long.parseLong( type[1] ) );
 
-          Dis( data.core.locations.get(0) ); ds.setDescriptor( data.core );
+          Dis( core.locations.get(0) ); ds.setDescriptor( core );
         }
         else { noCore(); }
       }
@@ -262,7 +256,7 @@ public class EXE extends WindowComponents implements ExploerEventListener
       {
         try
         {
-          b.seekV( Long.parseLong( type[1] ) );
+          file.seekV( Long.parseLong( type[1] ) );
         }
         catch( IOException e ) { }
       }
@@ -273,7 +267,7 @@ public class EXE extends WindowComponents implements ExploerEventListener
       {
         try
         {
-          b.seekV( Long.parseLong( type[1] ) );
+          file.seekV( Long.parseLong( type[1] ) );
 
           Virtual.setSelected( Long.parseLong( type[1] ), Long.parseLong( type[2] ) );
         }
@@ -301,25 +295,25 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV( data.DataDir[0] ); b.seekV( data.DataDir[0] );
+        file.seekV( DataDir[0] ); file.seekV( DataDir[0] );
 
         //Read Exportable methods.
 
         if( Export_des == null )
         {
-          b.Events = false;
+          file.Events = false;
           
-          Export.setUserObject("function Export Table"); Export_des = DLL_ex.LoadExport( Export, b );
+          Export.setUserObject("function Export Table"); Export_des = DLL_ex.LoadExport( Export, file );
           
-          b.Events = true;
+          file.Events = true;
 
           //Update the tree.
 
           ((DefaultTreeModel)tree.getModel()).nodeChanged( Export ); tree.expandPath( new TreePath( Export.getPath() ) );
         }
 
-        Virtual.setSelected( data.DataDir[0], data.DataDir[0] + data.DataDir[1] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[1] - 1 );
+        Virtual.setSelected( DataDir[0], DataDir[0] + DataDir[1] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[1] - 1 );
       }
       catch( IOException e ) { }
 
@@ -335,25 +329,25 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV( data.DataDir[2] ); b.seekV( data.DataDir[2] );
+        file.seekV( DataDir[2] ); file.seekV( DataDir[2] );
 
         //Decode import table.
 
         if( DLL_des == null )
         {
-          b.Events = false;
+          file.Events = false;
           
-          Import.setUserObject("DLL Import Table"); DLL_des = DLL.LoadDLLImport( Import, b );
+          Import.setUserObject("DLL Import Table"); DLL_des = DLL.LoadDLLImport( Import, file );
           
-          b.Events = true;
+          file.Events = true;
 
           //Update the tree.
 
           ((DefaultTreeModel)tree.getModel()).nodeChanged( Import ); tree.expandPath( new TreePath( Import.getPath() ) );
         }
 
-        Virtual.setSelected( data.DataDir[2], data.DataDir[2] + data.DataDir[3] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[3] - 1 );
+        Virtual.setSelected( DataDir[2], DataDir[2] + DataDir[3] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[3] - 1 );
       }
       catch( IOException e ) { }
 
@@ -368,25 +362,25 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV( data.DataDir[4] );
+        file.seekV( DataDir[4] );
 
         //Read Resource files.
 
         if( RSRC_des == null )
         {
-          b.Events = false;
+          file.Events = false;
           
-          RE.setUserObject("Resource Files"); RSRC_des = RSRC.readResource( RE, b );
+          RE.setUserObject("Resource Files"); RSRC_des = RSRC.readResource( RE, file );
           
-          b.Events = true;
+          file.Events = true;
 
           //Update the tree.
 
           ((DefaultTreeModel)tree.getModel()).nodeChanged( RE ); tree.expandPath( new TreePath( RE.getPath() ) );
         }
 
-        Virtual.setSelected( data.DataDir[4], data.DataDir[4] + data.DataDir[5] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[5] - 1 );
+        Virtual.setSelected( DataDir[4], DataDir[4] + DataDir[5] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[5] - 1 );
       }
       catch( IOException e ) { }
 
@@ -398,9 +392,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[6]);
-        Virtual.setSelected( data.DataDir[6], data.DataDir[6] + data.DataDir[7] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[7] - 1 );
+        file.seekV(DataDir[6]);
+        Virtual.setSelected( DataDir[6], DataDir[6] + DataDir[7] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[7] - 1 );
       }
       catch( IOException e ) { }
 
@@ -410,9 +404,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[8]);
-        Virtual.setSelected( data.DataDir[8], data.DataDir[8] + data.DataDir[9] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[9] - 1 );
+        file.seekV(DataDir[8]);
+        Virtual.setSelected( DataDir[8], DataDir[8] + DataDir[9] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[9] - 1 );
       }
       catch( IOException e ) { }
 
@@ -422,9 +416,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[10]);
-        Virtual.setSelected( data.DataDir[10], data.DataDir[10] + data.DataDir[11] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[11] - 1 );
+        file.seekV(DataDir[10]);
+        Virtual.setSelected( DataDir[10], DataDir[10] + DataDir[11] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[11] - 1 );
       }
       catch( IOException e ) { }
 
@@ -437,9 +431,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[12]);
-        Virtual.setSelected( data.DataDir[12], data.DataDir[12] + data.DataDir[13] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[13] - 1 );
+        file.seekV(DataDir[12]);
+        Virtual.setSelected( DataDir[12], DataDir[12] + DataDir[13] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[13] - 1 );
       }
       catch( IOException e ) { }
 
@@ -449,9 +443,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[14]);
-        Virtual.setSelected( data.DataDir[14], data.DataDir[14] + data.DataDir[15] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[15] - 1 );
+        file.seekV(DataDir[14]);
+        Virtual.setSelected( DataDir[14], DataDir[14] + DataDir[15] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[15] - 1 );
       }
       catch( IOException e ) { }
 
@@ -461,9 +455,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[16]);
-        Virtual.setSelected( data.DataDir[16], data.DataDir[16] + data.DataDir[17] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[17] - 1 );
+        file.seekV(DataDir[16]);
+        Virtual.setSelected( DataDir[16], DataDir[16] + DataDir[17] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[17] - 1 );
       }
       catch( IOException e ) { }
 
@@ -473,9 +467,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[18]);
-        Virtual.setSelected( data.DataDir[18], data.DataDir[18] + data.DataDir[19] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[19] - 1 );
+        file.seekV(DataDir[18]);
+        Virtual.setSelected( DataDir[18], DataDir[18] + DataDir[19] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[19] - 1 );
       }
       catch( IOException e ) { }
 
@@ -485,9 +479,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[20]);
-        Virtual.setSelected( data.DataDir[20], data.DataDir[20] + data.DataDir[21] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[21] - 1 );
+        file.seekV(DataDir[20]);
+        Virtual.setSelected( DataDir[20], DataDir[20] + DataDir[21] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[21] - 1 );
       }
       catch( IOException e ) { }
 
@@ -497,9 +491,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[22]);
-        Virtual.setSelected( data.DataDir[22], data.DataDir[22] + data.DataDir[23] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[23] - 1 );
+        file.seekV(DataDir[22]);
+        Virtual.setSelected( DataDir[22], DataDir[22] + DataDir[23] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[23] - 1 );
       }
       catch( IOException e ) { }
 
@@ -509,9 +503,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[24]);
-        Virtual.setSelected( data.DataDir[24], data.DataDir[24] + data.DataDir[25] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[25] - 1 );
+        file.seekV(DataDir[24]);
+        Virtual.setSelected( DataDir[24], DataDir[24] + DataDir[25] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[25] - 1 );
       }
       catch( IOException e ) { }
 
@@ -521,9 +515,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[26]);
-        Virtual.setSelected( data.DataDir[26], data.DataDir[26] + data.DataDir[27] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[27] - 1 );
+        file.seekV(DataDir[26]);
+        Virtual.setSelected( DataDir[26], DataDir[26] + DataDir[27] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[27] - 1 );
       }
       catch( IOException e ) { }
 
@@ -533,9 +527,9 @@ public class EXE extends WindowComponents implements ExploerEventListener
     {
       try
       {
-        b.seekV(data.DataDir[28]);
-        Virtual.setSelected( data.DataDir[28], data.DataDir[28] + data.DataDir[29] - 1 );
-        Offset.setSelected( b.getFilePointer(), b.getFilePointer() + data.DataDir[29] - 1 );
+        file.seekV(DataDir[28]);
+        Virtual.setSelected( DataDir[28], DataDir[28] + DataDir[29] - 1 );
+        Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[29] - 1 );
       }
       catch( IOException e ) { }
 
@@ -552,17 +546,17 @@ public class EXE extends WindowComponents implements ExploerEventListener
   {
     try
     {
-      b.seekV( loc );
+      file.seekV( loc );
 
-      long floc = b.getFilePointer();
+      long floc = file.getFilePointer();
 
-      String d = data.core.disASM_Code();
+      String d = core.disASM_Code();
 
       info( "<html>" + d + "</html>" );
 
-      Virtual.setSelected( loc, b.getVirtualPointer() - 1 ); Offset.setSelected( floc, b.getFilePointer() - 1 );
+      Virtual.setSelected( loc, file.getVirtualPointer() - 1 ); Offset.setSelected( floc, file.getFilePointer() - 1 );
 
-      ds.setDescriptor( data.core );
+      ds.setDescriptor( core );
     }
     catch( IOException e ) { }
   }

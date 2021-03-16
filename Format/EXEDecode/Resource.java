@@ -1,10 +1,9 @@
 package Format.EXEDecode;
 import java.io.*;
+import swingIO.*;
 import javax.swing.tree.*;
 
-import dataTools.*;
 import RandomAccessFileV.*;
-import WindowComponents.*;
 
 public class Resource extends Data
 {
@@ -151,13 +150,13 @@ public class Resource extends Data
   {
     if( el < 0 )
     {
-      WindowComponents.info( "<html>A directory consisting, of characteristics, time date stamp, and number of files, or folders.</html>" );
+      info( "<html>A directory consisting, of characteristics, time date stamp, and number of files, or folders.</html>" );
     }
     else
     {
       if( el > 6 ) { el = ( ( el - 6 ) % 3 ) + 6; }
 
-      WindowComponents.info( DirInfo[ el ] );
+      info( DirInfo[ el ] );
     }
   }
 
@@ -171,11 +170,11 @@ public class Resource extends Data
   {
     if( el < 0 )
     {
-      WindowComponents.info( "<html>Each file location. Has a location to the actual data, size, and code page.</html>" );
+      info( "<html>Each file location. Has a location to the actual data, size, and code page.</html>" );
     }
     else
     {
-      WindowComponents.info( FileInfo[ el ] );
+      info( FileInfo[ el ] );
     }
   }
 
@@ -187,11 +186,11 @@ public class Resource extends Data
   {
     if( el < 0 )
     {
-      WindowComponents.info( "<html>Location to the named Folder, or File.</html>" );
+      info( "<html>Location to the named Folder, or File.</html>" );
     }
     else
     {
-      WindowComponents.info( StrInfo[ el ] );
+      info( StrInfo[ el ] );
     }
   }
 }

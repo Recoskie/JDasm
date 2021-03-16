@@ -1,4 +1,4 @@
-package VHex;
+package swingIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -301,11 +301,11 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   //Add data type tool to hex editor.
 
-  public VHex(RandomAccessFileV f, dataTools.dataInspector d, boolean mode) { this(f, mode); d.addEditor( this ); }
+  public VHex(RandomAccessFileV f, swingIO.dataInspector d, boolean mode) { this(f, mode); d.addEditor( this ); }
 
   //Add data type tool to hex editor. If no mode setting then assume offset mode.
 
-  public VHex(RandomAccessFileV f, dataTools.dataInspector d) { this(f, false); d.addEditor( this ); }
+  public VHex(RandomAccessFileV f, swingIO.dataInspector d) { this(f, false); d.addEditor( this ); }
   
   //If no mode setting then assume offset mode.
 

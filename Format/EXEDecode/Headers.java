@@ -1,11 +1,10 @@
 package Format.EXEDecode;
 
 import java.io.*;
+import swingIO.*;
 import RandomAccessFileV.*;
 
-import dataTools.*;
 import core.x86.*;
-import WindowComponents.*;
 
 public class Headers extends Data
 {
@@ -293,7 +292,7 @@ public class Headers extends Data
   {
     if( el < 0 )
     {
-      WindowComponents.info("<html>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
+      info("<html>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
         "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
         "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.</html>");
     }
@@ -308,7 +307,7 @@ public class Headers extends Data
 
       //16 bit x86 DOS.
 
-      X86 temp = new X86( Data.stream ); temp.setBit( X86.x86_16 );
+      X86 temp = new X86( file ); temp.setBit( X86.x86_16 );
 
       temp.setSeg( (short)0x0010 ); //Sets the code segment.
 
@@ -317,9 +316,9 @@ public class Headers extends Data
         //Disassemble till end, or return from application.
         //Note that more can be added here such as the jump operation.
 
-        Data.stream.seekV( 256 );
+        file.seekV( 256 );
 
-        while( Data.stream.getFilePointer() < Data.PE )
+        while( file.getFilePointer() < Data.PE )
         {
           t1 = temp.posV(); t2 = temp.disASM();
           
@@ -331,19 +330,19 @@ public class Headers extends Data
           if( Dos_exit == 2 ) { break; }
         }
 
-        long pos = Data.stream.getFilePointer() - 1, posV = Data.stream.getVirtualPointer() - 1;
+        long pos = file.getFilePointer() - 1, posV = file.getVirtualPointer() - 1;
         
-        Data.stream.seekV( 256 );
-        WindowComponents.Virtual.setSelectedEnd( posV ); WindowComponents.Offset.setSelectedEnd( pos );
+        file.seekV( 256 );
+        Virtual.setSelectedEnd( posV ); Offset.setSelectedEnd( pos );
         
-        WindowComponents.info( "<html>" + MZinfo[ el ] + t + "</html>" );
+        info( "<html>" + MZinfo[ el ] + t + "</html>" );
       }
       catch( Exception e ) { }
     }
 
     else
     {
-      WindowComponents.info( MZinfo[ el ] );
+      info( MZinfo[ el ] );
     }
   }
 
@@ -398,10 +397,10 @@ public class Headers extends Data
   {
     if( el < 0 )
     {
-      WindowComponents.info("<html>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
+      info("<html>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
         "This header specifies the number of sections to map in virtual space. The processor type, and date of compilation.</html>");
     }
-    else { WindowComponents.info( PEinfo[ el ] ); }
+    else { info( PEinfo[ el ] ); }
   }
 
   //Detailed description of the OP header.
@@ -446,9 +445,9 @@ public class Headers extends Data
   {
     if( el < 0 )
     {
-      WindowComponents.info("<html>At the end of the PE header is the start of the Optional header. However, this header is not optional.</html>");
+      info("<html>At the end of the PE header is the start of the Optional header. However, this header is not optional.</html>");
     }
-    else { WindowComponents.info( OPinfo[ el >= 8 && is64bit ? el + 1 : el ] ); }
+    else { info( OPinfo[ el >= 8 && is64bit ? el + 1 : el ] ); }
   }
 
   //Detailed description of the data Directory Array.
@@ -461,10 +460,10 @@ public class Headers extends Data
   {
     if( el < 0 )
     {
-      WindowComponents.info("<html>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
+      info("<html>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
         "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.<br /><br />Anything that is 0, is not used.</html>");
     }
-    else { WindowComponents.info( DDinfo[ el % 3 ] ); }
+    else { info( DDinfo[ el % 3 ] ); }
   }
 
   //Detailed description of the sections to RAM memory.
@@ -485,9 +484,9 @@ public class Headers extends Data
   {
     if( el < 0 )
     {
-      WindowComponents.info("<html>Number of sections to read was defined in the OP header.<br /><br />The virtual address positions are useless without setting up the mapped sections.<br /><br />" +
+      info("<html>Number of sections to read was defined in the OP header.<br /><br />The virtual address positions are useless without setting up the mapped sections.<br /><br />" +
         "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.</html>");
     }
-    else { WindowComponents.info( Sinfo[ el % 8 ] ); }
+    else { info( Sinfo[ el % 8 ] ); }
   }
 }

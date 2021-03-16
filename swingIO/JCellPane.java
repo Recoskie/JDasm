@@ -1,4 +1,4 @@
-package cellPane;
+package swingIO;
 import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.*;
@@ -7,7 +7,7 @@ import javax.swing.event.*;
 
 //Uses custom layout with widgets that control the components in window.
 
-public class CellPane extends JComponent implements MouseMotionListener, MouseListener, AncestorListener
+public class JCellPane extends JComponent implements MouseMotionListener, MouseListener, AncestorListener
 {
   //Rows and cols minium, or preferred size.
 
@@ -237,7 +237,7 @@ public class CellPane extends JComponent implements MouseMotionListener, MouseLi
 
   //Construct the split layout system.
 
-  public CellPane()
+  public JCellPane()
   {
     cLayout = new CellLayout(); this.setLayout( cLayout );
 

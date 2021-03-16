@@ -6,7 +6,7 @@ import javax.swing.tree.*;
 
 public class FileIconManager extends DefaultTreeCellRenderer
 {
-  public static String Folder = "Icons/f.gif", UnkowenFile = "Icons/u.gif";
+  public static String Folder = "Icons/f.gif", UnknownFile = "Icons/u.gif";
   public static ImageIcon FolderPic[] = new ImageIcon[2];
 
   public static String FType[] = new String[] { ".h", ".disk", ".exe",".dll",".sys",".drv",".ocx" };
@@ -27,7 +27,7 @@ public class FileIconManager extends DefaultTreeCellRenderer
       LoadData = false;
 
       FolderPic[0] = new ImageIcon( FileIconManager.class.getResource( Folder ) );
-      FolderPic[1] = new ImageIcon( FileIconManager.class.getResource( UnkowenFile ) );
+      FolderPic[1] = new ImageIcon( FileIconManager.class.getResource( UnknownFile ) );
     
       for( int i = 0; i < Load.length; i++ )
       {
@@ -46,7 +46,7 @@ public class FileIconManager extends DefaultTreeCellRenderer
 
     if( leaf ) { check = SetImage( value + "" ); }
 
-    if( !check&leaf ) { UnkowenFileType( value + "" ); } else if( !leaf ) { FolderIcon( value + "" ); }
+    if( !check&leaf ) { UnknownFileType( value + "" ); } else if( !leaf ) { FolderIcon( value + "" ); }
     
     return( this );
   }
@@ -55,22 +55,22 @@ public class FileIconManager extends DefaultTreeCellRenderer
 
   protected boolean SetImage(String name)
   {
-    String EX=getExstntion( name );
+    String EX=getExtension( name );
       
     if( !EX.equals("") )
     {
-      int n = GetExstntionNumber( EX );
+      int n = GetExtensionNumber( EX );
         
       if( n != -1 )
       {
         setIcon( LoadedPic[n] );
-        setText( FilterExstntion( FilterRefrence( name ) ) );
+        setText( FilterExtension( FilterReference( name ) ) );
         return( true );
       }
     }
     else
     {
-      setText( FilterRefrence( name ) );
+      setText( FilterReference( name ) );
     }
       
     return(false);
@@ -91,13 +91,13 @@ public class FileIconManager extends DefaultTreeCellRenderer
     }
   }
 
-  protected void UnkowenFileType(String f)
+  protected void UnknownFileType(String f)
   {
     //In case the file uses a value at the end of it's name to use as reference in a list
 
     if( Open )
     {
-      f = FilterRefrence( f );
+      f = FilterReference( f );
 
       if( !SetImage( f ) )
       {
@@ -108,7 +108,7 @@ public class FileIconManager extends DefaultTreeCellRenderer
     else { setIcon( FolderPic[1] ); }
   }
 
-  protected String getExstntion(String f)
+  protected String getExtension(String f)
   {
     if( f.lastIndexOf(46) > 0 )
     {
@@ -120,7 +120,7 @@ public class FileIconManager extends DefaultTreeCellRenderer
     return("");
   }
     
-  protected int GetExstntionNumber(String Ex)
+  protected int GetExtensionNumber(String Ex)
   {
     for(int i = 0; i < FType.length; i++ )
     {
@@ -133,12 +133,12 @@ public class FileIconManager extends DefaultTreeCellRenderer
     return(-1);
   }
     
-  protected String FilterExstntion(String File)
+  protected String FilterExtension(String File)
   {
     return( File.substring( 0, File.lastIndexOf(46) ) );
   }
 
-  protected String FilterRefrence(String File)
+  protected String FilterReference(String File)
   {
     if( File.lastIndexOf(35) > 0 )
     {

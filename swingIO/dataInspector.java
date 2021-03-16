@@ -1,4 +1,4 @@
-package dataTools;
+package swingIO;
 
 import java.awt.*;
 import javax.swing.*;
@@ -8,7 +8,6 @@ import java.awt.event.*;
 import java.util.*;
 
 import RandomAccessFileV.*;
-import VHex.*;
 
 public class dataInspector extends JComponent implements IOEventListener, ActionListener
 {

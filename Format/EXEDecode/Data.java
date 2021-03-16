@@ -1,14 +1,9 @@
 package Format.EXEDecode;
 
 import javax.swing.JTable;
-import RandomAccessFileV.*;
 
-public class Data
+public class Data extends Window.Window
 {
-  //File system stream.
-
-  public static RandomAccessFileV stream;
-
   //variables used to hold dll table of functions and dll name for when user click on dll
   //the number in the name array corresponds to which table to use.
   

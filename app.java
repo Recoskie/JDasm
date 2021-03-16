@@ -1,19 +1,13 @@
 import javax.swing.*;
 import java.io.*;
-import java.awt.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.awt.event.*;
-import WindowComponents.*;
-import cellPane.CellPane;
-
-//New file components.
-
 import RandomAccessFileV.*;
-import VHex.*;
-import dataTools.*;
+import WindowComponents.*;
+import Window.*;
 
-public class app extends WindowComponents implements TreeWillExpandListener, TreeSelectionListener, ActionListener, MouseListener
+public class app extends Window implements TreeWillExpandListener, TreeSelectionListener, ActionListener, MouseListener
 {
   //Current file path.
 
@@ -21,8 +15,6 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
   public String Sep = System.getProperty("file.separator");
 
   //The file system stream to the file type.
-
-  public static RandomAccessFileV file;
 
   public static boolean diskMode = false;
 
@@ -105,170 +97,11 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
 
   public app( String Arg_file )
   {
-    f = new JFrame("JFH-Disassembly"); f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    createGUI("JFH-Disassembly", this, this, this, this);
 
-    //Tool window.
-
-    infoData.setContentType("text/html");
-    infoData.setBackground( new Color(238,238,238) );
-    infoData.setEditable(false);
-    javax.swing.text.DefaultCaret caret = (javax.swing.text.DefaultCaret) infoData.getCaret();
-    caret.setUpdatePolicy(javax.swing.text.DefaultCaret.NEVER_UPDATE);
-    iData = new JScrollPane( infoData );
-
-    //File chooser controls.
-
-    fcBar = new JMenuBar();
-
-    JMenuItem Back = new JMenuItem( "Back", new ImageIcon( app.class.getResource( "AppPictures/back.png" ) ) );
-    JMenuItem Home = new JMenuItem( "User", new ImageIcon( app.class.getResource( "AppPictures/home.png" ) ) );
-    JMenuItem Go = new JMenuItem( "Forward", new ImageIcon( app.class.getResource( "AppPictures/go.png" ) ) );
-    JMenuItem Up = new JMenuItem( "Up a Folder", new ImageIcon( app.class.getResource( "AppPictures/up.png" ) ) );
-    JMenuItem Computer = new JMenuItem( "My Computer", new ImageIcon( app.class.getResource( "AppPictures/computer.png" ) ) );
-    JMenuItem OpenDisk = new JMenuItem( "Open Disk", new ImageIcon( app.class.getResource( "AppPictures/OpenDisk.png" ) ) );
-
-    fcBar.add( Computer ); fcBar.add( Back ); fcBar.add( Home ); fcBar.add( Go ); fcBar.add( Up ); fcBar.add( OpenDisk );
-  
-    //Action commands.
-  
-    Back.setActionCommand( "B" ); Back.addActionListener(this);
-    Go.setActionCommand( "G" ); Go.addActionListener(this);
-    Computer.setActionCommand( "C" ); Computer.addActionListener(this);
-    Home.setActionCommand( "H" ); Home.addActionListener(this);
-    Up.setActionCommand( "U" ); Up.addActionListener(this);
-    OpenDisk.setActionCommand( "O" ); OpenDisk.addActionListener(this);
-
-    //Binary tools menu bar.
-
-    bdBar = new JMenuBar();
-
-    JMenu fm = new JMenu("File");
-    JMenu vm = new JMenu("View");
-    JMenu tm = new JMenu("Tools");
- 
-    JMenuItem f1 = new JMenuItem("Open new File");
-
-    //View options.
-
-    JMenuItem v1 = new JMenuItem("Toggle text View");
-    JMenuItem v2 = new JMenuItem("Toggle virtual space View");
-    JMenuItem v3 = new JMenuItem("Toggle offset View");
-    JMenuItem v4 = new JMenuItem("Toggle Data Inspector");
-
-    //Tools.
-
-    JMenuItem t1 = new JMenuItem("Goto Offset");
-    JMenuItem t2 = new JMenuItem("Goto Virtual");
-
-    //Hex editor operations.
-
-    pm = new JPopupMenu("Selected bytes.");
-
-    JMenuItem p1 = new JMenuItem("Copy as hex");
-    JMenuItem p2 = new JMenuItem("Copy raw data");
-    JMenuItem p3 = new JMenuItem("Save as file");
-
-    //Set the action commands.
-
-    p1.setActionCommand("CP"); p2.setActionCommand("CPR");
-
-    //Create tool bar.
-
-    fm.add(f1);
-    
-    vm.add(v1); vm.add(v2); vm.add(v3); vm.add(v4);
-
-    tm.add(t1); tm.add(t2);
-
-    bdBar.add(fm); bdBar.add(vm); bdBar.add(tm);
-
-    //Create the pop up menu.
-
-    pm.add( p1 ); pm.add( p2 ); pm.add( p3 );
-  
-    //add ActionListener to menuItems.
-    
-    f1.addActionListener(this);
-    
-    v1.addActionListener(this); v2.addActionListener(this);
-    v3.addActionListener(this); v4.addActionListener(this);
-
-    t1.addActionListener(this); t2.addActionListener(this);
-
-    p1.addActionListener(this); p2.addActionListener(this); p3.addActionListener(this);
-
-    //The tree is used for file chooser, and for decoded data view.
-
-    tree = new JTree();
-  
     //Update the tree with a directory search for file chooser.
   
     if( Arg_file == "" ) { dirSearch(); }
-
-    //tree properties.
-
-    tree.setRootVisible(false); tree.setShowsRootHandles(false);
-    tree.addTreeWillExpandListener(this); tree.addMouseListener(this);
-    tree.addTreeSelectionListener(this);
-  
-    //Custom file Icon manager.
-  
-    tree.setCellRenderer(new FileIconManager());
-    stree = new JScrollPane( tree );
-
-    //Simple grid layout, for the tree.
-
-    f.setLayout(new GridLayout(1,0));
-    
-    //Initialize IO components.
-
-    try
-    {
-      file = new RandomAccessFileV( new byte[16] );
-
-      di = new dataInspector( file ); ds = new dataDescriptor( di );
-          
-      Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
-    }
-    catch(Exception e){ }
-
-    Virtual.setComponentPopupMenu(pm); Offset.setComponentPopupMenu(pm);
-
-    Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
-
-    //Set visibility to tree only.
-
-    ds.setVisible(false); iData.setVisible(false);
-    Virtual.setVisible(false); Offset.setVisible(false);
-    di.setVisible(false);
-    
-    //Add all the tools to window.
-
-    tools = new CellPane();
-
-    //Data display tools.
-
-    tools.add( stree ); tools.add( ds ); tools.add( iData ); tools.rowEnd();
-
-    //Binary tools.
-
-    tools.add( Virtual ); tools.add( Offset ); tools.add( di ); tools.rowEnd();
-
-    //scroll bar for the tree.
-
-    f.add(tools);
-
-    //set the menu bar controls for file chooser.
-
-    f.setJMenuBar(fcBar);
-
-    //Set application icon image.
-
-    f.setIconImage( new ImageIcon( app.class.getResource( "AppPictures/app.png" ) ).getImage() );
-
-    //Display the window.
-
-    f.pack(); f.setLocationRelativeTo(null);
 
     //open disk, or file.
 
@@ -562,7 +395,7 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
 
       try
       {
-        java.awt.datatransfer.Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+        java.awt.datatransfer.Clipboard c = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
 
         java.awt.datatransfer.StringSelection s;
 
@@ -713,7 +546,7 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
 
       if( I >= 0 )
       {
-        ((ExploerEventListener)UsedDecoder).read( Path + Sep + ft, file );
+        ((ExplorerEventListener)UsedDecoder).read( Path + Sep + ft, file );
 
         stree.setVisible(true); ds.setVisible(true); iData.setVisible(true);
       
@@ -882,7 +715,7 @@ public class app extends WindowComponents implements TreeWillExpandListener, Tre
     }
     else if( UsedDecoder != null )
     {
-      ((ExploerEventListener)UsedDecoder).elementOpen(tree.getLastSelectedPathComponent().toString());
+      ((ExplorerEventListener)UsedDecoder).elementOpen(tree.getLastSelectedPathComponent().toString());
     }
   }
 
