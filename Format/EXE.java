@@ -1,17 +1,17 @@
 package Format;
 
 import java.io.*;
+
 import swingIO.*;
+import swingIO.tree.*;
 import javax.swing.tree.*;
 import Format.EXEDecode.*;
-import RandomAccessFileV.*;
-import WindowComponents.*;
 
 //Processor cores.
 
 import core.x86.*; //X86.
 
-public class EXE extends Data implements ExplorerEventListener
+public class EXE extends Data implements JDEventListener
 {
   //The new Descriptor table allows a description of clicked.
 
@@ -35,22 +35,22 @@ public class EXE extends Data implements ExplorerEventListener
 
   //Nodes that can be added to when Adding section format readers.
 
-  DefaultMutableTreeNode root;
-  DefaultMutableTreeNode Export = new DefaultMutableTreeNode("function Export Table.h");
-  DefaultMutableTreeNode Import = new DefaultMutableTreeNode("DLL Import Table.h");
-  DefaultMutableTreeNode RE = new DefaultMutableTreeNode("Resource Files.h");
-  DefaultMutableTreeNode EX = new DefaultMutableTreeNode("Exception Table.h");
-  DefaultMutableTreeNode Security = new DefaultMutableTreeNode("Security Level Settings.h");
-  DefaultMutableTreeNode RELOC = new DefaultMutableTreeNode("Relocations.h");
-  DefaultMutableTreeNode DEBUG = new DefaultMutableTreeNode("DEBUG TABLE.h");
-  DefaultMutableTreeNode Description = new DefaultMutableTreeNode("Description/Architecture.h");
-  DefaultMutableTreeNode MV = new DefaultMutableTreeNode("Machine Value.h");
-  DefaultMutableTreeNode TS = new DefaultMutableTreeNode("Thread Storage Location.h");
-  DefaultMutableTreeNode ConFIG = new DefaultMutableTreeNode("Load System Configuration.h");
-  DefaultMutableTreeNode BoundImport = new DefaultMutableTreeNode("Import Table of Functions inside program.h");
-  DefaultMutableTreeNode ImportAddress = new DefaultMutableTreeNode("Import Address Setup Table.h");
-  DefaultMutableTreeNode DelayImport = new DefaultMutableTreeNode("Delayed Import Table.h");
-  DefaultMutableTreeNode COM = new DefaultMutableTreeNode("COM Runtime Descriptor.h");
+  JDNode root;
+  JDNode Export = new JDNode("function Export Table.h", -1);
+  JDNode Import = new JDNode("DLL Import Table.h", -1);
+  JDNode RE = new JDNode("Resource Files.h", -1);
+  JDNode EX = new JDNode("Exception Table.h", -1);
+  JDNode Security = new JDNode("Security Level Settings.h", -1);
+  JDNode RELOC = new JDNode("Relocations.h", -1);
+  JDNode DEBUG = new JDNode("DEBUG TABLE.h", -1);
+  JDNode Description = new JDNode("Description/Architecture.h", -1);
+  JDNode MV = new JDNode("Machine Value.h", -1);
+  JDNode TS = new JDNode("Thread Storage Location.h", -1);
+  JDNode ConFIG = new JDNode("Load System Configuration.h", -1);
+  JDNode BoundImport = new JDNode("Import Table of Functions inside program.h", -1);
+  JDNode ImportAddress = new JDNode("Import Address Setup Table.h", -1);
+  JDNode DelayImport = new JDNode("Delayed Import Table.h", -1);
+  JDNode COM = new JDNode("COM Runtime Descriptor.h", -1);
 
   //plug in the executable Readers
 
@@ -59,13 +59,9 @@ public class EXE extends Data implements ExplorerEventListener
   public DLLImport DLL = new DLLImport();
   public Resource RSRC = new Resource();
 
-  public EXE() { UsedDecoder = this; }
-
-  //plug in the separate decoders of the exe format together
-
-  public void read( String F, RandomAccessFileV notUsed )
+  public EXE()
   {
-    blank = new Descriptor( file );
+    blank = new Descriptor( file ); tree.setEventListener( this );
 
     file.Events = false;
 
@@ -73,11 +69,11 @@ public class EXE extends Data implements ExplorerEventListener
  
     ((DefaultTreeModel)tree.getModel()).setRoot(null);
     tree.setRootVisible(true);tree.setShowsRootHandles(true);
-    root = new DefaultMutableTreeNode( F );
+    root = new JDNode( fc.getFileName() );
 
     //header data folder to organize exe setup information.
   
-    DefaultMutableTreeNode Headers = new DefaultMutableTreeNode("Header Data");
+    JDNode Headers = new JDNode("Header Data");
 
     //Decode the setup headers.
 
@@ -110,17 +106,17 @@ public class EXE extends Data implements ExplorerEventListener
       }
     }
 
-    Headers.add(new DefaultMutableTreeNode("MZ Header.h#H,0"));
-    Headers.add(new DefaultMutableTreeNode("PE Header.h#H,1"));
-    Headers.add(new DefaultMutableTreeNode("OP Header.h#H,2"));
-    Headers.add(new DefaultMutableTreeNode("Data Directory Array.h#H,3"));
-    Headers.add(new DefaultMutableTreeNode("Mapped SECTIONS TO RAM.h#H,4"));
+    Headers.add(new JDNode("MZ Header.h", "H", 0));
+    Headers.add(new JDNode("PE Header.h", "H", 1));
+    Headers.add(new JDNode("OP Header.h", "H", 2));
+    Headers.add(new JDNode("Data Directory Array.h", "H", 3));
+    Headers.add(new JDNode("Mapped SECTIONS TO RAM.h", "H", 4));
 
     root.add( Headers );
 
     //Start of code.
 
-    if( baseOfCode != 0 )  { root.add(new DefaultMutableTreeNode("Program Start (Machine code).h#Dis," + ( imageBase + startOfCode ) + "" )); }
+    if( baseOfCode != 0 )  { root.add(new JDNode( "Program Start (Machine code).h", "Dis", imageBase + startOfCode ) ); }
 
     //Location of the export directory
 
@@ -186,28 +182,26 @@ public class EXE extends Data implements ExplorerEventListener
 
     file.Events = true;
 
-    tree.setSelectionPath( new TreePath( Headers.getPath() ) ); elementOpen("Header Data");
+    //tree.setSelectionPath( new TreePath( Headers.getPath() ) ); open( new JDEvent( this, "Header Data", "", "", new long[]{0} ) );
 
     f.setVisible(true);
   }
 
   //Change What To Display Based on what the user clicks on.
 
-  public void elementOpen(String h)
+  public void open( JDEvent e )
   {
     //Data descriptors, for data structures.
 
-    if( h.indexOf("#") > 0 )
+    if( e.getArgs()[0] >= 0 )
     {
-      String[] type = h.substring( h.lastIndexOf("#") + 1, h.length() ).split(",");
-
       //Start Disassembling instructions.
     
-      if( type[0].equals("Dis") )
+      if( e.getID().equals("Dis") )
       {
         //If import table is not loaded. It should be loaded to map method calls.
 
-        if( DLL_des == null ) { elementOpen("DLL Import Table"); }
+        if( DLL_des == null ) { open( new JDEvent( this, "DLL Import Table", "", "", new long[]{0} ) ); }
 
         //Begin disassembly.
 
@@ -215,7 +209,7 @@ public class EXE extends Data implements ExplorerEventListener
         {
           core.locations.clear(); core.data_off.clear(); core.code.clear();
 
-          core.locations.add( Long.parseLong( type[1] ) );
+          core.locations.add( e.getArgs()[0] );
 
           Dis( core.locations.get(0) ); ds.setDescriptor( core );
         }
@@ -224,54 +218,54 @@ public class EXE extends Data implements ExplorerEventListener
 
       //Headers.
 
-      else if( type[0].equals("H") )
+      else if( e.getID().equals("H") )
       {
-        ds.setDescriptor( Header_des[ Integer.parseInt( type[1] ) ] );
+        ds.setDescriptor( Header_des[ (int)e.getArgs()[0] ] );
       }
 
       //Export data structures.
 
-      else if( type[0].equals("E") )
+      else if( e.getID().equals("E") )
       {
-        ds.setDescriptor( Export_des[ Integer.parseInt( type[1] ) ] );
+        ds.setDescriptor( Export_des[ (int)e.getArgs()[0] ] );
       }
 
       //DLL import data structures.
 
-      else if( type[0].equals("D") )
+      else if( e.getID().equals("D") )
       {
-        ds.setDescriptor( DLL_des[ Integer.parseInt( type[1] ) ] );
+        ds.setDescriptor( DLL_des[ (int)e.getArgs()[0] ] );
       }
 
       //Resource reader data structures.
 
-      else if( type[0].equals("R") )
+      else if( e.getID().equals("R") )
       {
-        ds.setDescriptor( RSRC_des[ Integer.parseInt( type[1] ) ] );
+        ds.setDescriptor( RSRC_des[ (int)e.getArgs()[0] ] );
       }
 
       //Offset.
 
-      else if( type[0].equals("O") )
+      else if( e.getID().equals("O") )
       {
         try
         {
-          file.seekV( Long.parseLong( type[1] ) );
+          file.seekV( e.getArgs()[0] );
         }
-        catch( IOException e ) { }
+        catch( IOException er ) { }
       }
 
       //Select virtual offset.
 
-      else if( type[0].equals("Sv") )
+      else if( e.getID().equals("Sv") )
       {
         try
         {
-          file.seekV( Long.parseLong( type[1] ) );
+          file.seekV( e.getArgs()[0] );
 
-          Virtual.setSelected( Long.parseLong( type[1] ), Long.parseLong( type[2] ) );
+          Virtual.setSelected( e.getArgs()[0], e.getArgs()[1] );
         }
-        catch( IOException e ) { }
+        catch( IOException er ) { }
       }
 
       return;
@@ -279,9 +273,9 @@ public class EXE extends Data implements ExplorerEventListener
 
     //Headers must be decoded before any other part of the program can be read.
 
-    else if( h.equals("Header Data") )
+    else if( e.getPath().equals("Header Data") )
     {
-      Offset.setSelected( 0, ( Header_des[4].pos + Header_des[4].length ) - 1 );
+      //Offset.setSelected( 0, ( Header_des[4].pos + Header_des[4].length ) - 1 );
 
       info("<html>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
       "Export Table can not be located.<br /><br />" +
@@ -291,7 +285,7 @@ public class EXE extends Data implements ExplorerEventListener
 
     //Seek virtual address position. Thus begin reading section.
 
-    else if( h.startsWith( "function Export Table", 0 ) )
+    else if( e.getPath().startsWith( "function Export Table", 0 ) )
     {
       try
       {
@@ -315,7 +309,7 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[0], DataDir[0] + DataDir[1] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[1] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       info("<html>Once the headers are read, then the program is setup in virtual space.<br /><br />" +
       "The Export section is a list of names that locate to a machine code in RAM.<br /><br />" +
@@ -325,7 +319,7 @@ public class EXE extends Data implements ExplorerEventListener
       "This allows the other binary to directly run methods by using the import location as a relative address.</html>");
     }
 
-    else if( h.startsWith( "DLL Import Table", 0 ) )
+    else if( e.getPath().startsWith( "DLL Import Table", 0 ) )
     {
       try
       {
@@ -349,7 +343,7 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[2], DataDir[2] + DataDir[3] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[3] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       info("<html>Methods that are imported from other files using the export table section.<br /><br />" +
       "Each import file is loaded to RAM memory. Each import has two method lists.<br /><br />" +
@@ -358,7 +352,7 @@ public class EXE extends Data implements ExplorerEventListener
       "It is easy to map when a method call is done in machine code.</html>");
     }
 
-    else if( h.startsWith( "Resource Files", 0 ) )
+    else if( e.getPath().startsWith( "Resource Files", 0 ) )
     {
       try
       {
@@ -382,13 +376,13 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[4], DataDir[4] + DataDir[5] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[5] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       info("<html>Files that can be read within the application, or DLL. Such as pictures, images, audio files.<br /><br />The first Icon that is read is the programs ICon image.<br /><br />" +
       "Each address location is added to the start of the resource section.</html>");
     }
 
-    else if( h.equals("Exception Table.h") )
+    else if( e.getPath().equals("Exception Table.h") )
     {
       try
       {
@@ -396,11 +390,11 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[6], DataDir[6] + DataDir[7] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[7] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }
-    else if( h.equals("Security Level Settings.h") )
+    else if( e.getPath().equals("Security Level Settings.h") )
     {
       try
       {
@@ -408,11 +402,11 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[8], DataDir[8] + DataDir[9] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[9] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }
-    else if( h.equals("Relocations.h") )
+    else if( e.getPath().equals("Relocations.h") )
     {
       try
       {
@@ -420,14 +414,14 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[10], DataDir[10] + DataDir[11] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[11] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       info("<html>Relocations are used if the program is not loaded at it's preferred base Address set in the op header.<br /><br />" +
       "The difference is added to locations defined in the address list in this relocation section.<br /><br />" +
       "Relocations are not needed, for this disassembler as the program is always mapped at it's preferred base address.<br /><br />" +
       "A reader can be designed for the relocation section, but is not really necessary.</html>");
     }
-    else if( h.equals("DEBUG TABLE.h") )
+    else if( e.getPath().equals("DEBUG TABLE.h") )
     {
       try
       {
@@ -435,11 +429,11 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[12], DataDir[12] + DataDir[13] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[13] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }
-    else if( h.equals("Description/Architecture.h") )
+    else if( e.getPath().equals("Description/Architecture.h") )
     {
       try
       {
@@ -447,11 +441,11 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[14], DataDir[14] + DataDir[15] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[15] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }
-    else if( h.equals("Machine Value.h") )
+    else if( e.getPath().equals("Machine Value.h") )
     {
       try
       {
@@ -459,11 +453,11 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[16], DataDir[16] + DataDir[17] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[17] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }
-    else if( h.equals("Thread Storage Location.h") )
+    else if( e.getPath().equals("Thread Storage Location.h") )
     {
       try
       {
@@ -471,11 +465,11 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[18], DataDir[18] + DataDir[19] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[19] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }
-    else if( h.equals("Load System Configuration.h") )
+    else if( e.getPath().equals("Load System Configuration.h") )
     {
       try
       {
@@ -483,11 +477,11 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[20], DataDir[20] + DataDir[21] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[21] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }
-    else if( h.equals("Import Table of Functions inside program.h") )
+    else if( e.getPath().equals("Import Table of Functions inside program.h") )
     {
       try
       {
@@ -495,11 +489,11 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[22], DataDir[22] + DataDir[23] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[23] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }
-    else if( h.equals("Import Address Setup Table.h") )
+    else if( e.getPath().equals("Import Address Setup Table.h") )
     {
       try
       {
@@ -507,11 +501,11 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[24], DataDir[24] + DataDir[25] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[25] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }
-    else if( h.equals("Delayed Import Table.h") )
+    else if( e.getPath().equals("Delayed Import Table.h") )
     {
       try
       {
@@ -519,11 +513,11 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[26], DataDir[26] + DataDir[27] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[27] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }
-    else if( h.equals("COM Runtime Descriptor.h") )
+    else if( e.getPath().equals("COM Runtime Descriptor.h") )
     {
       try
       {
@@ -531,7 +525,7 @@ public class EXE extends Data implements ExplorerEventListener
         Virtual.setSelected( DataDir[28], DataDir[28] + DataDir[29] - 1 );
         Offset.setSelected( file.getFilePointer(), file.getFilePointer() + DataDir[29] - 1 );
       }
-      catch( IOException e ) { }
+      catch( IOException er ) { }
 
       noDecode();
     }

@@ -12,12 +12,12 @@ public class Sys
 
   //The application is initialized on start.
 
-  private String cd = "", app = "", Jar = "-jar ";
+  private static String cd = "", app = "", Jar = "-jar ";
 
   //Convince method to prompt user if they wish to run application as administrator (Super user).
   //Starts the application with command line arguments.
 
-  public boolean promptAdmin( String args )
+  public static boolean promptAdmin( String args )
   {
     if( app == "" ) { return( false ); }
 
@@ -109,7 +109,7 @@ public class Sys
           {
             if( !oneTry )
             {
-              int action = javax.swing.JOptionPane.showConfirmDialog(null, pwd,"Enter Password",javax.swing.JOptionPane.OK_CANCEL_OPTION);
+              javax.swing.JOptionPane.showConfirmDialog(null, pwd,"Enter Password",javax.swing.JOptionPane.OK_CANCEL_OPTION);
           
               //Give password to system.
             
@@ -168,7 +168,7 @@ public class Sys
 
   //This method tests if the new process started as administrator.
 
-  public boolean start( Class cl, String[] args )
+  public static boolean start( Class cl, String[] args )
   {
     try { app = new File(cl.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath(); } catch(java.net.URISyntaxException e) { }
 

@@ -1,13 +1,13 @@
 package Format.EXEDecode;
 import java.io.*;
 import swingIO.*;
-import javax.swing.tree.*;
+import swingIO.tree.*;
 
 import RandomAccessFileV.*;
 
 public class DLLImport extends Data
 {
-  public Descriptor[] LoadDLLImport( DefaultMutableTreeNode IMPORT, RandomAccessFileV b ) throws IOException
+  public Descriptor[] LoadDLLImport( JDNode IMPORT, RandomAccessFileV b ) throws IOException
   {
     //get the physical address to data directory array links to dll import table
 
@@ -15,7 +15,7 @@ public class DLLImport extends Data
 
     //for dll names, and function list.
 
-    IMPORT.add( new DefaultMutableTreeNode( "DLL Import Array Decode.h#D,0" ) );
+    IMPORT.add( new JDNode( "DLL Import Array Decode.h", "D", 0 ) );
 
     Descriptor DLLArray = new Descriptor( b, true );
     Descriptor DLLName, FuncArray1, FuncArray2, Method;
@@ -24,7 +24,7 @@ public class DLLImport extends Data
 
     long t = 0, t2 = 0, pos = 1;
 
-    DefaultMutableTreeNode DLLFunc;
+    JDNode DLLFunc;
 
     while( ( d1 | d2 | d3 | d4 | d5 ) != 0 )
     {
@@ -48,7 +48,7 @@ public class DLLImport extends Data
 
       //Load the two Function list.
 
-      DLLFunc = new DefaultMutableTreeNode( DLLName.value + "#D," + ref ); des.add( DLLName ); ref += 1;
+      DLLFunc = new JDNode( DLLName.value.toString(), "D", ref ); des.add( DLLName ); ref += 1;
       
       if( ( d1 | d2 | d3 | d4 | d5 ) != 0 )
       {
@@ -99,7 +99,7 @@ public class DLLImport extends Data
           {
             core.mapped_loc.add( "Method #" + ( pos & 0xFFFF ) + "" );
 
-            DLLFunc.add( new DefaultMutableTreeNode( "No_Name() #" + ( pos & 0xFFFF ) + ".dll#" ) );
+            DLLFunc.add( new JDNode( "No_Name() #" + ( pos & 0xFFFF ) + ".dll#" ) );
           }
 
           //Else grater than 0, and not zero. Then it is a named import method. 
@@ -116,17 +116,17 @@ public class DLLImport extends Data
 
             core.mapped_loc.add( Method.value + "" );
 
-            DLLFunc.add( new DefaultMutableTreeNode( Method.value + "().dll#D,"+ ref ) ); ref += 1; b.seekV(t2);
+            DLLFunc.add( new JDNode( Method.value + "().dll", "D", ref ) ); ref += 1; b.seekV(t2);
           }
         }
 
         core.mapped_pos.add( b.getVirtualPointer() );
 
-        DLLFunc.insert( new DefaultMutableTreeNode( "Function Array Decode 1.h#D," + ref ), 0 );
+        DLLFunc.insert( new JDNode( "Function Array Decode 1.h", "D", ref ), 0 );
 
         FuncArray1.setEvent( this::funcInfo ); des.add( FuncArray1 ); ref += 1;
         
-        DLLFunc.insert( new DefaultMutableTreeNode( "Function Array Decode 2.h#D," + ref ), 1 );
+        DLLFunc.insert( new JDNode( "Function Array Decode 2.h", "D", ref ), 1 );
         
         FuncArray2.setEvent( this::funcInfo ); des.add( FuncArray2 ); ref += 1;
 

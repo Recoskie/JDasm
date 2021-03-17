@@ -2,11 +2,10 @@ package Window;
 
 import javax.swing.*;
 import swingIO.*;
+import swingIO.tree.*;
 import java.awt.*;
-import javax.swing.event.*;
 import java.awt.event.*;
 import RandomAccessFileV.*;
-import WindowComponents.*;
 
 public class Window
 {
@@ -32,8 +31,12 @@ public class Window
 
   //File chooser tree, or data from a file format reader.
 
-  public static JTree tree;
+  public static JDTree tree;
   public static JScrollPane stree;
+
+  //The file chooser
+
+  public static fileChooser fc;
 
   //Additional detailed information output. For data in table cells, or section.
   //Also disassembly output.
@@ -57,23 +60,15 @@ public class Window
 
   public static JCellPane tools;
 
-  //Once hex editor is initialized. Then the target is set afterwards for new files.
-
-  public static boolean HInit = false;
-
   //Hex editor view options.
 
   public static boolean textV = true;
-
-  //The current file reader. Used for handling events to decode for the section of interest in the tree.
-
-  public static Object UsedDecoder;
 
   //Additional info text.
 
   public static void info( String s ) { infoData.setText(s); }
 
-  public static void createGUI(String w, ActionListener app, TreeWillExpandListener app2, MouseListener app3, TreeSelectionListener app4)
+  public static void createGUI(String w, ActionListener app, JDEventListener app1 )
   {
     f = new JFrame(w); f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -169,20 +164,17 @@ public class Window
 
     //The tree is used for file chooser, and for decoded data view.
 
-    tree = new JTree();
+    tree = new JDTree();
 
     //tree properties.
 
-    tree.setRootVisible(false); tree.setShowsRootHandles(false);
-    tree.addTreeWillExpandListener(app2); tree.addMouseListener(app3);
-    tree.addTreeSelectionListener(app4);
-  
-    //Custom file Icon manager.
-  
-    tree.setCellRenderer(new FileIconManager());
-    stree = new JScrollPane( tree );
+    tree.setRootVisible(false); tree.setShowsRootHandles(false); stree = new JScrollPane( tree );
 
-    //Simple grid layout, for the tree.
+    //Setup file chooser.
+
+    fc = new fileChooser( tree ); fc.setEventListener( app1 );
+
+    //Put JCellPane in grid layout.
 
     f.setLayout(new GridLayout(1,0));
     
@@ -200,7 +192,7 @@ public class Window
 
     Virtual.setComponentPopupMenu(pm); Offset.setComponentPopupMenu(pm);
 
-    Offset.enableText( textV ); Virtual.enableText( textV ); HInit = true;
+    Offset.enableText( textV ); Virtual.enableText( textV );
 
     //Set visibility to tree only.
 
@@ -231,9 +223,5 @@ public class Window
     //Set application icon image.
 
     f.setIconImage( new ImageIcon( Window.class.getResource( "AppPictures/app.png" ) ).getImage() );
-
-    //Display the window.
-
-    f.pack(); f.setLocationRelativeTo(null);
   }
 }

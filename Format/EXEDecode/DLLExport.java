@@ -1,13 +1,13 @@
 package Format.EXEDecode;
 import java.io.*;
 import swingIO.*;
-import javax.swing.tree.*;
+import swingIO.tree.*;
 
 import RandomAccessFileV.*;
 
 public class DLLExport extends Data
 {
-  public Descriptor[] LoadExport( DefaultMutableTreeNode Export, RandomAccessFileV b ) throws IOException
+  public Descriptor[] LoadExport( JDNode Export, RandomAccessFileV b ) throws IOException
   {
     java.util.LinkedList<Descriptor> des = new java.util.LinkedList<Descriptor>();
 
@@ -36,11 +36,11 @@ public class DLLExport extends Data
 
     boolean[] named;
 
-    DefaultMutableTreeNode Methods, Method_loc;
+    JDNode Methods, Method_loc;
 
     //Begin reeding, and mapping the export method locations.
 
-    Export.add( new DefaultMutableTreeNode( "Export info.h#E," + ref + "" ) ); ref += 1;
+    Export.add( new JDNode( "Export info.h", "E", ref ) ); ref += 1;
 
     Data = new Descriptor( b, true ); Data.setEvent( this::exportInfo );
 
@@ -82,9 +82,9 @@ public class DLLExport extends Data
 
     Str.String8("Export Name.", ((byte)0x00));
 
-    Methods = new DefaultMutableTreeNode( Str.value + "#E," + ref + "" ); des.add( Str ); Str.setEvent( this::strInfo ); ref += 1;
+    Methods = new JDNode( Str.value.toString(), "E", ref ); des.add( Str ); Str.setEvent( this::strInfo ); ref += 1;
 
-    Methods.add( new DefaultMutableTreeNode( "Address list location.h#E," + ref + "" ) ); ref += 1;
+    Methods.add( new JDNode( "Address list location.h", "E", ref ) ); ref += 1;
 
     //The Address list.
     
@@ -108,13 +108,13 @@ public class DLLExport extends Data
       order[i] = ( ((Short)Data.value).intValue() & 0xFFFF ); named[ order[i] + base ] = true;
     }
 
-    Methods.add( new DefaultMutableTreeNode( "Order list location.h#E," + ref ) ); des.add( Data ); Data.setEvent( this::OlistInfo ); ref += 1;
+    Methods.add( new JDNode( "Order list location.h", "E", ref ) ); des.add( Data ); Data.setEvent( this::OlistInfo ); ref += 1;
 
     //Names. Our sorted location list should now locate to each named method.
     
     b.seekV( name_List ); Data = new Descriptor( b, true );
 
-    Methods.insert( new DefaultMutableTreeNode( "Name list location.h#E," + ref + "" ), 1 ); des.add( Data ); Data.setEvent( this::MlistInfo ); ref += 1;
+    Methods.insert( new JDNode( "Name list location.h", "E", ref ), 1 ); des.add( Data ); Data.setEvent( this::MlistInfo ); ref += 1;
 
     //The named methods.
 
@@ -129,16 +129,16 @@ public class DLLExport extends Data
 
       Str.String8("Name.", ((byte)0x00)); b.seekV( t );
 
-      Method_loc = new DefaultMutableTreeNode( Str.value + "() #" + order[i] + "#E," + ref + "" ); ref += 1;
+      Method_loc = new JDNode( Str.value + "() #" + order[i], "E", ref ); ref += 1;
 
       if( loc[ order[i] + base ] > imageBase )
       {
-        Method_loc.add( new DefaultMutableTreeNode( "Goto Location.h#Sv," + loc[ order[i] + base ] + "," + loc[ order[i] + base ] + "" ) );
-        Method_loc.add( new DefaultMutableTreeNode( "Disassemble Location.h#Dis," + loc[ order[i] + base ] + "" ) );
+        Method_loc.add( new JDNode( "Goto Location.h", "Sv", new long[]{ loc[ order[i] + base ], loc[ order[i] + base ] } ) );
+        Method_loc.add( new JDNode( "Disassemble Location.h", "Dis", loc[ order[i] + base ] ) );
       }
       else
       {
-        Method_loc.add( new DefaultMutableTreeNode( "No Data" ) );
+        Method_loc.add( new JDNode( "No Data" ) );
       }
 
       Methods.add( Method_loc );
@@ -150,16 +150,16 @@ public class DLLExport extends Data
     {
       if( !named[i] )
       {
-        Method_loc = new DefaultMutableTreeNode( "No_Name() #" + i + "#" );
+        Method_loc = new JDNode( "No_Name() #" + i + "#" );
 
         if( loc[i] > imageBase )
         {
-          Method_loc.add( new DefaultMutableTreeNode( "Goto Location.h#Sv," + loc[i] + "," + loc[i] + "" ) );
-          Method_loc.add( new DefaultMutableTreeNode( "Disassemble Location.h#Dis," + loc[i] + "" ) );
+          Method_loc.add( new JDNode( "Goto Location.h", "Sv", new long[]{ loc[i], loc[i] } ) );
+          Method_loc.add( new JDNode( "Disassemble Location.h", "Dis", loc[i] ) );
         }
         else
         {
-          Method_loc.add( new DefaultMutableTreeNode( "No Data" ) );
+          Method_loc.add( new JDNode( "No Data" ) );
         }
 
         Methods.add( Method_loc );

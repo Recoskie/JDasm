@@ -47,6 +47,7 @@ public class Headers extends Data
 
   public Descriptor readPE(RandomAccessFileV b) throws IOException
   {
+    b.seek(PE);
     Descriptor pe = new Descriptor( b );
 
     //data decode to table

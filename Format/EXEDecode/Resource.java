@@ -1,7 +1,7 @@
 package Format.EXEDecode;
 import java.io.*;
 import swingIO.*;
-import javax.swing.tree.*;
+import swingIO.tree.*;
 
 import RandomAccessFileV.*;
 
@@ -17,17 +17,17 @@ public class Resource extends Data
 
   //Each DIR contains a list to another Dir list, or File.
 
-  DefaultMutableTreeNode nDir;
+  JDNode nDir;
   Descriptor File_Str;
   long t = 0;
 
   //Use current IO potion if no defined position.
 
-  public Descriptor[] readResource( DefaultMutableTreeNode Dir, RandomAccessFileV b ) throws IOException { return( readResource( Dir, b, 0 ) ); }
+  public Descriptor[] readResource( JDNode Dir, RandomAccessFileV b ) throws IOException { return( readResource( Dir, b, 0 ) ); }
 
   //Recursively read Resource at a set position.
 
-  public Descriptor[] readResource( DefaultMutableTreeNode Dir, RandomAccessFileV b, long pos ) throws IOException
+  public Descriptor[] readResource( JDNode Dir, RandomAccessFileV b, long pos ) throws IOException
   {
     Descriptor des_Dir;
 
@@ -56,7 +56,7 @@ public class Resource extends Data
 
     des.add(des_Dir);
 
-    Dir.add( new DefaultMutableTreeNode( "Directory Info.h#R," + ref + "" ) ); ref += 1;
+    Dir.add( new JDNode( "Directory Info.h", "R", ref ) ); ref += 1;
 
     for( int i = 0; i < size; i++ )
     {
@@ -76,14 +76,14 @@ public class Resource extends Data
 
         File_Str.LUINT16("Name length"); File_Str.LString16("Entire Name", ((Short)File_Str.value).intValue() );
         
-        nDir = new DefaultMutableTreeNode( File_Str.value + "#R," + ref + "" ); ref += 1;
+        nDir = new JDNode( File_Str.value.toString(), "R", ref ); ref += 1;
 
         b.seekV( t );
       }
 
       //Positive value is a ID name.
 
-      else { nDir = new DefaultMutableTreeNode( t + "" ); }
+      else { nDir = new JDNode( t + "" ); }
 
       Dir.add( nDir );
 
@@ -106,14 +106,14 @@ public class Resource extends Data
       
       else
       {
-        nDir.add( new DefaultMutableTreeNode( "File Info.h#R," + ref ) ); ref += 1;
+        nDir.add( new JDNode( "File Info.h", "R", ref ) ); ref += 1;
         
         t = b.getVirtualPointer(); b.seekV( pos + DataDir[4] );
 
         File_Str = new Descriptor( b, true ); File_Str.setEvent( this::fileInfo );
 
         File_Str.LUINT32("File location"); pos = ((Integer)File_Str.value).longValue() + imageBase;
-        File_Str.LUINT32("File size"); nDir.add( new DefaultMutableTreeNode( "File Data#Sv," + pos + "," + ( pos + ( ( (Integer)File_Str.value ).longValue() ) - 1 ) + "" ) );
+        File_Str.LUINT32("File size"); nDir.add( new JDNode( "File Data", "Sv", new long[]{ pos, pos + ( ( (Integer)File_Str.value ).longValue() ) - 1 } ) );
         File_Str.LUINT32("Code Page");
         File_Str.LUINT32("Reserved");
 
