@@ -2,17 +2,15 @@ package Format.EXEDecode;
 
 import java.io.*;
 import swingIO.*;
-import RandomAccessFileV.*;
-
 import core.x86.*;
 
 public class Headers extends Data
 {
   //*********************************creates the data of the MZ header***********************************
 
-  public Descriptor readMZ(RandomAccessFileV b) throws IOException
+  public Descriptor readMZ() throws IOException
   {
-    Descriptor mz = new Descriptor( b );
+    Descriptor mz = new Descriptor( file );
 
     mz.String8( "SIGNATURE", 2 ); String sig = mz.value + "";
     mz.LUINT16( "Size of Last Page" );
@@ -34,7 +32,7 @@ public class Headers extends Data
     mz.Other( "Reserved", 20 );
     mz.LUINT32( "PE Header Location" ); PE = ((Integer)mz.value).longValue();
 
-    b.addV( b.getFilePointer(), PE - mz.length, 256, PE - mz.length );
+    file.addV( file.getFilePointer(), PE - mz.length, 256, PE - mz.length );
 
     mz.Other( "8086 16-bit", (int)(PE - mz.length) );
 
@@ -45,10 +43,9 @@ public class Headers extends Data
 
   //*********************************creates the nicely styled data of the PE header***********************************
 
-  public Descriptor readPE(RandomAccessFileV b) throws IOException
+  public Descriptor readPE() throws IOException
   {
-    b.seek(PE);
-    Descriptor pe = new Descriptor( b );
+    file.seek(PE); Descriptor pe = new Descriptor( file );
 
     //data decode to table
 
@@ -68,9 +65,9 @@ public class Headers extends Data
 
   //************************************************READ OP HEADER********************************************
 
-  public Descriptor readOP(RandomAccessFileV b) throws IOException
+  public Descriptor readOP() throws IOException
   {
-    Descriptor op = new Descriptor(b);
+    Descriptor op = new Descriptor(file);
 
     //The OP header has different signature meanings.
     //OP = 0B 01 is a 32 bit program, and 0B 02 is a 64 bit one. Additional 01 07 is a ROM image.
@@ -153,7 +150,7 @@ public class Headers extends Data
   //Each section is given in virtual address position if used. Sections that are not used have a virtual address of 0.
   //The next header defines the sections that are to be read and placed in ram memory.
 
-  public Descriptor readDataDrectory(RandomAccessFileV b) throws IOException
+  public Descriptor readDataDirectory() throws IOException
   {
     //Names of the data array locations
 
@@ -176,7 +173,7 @@ public class Headers extends Data
 
     //Create table data.
 
-    Descriptor dd = new Descriptor(b);
+    Descriptor dd = new Descriptor(file);
 
     //The Number of data Directory array sections.
 
@@ -202,7 +199,7 @@ public class Headers extends Data
   //****************************************Read the Mapped Sections of executable, or dll*******************************************
   //The PE header defines the number of sections. Without this the virtual addresses of each section in DataDrectory is useless.
 
-  public Descriptor readSections(RandomAccessFileV b) throws IOException
+  public Descriptor readSections() throws IOException
   {
     byte[] bd = new byte[ 12 ];
     
@@ -210,7 +207,7 @@ public class Headers extends Data
 
     //Create table data.
 
-    Descriptor sd = new Descriptor(b);
+    Descriptor sd = new Descriptor(file);
 
     for( int i = 0; i < NOS; i++ )
     {
@@ -237,7 +234,7 @@ public class Headers extends Data
 
       //Add virtual address to IO system.
 
-      b.addV( offset, size, virtualOffset + imageBase, virtualSize );
+      file.addV( offset, size, virtualOffset + imageBase, virtualSize );
     }
 
     sd.setEvent(this::sdInfo); return(sd);

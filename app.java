@@ -261,7 +261,7 @@ public class app extends Window implements ActionListener, JDEventListener
     stree.setVisible(true); ds.setVisible(false); iData.setVisible(false);
     Virtual.setVisible(false); Offset.setVisible(false); di.setVisible(false);
 
-    f.setJMenuBar(fcBar); fc.setTree( tree );
+    f.setJMenuBar(fcBar); fc.setTree( tree ); tree.singleClick = false;
   }
 
   public void open( JDEvent e )

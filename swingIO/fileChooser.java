@@ -27,7 +27,7 @@ public class fileChooser implements JDEventListener
 
   public fileChooser( JDTree t ) { jd = t; jd.setEventListener( this ); dirSearch(); }
 
-  public void setTree( JDTree t ) { t.setEventListener( this ); }
+  public void setTree( JDTree t ) { t.setEventListener( this ); dirSearch(); }
 
   //Set the event listener.
 

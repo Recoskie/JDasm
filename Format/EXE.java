@@ -73,17 +73,17 @@ public class EXE extends Data implements JDEventListener
 
     //header data folder to organize exe setup information.
   
-    JDNode Headers = new JDNode("Header Data");
+    JDNode Headers = new JDNode("Header Data", -1);
 
     //Decode the setup headers.
 
     try
     {
-      Header_des[0] = Header.readMZ( file );
-      if(!error) { Header_des[1] = Header.readPE( file ); }
-      if(!error) { Header_des[2] = Header.readOP( file ); }
-      if(!error) { Header_des[3] = Header.readDataDrectory( file ); }
-      if(!error) { Header_des[4] = Header.readSections( file ); }
+      Header_des[0] = Header.readMZ();
+      if(!error) { Header_des[1] = Header.readPE(); }
+      if(!error) { Header_des[2] = Header.readOP(); }
+      if(!error) { Header_des[3] = Header.readDataDirectory(); }
+      if(!error) { Header_des[4] = Header.readSections(); }
     }
     catch(java.io.IOException e) { error = true; }
 
@@ -182,7 +182,7 @@ public class EXE extends Data implements JDEventListener
 
     file.Events = true;
 
-    //tree.setSelectionPath( new TreePath( Headers.getPath() ) ); open( new JDEvent( this, "Header Data", "", "", new long[]{0} ) );
+    tree.setSelectionPath( new TreePath( Headers.getPath() ) ); open( new JDEvent( this, "Header Data", -1 ) );
 
     f.setVisible(true);
   }
@@ -297,7 +297,7 @@ public class EXE extends Data implements JDEventListener
         {
           file.Events = false;
           
-          Export.setUserObject("function Export Table"); Export_des = DLL_ex.LoadExport( Export, file );
+          Export.setUserObject("function Export Table"); Export_des = DLL_ex.LoadExport( Export );
           
           file.Events = true;
 
@@ -331,7 +331,7 @@ public class EXE extends Data implements JDEventListener
         {
           file.Events = false;
           
-          Import.setUserObject("DLL Import Table"); DLL_des = DLL.LoadDLLImport( Import, file );
+          Import.setUserObject("DLL Import Table"); DLL_des = DLL.LoadDLLImport( Import );
           
           file.Events = true;
 
@@ -364,7 +364,7 @@ public class EXE extends Data implements JDEventListener
         {
           file.Events = false;
           
-          RE.setUserObject("Resource Files"); RSRC_des = RSRC.readResource( RE, file );
+          RE.setUserObject("Resource Files"); RSRC_des = RSRC.readResource( RE );
           
           file.Events = true;
 

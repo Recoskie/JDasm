@@ -3,8 +3,6 @@ import java.io.*;
 import swingIO.*;
 import swingIO.tree.*;
 
-import RandomAccessFileV.*;
-
 public class Resource extends Data
 {
   //Data structure data descriptors.
@@ -23,11 +21,11 @@ public class Resource extends Data
 
   //Use current IO potion if no defined position.
 
-  public Descriptor[] readResource( JDNode Dir, RandomAccessFileV b ) throws IOException { return( readResource( Dir, b, 0 ) ); }
+  public Descriptor[] readResource( JDNode Dir ) throws IOException { return( readResource( Dir, 0 ) ); }
 
   //Recursively read Resource at a set position.
 
-  public Descriptor[] readResource( JDNode Dir, RandomAccessFileV b, long pos ) throws IOException
+  public Descriptor[] readResource( JDNode Dir, long pos ) throws IOException
   {
     Descriptor des_Dir;
 
@@ -41,11 +39,11 @@ public class Resource extends Data
 
     //The position of the DIR. IF not used then current IO position is used.
 
-    if( pos != 0 ) { b.seekV( pos ); }
+    if( pos != 0 ) { file.seekV( pos ); }
 
     //The DIR info descriptor.
 
-    des_Dir = new Descriptor( b, true ); des_Dir.setEvent( this::dirInfo );
+    des_Dir = new Descriptor( file, true ); des_Dir.setEvent( this::dirInfo );
 
     des_Dir.LUINT32("Characteristics");
     des_Dir.LUINT32("Time Date Stamp");
@@ -70,15 +68,15 @@ public class Resource extends Data
 
       if( t < 0 )
       {
-        pos = t & 0x7FFFFFFF; t = b.getVirtualPointer(); b.seekV( pos + DataDir[4] );
+        pos = t & 0x7FFFFFFF; t = file.getVirtualPointer(); file.seekV( pos + DataDir[4] );
 
-        File_Str = new Descriptor( b, true ); des.add( File_Str ); File_Str.setEvent( this::strInfo );
+        File_Str = new Descriptor( file, true ); des.add( File_Str ); File_Str.setEvent( this::strInfo );
 
         File_Str.LUINT16("Name length"); File_Str.LString16("Entire Name", ((Short)File_Str.value).intValue() );
         
         nDir = new JDNode( File_Str.value.toString(), "R", ref ); ref += 1;
 
-        b.seekV( t );
+        file.seekV( t );
       }
 
       //Positive value is a ID name.
@@ -95,11 +93,11 @@ public class Resource extends Data
 
       if( pos < 0 )
       {
-        Pos = b.getVirtualPointer();
+        Pos = file.getVirtualPointer();
         
-        readResource( nDir, b, ( pos & 0x7FFFFFFF ) + DataDir[4] );
+        readResource( nDir, ( pos & 0x7FFFFFFF ) + DataDir[4] );
         
-        b.seekV( Pos );
+        file.seekV( Pos );
       }
       
       //File info.
@@ -108,9 +106,9 @@ public class Resource extends Data
       {
         nDir.add( new JDNode( "File Info.h", "R", ref ) ); ref += 1;
         
-        t = b.getVirtualPointer(); b.seekV( pos + DataDir[4] );
+        t = file.getVirtualPointer(); file.seekV( pos + DataDir[4] );
 
-        File_Str = new Descriptor( b, true ); File_Str.setEvent( this::fileInfo );
+        File_Str = new Descriptor( file, true ); File_Str.setEvent( this::fileInfo );
 
         File_Str.LUINT32("File location"); pos = ((Integer)File_Str.value).longValue() + imageBase;
         File_Str.LUINT32("File size"); nDir.add( new JDNode( "File Data", "Sv", new long[]{ pos, pos + ( ( (Integer)File_Str.value ).longValue() ) - 1 } ) );
@@ -119,7 +117,7 @@ public class Resource extends Data
 
         des.add( File_Str );
 
-        b.seekV( t );
+        file.seekV( t );
       }
     }
 

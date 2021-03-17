@@ -3,11 +3,9 @@ import java.io.*;
 import swingIO.*;
 import swingIO.tree.*;
 
-import RandomAccessFileV.*;
-
 public class DLLExport extends Data
 {
-  public Descriptor[] LoadExport( JDNode Export, RandomAccessFileV b ) throws IOException
+  public Descriptor[] LoadExport( JDNode Export ) throws IOException
   {
     java.util.LinkedList<Descriptor> des = new java.util.LinkedList<Descriptor>();
 
@@ -42,7 +40,7 @@ public class DLLExport extends Data
 
     Export.add( new JDNode( "Export info.h", "E", ref ) ); ref += 1;
 
-    Data = new Descriptor( b, true ); Data.setEvent( this::exportInfo );
+    Data = new Descriptor( file, true ); Data.setEvent( this::exportInfo );
 
     Data.LUINT32("Characteristics");
     Data.LUINT32("Time Date Stamp");
@@ -78,7 +76,7 @@ public class DLLExport extends Data
 
     //Read the export binary file name.
 
-    b.seekV( name ); Str = new Descriptor( b, true );
+    file.seekV( name ); Str = new Descriptor( file, true );
 
     Str.String8("Export Name.", ((byte)0x00));
 
@@ -88,7 +86,7 @@ public class DLLExport extends Data
 
     //The Address list.
     
-    b.seekV( address_List ); Data = new Descriptor( b, true ); des.add( Data ); Data.setEvent( this::AlistInfo );
+    file.seekV( address_List ); Data = new Descriptor( file, true ); des.add( Data ); Data.setEvent( this::AlistInfo );
 
     for( int i = 0; i < asize; i++ )
     {
@@ -98,7 +96,7 @@ public class DLLExport extends Data
 
     //Put the address locations in order to each name using the ordinal list.
 
-    b.seekV( ordinal_List ); Data = new Descriptor( b, true );
+    file.seekV( ordinal_List ); Data = new Descriptor( file, true );
 
     for( int i = 0; i < size; i++ )
     {
@@ -112,7 +110,7 @@ public class DLLExport extends Data
 
     //Names. Our sorted location list should now locate to each named method.
     
-    b.seekV( name_List ); Data = new Descriptor( b, true );
+    file.seekV( name_List ); Data = new Descriptor( file, true );
 
     Methods.insert( new JDNode( "Name list location.h", "E", ref ), 1 ); des.add( Data ); Data.setEvent( this::MlistInfo ); ref += 1;
 
@@ -123,11 +121,11 @@ public class DLLExport extends Data
       Data.Array( "Array Element " + i + "", 4 );
       Data.LUINT32("Method name Location."); name_List = ((Integer)Data.value).longValue() + imageBase;
 
-      t = b.getVirtualPointer(); b.seekV( name_List );
+      t = file.getVirtualPointer(); file.seekV( name_List );
 
-      Str = new Descriptor( b, true ); des.add( Str ); Str.setEvent( this::mstrInfo );
+      Str = new Descriptor( file, true ); des.add( Str ); Str.setEvent( this::mstrInfo );
 
-      Str.String8("Name.", ((byte)0x00)); b.seekV( t );
+      Str.String8("Name.", ((byte)0x00)); file.seekV( t );
 
       Method_loc = new JDNode( Str.value + "() #" + order[i], "E", ref ); ref += 1;
 

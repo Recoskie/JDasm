@@ -15,6 +15,26 @@ public class JDEvent extends EventObject
     super( source ); path = Path; id = ID; ext = ex; n = nv;
   }
 
+  public JDEvent( Object source, String Path, String ex, String ID, long nv )
+  {
+    super( source ); path = Path; id = ID; ext = ex; n = new long[]{nv};
+  }
+
+  public JDEvent( Object source, String Path, long[] nv )
+  {
+    super( source ); path = Path; n = nv;
+  }
+
+  public JDEvent( Object source, String Path, long nv )
+  {
+    super( source ); path = Path; n = new long[]{nv};
+  }
+
+  public JDEvent( Object source, String Path )
+  {
+    super( source ); path = Path;
+  }
+
   public String getPath(){ return( path ); }
 
   public String getExtension(){ return( ext ); }
@@ -22,4 +42,6 @@ public class JDEvent extends EventObject
   public String getID(){ return( id ); }
 
   public long[] getArgs(){ return( n ); }
+
+  public long getArg( int el ){ return( n[el] ); }
 }

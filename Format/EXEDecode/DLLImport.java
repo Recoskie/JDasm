@@ -3,11 +3,9 @@ import java.io.*;
 import swingIO.*;
 import swingIO.tree.*;
 
-import RandomAccessFileV.*;
-
 public class DLLImport extends Data
 {
-  public Descriptor[] LoadDLLImport( JDNode IMPORT, RandomAccessFileV b ) throws IOException
+  public Descriptor[] LoadDLLImport( JDNode IMPORT ) throws IOException
   {
     //get the physical address to data directory array links to dll import table
 
@@ -17,7 +15,7 @@ public class DLLImport extends Data
 
     IMPORT.add( new JDNode( "DLL Import Array Decode.h", "D", 0 ) );
 
-    Descriptor DLLArray = new Descriptor( b, true );
+    Descriptor DLLArray = new Descriptor( file, true );
     Descriptor DLLName, FuncArray1, FuncArray2, Method;
 
     int d1 = 0, d2 = 0, d3 = 0, d4 = 0, d5 = 1, ref = 1, dllEl = 0;
@@ -40,11 +38,11 @@ public class DLLImport extends Data
 
       //DLL Name.
 
-      t = b.getVirtualPointer(); b.seekV( d4 + imageBase );
+      t = file.getVirtualPointer(); file.seekV( d4 + imageBase );
 
       //Read the name.
 
-      DLLName = new Descriptor( b, true ); DLLName.String8("DLL Name", (byte)0x00 ); DLLName.setEvent( this::dllInfo );
+      DLLName = new Descriptor( file, true ); DLLName.String8("DLL Name", (byte)0x00 ); DLLName.setEvent( this::dllInfo );
 
       //Load the two Function list.
 
@@ -54,7 +52,7 @@ public class DLLImport extends Data
       {
         //Function list First location.
 
-        b.seekV( d1 + imageBase ); FuncArray1 = new Descriptor( b, true );
+        file.seekV( d1 + imageBase ); FuncArray1 = new Descriptor( file, true );
 
         //read the list.
         
@@ -74,7 +72,7 @@ public class DLLImport extends Data
 
         //Function location list 2.
 
-        b.seekV( d5 + imageBase ); FuncArray2 = new Descriptor( b, true );
+        file.seekV( d5 + imageBase ); FuncArray2 = new Descriptor( file, true );
 
         //Add the list to the decompiler.
 
@@ -106,21 +104,21 @@ public class DLLImport extends Data
 
           else if ( pos != 0 )
           {
-            t2 = b.getVirtualPointer();
+            t2 = file.getVirtualPointer();
 
             //Read HInit ID, and Function name.
 
-            b.seekV( pos + imageBase ); Method = new Descriptor( b, true ); Method.LUINT16("Address list index."); Method.String8( "Method name", (byte)0x00 );
+            file.seekV( pos + imageBase ); Method = new Descriptor( file, true ); Method.LUINT16("Address list index."); Method.String8( "Method name", (byte)0x00 );
             
             Method.setEvent( this::methodInfo ); des.add( Method );
 
             core.mapped_loc.add( Method.value + "" );
 
-            DLLFunc.add( new JDNode( Method.value + "().dll", "D", ref ) ); ref += 1; b.seekV(t2);
+            DLLFunc.add( new JDNode( Method.value + "().dll", "D", ref ) ); ref += 1; file.seekV(t2);
           }
         }
 
-        core.mapped_pos.add( b.getVirtualPointer() );
+        core.mapped_pos.add( file.getVirtualPointer() );
 
         DLLFunc.insert( new JDNode( "Function Array Decode 1.h", "D", ref ), 0 );
 
@@ -133,7 +131,7 @@ public class DLLImport extends Data
         IMPORT.add( DLLFunc );
       }
       
-      dllEl++; b.seekV(t);
+      dllEl++; file.seekV(t);
 
       //If 60 DLL's then something really went wrong.
       
