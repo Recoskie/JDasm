@@ -296,7 +296,7 @@ public class app extends Window implements ActionListener, JDEventListener
       }
       else
       {
-        file = new RandomAccessDevice( e.getID(), "r" );
+        f.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) ); file = new RandomAccessDevice( e.getID(), "r" ); f.setContentPane( tools );
       }
 
       Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
