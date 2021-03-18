@@ -39,13 +39,11 @@ public class app extends Window implements ActionListener, JDEventListener
 
     if( Arg_file != "" )
     {
-      if( isDisk ) { open( new JDEvent( this, "", ".disk", Arg_file, 0 ) ); }
+      if( isDisk ) { open( new JDEvent( this, "", "", Arg_file, -2 ) ); }
       else
       {
         open( new JDEvent( this, Arg_file ) );
       }
-      
-      f.pack();
     }
   }
 
@@ -88,7 +86,13 @@ public class app extends Window implements ActionListener, JDEventListener
     //Disk selector. Not available yet.
     //Note I need to make a disk chooser that uses the tree I built.
     
-    if( e.getActionCommand() == "O" ) { dc.setTree( tree ); dc.setEventListener( this ); }
+    if( e.getActionCommand() == "O" )
+    {
+      if( !dc.setTree( tree ) )
+      {
+        javax.swing.JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System.");
+      }
+    }
 
     //Binary tool display controls.
 
@@ -290,13 +294,15 @@ public class app extends Window implements ActionListener, JDEventListener
 
     try
     {
-      if( !e.getExtension().equals(".disk") )
+      if( e.getArg(0) >= 0 )
       {
         file = new RandomAccessFileV( e.getPath(), "rw" );
       }
       else
       {
-        f.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) ); file = new RandomAccessDevice( e.getID(), "r" ); f.setContentPane( tools );
+        f.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) );
+        file = new RandomAccessDevice( e.getID(), "r" );
+        f.setContentPane( tools );
       }
 
       Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
@@ -323,7 +329,7 @@ public class app extends Window implements ActionListener, JDEventListener
       I = -1;
       if(!admin)
       {
-        if( !e.getExtension().equals(".disk") )
+        if( e.getArg(0) >= 0 )
         {
           JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file, or File is open by another process.");
 
@@ -338,7 +344,7 @@ public class app extends Window implements ActionListener, JDEventListener
       }
       else
       {
-        if( !e.getExtension().equals(".disk") )
+        if( e.getArg(0) >= 0 )
         {
           JOptionPane.showMessageDialog(null,"File is open by another process. You can make a copy of the file, and put it somewhere else to open it.");
         }

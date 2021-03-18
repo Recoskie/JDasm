@@ -37,14 +37,14 @@ public class diskChooser implements JDEventListener
         try
         {
           f = new File (Root + ( r == 0 && Zero ? "" : r ) + ""); check = f.exists(); new RandomAccessFile( f, "r");
-          root.add( new JDNode( type + r + ".disk", Root + ( r == 0 && Zero ? "" : r ) ) );
+          root.add( new JDNode( type + r + ".disk", Root + ( r == 0 && Zero ? "" : r ), -2 ) );
           r += 1; disks += 1;
         }
         catch( Exception er )
         {
           if( check || er.getMessage().indexOf("Access is denied") > 0 )
           {
-            root.add( new JDNode( type + r + ".disk", Root + ( r == 0 && Zero ? "" : r ) ) );
+            root.add( new JDNode( type + r + ".disk", Root + ( r == 0 && Zero ? "" : r ), -2 ) );
             r += 1; disks += 1;
           }
           else
@@ -58,11 +58,11 @@ public class diskChooser implements JDEventListener
 
   //Initialize.
 
-  public diskChooser( JDTree t ) { jd = t; jd.setEventListener( this ); findDisks(); }
+  public boolean diskChooser( JDTree t ) { jd = t; return( findDisks() ); }
 
   public diskChooser( ) { }
 
-  public void setTree( JDTree t ) { jd = t; findDisks(); }
+  public boolean setTree( JDTree t ) { jd = t; return( findDisks() ); }
 
   //Set the event listener.
 
@@ -74,7 +74,7 @@ public class diskChooser implements JDEventListener
 
   //Search system for disks.
 
-  private void findDisks()
+  private boolean findDisks()
   {
     //Clear the current tree nodes.
 
@@ -98,14 +98,9 @@ public class diskChooser implements JDEventListener
 
     //Update tree.
       
-    if( d.disks != 0 )
-    {
-      ((javax.swing.tree.DefaultTreeModel)jd.getModel()).setRoot( root );
-    }
-    else
-    {
-      javax.swing.JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System.");
-    }
+    if( d.disks != 0 ) { ((javax.swing.tree.DefaultTreeModel)jd.getModel()).setRoot( root ); } else { return(false); }
+
+    return( true );
   }
 
   public void open( JDEvent jd ) { Event.open( jd ); }

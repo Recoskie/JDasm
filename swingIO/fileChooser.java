@@ -193,7 +193,7 @@ public class fileChooser implements JDEventListener
 
   public void open( JDEvent e )
   {
-    if( e.getArgs()[0] < 0 )
+    if( e.getArgs()[0] == -1 )
     {
       Path += e.getPath() + Sep; dirSearch();
     }
