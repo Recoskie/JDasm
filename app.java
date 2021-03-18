@@ -25,19 +25,28 @@ public class app extends Window implements ActionListener, JDEventListener
 
   //Create the application.
 
-  public app( String Arg_file )
+  public app( String Arg_file, boolean isDisk )
   {
     //Create GUI.
 
     createGUI("JFH-Disassembly", this, this);
 
-    //Check open with args.
-
-    if( Arg_file != "" ) { open( new JDEvent(this, Arg_file, "", "", new long[]{0} ) ); }
-
     //Display GUI.
     
     f.pack(); f.setLocationRelativeTo(null); f.setVisible(true);
+
+    //Check open with args.
+
+    if( Arg_file != "" )
+    {
+      if( isDisk ) { open( new JDEvent( this, "", ".disk", Arg_file, 0 ) ); }
+      else
+      {
+        open( new JDEvent( this, Arg_file ) );
+      }
+      
+      f.pack();
+    }
   }
 
   public static void main( String[] args )
@@ -46,11 +55,18 @@ public class app extends Window implements ActionListener, JDEventListener
 
     //Command line argument.
 
-    String open = "";
+    if( args.length > 1 )
+    {
+      if( args[0].equals("disk") ) { new app( args[1], true ); }
+      else
+      {
+        new app( args[1], false );
+      }
 
-    if( args.length > 1 ) { if( args[0].equals("disk") ) { } open = args[1]; }
+      return;
+    }
 
-    new app( open );
+    new app( "", false );
   }
 
   //handling menu item events
@@ -72,7 +88,7 @@ public class app extends Window implements ActionListener, JDEventListener
     //Disk selector. Not available yet.
     //Note I need to make a disk chooser that uses the tree I built.
     
-    if( e.getActionCommand() == "O" ) { JOptionPane.showMessageDialog( null, "Operation temporarily unavailable." ); }
+    if( e.getActionCommand() == "O" ) { dc.setTree( tree ); dc.setEventListener( this ); }
 
     //Binary tool display controls.
 
@@ -274,7 +290,14 @@ public class app extends Window implements ActionListener, JDEventListener
 
     try
     {
-      file = new RandomAccessFileV( e.getPath(), "rw" );
+      if( !e.getExtension().equals(".disk") )
+      {
+        file = new RandomAccessFileV( e.getPath(), "rw" );
+      }
+      else
+      {
+        file = new RandomAccessDevice( e.getID(), "r" );
+      }
 
       Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
 
@@ -295,21 +318,34 @@ public class app extends Window implements ActionListener, JDEventListener
 
       f.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
-    catch(Exception er)
+    catch (Exception er)
     {
-      er.printStackTrace();
+      I = -1;
       if(!admin)
       {
-        JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file, or File is open by another process.");
-      
-        //Prompt the user if they wish to run operation as admin.
-            
-        if( Sys.promptAdmin("file " + e.getPath() ) ) { System.exit(0); }
+        if( !e.getExtension().equals(".disk") )
+        {
+          JOptionPane.showMessageDialog(null,"Need Administrative privilege to read this file, or File is open by another process.");
+
+          if( Sys.promptAdmin("file " + e.getPath() ) ) { System.exit(0); }
+        }
+        else
+        {
+          JOptionPane.showMessageDialog(null,"Need Administrative privilege to read disk drives.");
+
+          if( Sys.promptAdmin("disk " + e.getID() ) ) { System.exit(0); }
+        }
       }
       else
       {
-        System.out.println(er.getMessage());
-        JOptionPane.showMessageDialog(null,"Can't Open File.");
+        if( !e.getExtension().equals(".disk") )
+        {
+          JOptionPane.showMessageDialog(null,"File is open by another process. You can make a copy of the file, and put it somewhere else to open it.");
+        }
+        else
+        {
+          JOptionPane.showMessageDialog(null,"Unable to read disk drive.");
+        }
       }
 
       Reset();
@@ -321,7 +357,7 @@ public class app extends Window implements ActionListener, JDEventListener
     }
     catch(Exception er)
     {
-      I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!");
+      I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); Reset();
     }
   }
 

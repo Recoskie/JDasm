@@ -37,6 +37,7 @@ public class Window
   //The file chooser
 
   public static fileChooser fc;
+  public static diskChooser dc;
 
   //Additional detailed information output. For data in table cells, or section.
   //Also disassembly output.
@@ -172,7 +173,7 @@ public class Window
 
     //Setup file chooser.
 
-    fc = new fileChooser( tree ); fc.setEventListener( app1 );
+    fc = new fileChooser( tree ); fc.setEventListener( app1 ); dc = new diskChooser();
 
     //Put JCellPane in grid layout.
 

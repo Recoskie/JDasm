@@ -67,9 +67,7 @@ public class EXE extends Data implements JDEventListener
 
     //Root node is now the target file.
  
-    ((DefaultTreeModel)tree.getModel()).setRoot(null);
-    tree.setRootVisible(true);tree.setShowsRootHandles(true);
-    root = new JDNode( fc.getFileName() );
+    ((DefaultTreeModel)tree.getModel()).setRoot(null); tree.setRootVisible(true);tree.setShowsRootHandles(true); root = new JDNode( fc.getFileName() );
 
     //header data folder to organize exe setup information.
   
@@ -193,7 +191,7 @@ public class EXE extends Data implements JDEventListener
   {
     //Data descriptors, for data structures.
 
-    if( e.getArgs()[0] >= 0 )
+    if( e.getArg(0) >= 0 )
     {
       //Start Disassembling instructions.
     
@@ -201,7 +199,7 @@ public class EXE extends Data implements JDEventListener
       {
         //If import table is not loaded. It should be loaded to map method calls.
 
-        if( DLL_des == null ) { open( new JDEvent( this, "DLL Import Table", "", "", new long[]{0} ) ); }
+        if( DLL_des == null ) { open( new JDEvent( this, "DLL Import Table", -1 ) ); }
 
         //Begin disassembly.
 
@@ -209,7 +207,7 @@ public class EXE extends Data implements JDEventListener
         {
           core.locations.clear(); core.data_off.clear(); core.code.clear();
 
-          core.locations.add( e.getArgs()[0] );
+          core.locations.add( e.getArg(0) );
 
           Dis( core.locations.get(0) ); ds.setDescriptor( core );
         }
@@ -220,28 +218,28 @@ public class EXE extends Data implements JDEventListener
 
       else if( e.getID().equals("H") )
       {
-        ds.setDescriptor( Header_des[ (int)e.getArgs()[0] ] );
+        ds.setDescriptor( Header_des[ (int)e.getArg(0) ] );
       }
 
       //Export data structures.
 
       else if( e.getID().equals("E") )
       {
-        ds.setDescriptor( Export_des[ (int)e.getArgs()[0] ] );
+        ds.setDescriptor( Export_des[ (int)e.getArg(0) ] );
       }
 
       //DLL import data structures.
 
       else if( e.getID().equals("D") )
       {
-        ds.setDescriptor( DLL_des[ (int)e.getArgs()[0] ] );
+        ds.setDescriptor( DLL_des[ (int)e.getArg(0) ] );
       }
 
       //Resource reader data structures.
 
       else if( e.getID().equals("R") )
       {
-        ds.setDescriptor( RSRC_des[ (int)e.getArgs()[0] ] );
+        ds.setDescriptor( RSRC_des[ (int)e.getArg(0) ] );
       }
 
       //Offset.
@@ -250,7 +248,7 @@ public class EXE extends Data implements JDEventListener
       {
         try
         {
-          file.seekV( e.getArgs()[0] );
+          file.seekV( e.getArg(0) );
         }
         catch( IOException er ) { }
       }
@@ -261,9 +259,9 @@ public class EXE extends Data implements JDEventListener
       {
         try
         {
-          file.seekV( e.getArgs()[0] );
+          file.seekV( e.getArg(0) );
 
-          Virtual.setSelected( e.getArgs()[0], e.getArgs()[1] );
+          Virtual.setSelected( e.getArg(0), e.getArg(1) );
         }
         catch( IOException er ) { }
       }

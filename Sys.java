@@ -3,7 +3,6 @@ import java.io.*;
 public class Sys
 {
   private static final String Sys = System.getProperty("os.name");
-
   public static final boolean windows = Sys.startsWith("Windows");
   public static final boolean linux = Sys.startsWith("Linux");
   public static final boolean mac = Sys.startsWith("Mac");
