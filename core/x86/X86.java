@@ -12,30 +12,30 @@ public class X86 extends X86Types implements core.Core
   
   /*-------------------------------------------------------------------------------------------------------------------------
   Code Segment is used in 16 bit binaries in which the segment is times 16 (Left Shift 4) added to the 16 bit address position.
-  This was done to load more programs in 16 bit space at an selected segment location. In 16 bit X86 processors the I
+  This was done to load more programs in 16 bit space at an selected segment location. In 16 bit X86 processors the instruction
   pointer register counts from 0000 hex to FFFF hex and starts over at 0000 hex. Allowing a program to be a max length of
-  65535 bytes long. The Code Segment is multiplied by 16 then is added to the I pointer position in memory.
+  65535 bytes long. The Code Segment is multiplied by 16 then is added to the instruction pointer position in memory.
   ---------------------------------------------------------------------------------------------------------------------------
   In 32 bit, and 64 bit the address combination is large enough that segmented program loading was no longer required.
   However 32 bit still supports Segmented addressing if used, but 64 bit binaries do not. Also if the code segment is set
-  36, or higher in 32 bit binaries this sets SEG:OFFSET address format for each Is Memory position.
+  36, or higher in 32 bit binaries this sets SEG:OFFSET address format for each instructions Memory position.
   ---------------------------------------------------------------------------------------------------------------------------
-  In 64 bit mode, an programs Is are in a 64 bit address using the processors full I pointer, but in 32
-  bit Is the first 32 bit of the I pointer is used. In 16 bit the first 16 bits of the I pointer
-  is used, but with the code segment. Each I is executed in order by the I pointer that goes in sectional sizes
+  In 64 bit mode, an programs instructions are in a 64 bit address using the processors full instruction pointer, but in 32
+  bit instructions the first 32 bit of the instruction pointer is used. In 16 bit the first 16 bits of the instruction pointer
+  is used, but with the code segment. Each instruction is executed in order by the Instruction pointer that goes in sectional sizes
   "RIP (64)/EIP (32)/IP (16)" Depending on the Bit mode the 64 bit CPU is set in, or if the CPU is 32 bit to begin with.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private short CodeSeg = 0x0000;
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  The IHex String stores the Bytes of decoded Is. It is shown to the left side of the disassembled I.
+  The InstructionHex String stores the Bytes of decoded instructions. It is shown to the left side of the disassembled instruction.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private String IHex = "";
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  The IPos String stores the start position of a decoded binary I in memory from the function ^getPosition()^.
+  The InstructionPos String stores the start position of a decoded binary instruction in memory from the function ^GetPosition()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private long IPos = 0;
@@ -44,18 +44,18 @@ public class X86 extends X86Types implements core.Core
   Decoding display options.
   -------------------------------------------------------------------------------------------------------------------------*/
   
-  public boolean ShowIHex = true; //setting to show the hex code of the I beside the decoded I output.
-  public boolean ShowIPos = true; //setting to show the I address position.
+  public boolean ShowIHex = true; //setting to show the hex code of the instruction beside the decoded instruction output.
+  public boolean ShowIPos = true; //setting to show the instruction address position.
   
   /*-------------------------------------------------------------------------------------------------------------------------
   The Opcode, and Opcode map.
   ---------------------------------------------------------------------------------------------------------------------------
-  The first 0 to 255 (Byte) value that is read is the selected I code, however some codes are used as Adjustment to
-  remove limitations that are read by the function ^decodePrefixAdjustments()^.
+  The first 0 to 255 (Byte) value that is read is the selected instruction code, however some codes are used as Adjustment to
+  remove limitations that are read by the function ^DecodePrefixAdjustments()^.
   ---------------------------------------------------------------------------------------------------------------------------
-  Because X86 was limited to 255 Is An number was sacrificed to add more Is.
-  By using one of the 0 to 255 Is like 15 which is "0F" as an hex number the next 0 to 255 value is an hole
-  new set of 0 to 255 Is these are called escape code prefixes.
+  Because X86 was limited to 255 instructions An number was sacrificed to add more instructions.
+  By using one of the 0 to 255 instructions like 15 which is "0F" as an hex number the next 0 to 255 value is an hole
+  new set of 0 to 255 instructions these are called escape code prefixes.
   ---------------------------------------------------------------------------------------------------------------------------
   Bellow XX is the opcode combined with the adjustment escape codes thus how opcode is used numerically in the disassembler.
   ---------------------------------------------------------------------------------------------------------------------------
@@ -71,8 +71,8 @@ public class X86 extends X86Types implements core.Core
   VEX.mmmmm = 000_00b (1-byte map), 000_01b (2-byte map), 000_10b (0Fh,38h), 000_11b (0Fh,3Ah)
   EVEX.mm = 00b (1-byte map), 01b (2-byte map), 10b (0Fh,38h), 11b (0Fh,3Ah)
   --------------------------------------------------------------------------------------------------------------------------
-  Function ^decodePrefixAdjustments()^ reads opcodes that act as settings it only ends when Opcode is an actual
-  I code value 0 to 1023 inducing escape codes. Opcode is Used by function ^DecodeOpcode()^ with the Mnemonic array.
+  Function ^DecodePrefixAdjustments()^ reads opcodes that act as settings it only ends when Opcode is an actual
+  instruction code value 0 to 1023 inducing escape codes. Opcode is Used by function ^DecodeOpcode()^ with the Mnemonic array.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private int Opcode = 0;
@@ -87,7 +87,7 @@ public class X86 extends X86Types implements core.Core
   private String Instruction = "";
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  The Is operands.
+  The Instructions operands.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private String InsOperands = "";
@@ -96,7 +96,7 @@ public class X86 extends X86Types implements core.Core
   SizeAttrSelect controls the General arithmetic extended sizes "8/16/32/64", and SIMD Vector register extended sizes "128/256/512/1024".
   ---------------------------------------------------------------------------------------------------------------------------
   General arithmetic sizes "8/16/32/64" change by operand override which makes all operands go 16 bit.
-  The width bit which is in the REX prefix makes operands go all 64 bits the changes depend on the Is adjustable size.
+  The width bit which is in the REX prefix makes operands go all 64 bits the changes depend on the instructions adjustable size.
   The value system goes as follows: 0=8, or 16, then 1=Default32, then 2=Max64. Smallest to largest in order.
   Changeable from prefixes. Code 66 hex is operand override, 48 hex is the REX.W setting. By default operands are 32 bit
   in size in both 32 bit mode, and 64 bit modes so by default the Size attribute setting is 1 in value so it lines up with 32.
@@ -105,25 +105,25 @@ public class X86 extends X86Types implements core.Core
   If in 16 bit mode the 16 bit operand size trades places with 32, so when the operand override is used it goes from 16 to 32.
   Also in 32 bit mode any size that is 64 changes to 32, but except for operands that do not use the BySize system.
   ---------------------------------------------------------------------------------------------------------------------------
-  During Vector Is size settings "128/256/512" use the SizeAttrSelect as the vector length setting as a 0 to 3 value from
+  During Vector instructions size settings "128/256/512" use the SizeAttrSelect as the vector length setting as a 0 to 3 value from
   smallest to largest Note 1024 is Reserved the same system used for General arithmetic sizes "8/16/32/64" that go in order.
   If an operand is used that is 32/64 in size the Width bit allows to move between Sizes 32/64 separately.
   ---------------------------------------------------------------------------------------------------------------------------
-  Used by the function ^getOperandSize()^ which uses a fast base 2 logarithm system.
+  Used by the function ^GetOperandSize()^ which uses a fast base 2 logarithm system.
   The function ^DecodeOpcode()^ also uses the current size setting for operation names that change name by size, Or
-  In vector Is the select I by size is used to Add additional Is between the width bit (W=0), and (W=1).
+  In vector instructions the select instruction by size is used to Add additional instructions between the width bit (W=0), and (W=1).
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private int SizeAttrSelect = 1;
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  The Width bit is used in combination with SizeAttrSelect only with Vector Is.
+  The Width bit is used in combination with SizeAttrSelect only with Vector instructions.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean WidthBit = false;
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  Pointer size plus 16 bit's used by FAR JUMP and other Is.
+  Pointer size plus 16 bit's used by FAR JUMP and other instructions.
   For example FAR JUMP is size attributes 16/32/64 normally 32 is the default size, but it is 32+16=48 FWORD PTR.
   In 16 bit CPU mode the FAR jump defaults to 16 bits, but because it is a far jump it is 16+16=32 which is DWORD PTR.
   Set by the function ^DecodeOperandString()^ for if the ModR/M operand type is far pointer address.
@@ -137,8 +137,8 @@ public class X86 extends X86Types implements core.Core
   AddressOverride is hex opcode 67 then when used with any operation that uses the ModR/M in address mode the ram address
   goes down one in bit mode. Switches 64 address mode to 32 bit address mode, and in 32 bit mode the address switches to
   16 bit address mode which uses a completely different ModR/M format. When in 16 bit mode the address switches to 32 bit.
-  Set true when Opcode 67 is read by ^decodePrefixAdjustments()^ which effects the next opcode that is not a prefix opcode
-  then is set false after I decodes.
+  Set true when Opcode 67 is read by ^DecodePrefixAdjustments()^ which effects the next opcode that is not a prefix opcode
+  then is set false after instruction decodes.
   ---------------------------------------------------------------------------------------------------------------------------
   Used by the function ^Decode_ModRM_SIB_Address()^.
   -------------------------------------------------------------------------------------------------------------------------*/
@@ -157,9 +157,9 @@ public class X86 extends X86Types implements core.Core
   When RegExtend is 11,000 the added lower three bits is 11,000 = 24 to 10,111 = 31.
   ---------------------------------------------------------------------------------------------------------------------------
   The Register expansion bits make the binary number from a 3 bit number to a 5 bit number by combining the EVEX.R'R bits.
-  The REX opcode, and EVEX opcode 62 hex are decoded with function ^decodePrefixAdjustments()^ which contain R bit settings.
+  The REX opcode, and EVEX opcode 62 hex are decoded with function ^DecodePrefixAdjustments()^ which contain R bit settings.
   ---------------------------------------------------------------------------------------------------------------------------
-  Used by function ^decodeRegValue()^.
+  Used by function ^DecodeRegValue()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private int RegExtend = 0;
@@ -201,20 +201,20 @@ public class X86 extends X86Types implements core.Core
   This may seem confusing, but the 8 bit high low registers are used all in "low order" when any REX prefix is used.
   Set RexActive true when the REX Prefix is used, for the High, and low Register separation.
   ---------------------------------------------------------------------------------------------------------------------------
-  Used by function ^decodeRegValue()^.
+  Used by function ^DecodeRegValue()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean RexActive = false;
   
   /*-------------------------------------------------------------------------------------------------------------------------
   The SIMD value is set according to SIMD MODE by prefixes (none, 66, F2, F3), or by the value of VEX.pp, and EVEX.pp.
-  Changes the selected I in ^DecodeOpcode()^ only for SSE vector opcodes that have 4 possible Is in
-  one I for the 4 modes otherwise 66 is Operand override, and F2 is REPNE, and F3 is REP prefix adjustments.
+  Changes the selected instruction in ^DecodeOpcode()^ only for SSE vector opcodes that have 4 possible instructions in
+  one instruction for the 4 modes otherwise 66 is Operand override, and F2 is REPNE, and F3 is REP prefix adjustments.
   By reusing some of the already used Prefix adjustments more opcodes did not have to be sacrificed.
   ---------------------------------------------------------------------------------------------------------------------------
-  SIMD is set 00 in binary by default, SIMD is set 01 in binary when opcode 66 is read by ^decodePrefixAdjustments()^,
-  SIMD is set 10 in binary when opcode F2 is read by ^decodePrefixAdjustments()^, and SIMD is set 11 in binary when F3 is read
-  by ^decodePrefixAdjustments()^.
+  SIMD is set 00 in binary by default, SIMD is set 01 in binary when opcode 66 is read by ^DecodePrefixAdjustments()^,
+  SIMD is set 10 in binary when opcode F2 is read by ^DecodePrefixAdjustments()^, and SIMD is set 11 in binary when F3 is read
+  by ^DecodePrefixAdjustments()^.
   ---------------------------------------------------------------------------------------------------------------------------
   The VEX, and EVEX adjustment codes contain SIMD mode adjustment bits in which each code that is used to change the mode go
   in the same order as SIMD. This allows SIMD to be set directly by the VEX.pp, and EVEX.pp bit value.
@@ -228,7 +228,7 @@ public class X86 extends X86Types implements core.Core
   private int SIMD = 0;
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  Vect is set true during the decoding of an I code. If the I is an Vector I 4 in length for
+  Vect is set true during the decoding of an instruction code. If the instruction is an Vector instruction 4 in length for
   the four modes then Vect is set true. When Vect is set true the Function ^Decode_ModRM_SIB_Address()^ Will decode the
   ModR/M as a Vector address.
   ---------------------------------------------------------------------------------------------------------------------------
@@ -240,7 +240,7 @@ public class X86 extends X86Types implements core.Core
   /*-------------------------------------------------------------------------------------------------------------------------
   In AVX512 The width bit can be ignored, or used. The width bit relates to the SIMD mode for size of the numbers in the vector.
   Modes N/A, F3 are 32 bit, while 66, F2 are 64 bit. The width bit has to be set for the extend data size for
-  most AVX512 Is unless the width bit is ignored. Some AVX512 vectors can also broadcast round to there extend data size
+  most AVX512 instructions unless the width bit is ignored. Some AVX512 vectors can also broadcast round to there extend data size
   controlled by the width bit extend size and SIMD mode.
   -------------------------------------------------------------------------------------------------------------------------*/
   
@@ -267,25 +267,25 @@ public class X86 extends X86Types implements core.Core
   The EVEX prefix can only Broadcast round using an "b" control which sets the Broadcast round option for Swizzle.
   -------------------------------------------------------------------------------------------------------------------------*/
   
-  private boolean Swizzle = false; //Swizzle based I. If false then Up, or Down conversion.
+  private boolean Swizzle = false; //Swizzle based instruction. If false then Up, or Down conversion.
   private boolean Up = false; //Only used if Swizzle is false. If set false then it is an down conversion.
   private boolean Float = false; //If False Integer data is used.
   private int VectS = 0x00; //Stores the three vector settings Swizzle, Up, and Float, for faster comparison to special cases.
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  The Extension is set 2 during opcode 62 hex for EVEX in which the ^decodePrefixAdjustments()^ decodes the settings, but if
+  The Extension is set 2 during opcode 62 hex for EVEX in which the ^DecodePrefixAdjustments()^ decodes the settings, but if
   the bit that must be set 0 for EVEX is set 1 then Extension is set 3 for MVEX.
-  The Extension is set 1 during opcodes C4, and C5 hex in which the ^decodePrefixAdjustments()^ decodes the settings for the VEX prefixes.
+  The Extension is set 1 during opcodes C4, and C5 hex in which the ^DecodePrefixAdjustments()^ decodes the settings for the VEX prefixes.
   ---------------------------------------------------------------------------------------------------------------------------
-  An I that has 4 opcode combinations based on SIMD can use another 4 in length separator in the select SIMD mode
+  An instruction that has 4 opcode combinations based on SIMD can use another 4 in length separator in the select SIMD mode
   which selects the opcode based on extension used. This is used to separate codes that can be Vector adjusted, and not.
   Some codes can only be used in VEX, but not EVEX, and not all EVEX can be MVEX encoded as the EVEX versions were introduced after,
-  also MMX I can not be used with vector adjustments.
+  also MMX instruction can not be used with vector adjustments.
   ---------------------------------------------------------------------------------------------------------------------------
-  By default Extension is 0 for decoding Is normally.
+  By default Extension is 0 for decoding instructions normally.
   ---------------------------------------------------------------------------------------------------------------------------
-  Used by function ^DecodeOpcode()^ adds the letter "V" to the I name to show it uses Vector adjustments.
-  When the Function ^DecodeOpcode()^ completes if Vect is not true and an Extension is active the I is invalid.
+  Used by function ^DecodeOpcode()^ adds the letter "V" to the instruction name to show it uses Vector adjustments.
+  When the Function ^DecodeOpcode()^ completes if Vect is not true and an Extension is active the instruction is invalid.
   Used By function ^DecodeOperandString()^ which allows the Vector operand to be used if existent in the operand string.
   -------------------------------------------------------------------------------------------------------------------------*/
   
@@ -293,7 +293,7 @@ public class X86 extends X86Types implements core.Core
   
   /*-------------------------------------------------------------------------------------------------------------------------
   MVEX/EVEX conversion modes. MVEX can directly set the conversion mode between float, or integer, to broadcast round using option bits.
-  The EVEX Extension only has the broadcast rounding control. In which some Is support "]{1to16}" (B32), or "]{1to8}" (B64)
+  The EVEX Extension only has the broadcast rounding control. In which some instructions support "]{1to16}" (B32), or "]{1to8}" (B64)
   Based on the data size using the width bit setting. EVEX only can use the 1ToX broadcast round control.
   ---------------------------------------------------------------------------------------------------------------------------
   Used by function ^Decode_ModRM_SIB_Address()^.
@@ -303,12 +303,12 @@ public class X86 extends X86Types implements core.Core
   
   /*-------------------------------------------------------------------------------------------------------------------------
   MVEX/EVEX rounding modes. In EVEX if the ModR/M is used in register mode and Bround Is active.
-  The EVEX Error Suppression type is set by the RoundingSetting {ER}, and {SAE} settings for if the I supports it.
+  The EVEX Error Suppression type is set by the RoundingSetting {ER}, and {SAE} settings for if the instruction supports it.
   The MVEX version allows the use of both rounding modes. MVEX can select the rounding type using option bits if the
   "MVEX.E" control is set in an register to register operation.
   ---------------------------------------------------------------------------------------------------------------------------
   The function ^Decode_ModRM_SIB_Address()^ sets RoundMode.
-  The function decodeImmediate() adds the error Suppression to the end of the I.
+  The function DecodeInstruction() adds the error Suppression to the end of the instruction.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private int RoundMode = 0;
@@ -316,18 +316,18 @@ public class X86 extends X86Types implements core.Core
   /*-------------------------------------------------------------------------------------------------------------------------
   The VEX Extension, and MVEX/EVEX Extension have an Vector register selection built in for Vector operation codes that use the
   vector register. This operand is only read in the "operand string" if an VEX, or EVEX prefix was decoded by the
-  function ^decodePrefixAdjustments()^, and making Extension 1 for VEX, or 2 for EVEX instead of 0 by default.
-  During a VEX, or EVEX version of the SSE I the vector bits are a 4 bit binary value of 0 to 15, and are extended
+  function ^DecodePrefixAdjustments()^, and making Extension 1 for VEX, or 2 for EVEX instead of 0 by default.
+  During a VEX, or EVEX version of the SSE instruction the vector bits are a 4 bit binary value of 0 to 15, and are extended
   in EVEX and MVEX to 32 by adding the EVEX.V, or MVEX.V bit to the vector register value.
   ---------------------------------------------------------------------------------------------------------------------------
-  Used with the function ^decodeRegValue()^ to decode the Register value.
+  Used with the function ^DecodeRegValue()^ to decode the Register value.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private int VectorRegister = 0;
   
   /*-------------------------------------------------------------------------------------------------------------------------
   The MVEX/EVEX Extension has an mask Register value selection for {K0-K7} mask to destination operand.
-  The K mask register is always displayed to the destination operand in any Vector I used with MVEX/EVEX settings.
+  The K mask register is always displayed to the destination operand in any Vector instruction used with MVEX/EVEX settings.
   ---------------------------------------------------------------------------------------------------------------------------
   The {K} is added onto the first operand in OpNum before returning the decoded operands from the function ^DecodeOperands()^.
   -------------------------------------------------------------------------------------------------------------------------*/
@@ -356,17 +356,17 @@ public class X86 extends X86Types implements core.Core
   private int IMMValue = 0;
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  Prefix G1, and G2 are used with Intel HLE, and other prefix codes such as repeat the I Codes F2, F3 which can be
-  applied to any I unless it is an SIMD I which uses F2, and F3 as the SIMD Mode.
+  Prefix G1, and G2 are used with Intel HLE, and other prefix codes such as repeat the instruction Codes F2, F3 which can be
+  applied to any instruction unless it is an SIMD instruction which uses F2, and F3 as the SIMD Mode.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private String PrefixG1 = "", PrefixG2 = "";
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  Intel HLE is used with basic arithmetic Is like Add, and subtract, and shift operations.
-  Intel HLE Is replace the Repeat F2, and F3, also lock F0 with XACQUIRE, and XRELEASE.
+  Intel HLE is used with basic arithmetic instructions like Add, and subtract, and shift operations.
+  Intel HLE instructions replace the Repeat F2, and F3, also lock F0 with XACQUIRE, and XRELEASE.
   ---------------------------------------------------------------------------------------------------------------------------
-  This is used by function ^decodeImmediate()^.
+  This is used by function ^DecodeInstruction()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean XRelease = false, XAcquire = false;
@@ -374,35 +374,35 @@ public class X86 extends X86Types implements core.Core
   /*-------------------------------------------------------------------------------------------------------------------------
   Intel HLE flip "G1 is used as = REP (XACQUIRE), or RENP (XRELEASE)", and "G2 is used as = LOCK" if the lock prefix was
   not read first then G1, and G2 flip. Also XACQUIRE, and XRELEASE replace REP, and REPNE if the LOCK prefix is used with
-  REP, or REPNE if the I supports Intel HLE.
+  REP, or REPNE if the instruction supports Intel HLE.
   ---------------------------------------------------------------------------------------------------------------------------
-  This is used by function ^decodeImmediate()^.
+  This is used by function ^DecodeInstruction()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean HLEFlipG1G2 = false;
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  Replaces segment overrides CS, and DS with HT, and HNT prefix for Branch taken and not taken used by jump Is.
+  Replaces segment overrides CS, and DS with HT, and HNT prefix for Branch taken and not taken used by jump instructions.
   ---------------------------------------------------------------------------------------------------------------------------
-  This is used by functions ^Decode_ModRM_SIB_Address()^, and ^decodeImmediate()^.
+  This is used by functions ^Decode_ModRM_SIB_Address()^, and ^DecodeInstruction()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean HT = false;
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  I that support MPX replace the REPNE prefix with BND if operation is a MPX I.
+  Instruction that support MPX replace the REPNE prefix with BND if operation is a MPX instruction.
   ---------------------------------------------------------------------------------------------------------------------------
-  This is used by function ^decodeImmediate()^.
+  This is used by function ^DecodeInstruction()^.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean BND = false;
   
   /*-------------------------------------------------------------------------------------------------------------------------
-  The Invalid I variable is very important as some bit settings in vector extensions create invalid operation codes.
+  The Invalid Instruction variable is very important as some bit settings in vector extensions create invalid operation codes.
   Also some opcodes are invalid in different cpu bit modes.
   ---------------------------------------------------------------------------------------------------------------------------
-  Function ^decodePrefixAdjustments()^ Set the Invalid Opcode if an I or prefix is compared that is invalid for CPU bit mode.
-  The function ^decodeImmediate()^ returns an invalid I if Invalid Operation is used for CPU bit mode.
+  Function ^DecodePrefixAdjustments()^ Set the Invalid Opcode if an instruction or prefix is compared that is invalid for CPU bit mode.
+  The function ^DecodeInstruction()^ returns an invalid instruction if Invalid Operation is used for CPU bit mode.
   -------------------------------------------------------------------------------------------------------------------------*/
   
   private boolean InvalidOp = false;
@@ -649,7 +649,7 @@ public class X86 extends X86Types implements core.Core
   /*-------------------------------------------------------------------------------------------------------------------------
   Finds bit positions to the Size attribute indexes in REG array, and the Pointer Array. For the Size Attribute variations.
   ---------------------------------------------------------------------------------------------------------------------------
-  The SizeAttribute settings is 8 digits big consisting of 1, or 0 to specify the extended size that an operand can be made.
+  The SizeAttribute settings is 8 digits big consisting of 1, or 0 to specify the the extended size that an operand can be made.
   In which an value of 01100100 is decoded as "0 = 1024, 1 = 512, 1 = 256, 0 = 128, 0 = 64, 1 = 32, 0 = 16, 0 = 8".
   In which the largest bit position is 512, and is the 6th number "0 = 7, 1 = 6, 1 = 5, 0 = 4, 0 = 3, 1 = 2, 0 = 1, 0 = 0".
   In which 6 is the bit position for 512 as the returned Size . Each size is in order from 0 to 7, thus the size given back
@@ -663,7 +663,7 @@ public class X86 extends X86Types implements core.Core
     /*----------------------------------------------------------------------------------------------------------------------------------------
     Each S value goes in order to the vector length value in EVEX, and VEX Smallest to biggest in perfect alignment.
     SizeAttrSelect is set 1 by default, unless it is set 0 to 3 by the vector length bit's in the EVEX prefix, or 0 to 1 in the VEX prefix.
-    In which if it is not an Vector I S2 acts as the mid default size attribute in 32 bit mode, and 64 bit mode for all Is.
+    In which if it is not an Vector instruction S2 acts as the mid default size attribute in 32 bit mode, and 64 bit mode for all instructions.
     ----------------------------------------------------------------------------------------------------------------------------------------*/
 
     int S3 = 0, S2 = 0, S1 = 0, S0 = -1, t = 0; //Note S0 is Vector size 1024, which is unused.
@@ -787,7 +787,7 @@ public class X86 extends X86Types implements core.Core
   When input type is value 2 decode the immediate as a relative address used by jumps, and function calls.
   When input type is value 3 decode the immediate as a Integer Used by Displacements.
   ---------------------------------------------------------------------------------------------------------------------------
-  The function argument SizeSetting is the size attributes of the IMM that is decoded using the getOperandSize function.
+  The function argument SizeSetting is the size attributes of the IMM that is decoded using the GetOperandSize function.
   The Imm uses two size setting, the first 4 bits are used for the Immediate actual adjustable sizes 8,16,32,64.
   ---------------------------------------------------------------------------------------------------------------------------
   If BySize is false the SizeSetting is used numerically as a single size selection as
@@ -982,7 +982,7 @@ public class X86 extends X86Types implements core.Core
 
   private String decodeRegValue( int RValue, boolean BySize, int Setting )
   {
-    //If the I is a Vector I, and no extension is active like EVEX, VEX Make sure Size attribute uses the default vector size.
+    //If the instruction is a Vector instruction, and no extension is active like EVEX, VEX Make sure Size attribute uses the default vector size.
 
     if( Vect && Extension == 0 )
     {
@@ -1050,7 +1050,7 @@ public class X86 extends X86Types implements core.Core
     if( ModRM[0] != 3 )
     {
 
-      //If the I is a Vector I, and no extension is active like EVEX, VEX Make sure Size attribute uses the default vector size.
+      //If the instuction is a Vector instuction, and no extension is active like EVEX, VEX Make sure Size attribute uses the default vector size.
 
       if( Vect && Extension == 0 ) { SizeAttrSelect = 0; }
 
@@ -1415,8 +1415,8 @@ public class X86 extends X86Types implements core.Core
   }
 
   /*-------------------------------------------------------------------------------------------------------------------------
-  Decode Prefix Mnemonic codes. Prefixes are I codes that do not do an operation instead adjust
-  controls in the CPU to be applied to an select I code that is not an Prefix I.
+  Decode Prefix Mnemonic codes. Prefixes are instruction codes that do not do an operation instead adjust
+  controls in the CPU to be applied to an select instruction code that is not an Prefix instruction.
   ---------------------------------------------------------------------------------------------------------------------------
   At the end of this function "Opcode" should not hold any prefix code, so then Opcode contains an operation code.
   -------------------------------------------------------------------------------------------------------------------------*/
@@ -1434,7 +1434,7 @@ public class X86 extends X86Types implements core.Core
     if(Opcode == 0x0F)
     {
       Opcode = 0x100; //By starting at 0x100 with binary bit 9 set one then adding the 8 bit opcode then Opcode goes 256 to 511.
-      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode I.
+      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode instruction.
     }
 
     //if 38 hex while using two byte opcode.
@@ -1442,7 +1442,7 @@ public class X86 extends X86Types implements core.Core
     else if(Opcode == 0x138 && Mnemonics[0x138] == "")
     {
       Opcode = 0x200; //By starting at 0x200 with binary bit 10 set one then adding the 8 bit opcode then Opcode goes 512 to 767.
-      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode I.
+      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode instruction.
     }
 
     //if 3A hex while using two byte opcode go three byte opcodes.
@@ -1450,7 +1450,7 @@ public class X86 extends X86Types implements core.Core
     else if(Opcode == 0x13A && Mnemonics[0x13A] == "")
     {
       Opcode = 0x300; //By starting at 0x300 hex and adding the 8 bit opcode then Opcode goes 768 to 1023.
-      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode I.
+      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode instruction.
     }
 
     //Rex prefix decodes only in 64 bit mode.
@@ -1463,7 +1463,7 @@ public class X86 extends X86Types implements core.Core
       RegExtend = ( Opcode & 0x04 ) << 1; //Register Extend Setting.
       WidthBit = ( Opcode & 0x08 ) == 0x08; //Set The Width Bit setting if active.
       SizeAttrSelect = WidthBit ? 2 : 1; //The width Bit open all 64 bits.
-      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode I.
+      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode instruction.
     }
 
     //The VEX2 Operation code Extension to SSE settings decoding.
@@ -1570,7 +1570,7 @@ public class X86 extends X86Types implements core.Core
         VectorRegister = ( Opcode & 0x7800 ) >> 11; //The added in Vector register to SSE.
         SizeAttrSelect = ( Opcode & 0x0400 ) >> 10; //Vector length for 256 setting.
         SIMD = ( Opcode & 0x0300 ) >> 8; //The SIMD mode.
-        if( SIMD > 0 ) { InvalidOp = true; } //If SIMD MODE is set anything other than 0 the I is invalid.
+        if( SIMD > 0 ) { InvalidOp = true; } //If SIMD MODE is set anything other than 0 the instruction is invalid.
         Opcode = 0x400 | ( ( Opcode & 0x0003 ) << 8 ); //Change Operation code map.
 
         //-------------------------------------------------------------------------------------------------------------------------
@@ -1646,7 +1646,7 @@ public class X86 extends X86Types implements core.Core
 
       Opcode ^= 0x0878F0;
 
-      //Check if Reserved bits are 0 if they are not 0 the MVEX/EVEX I is invalid.
+      //Check if Reserved bits are 0 if they are not 0 the MVEX/EVEX instruction is invalid.
 
       InvalidOp = ( Opcode & 0x00000C ) > 0;
 
@@ -1701,16 +1701,16 @@ public class X86 extends X86Types implements core.Core
     if ( ( Opcode & 0x7E7 ) == 0x26 || ( Opcode & 0x7FE ) == 0x64 )
     {
       SegOverride = (String)Mnemonics[ Opcode ]; //Set the Left Bracket for the ModR/M memory address.
-      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode I.
+      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode instruction.
     }
 
     //Operand override Prefix
 
     if(Opcode == 0x66)
     {
-      SIMD = 1; //sets SIMD mode 1 in case of SSE I opcode.
-      SizeAttrSelect = 0; //Adjust the size attribute setting for the size adjustment to the next I.
-      decodePrefixAdjustments(); return;  //restart function decode more prefix settings that can effect the decode I.
+      SIMD = 1; //sets SIMD mode 1 in case of SSE instuction opcode.
+      SizeAttrSelect = 0; //Adjust the size attribute setting for the size adjustment to the next instruction.
+      decodePrefixAdjustments(); return;  //restart function decode more prefix settings that can effect the decode instruction.
     }
 
     //Ram address size override.
@@ -1718,7 +1718,7 @@ public class X86 extends X86Types implements core.Core
     if(Opcode == 0x67)
     {
       AddressOverride = true; //Set the setting active for the ModR/M address size.
-      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode I.
+      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode instruction.
     }
 
     //if repeat Prefixes F2 hex REP,or F3 hex RENP
@@ -1728,7 +1728,7 @@ public class X86 extends X86Types implements core.Core
       SIMD = (Opcode & 0x02 )  |  ( 1 - Opcode & 0x01 ); //F2, and F3 change the SIMD mode during SSE Is.
       PrefixG1 = (String)Mnemonics[ Opcode ]; //set the Prefix string.
       HLEFlipG1G2 = true; //set Flip HLE in case this is the last prefix read, and LOCK was set in string G2 first for HLE.
-      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode I.
+      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode instruction.
     }
 
     //if the lock prefix note the lock prefix is separate
@@ -1737,7 +1737,7 @@ public class X86 extends X86Types implements core.Core
     {
       PrefixG2 = (String)Mnemonics[ Opcode ]; //set the Prefix string
       HLEFlipG1G2 = false; //set Flip HLE false in case this is the last prefix read, and REP, or REPNE was set in string G2 first for HLE.
-      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode I.
+      decodePrefixAdjustments(); return; //restart function decode more prefix settings that can effect the decode instruction.
     }
 
     //Before ending the function "decodePrefixAdjustments()" some opcode combinations are invalid in 64 bit mode.
@@ -1755,11 +1755,11 @@ public class X86 extends X86Types implements core.Core
   /*-------------------------------------------------------------------------------------------------------------------------
   The Decode opcode function gives back the operation name, and what it uses for input.
   The input types are for example which registers it uses with the ModR/M, or which Immediate type is used.
-  The input types are stored into an operand string. This function gives back the I name, And what the operands use.
+  The input types are stored into an operand string. This function gives back the instruction name, And what the operands use.
   ---------------------------------------------------------------------------------------------------------------------------
-  This function is designed to be used after the Decode prefix adjustments function because the Opcode should contain an real I code.
+  This function is designed to be used after the Decode prefix adjustments function because the Opcode should contain an real instruction code.
   This is because the Decode prefix adjustments function will only end if the Opcode value is not a prefix adjustment code to the ModR/M etc.
-  However DecodePrefixAdjustments can also prevent this function from being called next if the prefix settings are bad or an invalid I is
+  However DecodePrefixAdjustments can also prevent this function from being called next if the prefix settings are bad or an invalid instruction is
   used for the bit mode the CPU is in as it will set InvalidOp true.
   -------------------------------------------------------------------------------------------------------------------------*/
 
@@ -1802,7 +1802,7 @@ public class X86 extends X86Types implements core.Core
     }
 
     //Arithmetic unit 8x8 combinational logic array combinations.
-    //If the current Mnemonic is an array 8 in length It is a group opcode I may repeat previous Is in different forums.
+    //If the current Mnemonic is an array 8 in length It is a group opcode instruction may repeat previous instructions in different forums.
 
     if( I.length == 8)
     {
@@ -1837,7 +1837,7 @@ public class X86 extends X86Types implements core.Core
     }
 
     //Vector unit 4x4 combinational array logic.
-    //if the current Mnemonic is an array 4 in size it is an SIMD I with four possible modes N/A, 66, F3, F2.
+    //if the current Mnemonic is an array 4 in size it is an SIMD instruction with four possible modes N/A, 66, F3, F2.
     //The mode is set to SIMD, it could have been set by the EVEX.pp, VEX.pp bit combination, or by prefixes N/A, 66, F3, F2.
 
     if( I.length == 4 )
@@ -1845,7 +1845,7 @@ public class X86 extends X86Types implements core.Core
       Vect = true; //Set Vector Encoding true.
 
       //Reset the prefix string G1 because prefix codes F2, and F3 are used with SSE which forum the repeat prefix.
-      //Some SSE Is can use the REP, RENP prefixes.
+      //Some SSE instructions can use the REP, RENP prefixes.
       //The Vectors that do support the repeat prefix uses Packed Single format.
 
       if(I[2] != "" && I[3] != "") { PrefixG1 = ""; } else { SIMD = SIMD & 1; }
@@ -1859,13 +1859,13 @@ public class X86 extends X86Types implements core.Core
         I = (Object[])I[SIMD]; O = (Object[])O[SIMD];
       }
 
-      //If the SIMD I uses another array 4 in length in the Selected SIMD vector I.
-      //Then each vector Extension is separate. The first extension is used if no extension is active for Regular Is, and vector I septation.
-      //0=None. 1=VEX only. 2=EVEX only. 3=??? unused.
+      //If the SIMD instruction uses another array 4 in length in the Selected SIMD vector Instruction.
+      //Then each vector Extension is separate. The first extension is used if no extension is active for Regular instructions, and vector instruction septation.
+      //0=None. 1=VEX only. 2=EVEX only. 3=??? unused
 
       if(I.length == 4)
       {
-        //Get the correct I for the Active Extension type.
+        //Get the correct Instruction for the Active Extension type.
 
         if(I[Extension] != "")
         {
@@ -1884,13 +1884,13 @@ public class X86 extends X86Types implements core.Core
     }
     else if( Opcode >= 0x700 && SIMD > 0 ){ Instruction = "???"; InsOperands = ""; return; }
 
-    //if Any Mnemonic is an array 3 in size the I name goes by size.
+    //if Any Mnemonic is an array 3 in size the instruction name goes by size.
 
     if(I.length == 3)
     {
       bits = ( ( Extension == 0 & BitMode != 0 ) ? 1 : 0 ) ^ ( ( SizeAttrSelect >= 1 ) ? 1 : 0 ); //The first bit in SizeAttrSelect for size 32/16 Flips if 16 bit mode.
       if( WidthBit ) { bits = 2; } //Goes 64 using the Width bit.
-      if( Extension == 3 && HInt_ZeroMerg && I[1] != "" ) { HInt_ZeroMerg = false; bits = 1; } //MVEX uses element 1 if MVEX.E is set for I that change name.
+      if( Extension == 3 && HInt_ZeroMerg && I[1] != "" ) { HInt_ZeroMerg = false; bits = 1; } //MVEX uses element 1 if MVEX.E is set for instruction that change name.
 
       if (I[bits] != "")
       {
@@ -1928,7 +1928,7 @@ public class X86 extends X86Types implements core.Core
   active along the X86Decoder. The OpNum is the order the decoded operands will be positioned after they are decoded
   in order along the X86 decoder. The order the operands display is different than the order they decode in sequence.
   ---------------------------------------------------------------------------------------------------------------------------
-  This function is used after the function ^decodeOpcode()^ because the function ^decodeOpcode()^ gives back the
+  This function is used after the function ^DecodeOpcode()^ because the function ^DecodeOpcode()^ gives back the
   operand string for what the instruction takes as input.
   -------------------------------------------------------------------------------------------------------------------------*/
 
@@ -2357,14 +2357,14 @@ public class X86 extends X86Types implements core.Core
 
       Lookup = Instruction.equals("CALL") || Instruction.equals("JMP");
 
-      //If Extension is not 0 then add the vector extend "V" to the I.
-      //During the decoding of the operands the I can be returned as invalid if it is an Arithmetic, or MM, ST I.
-      //Vector mask Is start with K instead of V any I that starts with K and is an
-      //vector mask I which starts with K instead of V.
+      //If Extension is not 0 then add the "V" to the start of the instruction.
+      //During the decoding of the operands. The instruction can be invalid if it is an Arithmetic, or MM, ST.
+      //Vector mask start with K instead of V. Any instruction that starts with K is an
+      //vector mask instruction which starts with K instead of V.
 
       if( Opcode <= 0x400 && Extension > 0 && Instruction.charAt(0) != 'K' && Instruction != "???" ) { Instruction = "V" + Instruction; }
 
-      //In 32 bit mode, or bellow only one I MOVSXD is replaced with ARPL.
+      //In 32 bit mode, or bellow only one instruction MOVSXD is replaced with ARPL.
 
       if( BitMode <= 1 && Instruction == "MOVSXD" ) { Instruction = "ARPL"; InsOperands = "06020A01"; }
 
