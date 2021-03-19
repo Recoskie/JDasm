@@ -47,6 +47,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   private ArrayList<Dims> Rows = new ArrayList<Dims>();
   private ArrayList<Dims> Cols = new ArrayList<Dims>();
+  private ArrayList<Integer> ColMin = new ArrayList<Integer>();
 
   //Gap between components.
 
@@ -100,7 +101,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
     public void updateSizes(Container parent)
     {
       Rows.clear(); Cols.clear();
-      int nComps = parent.getComponentCount();
+      int nComps = parent.getComponentCount(); while( ColMin.size() <= nComps ) { ColMin.add(0); }
       Dimension perf = null, min = null;
 
       Component c;
@@ -134,7 +135,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
  
         rowHeight = Math.max( perf.height, rowHeight ); minHeight = Math.max( min.height, minHeight );
 
-        Cols.add( new Dims( perf.width, min.width, perf.width ) );
+        Cols.add( new Dims( perf.width, Math.max( min.width, ColMin.get(col) ), Math.max( perf.width, ColMin.get(col) ) ) );
 
         if( col >= len )
         {
@@ -234,6 +235,14 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
     eCol = -1; eRow = -1;
   }
+
+  //Set a row to take up rest of space.
+
+  public void rowMaximize( int el ) { eRow = el; rowAdjustableSize(); ny = adjSize.max; setRow(); eRow = -1; }
+
+  //Set column minium sizes manually.
+
+  public void setColMinium( int el, int val ) { while( ColMin.size() <= el ) { ColMin.add(0); } ColMin.set( el, val ); }
 
   //Construct the split layout system.
 

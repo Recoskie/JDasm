@@ -35,6 +35,10 @@ public class app extends Window implements ActionListener, JDEventListener
     
     f.pack(); f.setLocationRelativeTo(null); f.setVisible(true);
 
+    //Adjust minium col widths.
+
+    tools.setColMinium(0, 300);
+
     //Check open with args.
 
     if( Arg_file != "" )
@@ -337,7 +341,7 @@ public class app extends Window implements ActionListener, JDEventListener
 
       if( e.getArg(0) == -2 ) { f.setContentPane( tools ); }
 
-      f.setExtendedState(JFrame.MAXIMIZED_BOTH);
+      f.setExtendedState(JFrame.MAXIMIZED_BOTH); tools.rowMaximize(0);
     }
     catch (Exception er)
     {
