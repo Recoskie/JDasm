@@ -42,7 +42,7 @@ public class app extends Window implements ActionListener, JDEventListener
       if( isDisk ) { open( new JDEvent( this, "", "", Arg_file, -2 ) ); }
       else
       {
-        open( new JDEvent( this, Arg_file ) );
+        open( new JDEvent( this, Arg_file, Arg_file.indexOf(".") > 0 ? Arg_file.substring( Arg_file.lastIndexOf("."), Arg_file.length() ) : "", "", 0 ) );
       }
     }
   }
@@ -377,7 +377,6 @@ public class app extends Window implements ActionListener, JDEventListener
         return(i);
       }
     }
-
     return( -1 );
   }
 }
