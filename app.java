@@ -296,7 +296,21 @@ public class app extends Window implements ActionListener, JDEventListener
     {
       if( e.getArg(0) >= 0 )
       {
-        file = new RandomAccessFileV( e.getPath(), "rw" );
+        file = new RandomAccessFileV( e.getPath(), "r" );
+        try
+        {
+          file = new RandomAccessFileV( e.getPath(), "rw" );
+        }
+        catch (Exception er)
+        {
+          if( !admin && JOptionPane.showConfirmDialog(null, "To write to this file, you will have to run as admin.\r\n\r\n" +
+          "Hit \"no\" if you want to open the file in \"read only\" mode.\r\n\r\n" +
+          "Open file as admin?", null, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+          {
+            if( Sys.promptAdmin("file " + e.getPath() ) ) { System.exit(0); }
+          }
+          if( admin ) { JOptionPane.showMessageDialog(null, "File can only be read."); }
+        }
       }
       else
       {
