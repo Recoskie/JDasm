@@ -302,7 +302,6 @@ public class app extends Window implements ActionListener, JDEventListener
       {
         f.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) );
         file = new RandomAccessDevice( e.getID(), "r" );
-        f.setContentPane( tools );
       }
 
       Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
@@ -321,6 +320,8 @@ public class app extends Window implements ActionListener, JDEventListener
       
         Virtual.setVisible(false); Offset.setVisible(true); di.setVisible(true);
       }
+
+      if( e.getArg(0) == -2 ) { f.setContentPane( tools ); }
 
       f.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
