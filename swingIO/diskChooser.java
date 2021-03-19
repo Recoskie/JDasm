@@ -3,10 +3,9 @@ package swingIO;
 import swingIO.tree.*;
 import java.io.*;
 
-public class diskChooser implements JDEventListener
+public class diskChooser
 {
   protected JDTree jd;
-  protected JDEventListener Event = this;
 
   //Check system information.
 
@@ -64,14 +63,6 @@ public class diskChooser implements JDEventListener
 
   public boolean setTree( JDTree t ) { jd = t; return( findDisks() ); }
 
-  //Set the event listener.
-
-  public void setEventListener( JDEventListener listener ) { Event = listener; }
-
-  //reset the event listener.
-
-  public void removeEventListener( JDEventListener listener ) { Event = this; }
-
   //Search system for disks.
 
   private boolean findDisks()
@@ -102,6 +93,4 @@ public class diskChooser implements JDEventListener
 
     return( true );
   }
-
-  public void open( JDEvent jd ) { Event.open( jd ); }
 }
