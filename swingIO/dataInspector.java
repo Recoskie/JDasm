@@ -9,9 +9,9 @@ import java.util.*;
 
 import RandomAccessFileV.*;
 
-public class dataInspector extends JComponent implements IOEventListener, ActionListener
+public class dataInspector extends JComponent implements IOEventListener, ActionListener, MouseMotionListener, MouseListener
 {
-  private static RandomAccessFileV d;
+  private RandomAccessFileV d;
 
   //integers.
 
@@ -369,7 +369,7 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     }
 
     public Dimension getMinimumSize() { return( new Dimension( super.getPreferredSize() ) ); }
-  };
+  }
 
   //Create controls.
 
@@ -443,6 +443,8 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     super.setLayout( new FlowLayout( FlowLayout.LEFT ) ); super.add( comp );
 
     try { d.seek(d.getFilePointer()); } catch( java.io.IOException e ) { }
+
+    this.addMouseListener(this); this.addMouseMotionListener(this);
   }
 
   //Disable events when component is not visible.
@@ -642,4 +644,18 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
     try{ d.seek( d.getFilePointer() ); } catch( java.io.IOException er ) {  }
   }
+
+  public void mouseClicked(MouseEvent e) { }
+
+  public void mousePressed(MouseEvent e) { }
+
+  public void mouseReleased(MouseEvent e) { }
+
+  public void mouseEntered(MouseEvent e) { }
+
+  public void mouseExited(MouseEvent e) { }
+
+  public void mouseDragged(MouseEvent e) { }
+
+  public void mouseMoved(MouseEvent e) { }
 }
