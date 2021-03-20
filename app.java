@@ -4,8 +4,10 @@ import java.awt.event.*;
 import RandomAccessFileV.*;
 import Window.*;
 import swingIO.tree.*;
+import java.awt.dnd.*;
+import java.awt.datatransfer.DataFlavor;
 
-public class app extends Window implements ActionListener, JDEventListener
+public class app extends Window implements ActionListener, DropTargetListener, JDEventListener
 {
   //Application is not Administrator by default.
 
@@ -23,13 +25,17 @@ public class app extends Window implements ActionListener, JDEventListener
 
   private String DecodeAPP[] = new String[]{ "Format.EXE" };
 
+  //Drag and drop file handling.
+  
+  private String df = "";
+
   //Create the application.
 
   public app( String Arg_file, boolean isDisk )
   {
     //Create GUI.
 
-    createGUI("JFH-Disassembly", this, this);
+    createGUI("JFH-Disassembly", this, this); new DropTarget(f, DnDConstants.ACTION_LINK, this, true);
 
     //Display GUI.
     
@@ -401,6 +407,32 @@ public class app extends Window implements ActionListener, JDEventListener
       I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); Reset();
     }
   }
+
+  //File check on drag and drop.
+  
+  @SuppressWarnings({"unchecked"}) public void dragOver(DropTargetDragEvent dtde)
+  {
+    try
+    {
+      java.util.List<File> f = ((java.util.List<File>)dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor));
+
+      df = f.get(0).toString(); if( new File( df ).isFile() && f.size() == 1 ) { dtde.acceptDrag(DnDConstants.ACTION_LINK); } else { dtde.rejectDrag(); }
+    }
+    catch( Exception e ) { dtde.rejectDrag(); }
+  }
+
+  //Open file.
+
+  public void drop(DropTargetDropEvent dtde)
+  {
+    open( new JDEvent( this, df, df.indexOf(".") > 0 ? df.substring( df.lastIndexOf("."), df.length() ) : "", "", 0 ) );
+  }
+
+  public void dropActionChanged(DropTargetDragEvent dtde) { }
+
+  public void dragEnter(DropTargetDragEvent dtde) { }
+
+  public void dragExit(DropTargetEvent dte) { }
 
   public int DefaultProgram(String EX) { for( int i = 0; i < Supports.length; i++ ) { if( Supports[i].equals(EX) ) { return(i); } } return( -1 ); }
 }
