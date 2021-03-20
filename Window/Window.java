@@ -37,7 +37,6 @@ public class Window
   //The file chooser
 
   public static fileChooser fc;
-  public static diskChooser dc;
 
   //Additional detailed information output. For data in table cells, or section.
   //Also disassembly output.
@@ -76,7 +75,8 @@ public class Window
     //Tool window.
 
     infoData.setContentType("text/html");
-    infoData.setBackground( new Color(238,238,238) );
+    infoData.setFont( new Font("monospaced", Font.PLAIN, 12) );
+    infoData.setBackground( new Color( 238, 238, 238 ) );
     infoData.setEditable(false);
     javax.swing.text.DefaultCaret caret = (javax.swing.text.DefaultCaret) infoData.getCaret();
     caret.setUpdatePolicy(javax.swing.text.DefaultCaret.NEVER_UPDATE);
@@ -173,7 +173,7 @@ public class Window
 
     //Setup file chooser.
 
-    fc = new fileChooser( tree ); fc.setEventListener( app1 ); dc = new diskChooser();
+    fc = new fileChooser( tree ); fc.setEventListener( app1 );
 
     //Put JCellPane in grid layout.
 

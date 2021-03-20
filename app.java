@@ -9,19 +9,19 @@ public class app extends Window implements ActionListener, JDEventListener
 {
   //Application is not Administrator by default.
 
-  public static boolean admin = false;
+  private static boolean admin = false;
 
   //Each integer is the file format decoder to use by file extensions.
 
-  public int UseDecoder[] = new int[] { 0, 0, 0, 0, 0 };
+  private int UseDecoder[] = new int[] { 0, 0, 0, 0, 0 };
 
   //Supported file format extensions.
 
-  public String Supports[] = new String[] { ".exe", ".dll", ".sys", ".drv", ".ocx" };
+  private String Supports[] = new String[] { ".exe", ".dll", ".sys", ".drv", ".ocx" };
 
   //The file to load. To begin decoding file types.
 
-  public String DecodeAPP[] = new String[]{ "Format.EXE" };
+  private String DecodeAPP[] = new String[]{ "Format.EXE" };
 
   //Create the application.
 
@@ -87,40 +87,21 @@ public class app extends Window implements ActionListener, JDEventListener
     
     if( e.getActionCommand() == "U" ) { fc.up(); }
 
-    //Disk selector. Not available yet.
-    //Note I need to make a disk chooser that uses the tree I built.
+    //Disk selector.
     
-    if( e.getActionCommand() == "O" )
-    {
-      if( !dc.setTree( tree ) )
-      {
-        javax.swing.JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System.");
-      }
-    }
+    if( e.getActionCommand() == "O" ) { if( !fc.disks() ) { javax.swing.JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); } }
 
     //Binary tool display controls.
 
-    else if( e.getActionCommand().equals("Toggle text View") )
-    {
-      textV = !textV; Offset.enableText( textV ); Virtual.enableText( textV );
-    }
+    else if( e.getActionCommand().equals("Toggle text View") ) { textV = !textV; Offset.enableText( textV ); Virtual.enableText( textV ); }
 
-    else if( e.getActionCommand().equals("Toggle virtual space View") )
-    {
-      Virtual.setVisible(!Virtual.isVisible());
-    }
+    else if( e.getActionCommand().equals("Toggle virtual space View") ) { Virtual.setVisible(!Virtual.isVisible()); }
 
-    else if( e.getActionCommand().equals("Toggle offset View") )
-    {
-      Offset.setVisible(!Offset.isVisible());
-    }
+    else if( e.getActionCommand().equals("Toggle offset View") ) { Offset.setVisible(!Offset.isVisible()); }
 
     else if( e.getActionCommand().equals("Open new File") ) { Reset(); }
 
-    else if( e.getActionCommand().equals("Toggle Data Inspector") )
-    {
-      di.setVisible(!di.isVisible());
-    }
+    else if( e.getActionCommand().equals("Toggle Data Inspector") ) { di.setVisible(!di.isVisible()); }
 
     else if( e.getActionCommand().equals("Goto Offset") )
     {
@@ -145,6 +126,8 @@ public class app extends Window implements ActionListener, JDEventListener
         JOptionPane.showMessageDialog( null, "Bad Input. Hex only." );
       }
     }
+
+    //Copy sleeted bytes in editor.
 
     else if( e.getActionCommand().startsWith("CP") )
     {
@@ -204,6 +187,8 @@ public class app extends Window implements ActionListener, JDEventListener
       file.Events = true;
     }
 
+    //Save selected bytes as file.
+
     else if( e.getActionCommand().equals("Save as file") )
     {
       file.Events = false;
@@ -214,8 +199,7 @@ public class app extends Window implements ActionListener, JDEventListener
 
       OutputStream os;
 
-      JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setDialogTitle("Save data to new file, or overwrite a file");
+      JFileChooser fileChooser = new JFileChooser(); fileChooser.setDialogTitle("Save data to new file, or overwrite a file");
  
       int userSelection = fileChooser.showSaveDialog( f );
  
@@ -278,6 +262,8 @@ public class app extends Window implements ActionListener, JDEventListener
     }
   }
 
+  //Set back to file chooser, and hide editor components till file is opened.
+
   public void Reset()
   {
     tree.setRootVisible(false); tree.setShowsRootHandles(false);
@@ -301,30 +287,40 @@ public class app extends Window implements ActionListener, JDEventListener
       if( e.getArg(0) >= 0 )
       {
         file = new RandomAccessFileV( e.getPath(), "r" );
-        try
+
+        //Check if user has write privilege.
+
+        try { file = new RandomAccessFileV( e.getPath(), "rw" ); } catch ( Exception er )
         {
-          file = new RandomAccessFileV( e.getPath(), "rw" );
-        }
-        catch (Exception er)
-        {
+          //If not admin ask user if they wish to try to gain write privilege run as admin.
+
           if( !admin && JOptionPane.showConfirmDialog(null, "To write to this file, you will have to run as admin.\r\n\r\n" +
           "Hit \"no\" if you want to open the file in \"read only\" mode.\r\n\r\n" +
           "Open file as admin?", null, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
           {
             if( Sys.promptAdmin("file " + e.getPath() ) ) { System.exit(0); }
           }
+
+          //If already running as admin file can only be read.
+
           if( admin ) { JOptionPane.showMessageDialog(null, "File can only be read."); }
         }
       }
+
+      //Open a diskID.
+
       else
       {
-        f.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) );
-        file = new RandomAccessDevice( e.getID(), "r" );
+        f.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) ); file = new RandomAccessDevice( e.getID(), "r" );
       }
+
+      //Set io components to target.
 
       Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
 
       f.setJMenuBar( bdBar );
+
+      //If is a recognized file. Set all editor/data components active.
 
       if( I >= 0 )
       {
@@ -332,6 +328,9 @@ public class app extends Window implements ActionListener, JDEventListener
       
         Virtual.setVisible(true); Offset.setVisible(true); di.setVisible(true);
       }
+
+      //Is not recognized file. Open using data types, and hex editor.
+
       else
       {
         stree.setVisible(false); ds.setVisible(false); iData.setVisible(false);
@@ -339,13 +338,23 @@ public class app extends Window implements ActionListener, JDEventListener
         Virtual.setVisible(false); Offset.setVisible(true); di.setVisible(true);
       }
 
+      //Set back tools after disk finish loading.
+
       if( e.getArg(0) == -2 ) { f.setContentPane( tools ); }
+
+      //Adjust the window.
 
       f.setExtendedState(JFrame.MAXIMIZED_BOTH); tools.rowMaximize(0);
     }
+
+    //Failed to read file, or disk.
+
     catch (Exception er)
     {
       I = -1;
+
+      //Prompt user if they wish to run as admin to open disk or file.
+
       if(!admin)
       {
         if( e.getArg(0) >= 0 )
@@ -361,6 +370,9 @@ public class app extends Window implements ActionListener, JDEventListener
           if( Sys.promptAdmin("disk " + e.getID() ) ) { System.exit(0); }
         }
       }
+
+      //Already running as admin. Then disk or file can not be read at all.
+
       else
       {
         if( e.getArg(0) >= 0 )
@@ -373,8 +385,12 @@ public class app extends Window implements ActionListener, JDEventListener
         }
       }
 
+      //Back to file selection as disk, or file can not be read at all.
+
       Reset();
     }
+
+    //Load file format reader.
 
     try
     {
@@ -386,15 +402,5 @@ public class app extends Window implements ActionListener, JDEventListener
     }
   }
 
-  public int DefaultProgram(String EX)
-  {
-    for( int i = 0; i < Supports.length; i++ )
-    {
-      if( Supports[i].equals(EX) )
-      {
-        return(i);
-      }
-    }
-    return( -1 );
-  }
+  public int DefaultProgram(String EX) { for( int i = 0; i < Supports.length; i++ ) { if( Supports[i].equals(EX) ) { return(i); } } return( -1 ); }
 }
