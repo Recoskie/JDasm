@@ -269,6 +269,15 @@ public class fileChooser implements JDEventListener
 
   public boolean disks() { return( findDisks() ); }
 
+  //Set the file that is open.
+
+  public void openFile( String f )
+  {
+    Path = f.substring( 0, f.lastIndexOf(Sep) ); AddToHistory( Path ); fileName = f.substring( f.lastIndexOf(Sep) + 1, f.length() );
+
+    Event.open( new JDEvent( this, Path + Sep + fileName + "", ( f.lastIndexOf(46) > 0 ) ? f.substring( f.lastIndexOf(46), f.length() ).toLowerCase() : "", "", 0 ) );
+  }
+
   //Add to path when folder, or fire event.
 
   public void open( JDEvent e )

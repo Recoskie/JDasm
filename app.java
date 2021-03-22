@@ -47,14 +47,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
     //Check open with args.
 
-    if( Arg_file != "" )
-    {
-      if( isDisk ) { open( new JDEvent( this, "", "", Arg_file, -2 ) ); }
-      else
-      {
-        open( new JDEvent( this, Arg_file, Arg_file.indexOf(".") > 0 ? Arg_file.substring( Arg_file.lastIndexOf("."), Arg_file.length() ) : "", "", 0 ) );
-      }
-    }
+    if( Arg_file != "" ) { if( isDisk ) { open( new JDEvent( this, "", "", Arg_file, -2 ) ); } else { fc.openFile(Arg_file); } }
   }
 
   public static void main( String[] args )
@@ -350,7 +343,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       //Adjust the window.
 
-      f.setExtendedState(JFrame.MAXIMIZED_BOTH); tools.rowMaximize(0);
+      f.setExtendedState(JFrame.MAXIMIZED_BOTH); try { tools.rowMaximize(0); } catch( Exception er ) {}
     }
 
     //Failed to read file, or disk.
