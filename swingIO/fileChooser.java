@@ -105,7 +105,7 @@ public class fileChooser implements JDEventListener
       
       for(int i = 0; i < roots.length; i++)
       {
-        JDNode t = new JDNode( roots[i].toString(), "", new long[]{ -1 } ); t.add( new JDNode("") ); root.add( t );
+        JDNode t = new JDNode( roots[i].toString(), "", -1); t.add( new JDNode("") ); root.add( t );
       }
     }
 
@@ -113,8 +113,7 @@ public class fileChooser implements JDEventListener
 
     else
     {
-      File folder = new File( Path );
-      File[] list = folder.listFiles();
+      File[] list = new File( Path ).listFiles();
       
       for(int i = 0; i < list.length; i++ )
       {
@@ -124,7 +123,7 @@ public class fileChooser implements JDEventListener
         }
         else
         {
-          JDNode t = new JDNode( fix( list[i].toString() ), "", new long[]{ -1 } ); t.add( new JDNode("") ); root.add( t );
+          JDNode t = new JDNode( fix( list[i].toString() ), "", -1 ); t.add( new JDNode("") ); root.add( t );
         }
       }
     }

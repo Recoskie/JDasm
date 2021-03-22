@@ -129,13 +129,6 @@ public class JDTree extends JTree implements MouseListener, JDEventListener
     }
   }
 
-  public void fireTreeWillExpand(TreePath path) throws ExpandVetoException
-  {
-    JDNode s = (JDNode)path.getLastPathComponent();
-
-    Event.open( new JDEvent(this, s.toString(), "", s.getID(), s.getArgs() ) );
-  }
-
   //Set the event listener.
 
   public void setEventListener( JDEventListener listener ) { Event = listener; }

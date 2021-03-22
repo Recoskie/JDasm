@@ -53,8 +53,8 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   public void addIOEventListener( IOEventListener listener )
   {
     //Event thread is created for sequential read, or write length.
-    
-    if( !Running ) { EventThread = new Thread(this); EventThread.start(); }
+
+    if( !EventThread.isAlive() ) { EventThread.start(); }
     
     list.add( IOEventListener.class, listener ); Events = true;
   }
@@ -248,9 +248,9 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   //Construct the reader using an file, or disk drive.
   
-  public RandomAccessFileV( File file, String mode ) throws FileNotFoundException { super( file, mode ); this.readOnly = mode.indexOf("w") < 0; }
+  public RandomAccessFileV( File file, String mode ) throws FileNotFoundException { super( file, mode ); EventThread = new Thread(this); this.readOnly = mode.indexOf("w") < 0; }
   
-  public RandomAccessFileV( String name, String mode ) throws FileNotFoundException { super( name, mode ); this.readOnly = mode.indexOf("w") < 0; }
+  public RandomAccessFileV( String name, String mode ) throws FileNotFoundException { super( name, mode ); EventThread = new Thread(this); this.readOnly = mode.indexOf("w") < 0; }
   
   //Temporary data. This is so that components that are dependent on this file system can be used without a target file.
   
@@ -260,7 +260,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public RandomAccessFileV( byte[] data ) throws IOException
   {
-    super( mkf(), "rw" ); this.readOnly = false; super.write( data );
+    super( mkf(), "rw" ); EventThread = new Thread(this); this.readOnly = false; super.write( data );
     
     addV( 0, data.length, 0, data.length );
     
@@ -269,7 +269,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   
   public RandomAccessFileV( byte[] data, long Address ) throws IOException
   {
-    super( mkf(), "rw" ); this.readOnly = false; super.write( data );
+    super( mkf(), "rw" ); EventThread = new Thread(this); this.readOnly = false; super.write( data );
     
     addV( 0, (long)data.length, Address, (long)data.length );
     
@@ -863,8 +863,6 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
 
   //Methods to change read data.
 
-  private byte[] td;
-
   public void modText8( String s ) {  }
 
   public void modText8( String s, int off ) {  }
@@ -1022,8 +1020,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
           {
             if( pos == super.getFilePointer() )
             {
-              fireIOEvent( new IOEvent( this, TPos, pos - 1, TPosV, posV - 1, TriggerV ) );
-              Trigger = false;
+              fireIOEvent( new IOEvent( this, TPos, pos - 1, TPosV, posV - 1, TriggerV ) ); Trigger = false;
             }
             else{ pos = super.getFilePointer(); posV = getVirtualPointer(); }
           }

@@ -80,7 +80,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
       if( c <= eCol ) { min += Cols.get( c ).min + gap; } else { max += Cols.get( c ).min + gap; }
     }
 
-    adjSize = new adj( min - gap, this.getWidth() - max );
+    adjSize = new adj( min - gap, ( this.getWidth() < cLayout.minWidth ? cLayout.minWidth : this.getWidth() ) - max );
   }
 
   //The layout system.
@@ -114,7 +114,6 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
       //The components are split by row using the max preferred height.
 
       int rowHeight = 0;
-      int minHeight = 0;
       int w1 = 0, w2 = 0;
       len = rowLen.get(0);
  

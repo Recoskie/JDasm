@@ -381,7 +381,7 @@ public class dataInspector extends JComponent implements IOEventListener, Action
     
     JTextField editor = (JTextField)dce.getComponent(); ((AbstractDocument)editor.getDocument()).setDocumentFilter( new DataFilter( false ) );
 
-    d = data; d.addIOEventListener( this );
+    d = data; d.addIOEventListener( this ); active = true;
 
     //Byte order panel.
 
@@ -449,9 +449,12 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
   //Disable events when component is not visible.
 
+  private boolean active = false;
+
   @Override public void setVisible( boolean v )
   {
-    if( v ) { d.addIOEventListener( this ); } else { d.removeIOEventListener(this); }
+    if( v && !active ) { active = true; d.addIOEventListener( this ); } else if ( !v && active ) { active = false; d.removeIOEventListener(this); }
+
     super.setVisible( v );
   }
 
@@ -459,9 +462,7 @@ public class dataInspector extends JComponent implements IOEventListener, Action
 
   public void setTarget( RandomAccessFileV data )
   {
-    d.removeIOEventListener( this );
-    d = data;
-    d.addIOEventListener( this );
+    d = data; if( isVisible() ) { d.addIOEventListener( this ); active = true; }
     try { d.seek(d.getFilePointer()); } catch( java.io.IOException e ) { }
   }
 
