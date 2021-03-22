@@ -317,7 +317,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
   {
     //Register this component to update on IO system calls.
     
-    f.addIOEventListener( this ); active = true; Virtual = mode; if( mode ) { s = "Virtual Address (h)"; }
+    f.addIOEventListener( this ); Virtual = mode; if( mode ) { s = "Virtual Address (h)"; }
 
     //Reference the file stream.
 
@@ -350,11 +350,9 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   //Disable events when component is not visible.
 
-  private boolean active = false;
-
   @Override public void setVisible( boolean v )
   {
-    if( v && !active ) { active = true; IOStream.addIOEventListener(this); } else if ( !v && active ) { active = false; IOStream.removeIOEventListener(this); }
+    if( v && !isVisible() ) { IOStream.addIOEventListener(this); } else if ( !v && isVisible() ) { IOStream.removeIOEventListener(this); }
     super.setVisible( v );
   }
 
@@ -857,7 +855,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
    public void setTarget( RandomAccessFileV f )
    {
-     IOStream = f; if( isVisible() ) { IOStream.addIOEventListener( this ); active = true; }
+     IOStream = f; if( isVisible() ) { IOStream.addIOEventListener( this ); }
      
      try { ScrollBar.setMaximum( Virtual ? 0xFFFFFFFFFFFFFFFFL : IOStream.length() ); ScrollBar.setVisibleAmount( Rows << 4 ); ScrollBar.setValue(0); } catch( Exception e ) { }
      
