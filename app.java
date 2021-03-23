@@ -35,15 +35,11 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   {
     //Create GUI.
 
-    createGUI("JFH-Disassembly", this, this); new DropTarget(f, DnDConstants.ACTION_LINK, this, true);
+    createGUI("JFH-Disassembly", this, this); new DropTarget(winFrame, DnDConstants.ACTION_LINK, this, true);
 
     //Display GUI.
     
-    f.pack(); f.setLocationRelativeTo(null); f.setVisible(true);
-
-    //Adjust minium col widths.
-
-    tools.setColMinium(0, 300);
+    winFrame.pack(); winFrame.setLocationRelativeTo(null); winFrame.setVisible(true);
 
     //Check open with args.
 
@@ -92,7 +88,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
     //Binary tool display controls.
 
-    else if( e.getActionCommand().equals("Toggle text View") ) { textV = !textV; Offset.enableText( textV ); Virtual.enableText( textV ); }
+    else if( e.getActionCommand().equals("Toggle text View") ) { Offset.enableText( !Offset.showText() ); Virtual.enableText( !Virtual.showText() ); }
 
     else if( e.getActionCommand().equals("Toggle virtual space View") ) { Virtual.setVisible(!Virtual.isVisible()); }
 
@@ -200,7 +196,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       JFileChooser fileChooser = new JFileChooser(); fileChooser.setDialogTitle("Save data to new file, or overwrite a file");
  
-      int userSelection = fileChooser.showSaveDialog( f );
+      int userSelection = fileChooser.showSaveDialog( winFrame );
  
       if (userSelection == JFileChooser.APPROVE_OPTION)
       {
@@ -270,7 +266,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     stree.setVisible(true); ds.setVisible(false); iData.setVisible(false);
     Virtual.setVisible(false); Offset.setVisible(false); di.setVisible(false);
 
-    f.setJMenuBar(fcBar); fc.setTree( tree ); tree.singleClick = false;
+    winFrame.setJMenuBar(fcBar); fc.setTree( tree ); tree.singleClick = false;
   }
 
   public void open( JDEvent e )
@@ -310,14 +306,14 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       else
       {
-        f.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) ); file = new RandomAccessDevice( e.getID(), "r" );
+        winFrame.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) ); file = new RandomAccessDevice( e.getID(), "r" );
       }
 
       //Set io components to target.
 
       Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
 
-      f.setJMenuBar( bdBar );
+      winFrame.setJMenuBar( bdBar );
 
       //If is a recognized file. Set all editor/data components active.
 
@@ -339,11 +335,11 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       //Set back tools after disk finish loading.
 
-      if( e.getArg(0) == -2 ) { f.setContentPane( tools ); }
+      if( e.getArg(0) == -2 ) { winFrame.setContentPane( tools ); }
 
       //Adjust the window.
 
-      f.setExtendedState(JFrame.MAXIMIZED_BOTH); try { tools.rowMaximize(0); } catch( Exception er ) {}
+      winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); try { tools.rowMaximize(0); } catch( Exception er ) {}
     }
 
     //Failed to read file, or disk.

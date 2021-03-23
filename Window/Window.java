@@ -9,13 +9,13 @@ import RandomAccessFileV.*;
 
 public class Window
 {
-  //Main application Window.
+  //File system.
 
   public static RandomAccessFileV file;
 
   //Main application Window.
 
-  public static JFrame f;
+  public static JFrame winFrame;
 
   //File chooser menu bar.
 
@@ -34,7 +34,7 @@ public class Window
   public static JDTree tree;
   public static JScrollPane stree;
 
-  //The file chooser
+  //The file chooser.
 
   public static fileChooser fc;
 
@@ -60,17 +60,13 @@ public class Window
 
   public static JCellPane tools;
 
-  //Hex editor view options.
-
-  public static boolean textV = true;
-
   //Additional info text.
 
   public static void info( String s ) { infoData.setText(s); }
 
   public static void createGUI(String w, ActionListener app, JDEventListener app1 )
   {
-    f = new JFrame(w); f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    winFrame = new JFrame(w); winFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     //Tool window.
 
@@ -177,7 +173,7 @@ public class Window
 
     //Put JCellPane in grid layout.
 
-    f.setLayout(new GridLayout(1,0));
+    winFrame.setLayout(new GridLayout(1,0));
     
     //Initialize IO components.
 
@@ -193,7 +189,7 @@ public class Window
 
     Virtual.setComponentPopupMenu(pm); Offset.setComponentPopupMenu(pm);
 
-    Offset.enableText( textV ); Virtual.enableText( textV );
+    Offset.enableText( true ); Virtual.enableText( true );
 
     //Set visibility to tree only.
 
@@ -207,22 +203,26 @@ public class Window
 
     //Data display tools.
 
-    tools.add( stree ); tools.add( ds ); tools.add( iData ); tools.rowEnd();
+    tools.add( stree ); tools.add( ds ); tools.add( iData ); tools.row();
 
     //Binary tools.
 
-    tools.add( Virtual ); tools.add( Offset ); tools.add( di ); tools.rowEnd();
+    tools.add( Virtual ); tools.add( Offset ); tools.add( di ); tools.row();
 
     //scroll bar for the tree.
 
-    f.add(tools);
+    winFrame.add(tools);
+
+    //Override minium size for components.
+
+    tools.setColMinium(0, 300); tools.setColMinium(1, 300); tools.setColMinium(2, 300); 
 
     //set the menu bar controls for file chooser.
 
-    f.setJMenuBar(fcBar);
+    winFrame.setJMenuBar(fcBar);
 
     //Set application icon image.
 
-    f.setIconImage( new ImageIcon( Window.class.getResource( "AppPictures/app.png" ) ).getImage() );
+    winFrame.setIconImage( new ImageIcon( Window.class.getResource( "AppPictures/app.png" ) ).getImage() );
   }
 }

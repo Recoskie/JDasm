@@ -410,6 +410,10 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
     validate();
   }
 
+  //Check if text is enabled.
+
+  public boolean showText() { return( text ); }
+
   //Check if editing data.
 
   public boolean isEditing() { return( emode ); }

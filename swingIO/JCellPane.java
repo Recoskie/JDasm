@@ -24,19 +24,10 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
   //All components and rows are divided by adjustable lines.
   //The dividers have a maximum or minium size.
 
-  class adj
-  {
-    int min = 0, max = 0;
-
-    public adj( int mn, int mx )
-    {
-      min = mn; max = mx;
-    }
-  }
+  private int adjMin = 0, adjMax = 0;
 
   private boolean layoutInitialized = false;
   private CellLayout cLayout;
-  private adj adjSize;
 
   //Row organization.
 
@@ -64,7 +55,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
       if( r <= eRow ) { min += Rows.get( r ).min; } else { max += Rows.get( r ).min; }
     }
 
-    adjSize = new adj( min, this.getHeight() - max );
+    adjMin = min; adjMax = this.getHeight() - max;
   }
 
   //Col min/max adjustable size Varies based on visible component's in col.
@@ -80,7 +71,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
       if( c <= eCol ) { min += Cols.get( c ).min + gap; } else { max += Cols.get( c ).min + gap; }
     }
 
-    adjSize = new adj( min - gap, ( this.getWidth() < cLayout.minWidth ? cLayout.minWidth : this.getWidth() ) - max );
+    adjMin = min - gap; adjMax = ( this.getWidth() < cLayout.minWidth ? cLayout.minWidth : this.getWidth() ) - max;
   }
 
   //The layout system.
@@ -237,7 +228,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   //Set a row to take up rest of space.
 
-  public void rowMaximize( int el ) { eRow = el; rowAdjustableSize(); ny = adjSize.max; setRow(); eRow = -1; }
+  public void rowMaximize( int el ) { eRow = el; rowAdjustableSize(); ny = adjMax; setRow(); eRow = -1; }
 
   //Set column minium sizes manually.
 
@@ -417,7 +408,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   //We subtract one in order to match the component index.
 
-  public void rowEnd() { rows += 1; rowLen.add( this.getComponentCount() - 1 ); }
+  public void row() { rows += 1; rowLen.add( this.getComponentCount() - 1 ); }
 
   //Point to element clicked.
 
@@ -437,13 +428,13 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
       {
         if( eCol >= 0 )
         {
-          if( nx < adjSize.min ) { nx = adjSize.min; }
-          if( nx > adjSize.max ) { nx = adjSize.max; }
+          if( nx < adjMin ) { nx = adjMin; }
+          if( nx > adjMax ) { nx = adjMax; }
         }
         else
         {
-          if( ny < adjSize.min ) { ny = adjSize.min; }
-          if( ny > adjSize.max ) { ny = adjSize.max; }
+          if( ny < adjMin ) { ny = adjMin; }
+          if( ny > adjMax ) { ny = adjMax; }
         }
       }
       

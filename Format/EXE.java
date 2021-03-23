@@ -181,8 +181,6 @@ public class EXE extends Data implements JDEventListener
     file.Events = true;
 
     tree.setSelectionPath( new TreePath( Headers.getPath() ) ); open( new JDEvent( this, "Header Data", -1 ) );
-
-    f.setVisible(true);
   }
 
   //Change What To Display Based on what the user clicks on.
