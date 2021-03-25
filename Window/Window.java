@@ -215,7 +215,9 @@ public class Window
 
     //Override minium size for components.
 
-    tools.setColMinium(0, 300); tools.setColMinium(1, 300); tools.setColMinium(2, 300); 
+    stree.setMinimumSize( new Dimension(300, 20));
+    ds.setMinimumSize( new Dimension(300, 20));
+    iData.setMinimumSize( new Dimension(300, 20));
 
     //set the menu bar controls for file chooser.
 

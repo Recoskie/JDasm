@@ -3,11 +3,10 @@ import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.event.*;
 
 //Uses custom layout with widgets that control the components in window.
 
-public class JCellPane extends JComponent implements MouseMotionListener, MouseListener, AncestorListener
+public class JCellPane extends JComponent implements MouseMotionListener, MouseListener
 {
   //Rows and cols minium, or preferred size.
 
@@ -38,11 +37,24 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   private ArrayList<Dims> Rows = new ArrayList<Dims>();
   private ArrayList<Dims> Cols = new ArrayList<Dims>();
-  private ArrayList<Integer> ColMin = new ArrayList<Integer>();
+
+  //Point to element clicked.
+
+  private int nx = 0, ny = 0;
+  private int rh = 0;
+  private int eCol = -1, eRow = -1;
 
   //Gap between components.
 
   private int gap = 7;
+
+  //Number of components.
+
+  private int nComps = 0;
+
+  //component place holder.
+
+  private Component c;
 
   //Row min/max adjustable size Varies based on visible component's.
 
@@ -92,10 +104,8 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
     public void updateSizes(Container parent)
     {
       Rows.clear(); Cols.clear();
-      int nComps = parent.getComponentCount(); while( ColMin.size() <= nComps ) { ColMin.add(0); }
+      nComps = parent.getComponentCount();
       Dimension perf = null, min = null;
-
-      Component c;
  
       //Reset preferred/minimum width and height.
     
@@ -125,7 +135,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
  
         rowHeight = Math.max( perf.height, rowHeight ); minHeight = Math.max( min.height, minHeight );
 
-        Cols.add( new Dims( perf.width, Math.max( min.width, ColMin.get(col) ), Math.max( perf.width, ColMin.get(col) ) ) );
+        Cols.add( new Dims( perf.width, min.width, perf.width ) );
 
         if( col >= len )
         {
@@ -166,9 +176,8 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
  
     public void layoutContainer(Container parent)
     {
-      Insets insets = parent.getInsets();
-      int nComps = parent.getComponentCount();
-      int x = 0, y = insets.top;
+      nComps = parent.getComponentCount();
+      int x = 0, y = parent.getInsets().top;
 
       int lx = 0; //last visible col.
       boolean rowVisible = false;
@@ -179,7 +188,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
  
       for ( int col = 0, row = 0; col < nComps; col++ )
       {
-        Component c = parent.getComponent( col );
+        c = parent.getComponent( col );
       
         if (c.isVisible())
         {
@@ -230,24 +239,13 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   public void rowMaximize( int el ) { eRow = el; rowAdjustableSize(); ny = adjMax; setRow(); eRow = -1; }
 
-  //Set column minium sizes manually.
-
-  public void setColMinium( int el, int val ) { while( ColMin.size() <= el ) { ColMin.add(0); } ColMin.set( el, val ); }
-
   //Construct the split layout system.
 
   public JCellPane()
   {
     cLayout = new CellLayout(); this.setLayout( cLayout );
 
-    //Note the mouse listener only works between vgap.
-    //Useful for mouse enter and exit. Mouse press determines which line we are adjusting in layout.
-
     this.addMouseListener(this); this.addMouseMotionListener(this);
-
-    //This tracks the mouse on top of the components. For mouse drag, and release when adjusting the layout.
-    
-    this.addAncestorListener(this);
   }
 
   //Paint the adjustable lines.
@@ -276,15 +274,14 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
     g.setColor( Color.BLACK );
 
-    int count = this.getComponentCount() - 1;
+    nComps = this.getComponentCount() - 1;
     Point pos;
     Dimension dim;
-    Component c;
     int rowHeight = 0;
     
     len = rowLen.get(0);
 
-    for( int col = 0, row = 0; col < count; col++ )
+    for( int col = 0, row = 0; col < nComps; col++ )
     {
       c = this.getComponent( col );
       pos = c.getLocation();
@@ -410,12 +407,6 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   public void row() { rows += 1; rowLen.add( this.getComponentCount() - 1 ); }
 
-  //Point to element clicked.
-
-  private int nx = 0, ny = 0;
-  private int rh = 0;
-  private int eCol = -1, eRow = -1;
-
   public void mouseMoved(MouseEvent e) { }
 
   public void mouseDragged(MouseEvent e)
@@ -497,14 +488,13 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
     nx = e.getX(); ny = e.getY();
 
-    int count = this.getComponentCount() - 1;
+    nComps = this.getComponentCount() - 1;
     Point pos;
     Dimension dim;
-    Component c;
     
     len = rowLen.get(0);
 
-    for( int col = 0, row = 0; col < count; col++ )
+    for( int col = 0, row = 0; col < nComps; col++ )
     {
       c = this.getComponent( col ); pos = c.getLocation(); dim = c.getSize();
 
@@ -534,27 +524,9 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   //Called by layout managers.
 
-  public void setBounds(int x, int y, int width, int height)
-  {
-    super.setBounds(x, y, width, height); 
-    
-    if( layoutInitialized ) { adj( width, height ); }
-  }
+  public void setBounds(int x, int y, int width, int height) { super.setBounds(x, y, width, height); if( layoutInitialized ) { adj( width, height ); } }
 
-  public void add(JComponent c)
-  {
-    c.addAncestorListener(this); super.add(c);
-  }
+  //Update the layout.
 
-  public void ancestorAdded ( AncestorEvent event )
-  {
-    if( layoutInitialized ) { cLayout.updateSizes(this); adj( this.getWidth(), this.getHeight() ); }
-  }
-
-  public void ancestorRemoved ( AncestorEvent event )
-  {
-    if( layoutInitialized ) { cLayout.updateSizes(this); adj( this.getWidth(), this.getHeight() ); }
-  }
-
-  public void ancestorMoved ( AncestorEvent event ){}
+  public void update() { if( layoutInitialized ) { cLayout.updateSizes(this); adj( this.getWidth(), this.getHeight() ); } }
 }

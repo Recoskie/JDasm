@@ -88,7 +88,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
     //Binary tool display controls.
 
-    else if( e.getActionCommand().equals("Toggle text View") ) { Offset.enableText( !Offset.showText() ); Virtual.enableText( !Virtual.showText() ); }
+    else if( e.getActionCommand().equals("Toggle text View") ) { Offset.enableText( !Offset.showText() ); Virtual.enableText( !Virtual.showText() ); tools.update(); }
 
     else if( e.getActionCommand().equals("Toggle virtual space View") ) { Virtual.setVisible(!Virtual.isVisible()); }
 
@@ -339,7 +339,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       //Adjust the window.
 
-      winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); try { tools.rowMaximize(0); } catch( Exception er ) {}
+      winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); try { tools.update(); tools.rowMaximize(0); } catch( Exception er ) {}
     }
 
     //Failed to read file, or disk.

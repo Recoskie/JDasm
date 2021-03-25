@@ -54,7 +54,7 @@ public class RandomAccessFileV extends RandomAccessFile implements Runnable
   {
     //Event thread is created for sequential read, or write length.
 
-    if( !EventThread.isAlive() ) { EventThread.start(); }
+    if( !EventThread.isAlive() ) { EventThread = new Thread(this); EventThread.start(); }
     
     list.add( IOEventListener.class, listener ); Events = true;
   }
