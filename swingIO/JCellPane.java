@@ -135,7 +135,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
  
         rowHeight = Math.max( perf.height, rowHeight ); minHeight = Math.max( min.height, minHeight );
 
-        Cols.add( new Dims( perf.width, min.width, perf.width ) );
+        Cols.add( new Dims( perf.width, min.width, Math.max( min.width, perf.width ) ) );
 
         if( col >= len )
         {
@@ -152,27 +152,9 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
       preferredHeight -= gap; preferredWidth = w1 - gap; minWidth = w2 - gap; layoutInitialized = true;
     }
   
-    public Dimension preferredLayoutSize(Container parent)
-    {
-      Dimension dim = new Dimension(0, 0);
- 
-      if( !layoutInitialized ) { updateSizes(parent); }
-    
-      dim.width = preferredWidth; dim.height = preferredHeight;
- 
-      return( dim );
-    }
+    public Dimension preferredLayoutSize(Container parent) { if( !layoutInitialized ) { updateSizes(parent); } return( new Dimension( preferredWidth, preferredHeight ) ); }
   
-    public Dimension minimumLayoutSize(Container parent)
-    {
-      Dimension dim = new Dimension(0, 0);
- 
-      if( !layoutInitialized ) { updateSizes(parent); }
-    
-      dim.width = minWidth; dim.height = minHeight;
- 
-      return( dim );
-    }
+    public Dimension minimumLayoutSize(Container parent) { if( !layoutInitialized ) { updateSizes(parent); } return( new Dimension( minWidth, minHeight ) ); }
  
     public void layoutContainer(Container parent)
     {

@@ -339,7 +339,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       //Adjust the window.
 
-      winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); try { tools.update(); tools.rowMaximize(0); } catch( Exception er ) {}
+      winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); tools.update(); tools.rowMaximize(0);
     }
 
     //Failed to read file, or disk.
