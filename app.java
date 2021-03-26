@@ -412,10 +412,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   //Open file.
 
-  public void drop(DropTargetDropEvent dtde)
-  {
-    open( new JDEvent( this, df, df.indexOf(".") > 0 ? df.substring( df.lastIndexOf("."), df.length() ) : "", "", 0 ) );
-  }
+  public void drop(DropTargetDropEvent dtde) { fc.openFile( df ); }
 
   public void dropActionChanged(DropTargetDragEvent dtde) { }
 

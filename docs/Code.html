@@ -1,0 +1,456 @@
+<html>
+<head>
+  <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
+  <title>Translating to high level code.</title>
+</head>
+<body>
+  <h1>JFH-Disassembly.</h1>
+  Welcome to JFH disassembly. A all in one multi-platform binary tool.
+
+  <h1>Pre compiled binary.</h1>
+  
+  A Pre compiled binary runs on a eco system of processors that are the same architecture type.
+
+  <br /><br />
+  
+  This is how Windows, DOS, Unix, Linux, and macOS work.
+
+  <br /><br />
+  
+  The loader for the application is design to dump the pre compiled binary into ram.
+
+  <br /><br />
+  
+  The CPU is meant to directly run the program instructions without recompiling the code.
+
+  <br /><br />
+  
+  The systems are originally designed to target x86 cores.
+
+  <br /><br />
+  
+  This meant mostly AMD, Intel cores, and some off brand x86 cores that run x86 instructions.
+  
+  <h1>Dynamically generated code.</h1>
+  
+  Such as Java, Scripting languages, emulators (JIT/Interpreter).
+
+  <br /><br />
+  
+  These forums of code store instructions stored in the file that are not understood by the CPU directly.
+
+  <br /><br />
+  
+  In java it is called <strong>java byte codes</strong>. As loading a new part in a APP, or game takes more time than a pre compiled code.
+
+  <br /><br />
+  
+  The advantage of this is that you can change the byte code commands into different processor instructions.
+
+  <br /><br />
+  
+  The main binary that does all the work is called a JIT compiler, or interpreter.
+
+  <br /><br />
+  
+  The JIT compiler, or interpreter is built in pre compiled binary code to make it run fast on the target architecture type.
+
+  <br /><br />
+  
+  However, if you use the JIT compiler, or interpreter as the base of your operating system for loading applications. That is dumb, and bit slower on performance.
+
+  <br /><br />
+  
+  These are your android systems, and SUN micro systems OS (Solar OS).
+
+  <br /><br /><hr />
+
+  Cases in which dynamically generated code speeds stuff up is.
+
+  <hr /><br />
+
+  Dynamically generated AI (Artificial intelligence) code. This is somewhat different as it takes information in to generate changes to itself.
+  
+  <br /><br />
+
+  There is also self modifying code that can make modifications to itself to save time in algorithms and loops.
+
+  <h1>Data types.</h1>
+
+  The raw arithmetic types such as Integers numbers, floating point, text data. Do not change between CPU architecture types.
+
+  <br /><br />
+
+  The data types for <strong>data processing</strong>, and doing math arithmetic, and text are standardized.
+  
+  <br /><br />
+
+  Everything is in bytes. Thus numbers are in different word sizes using bytes.
+
+  <br /><br />
+
+  The most java has to do is compile the programs instructions into instructions the target CPU architecture uses.
+
+  <br /><br />
+
+  The processor should be able to precess the standard primitive data types.
+
+  <br />
+
+  <h1>Translating to code.</h1>
+
+  There is very little difference between you building a program in machine code vs using a programming language.
+
+  <br /><br />
+
+  The steps you put into code are the same septs wrote out in machine code.
+
+  <br /><br />
+
+  What will change is you will see it moves a number into a register and adds it with the value. Writes it back to memory at the location of your variable.
+
+  <br /><br />
+
+  The thing that will be noticeably missing is the names of your data types.
+
+  <br /><br />
+
+  So when you see add, and subtracts, and other operations that you would normally do in code.
+
+  <br /><br />
+
+  You give them temporary variable names. Until you know what they ware intended for in the steps of the code.
+
+  <br /><br />
+
+  You also have to pick a language syntax that you are comfortable with. Such as "JavaScript", or "C".
+
+  <br /><br />
+
+  As you define what the steps are doing. It rally does not matter which language you target to write the steps back out in.
+
+  <br /><br />
+
+  You also should be able to distinguish some of the basic built in methods in a programming language.
+  
+  <br /><br />
+  
+  If you you see a number being divided by 10 till no remainder. Then you know it is the "toString" method. Which converts the number to a base 10 number.
+  
+  <br /><br />
+  
+  Uses graphics to draw the character values using the standard text format. However, you could just write out the fu;; logic of the code.
+
+  <br /><br />
+
+  However it makes it easier to read if you recognize the built in methods.
+
+  <h1>Arithmetic comparison.</h1>
+  
+  Normally in programming languages. You can compare things in a single line of code. However, comparison is done using arithmetic logic.
+  
+  <br /><br />
+
+  All CPU's have to do it in a few steps regardless of the CPU type.
+  
+  <br /><br />
+
+  An processors arithmetic unit has what we call outputs like zero, sing, carry, overflow. So do calculators.
+  
+  <br /><br />
+
+  These outputs are saved into a flag register from the arithmetic circuit per every arithmetic instruction.
+  
+  <br /><br />
+
+  A CPU like a x86 one. Will have a compare instruction. The compare instruction does a subtract between two numbers without writing the result.
+  
+  <br /><br />
+
+  We could use subtract instead on any CPU, but using compare is better if you do not wish for the value to be subtracted and only want to compare.
+  
+  <br /><br />
+
+  Now the zero output is set when the output is all 0 from any arithmetic operation. Which is just a <strong>inverter</strong> with an <strong>and gate</strong> at the output.
+  
+  <br /><br />
+  
+  This means both values are the same such as 7489328 - 7489328 = 0. Which set zero to active in the flag register.
+  
+  <br /><br />
+
+  If the value being subtracted was smaller. The last binary digit would be borrowed causing the last binary digit to be set.
+  
+  <br /><br />
+
+  This sets "sing = 1" as in negative value. If the value was grater than "sing = 0".
+  
+  <br /><br />
+
+  Comparing the flags after subtract, or compare allows us to create <strong>less than, grater than, equal to, or less than equal to, and grater than equals to</strong>.
+  
+  <br /><br />
+
+  This is the regular way comparison is done arithmetically by all CPU's.
+  
+  <br /><br />
+  
+  <strong>The programmer is not use to having to compare something first then do a conditional jump.</strong>
+  
+  <br /><br />
+
+  A processor jump in a x86 core will only jump to the location if the flags are set to the right value after a compare, subtract, or any arithmetic instruction.
+  
+  <br /><br />
+
+  Otherwise the instructions after the jump will run.
+  
+  <br /><br />
+  
+  On an ARM core. All instructions have a condition code. Which means the instruction might not run relative to the arithmetic results of the past instruction.
+  
+  <br /><br />
+
+  <img src="Figs/ARM-cond.gif"></img>
+
+  <br /><br />
+
+  We can also force the Arithmetic output flags to not be saved using the S-bit. This allows us to make some very interesting code on a ARM core.
+
+  <br /><br />
+
+  This allows us to build the logic for various arithmetic operations in code using conditions parried with arithmetic.
+
+  <br /><br />
+
+  This allows ARM cores to have few operation codes, but do just as much as x86 cores.
+
+  <br /><br />
+
+  Thus has allowed ARM to use less transistors, and runs on low power devices.
+
+  <br /><br />
+
+  On a x86 core we have dedicated instructions, for everything Arithmetic based.
+
+  <br />
+
+  An ARM may spend a few more instruction cycles doing a operation an x86 can do in one instruction cycle.
+
+  <br /><br />
+
+  The only conditional instructions on a x86 core are the jump instructions. Generally a compiler will write out the steps in your code in each separate if statement.
+
+  <br /><br />
+
+  It then links them together linearly. So it is important to map the conditional jump locations as these will tell us where code separates into <strong>IF statements</strong>.
+
+  <br /><br />
+
+  While on an ARM core. It can be instructions with conditions to make an combinational arithmetic operation, or program logic.
+
+  <br /><br />
+
+  What we call a jump instruction on a x86 core is called branching on an ARM. An ARM conditional brach works the same as a x86 conditional jump.
+
+  <br /><br />
+
+  So mapping ARM conditional branches reviles the programs if statements, and separations.
+
+  <h1>Method calls, and function calls.</h1>
+
+  x86 cores have a very special system for calling a method, or function in code.
+
+  <br /><br />
+
+  When we do a CALL instead of a jump to location.
+  
+  <br /><br />
+
+  The CALL instruction writes the current position the CPU is at in the code into RAM then jumps to location.
+
+  <br /><br />
+
+  So the CALL operation is two operations in one. The <string>RET</string> operation reads the number wrote into RAM and jumps back to that location.
+
+  <br /><br />
+
+  The instructions that came after the CALL operation continues.
+
+  <br /><br />
+
+  <string>RET</string>  is short for return back. Which <string>RET</string> is basicaly a read and jump.
+
+  <br /><br />
+
+  CALL/RET uses a register called the stack pointer as the location to write and read the value.
+  
+  <br /><br /> 
+  
+  If you change the value of the stack pointer register then use <string>RET</string>. We may not return back to the right location.
+  
+  <br /><br />
+
+  If you do change the value of the stack pointer register to do a add, or some arithmetic operation before using <string>RET</string>. Make sure you set it back to what it was.
+
+  <br /><br />
+
+  Another thing you have to worry about is instructions PUSH, and POP. If you use instructions PUSH, or POP before RET. You also may not end up back.
+
+  <br /><br />
+
+  The instruction PUSH writes the value of a register to the location of the stack pointer.
+
+  <br /><br />
+
+  The operation POP puts a value from the stack pointer location into a register.
+
+  <br /><br />
+
+  AS you write bytes at the location of the stack pointer register using PUSH. The stack pointer is subtracted by the bytes you write.
+
+  <br /><br />
+
+  AS you read bytes at the location of the stack pointer register using POP. The stack pointer is added by the bytes you write.
+
+  <br /><br />
+
+  Everything you PUSH you must POP in order. This way RET will return back to the right location.
+
+  <br /><br />
+
+  There is some tricks to this though. Say you build a method that takes two integers as a input.
+
+  <br /><br />
+
+  You may actually see these two integers get PUSHED onto the stack location before CALL.
+
+  <br /><br />
+
+  During the method you may actually see it use the stack pointer plus 8 as integer one input, and plus 12 as integer two input while the other 8 bytes is the RET location.
+
+  <br /><br />
+
+  You will see this lots in x86 binaries.
+
+  <br /><br />
+
+  Also print a stack trace operation in programming. Just prints the stack of the methods that are last called by locations in the stack register location.
+
+  <br /><br />
+
+  It is also important that the stack pointer register is set far enough away from the program instructions that it does not write over program instructions.
+
+  <br /><br />
+
+  So when you create functions/methods in code. You now know there is not much difference in how it gets compiled out.
+
+  <br /><br />
+
+  Some programming tools and let you inline the code. This means the compiler puts the code for you method in with the rest of the code instead of doing a CALL.
+
+  <br /><br />
+
+  This is done to make the code faster. This can triple to double the size of the binary program depending on how may places you use the function/method in the program.
+  
+  <h1>Loop, and repate.</h1>
+
+  x86 cors also have loops, and repeat instructions. These small things can be vary useful.
+
+  <br /><br />
+
+  The loop instructions are the same as your jump instructions. Except it jumps and subtracts the counting register by one.
+
+  <br /><br />
+
+  The LOOP instructions should always locate back to a previous instruction location, or set of instructions before the LOOP/JUMP instruction is reached again.
+
+  <br /><br />
+
+  Once the counting register is 0 the LOOP instruction no longer jumps back. Allowing the next instructions to run.
+
+  <br /><br />
+
+  The counting register should be set to the number of times you want to loop.
+
+  <br /><br />
+
+  The Repeat prefix can be used before any x86 data processing operation. The REP prefix will continue the instruction until the counting register is zero as well.
+
+  <br /><br />
+
+  There are a few special move operations for moving data around. They are operation codes A4, A5. These instructions automatically use two RAM address locations using two registers.
+
+  <br /><br />
+
+  When you are using instruction MOVS, si is considered as the source register, while di is considered as the destination register.
+
+  <br /><br />
+
+  The instruction MOVSB adds one to both SI and DI as it writes one byte from SI location to the location of DI.
+
+  <br /><br />
+
+  If we run this operation a bunch of times. It can move data from one spot of memory to another.
+  
+  <br /><br />
+  
+  So by using the repeat prefix to repeat this instruction. We can have this move data as large as we want to the value we set the counting register.
+
+  <br /><br />
+
+  In ARM we have a special instruction called a block copy instruction to achieve this same operation.
+
+  <h1>x86 register naming scheme.</h1>
+
+  Originally all x86 general arithmetic registers had no names.
+
+  <br /><br />
+  
+  Register 4 was used with arithmetic operation just like the other registers. However register 4 also was used with instructions PUSH/POP/CALL/RET.
+
+  <br /><br />
+
+  In which register 4 became known as the stack pointer register (SP for short). In which SP is still a general arithmetic register.
+
+  <br /><br />
+
+  Just that is is called stack pointer because it is used as a location for operation PUSH/POP/CALL/RET.
+
+  <br /><br />
+
+  The same applies to the counting register, Destination, and source.
+
+  <br /><br />
+
+  In ARM all registers go by number code as there is no special case instructions that use a particular register by default.
+
+  <br /><br />
+
+  In x86 Register 3 is used by default to store, or send a value between a prot number using input, and output instructions.
+
+  <br /><br />
+
+  So register 3 became known as the data register. However, is also a regular arithmetic register.
+
+  <h1>Complications.</h1>
+
+  The only thing that can become complicated is arithmetic paired with conditional jumps. Rather than compare and jump (Or ARM branch).
+  
+  <br /><br />
+  
+  This can make it tricky to reconstruct the original <strong>if statement</strong> in code.
+
+  <br /><br />
+
+  The easy part is defining function calls, and varibles. Giving the varibles a meaningful name for what they are used for can be tricky sometimes.
+
+  <br /><br />
+
+  So generally we can get really close to reconstructing the original source code of a "C" program, or "C++", or can change it to any other language syntax.
+
+  <br /><br />
+
+  Loops are very easy to identify. It can be a jump that jumps back till some condition, or the LOOP instruction till counting register is 0.
+</body>
+</html>
