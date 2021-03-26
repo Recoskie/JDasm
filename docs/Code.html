@@ -30,6 +30,10 @@
   <br /><br />
   
   This meant mostly AMD, Intel cores, and some off brand x86 cores that run x86 instructions.
+
+  <br /><br />
+
+  You can learn some of the basics of machine code, and processor architecture the following <a href="https://recoskie.github.io/JFH-Disassembly/docs/Machine.html">link</a>.
   
   <h1>Dynamically generated code.</h1>
   
@@ -82,10 +86,14 @@
   <br /><br />
 
   The data types for <strong>data processing</strong>, and doing math arithmetic, and text are standardized.
-  
+
   <br /><br />
 
   Also everything is in bytes. Thus numbers are in different word sizes using bytes.
+
+  <br /><br />
+
+  You can learn about them following: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html#dTypes">link</a>.
 
   <br /><br />
 
@@ -103,7 +111,7 @@
 
   <br /><br />
 
-  The steps you put into code are the same septs wrote out in machine code.
+  The steps you put into code are the same septs wrote out in machine code. It just is a little harder to follow.
 
   <br /><br />
 
@@ -111,7 +119,7 @@
 
   <br /><br />
 
-  The thing that will be noticeably missing is the names of your data types.
+  The first thing that will be noticeably missing is the names of your data types.
 
   <br /><br />
 
@@ -123,7 +131,7 @@
 
   <br /><br />
 
-  You also have to pick a language syntax that you are comfortable with. Such as "JavaScript", or "C".
+  You also have to pick a language syntax that you are comfortable with. Such as <strong>JavaScript, or C</strong>.
 
   <br /><br />
 
@@ -135,7 +143,7 @@
   
   <br /><br />
   
-  If you see a number being divided by 10 till no remainder. Then you know it is the "toString" method. Which converts the number to a base 10 number.
+  If you see a number being divided by 10 till no remainder. Then you know it is the <strong>toString</strong> method. Which converts the number to a base 10 number.
   
   <br /><br />
   
@@ -143,7 +151,7 @@
 
   <br /><br />
 
-  However it makes it easier to read if you recognize the built in methods.
+  It will still compile back out fine. However, it makes it easier to read if you recognize the built in methods.
 
   <h1>Arithmetic comparison.</h1>
   
@@ -155,11 +163,31 @@
   
   <br /><br />
 
-  An processors arithmetic unit has what we call outputs like zero, sing, carry, overflow. So do calculators.
+  An processors arithmetic unit has outputs zero, sing, carry, overflow. So do calculators.
   
   <br /><br />
 
   These outputs are saved into a flag register from the arithmetic circuit per every arithmetic instruction.
+
+  <br /><br />
+  
+  A simple ALU design is that of the 74181 which started the design of single chip CPU's. Following: <a href="https://en.wikipedia.org/wiki/74181">link</a>.
+
+  <br /><br />
+
+  All processors today have very small ALU which is designed to do all arithmetic operations. The small size is achieved by having the S inputs change the logical combination input to output.
+
+  <br /><br />
+
+  Thus you need to know the right values to set the S inputs to generate the right logical combination between input to output to do a ADD, or subtract.
+
+  <br /><br />
+
+  The pin that is A = B is the zero flag from the 74181, and P is parity meaning output is odd or even.
+
+  <br /><br />
+
+  We also have carry as a pin output. The sing is just a straight connection from the last output. Modern ALU's are 8 in size today. Thus are grouped together in word sizes.
   
   <br /><br />
 
@@ -271,7 +299,7 @@
 
   <br /><br />
 
-  So the CALL operation is two operations in one. The <string>RET</string> operation reads the number wrote into RAM and jumps back to that location.
+  So the CALL operation is two operations in one. The RET operation reads the number wrote into RAM and jumps back to that location.
 
   <br /><br />
 
@@ -279,7 +307,7 @@
 
   <br /><br />
 
-  <string>RET</string> is short for return back. Which <string>RET</string> is basically a read and jump.
+  RET is short for return back. Which RET is basically a read and jump.
 
   <br /><br />
 
@@ -287,11 +315,11 @@
   
   <br /><br /> 
   
-  If you change the value of the stack pointer register then use <string>RET</string>. We may not return back to the right location.
+  If you change the value of the stack pointer register then use RET. We may not return back to the right location.
   
   <br /><br />
 
-  If you do change the value of the stack pointer register to do a add, or some arithmetic operation before using <string>RET</string>. Make sure you set it back to what it was.
+  If you do change the value of the stack pointer register to do a add, or some arithmetic operation before using RET. Make sure you set it back to what it was.
 
   <br /><br />
 
