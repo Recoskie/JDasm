@@ -380,54 +380,6 @@
   <br /><br />
 
   This is done to make the code faster. This can triple to double the size of the binary program depending on how may places you use the function/method in the program.
-  
-  <h1>Loop, and repeat.</h1>
-
-  x86 cores also have loops, and repeat instructions. These small things can be vary useful.
-
-  <br /><br />
-
-  The loop instructions are the same as your jump instructions. Except it jumps and subtracts the counting register by one.
-
-  <br /><br />
-
-  The LOOP instructions should always locate back to a previous instruction location, or set of instructions before the LOOP/JUMP instruction is reached again.
-
-  <br /><br />
-
-  Once the counting register is 0 the LOOP instruction no longer jumps back. Allowing the next instructions to run.
-
-  <br /><br />
-
-  The counting register should be set to the number of times you want to loop.
-
-  <br /><br />
-
-  The Repeat prefix can be used before any x86 data processing operation. The REP prefix will continue the instruction until the counting register is zero as well.
-
-  <br /><br />
-
-  There are a few special move operations for moving data around. They are operation codes A4, A5. These instructions automatically use two RAM address locations using two registers.
-
-  <br /><br />
-
-  When you are using instruction MOVS, si is considered as the source register, while di is considered as the destination register.
-
-  <br /><br />
-
-  The instruction MOVSB adds one to both SI and DI as it writes one byte from SI location to the location of DI.
-
-  <br /><br />
-
-  If we run this operation a bunch of times. It can move data from one spot of memory to another.
-  
-  <br /><br />
-  
-  So by using the repeat prefix to repeat this instruction. We can have this move data as large as we want to the value we set the counting register.
-
-  <br /><br />
-
-  In ARM we have a special instruction called a block copy instruction to achieve this same operation.
 
   <h1>Interrupts vs CALL.</h1>
 
@@ -480,6 +432,54 @@
   <br /><br />
 
   Even though modern operating systems still load some interrupt methods in. It is a thing of the past.
+  
+  <h1>Loop, and repeat.</h1>
+
+  x86 cores also have loops, and repeat instructions. These small things can be vary useful.
+
+  <br /><br />
+
+  The loop instructions are the same as your jump instructions. Except it jumps and subtracts the counting register by one.
+
+  <br /><br />
+
+  The LOOP instructions should always locate back to a previous instruction location, or set of instructions before the LOOP/JUMP instruction is reached again.
+
+  <br /><br />
+
+  Once the counting register is 0 the LOOP instruction no longer jumps back. Allowing the next instructions to run.
+
+  <br /><br />
+
+  The counting register should be set to the number of times you want to loop.
+
+  <br /><br />
+
+  The Repeat prefix can be used before any x86 data processing operation. The REP prefix will continue the instruction until the counting register is zero as well.
+
+  <br /><br />
+
+  There are a few special move operations for moving data around. They are operation codes A4, A5. These instructions automatically use two RAM address locations using two registers.
+
+  <br /><br />
+
+  When you are using instruction MOVS, si is considered as the source register, while di is considered as the destination register.
+
+  <br /><br />
+
+  The instruction MOVSB adds one to both SI and DI as it writes one byte from SI location to the location of DI.
+
+  <br /><br />
+
+  If we run this operation a bunch of times. It can move data from one spot of memory to another.
+  
+  <br /><br />
+  
+  So by using the repeat prefix to repeat this instruction. We can have this move data as large as we want to the value we set the counting register.
+
+  <br /><br />
+
+  In ARM we have a special instruction called a block copy instruction to achieve this same operation.
 
   <h1>x86 register naming scheme.</h1>
 
