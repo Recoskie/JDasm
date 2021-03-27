@@ -443,11 +443,15 @@
 
   <br /><br />
 
-  The instruction INT 03 will read the third number and JUMP the CPU to the location.
+  The instruction INT 03 will read the fourth . The number is the JUMP location.
 
   <br /><br />
 
-  Before the CPU goes to the location. It writes the location it currently is at in memory. The same as the CALL instruction.
+  Before the CPU goes to the location. It writes the location it currently is at in memory.
+  
+  <br /><br />
+  
+  It stores the location the interrupt happened at the location of the stack pointer register. The same as the CALL instruction.
 
   <br /><br />
 
