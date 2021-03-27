@@ -429,6 +429,54 @@
 
   In ARM we have a special instruction called a block copy instruction to achieve this same operation.
 
+  <h1>Interrupts.</h1>
+
+  Short for INT followed by a interrupt number. These are also the same as a CALL instruction.
+
+  <br /><br />
+
+  The first thing an operating system does is set up a list of location at address 0 and up.
+
+  <br /><br />
+
+  The first number is INT 00, and the second is INT 01 and so on.
+
+  <br /><br />
+
+  The instruction INT 03 will read the third number and JUMP the CPU to the location.
+
+  <br /><br />
+
+  Before the CPU goes to the location. It writes the location it currently is at in memory. The same as the CALL instruction.
+
+  <br /><br />
+
+  At the end of the code an RET is used. This allows your code to resume after the interrupt.
+
+  <br /><br />
+
+  Interrupts are just a fancy CALL instruction that uses a list of locations at address 0 in RAM.
+
+  <br /><br />
+
+  Interrupts are not used much anymore by modern operating systems. Windows 10 still loads some methods into the interrupt list.
+
+  <br /><br />
+
+  However they are rarely ever used. The regular CALL instruction is preferred over Interrupt CALL.
+
+  <br /><br />
+
+  You can still look at the map of INT codes: <a href="https://en.wikipedia.org/wiki/DOS_API">DOS API INT Setup vector</a>.
+
+  <br /><br />
+
+  Windows Vista, and earlier still suported the full DOS API. Windows 10 still has a few Interrupts that load in, but very few.
+
+  <br /><br />
+
+  Even though modern operating systems still load some interrupt methods in. It is a thing of the past.
+
   <h1>x86 register naming scheme.</h1>
 
   Originally all x86 general arithmetic registers had no names.
