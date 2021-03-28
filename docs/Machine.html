@@ -11,7 +11,7 @@
 
   <h1>Machine code Introduction.</h1>
 
-  In the very first document we discussed the basic primitive data types that processors can work with, and do operations with.
+  In the very <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">basics document</a> we discussed the basic primitive data types that processors can work with, and do operations with.
 
   <br /><br />
 
@@ -53,11 +53,19 @@
 
   <br /><br />
 
+  The bytes that come after the instruction number is what the instruction uses as input.
+
+  <br /><br />
+
   This <a href="http://www.mlsite.net/8086/" target="_blank">link</a> is a mapping of the original 8086 instructions. Without any added instructions that became available in later cores.
 
   <br /><br />
 
   The 8086 map is the original foundation, for x86 machine code. Thus modern x86 cores even AMD ones still run the same basic operations using exactly the same encoding.
+
+  <br /><br />
+
+  For now lets start with a few sample codes.
 
   <br /><br />
 
@@ -78,7 +86,7 @@
   
   <br /><br />
 
-  MOV is short for move. MOV set the value of the AH register 97, and then BX is set 3333. The ADD operation uses the BX register as a location to a byte that is added with AH.
+  MOV is short for move. MOV sets the value of the AH register 97, and then BX is set 3333. The ADD operation uses the BX register as a location to a byte that is added with AH.
 
   <br /><br />
 
@@ -165,7 +173,7 @@
 
   <br /><br />
 
-  So operation code 66 hex become known as the "operand override prefix". As it was used before every 32 bit operation to make the operation the original 16 bit operation.
+  So operation code 66 hex become known as the <strong>operand override prefix</strong>. As it was used before every 32 bit operation to make the operation the original 16 bit operation.
 
   <br /><br />
 
@@ -177,7 +185,7 @@
 
   <br /><br />
   
-  In 16 bit mode all 32 bit operations are their original 16 bit size without using the operand override prefix 66 hex before every operation.
+  In 16 bit protect mode all 32 bit operations are their original 16 bit size without using the operand override prefix 66 hex before every operation.
 
   <br /><br />
 

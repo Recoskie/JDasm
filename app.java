@@ -90,13 +90,13 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
     else if( e.getActionCommand().equals("Toggle text View") ) { Offset.enableText( !Offset.showText() ); Virtual.enableText( !Virtual.showText() ); tools.update(); }
 
-    else if( e.getActionCommand().equals("Toggle virtual space View") ) { Virtual.setVisible(!Virtual.isVisible()); }
+    else if( e.getActionCommand().equals("Toggle virtual space View") ) { Virtual.setVisible(!Virtual.isVisible()); tools.update(); }
 
-    else if( e.getActionCommand().equals("Toggle offset View") ) { Offset.setVisible(!Offset.isVisible()); }
+    else if( e.getActionCommand().equals("Toggle offset View") ) { Offset.setVisible(!Offset.isVisible()); tools.update(); }
 
     else if( e.getActionCommand().equals("Open new File") ) { Reset(); }
 
-    else if( e.getActionCommand().equals("Toggle Data Inspector") ) { di.setVisible(!di.isVisible()); }
+    else if( e.getActionCommand().equals("Toggle Data Inspector") ) { di.setVisible(!di.isVisible()); tools.update(); }
 
     else if( e.getActionCommand().equals("Goto Offset") )
     {
