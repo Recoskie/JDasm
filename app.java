@@ -306,7 +306,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       else
       {
-        winFrame.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) ); file = new RandomAccessDevice( e.getID(), "r" );
+        winFrame.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) );
+        file = new RandomAccessDevice( e.getID(), "r" );
       }
 
       //Set io components to target.
@@ -333,13 +334,15 @@ public class app extends Window implements ActionListener, DropTargetListener, J
         Virtual.setVisible(false); Offset.setVisible(true); di.setVisible(true);
       }
 
+      //Adjust the window.
+
+      winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+      
       //Set back tools after disk finish loading.
 
       if( e.getArg(0) == -2 ) { winFrame.setContentPane( tools ); }
-
-      //Adjust the window.
-
-      winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); tools.update(); tools.rowMaximize(0);
+      
+      tools.rowMaximize(0); tools.update();
     }
 
     //Failed to read file, or disk.
