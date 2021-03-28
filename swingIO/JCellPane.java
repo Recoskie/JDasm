@@ -103,7 +103,6 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
  
     public void updateSizes(Container parent)
     {
-      Rows.clear(); Cols.clear();
       nComps = parent.getComponentCount();
       Dimension perf = null, min = null;
  
@@ -135,7 +134,14 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
  
         rowHeight = Math.max( perf.height, rowHeight ); minHeight = Math.max( min.height, minHeight );
 
-        Cols.add( new Dims( perf.width, min.width, Math.max( min.width, perf.width ) ) );
+        if(!layoutInitialized)
+        {
+          Cols.add( new Dims( perf.width, min.width, Math.max( min.width, perf.width ) ) );
+        }
+        else
+        {
+          Cols.set( col, new Dims( perf.width, min.width, Math.max( min.width, perf.width ) ) );
+        }
 
         if( col >= len )
         {
@@ -143,7 +149,16 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
           
           preferredHeight += rowHeight + gap;
 
-          Rows.add( new Dims( rowHeight, minHeight, rowHeight ) ); rowHeight = 0; minHeight = 0;
+          if(!layoutInitialized)
+          {
+            Rows.add( new Dims( rowHeight, minHeight, rowHeight ) );
+          }
+          else
+          {
+            Rows.set( row - 1, new Dims( rowHeight, minHeight, rowHeight ) );
+          }
+          
+          rowHeight = 0; minHeight = 0;
 
           w1 = Math.max( w1, preferredWidth ); w2 = Math.max( w2, minWidth ); preferredWidth = 0; minWidth = 0;
         }
@@ -171,7 +186,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
       for ( int col = 0, row = 0; col < nComps; col++ )
       {
         c = parent.getComponent( col );
-      
+
         if (c.isVisible())
         {
           if( col > len )
@@ -182,6 +197,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
             rowVisible = false;
           }
+
 
           c.setBounds(x, y, col >= lx ? parent.getWidth() - x : Cols.get( col ).val, Rows.get( row ).val );
 
