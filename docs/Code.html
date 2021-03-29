@@ -299,11 +299,19 @@
 
   <br /><br />
 
-  Modern ALU's have 7 adders infont that alow 8 bit multiply, and divided in one clock cycle. They can be switched off or on. Rather than doing shift and add, or subtract for multiply, and divide.
+  Modern ALU's have 7 adders infont that alow 8 bit multiply, or divided in one clock cycle. The adders can be switched off, or on.
+  
+  <br /><br />
+  
+  This allows x86 cores to do really fast multiply, or divide. Also made 32/64 bit multiply, or divide much faster.
+  
+  <br /><br />
+  
+  As we ware able to make the circuit smaller we can include a full 32/64 div/mul in one clock cycle.
 
   <br /><br />
 
-  Because, of the control unit we can choose the carry flag to be given into the carry input. This creates instruction add and carry, and subtract and barrow (carry flag).
+  Because, of the control unit we can also choose the carry flag to be given into the carry input. This creates instruction add and carry, and subtract and barrow (carry flag).
 
   <br /><br />
 
@@ -315,11 +323,19 @@
 
   <br /><br />
 
-  Also it is important to know that the ALU opcodes can be different than the codes the control unit uses.
+  Also it is important to know that the combinational ALU opcodes can be different than the codes the control unit uses.
 
   <br /><br />
 
   Lastly it is important to make sure your CPU is compatible with software wrote in x86 instructions, or ARM depending on the type you build.
+
+  <br /><br />
+
+  Also floating point instructions are built off of the ALU. Float numbers are added regularly, however are shifted relative to exponent.
+
+  <br /><br />
+
+  So floating point operations using IEEE floating point is easy to implement, however are a bit slower on modern CPU.
 
   <br /><br />
 
@@ -351,7 +367,7 @@
 
   <br /><br />
 
-  CALL/RET uses a register called the stack pointer as the location to write and read the value.
+  CALL/RET uses a register called the stack pointer as the location to write, and read the value.
   
   <br /><br /> 
   
