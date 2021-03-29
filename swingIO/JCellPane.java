@@ -127,7 +127,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
         }
         else
         {
-          perf = new Dimension( gap, gap ); min = new Dimension( gap, gap );
+          perf = new Dimension( -gap, -gap ); min = new Dimension( -gap, -gap );
         }
 
         preferredWidth += perf.width + gap; minWidth += min.width + gap;

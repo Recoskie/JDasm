@@ -285,6 +285,46 @@
 
   So mapping ARM conditional branches reviles the programs if statements, and separations.
 
+  <h1>Control unit.</h1>
+
+  The Arithmetic unit does most of the operations. However, the control unit is the most important.
+  
+  <br /><br />
+  
+  The control unit is what does the Compare instruction. The control unit does the subtract with ALU, but sets the write to register off.
+
+  <br /><br />
+
+  This allows us to compare without writing the subtracted result. In earlier x86 cores the control unit orchestrated a multiply, or divide as multiple ALU instructions as well.
+
+  <br /><br />
+
+  Modern ALU's have 7 adders infont that alow 8 bit multiply, and divided in one clock cycle. They can be switched off or on. Rather than doing shift and add, or subtract for multiply, and divide.
+
+  <br /><br />
+
+  Because, of the control unit we can choose the carry flag to be given into the carry input. This creates instruction add and carry, and subtract and barrow (carry flag).
+
+  <br /><br />
+
+  Which allows us to add or subtract numbers as large as we want.
+
+  <br /><br />
+
+  Without the control unit we would also not have conditional instructions which makes the CPU programmable.
+
+  <br /><br />
+
+  Also it is important to know that the ALU opcodes can be different than the codes the control unit uses.
+
+  <br /><br />
+
+  Lastly it is important to make sure your CPU is compatible with software wrote in x86 instructions, or ARM depending on the type you build.
+
+  <br /><br />
+
+  What has changed the most on CPU's is how small we can make transistors, and how close together the confections are is what makes CPU's so fast today.
+
   <h1>Method calls, and function calls.</h1>
 
   x86 cores have a very special system for calling a method, or function in code.
