@@ -336,10 +336,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       //Adjust the window.
 
-      if( winFrame.getExtendedState() != JFrame.MAXIMIZED_BOTH )
-      {
-        winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); winFrame.revalidate();
-      }
+      winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
       
       //Set back tools after disk finish loading.
 

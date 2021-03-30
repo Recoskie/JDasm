@@ -25,7 +25,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   private int adjMin = 0, adjMax = 0;
 
-  private boolean layoutInitialized = false;
+  private boolean layoutInitialized = false, up = false;
   private CellLayout cLayout;
 
   //Row organization.
@@ -179,7 +179,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
       int lx = 0; //last visible col.
       boolean rowVisible = false;
     
-      if ( !layoutInitialized ) { updateSizes(parent); }
+      if ( up ) { updateSizes(parent); up = false; }
 
       int len = rowLen.get(0); for( lx = len; lx > 0; lx-- ){ if( parent.getComponent( lx ).isVisible() ){ break; } }
  
@@ -211,24 +211,19 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   public void adj( int w, int h )
   {
-    if( layoutInitialized )
+    int c = 0, i = 0;
+
+    for( c = this.getComponentCount() - 1; c > 0; c-- )
     {
-      //last active row is resized.
-
-      int c = 0, i = 0;
-
-      for( c = this.getComponentCount() - 1; c > 0; c-- )
-      {
-        if( this.getComponent(c).isVisible() ) { break; }
-      }
-
-      for( i = 0; i < rows; i++ )
-      {
-        if( rowLen.get(i) >= c ) { eRow = i; break; }
-      }
-
-      ny = h; setRow();
+      if( this.getComponent(c).isVisible() ) { break; }
     }
+
+    for( i = 0; i < rows; i++ )
+    {
+      if( rowLen.get(i) >= c ) { eRow = i; break; }
+    }
+
+    ny = h; setRow();
 
     eCol = -1; eRow = -1;
   }
@@ -526,5 +521,5 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   //Update the layout.
 
-  public void update() { if( layoutInitialized ) { cLayout.updateSizes(this); adj( this.getWidth(), this.getHeight() ); } }
+  public void update() { up = true; cLayout.layoutContainer( this ); }
 }
