@@ -32,6 +32,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   private ArrayList<Integer> rowLen = new ArrayList<Integer>();
   private int rows = 0, len = 0;
+  private int start = 0, end = 0;
 
   //Getting components sizes can take up time. It is better to compute dimensions when components change.
 
@@ -76,7 +77,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
   {
     int min = 0, max = 0;
 
-    int start = eRow <= 0 ? 0 : rowLen.get( eRow - 1 ) + 1, end = rowLen.get( eRow );
+    start = eRow <= 0 ? 0 : rowLen.get( eRow - 1 ) + 1; end = rowLen.get( eRow );
 
     for( int c = start; c <= end; c++ )
     {
@@ -349,7 +350,7 @@ public class JCellPane extends JComponent implements MouseMotionListener, MouseL
 
   private void setCol()
   {
-    int start = eRow <= 0 ? 0 : rowLen.get( eRow - 1 ), end = rowLen.get( eRow );
+    start = eRow <= 0 ? 0 : rowLen.get( eRow - 1 ); end = rowLen.get( eRow );
 
     int ox = 0; for( int i = eRow > 0 ? start + 1 : start; i <= eCol; i++ )
     {
