@@ -13,13 +13,16 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   private static boolean admin = false;
 
-  //Each integer is the file format decoder to use by file extensions.
+  //Use the file signature codes instead of file extension.
 
-  private int UseDecoder[] = new int[] { 0, 0, 0, 0, 0 };
+  private byte Signature[][] = new byte[][]
+  {
+    new byte[] { 0x4D, 0x5A } //Microsoft binaries.
+  };
 
-  //Supported file format extensions.
+  //Buffer should be set to the length of the largest signature sequence.
 
-  private String Supports[] = new String[] { ".exe", ".dll", ".sys", ".drv", ".ocx" };
+  private byte[] Sig = new byte[2];
 
   //The file to load. To begin decoding file types.
 
@@ -271,10 +274,6 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   public void open( JDEvent e )
   {
-    //If file format is Supported. Open in reader with binary tools.
-
-    int I = DefaultProgram( e.getExtension() );
-
     //Set the IO target.
 
     try
@@ -316,18 +315,30 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       winFrame.setJMenuBar( bdBar );
 
-      //If is a recognized file. Set all editor/data components active.
+      //If file format is Supported. Open in reader with binary tools.
+
+      int I = DefaultProgram();
+
+      //If is a recognized file.
 
       if( I >= 0 )
       {
-        stree.setVisible(true); ds.setVisible(true); iData.setVisible(true);
+        //Load file format reader.
+
+        try
+        {
+          if( I >= 0 ) { Class.forName(DecodeAPP[I]).getConstructor().newInstance(); tree.singleClick = true; }
+
+          stree.setVisible(true); ds.setVisible(true); iData.setVisible(true);
       
-        Virtual.setVisible(true); Offset.setVisible(true); di.setVisible(true);
+          Virtual.setVisible(true); Offset.setVisible(true); di.setVisible(true);
+        }
+        catch(Exception er) { I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); }
       }
 
-      //Is not recognized file. Open using data types, and hex editor.
+      //If it is not an recognized file, or file format reader failed. Open using data types, and hex editor.
 
-      else
+      if( I < 0 )
       {
         stree.setVisible(false); ds.setVisible(false); iData.setVisible(false);
       
@@ -349,8 +360,6 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
     catch (Exception er)
     {
-      I = -1;
-
       //Prompt user if they wish to run as admin to open disk or file.
 
       if(!admin)
@@ -387,23 +396,6 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       Reset();
     }
-
-    //Load file format reader.
-
-    try
-    {
-      if( I >= 0 ) { Class.forName(DecodeAPP[UseDecoder[I]]).getConstructor().newInstance(); tree.singleClick = true; }
-    }
-    catch(Exception er)
-    {
-      stree.setVisible(false); ds.setVisible(false); iData.setVisible(false);
-      
-      Virtual.setVisible(false); Offset.setVisible(true); di.setVisible(true);
-
-      tools.rowMaximize(0); tools.update();
-
-      I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!");
-    }
   }
 
   //File check on drag and drop.
@@ -429,5 +421,17 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   public void dragExit(DropTargetEvent dte) { }
 
-  public int DefaultProgram(String EX) { for( int i = 0; i < Supports.length; i++ ) { if( Supports[i].equals(EX) ) { return(i); } } return( -1 ); }
+  public int DefaultProgram()
+  {
+    boolean Valid = true; file.Events = false; try{ file.read( Sig ); file.seek(0); } catch( IOException err ) { } file.Events = true;
+
+    for( int i1 = 0; i1 < Signature.length; i1++ )
+    {
+      Valid = true; for( int i2 = 0; i2 < Signature[i1].length && Valid; i2++ ) { Valid = Signature[i1][i2] == Sig[i2]; }
+
+      if( Valid ) { return( i1 ); }
+    }
+      
+    return( -1 );
+  }
 }
