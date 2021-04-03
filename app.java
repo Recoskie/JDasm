@@ -396,7 +396,13 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     }
     catch(Exception er)
     {
-      I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); Reset();
+      stree.setVisible(false); ds.setVisible(false); iData.setVisible(false);
+      
+      Virtual.setVisible(false); Offset.setVisible(true); di.setVisible(true);
+
+      tools.rowMaximize(0); tools.update();
+
+      I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!");
     }
   }
 
