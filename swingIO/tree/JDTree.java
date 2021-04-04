@@ -17,11 +17,19 @@ public class JDTree extends JTree implements MouseListener, JDEventListener
   public static String Folder = "Icons/f.gif", UnknownFile = "Icons/u.gif";
   public static ImageIcon FolderPic[] = new ImageIcon[2];
     
-  public static String FType[] = new String[] { ".h", ".disk", ".exe",".dll",".sys",".drv",".ocx" };
+  public static String FType[] = new String[]
+  {
+    ".h", ".disk", ".exe",".dll",
+    ".sys", ".drv", ".ocx", ".efi", ".mui"
+  };
     
-  public static String Load[] = new String[] { "Icons/H.gif", "Icons/disk.gif", "Icons/EXE.gif","Icons/dll.gif", "Icons/sys.gif","Icons/sys.gif","Icons/sys.gif" };
+  public static String Load[] = new String[]
+  {
+    "Icons/H.gif", "Icons/disk.gif", "Icons/EXE.gif","Icons/dll.gif",
+    "Icons/sys.gif", "Icons/sys.gif", "Icons/sys.gif", "Icons/sys.gif", "Icons/sys.gif"
+  };
     
-  public static ImageIcon LoadedPic[] = new ImageIcon[7];
+  public static ImageIcon LoadedPic[] = new ImageIcon[9];
     
   public boolean singleClick = false;
   

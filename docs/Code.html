@@ -153,7 +153,7 @@
 
   It will still compile back out fine. However, it makes it easier to read if you recognize the built in methods.
 
-  <h1>Arithmetic comparison.</h1>
+  <h1 id="cond">Arithmetic comparison.</h1>
   
   Normally in programming languages. You can compare things in a single line of code. However, comparison is done using arithmetic logic.
   
@@ -341,7 +341,7 @@
 
   What has changed the most on CPU's is how small we can make transistors, and how close together the confections are is what makes CPU's so fast today.
 
-  <h1>Method calls, and function calls.</h1>
+  <h1 id="func">Method calls, and function calls.</h1>
 
   x86 cores have a very way for calling a method, or function in code.
 
@@ -483,7 +483,7 @@
 
   <br /><br />
 
-  Windows Vista, and earlier still suported the full DOS API. Windows 10 still has a few Interrupts that load in, but very few.
+  Windows Vista, and earlier still supported the full DOS API. Windows 10 still has a few Interrupts that load in, but very few.
 
   <br /><br />
 
@@ -537,13 +537,219 @@
 
   In ARM we have a special instruction called a block copy instruction to achieve this same operation.
 
-  <h1>Array, and data structures.</h1>
+  <h1 id="data">Array, and data structures.</h1>
 
   There is a limited number of ways of building an array in machine code. Generally the best way to create an array is to think of the word size of the numbers we whish to store in the array.
 
   <br /><br />
 
-  In the case of an array made using bytes. Each next byte is a new index in the array. 
+  In the case of an array made using bytes. Each next byte is a new index in the array. The start position of the array in memory is called the base.
+
+  <br /><br />
+
+  The selected byte is then base plus index. When index is 13, then the 13th byte is read. This allows us to directly read which element we want from the array, or write the new value.
+  
+  <br /><br />
+
+  A simple array is like this.
+
+  <br /><br />
+
+  MOV RBX,0000000403700080<br />
+  MOV RDI,0000000000000007<br />
+  ADD BYTE PTR[RBX + RDI],78
+
+  <br /><br />
+
+  We add 78 to the array index 7. So RBX is the base of the array 403700080. We add 7 to 403700080, for the 7th byte across as the address.
+
+  <br /><br />
+
+  If we make this into a loop and add the RDI register by one each time. We are effectively adding 78 to all indexes after index 7.
+
+  <br /><br />
+
+  Lets say we have an array where each number in the array is 8 bytes big.
+
+  <br /><br />
+
+  MOV RBX,0000000403700080<br />
+  MOV RSI,0000000000000009<br />
+  MOV RDX,QWORD PTR[RBX + RSI * 8]
+
+  <br /><br />
+
+  In the above example we read the 9th 64 bit number into the RDX register. We then can start comparing the 9th number, or make it a loop.
+
+  <br /><br />
+
+  Since each index can be two bytes instead of one. The x86 core also lets you multiply the index register by 2, 4, or 8.
+
+  <br /><br />
+
+  We can pick any two registers to add together as an address location. Thus the base register is more or less just a historical name. 
+
+  <br /><br />
+
+  Now you may be wondering how we create arrays with multiple dimensions in linear space.
+
+  <br /><br />
+
+  MOV RBX,0000000403700080<br />
+  MOV RSI,0000000000000009<br />
+  MOV RBX,QWORD PTR[RBX + RSI * 8]<br />
+  MOV RSI,0000000000000002<br />
+  MOV RDX,QWORD PTR[RBX + RSI * 8]
+
+  <br /><br />
+
+  This time the first array does not hold the values we want. Instead it locates to another array. So we are asking for the location to the 9th array.
+
+  <br /><br />
+
+  We then set RBX to the location of the 9th array. We then set RSI to the index in the second array, and move the value into the RDX register.
+
+  <br /><br />
+
+  This is how two dimensional arrays are done in memory. In code it would look like this <strong>MyVal = MyArray[9][2]</strong>.
+
+  <br /><br />
+
+  In the case of a three dimensional array in linear space.
+
+  <br /><br />
+
+  MOV RBX,0000000403700080<br />
+  MOV RSI,0000000000000003<br />
+  MOV RBX,QWORD PTR[RBX + RSI * 8]<br />
+  MOV RSI,0000000000000007<br />
+  MOV RBX,QWORD PTR[RBX + RSI * 8]<br />
+  MOV RSI,0000000000000002<br />
+  MOV RDX,QWORD PTR[RBX + RSI * 8]
+
+  <br /><br />
+
+  In code it would look like this <strong>MyVal = MyArray[3][7][2]</strong>. We let RBX locate to each next array.
+
+  <br /><br />
+
+  When we write a 3D, or 4D array in machine code. We have to be very careful with the locations to each array.
+  
+  <br /><br />
+  
+  This is because we have to write out each location RBX will be set. Thus it must line up to the base position of each array.
+  
+  <br /><br />
+
+  However in a programing language. The coding tool will line up the linear space for your array. Also the more dimensions you add to your array the slower your code may become.
+
+  <br /><br />
+
+  We can also write the array out as follows.
+
+  <br /><br />
+
+  <strong>Location = MyArray[3]<br />
+  Location = Location[7]<br />
+  MyVal = Location[2]</strong>
+
+  <br /><br />
+
+  Thus programing languages let us store the <strong>pointer locations</strong> to an array. This improves performance if we wish to iterate over one array location.
+
+  <h2>Data structures.</h2>
+
+  Now lets say we wish for each array element to hold more than one value. This is called a data structure.
+
+  <br /><br />
+
+  Now lets say we create a <strong>house</strong> data structure. We want to store a byte that is 0 to 255 for which type of flooring.
+
+  <br /><br />
+
+  We want a byte for which kind of wallpaper that is 0 to 255. We want another byte that is 0 to 255 for the type of lighting.
+
+  <br /><br />
+
+  In programming languages we can specify things like this.
+
+  <br /><br />
+
+  <strong>House<br />
+  {<br />
+    byte flooring = 0;<br />
+    byte walls = 0;<br />
+    byte lighting = 0;<br />
+  };
+  </strong>
+
+  <br /><br />
+
+  We can specify our array as follows <strong>House[][][] myArray = new House[10][10][10];</strong>.
+
+  <br /><br />
+
+  When we address each thing in the data structure it goes as follows.
+
+  <br /><br />
+
+  MOV RBX,0000000403700080<br />
+  MOV RSI,0000000000000003<br />
+  MOV RBX,QWORD PTR[RBX + RSI * 8]<br />
+  MOV RSI,0000000000000007<br />
+  MOV RBX,QWORD PTR[RBX + RSI * 8]<br />
+  MOV RSI,0000000000000002<br />
+  MOV RBX,QWORD PTR[RBX + RSI * 8]<br />
+  MOV R8,QWORD PTR[RBX]<br />
+  MOV R9,QWORD PTR[RBX + 1]<br />
+  MOV R10,QWORD PTR[RBX + 2]
+
+  <br /><br />
+
+  This time the third dimension points to our data structure location. Which consists of three byte values that go in order the way they are defined.
+
+  <br /><br />
+
+  The x86 address system lets us add an offset to our address location called a displacement. The register R8 is flooring. The register R9 is walls. The register R10 is lighting.
+
+  <br /><br />
+
+  In a programming language it looks like this.
+
+  <br /><br />
+
+  <strong>MyHouse = MyArray[3][7][2]<br />
+  MyVal_1 = MyHouse.flooring;<br />
+  MyVal_2 = MyHouse.walls;<br />
+  MyVal_3 = MyHouse.lighting;</strong>
+
+  <br /><br />
+
+  Thus we can iterate over the 3D array of 3D placed houses. However, we generally do not have to make every array location as a custom data structure.
+
+  <br /><br />
+
+  Thus this completes the complete introduction to the x86 <a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400">Scale index base</a> system.
+
+  <br /><br />
+
+  Data structures can also exist as a single location as well in a program, or file. Such as the header data structure at the start of a binary file.
+
+  <br /><br />
+
+  In which the data structure defines the attributes associated with the file type. Or if you only want to use the data structure as a single variable in your code.
+  
+  <br /><br />
+  
+  Programming tools, and programming languages makes it that we can give things names rather than being locations once compiled out.
+
+  <br /><br />
+
+  All the different ways of iterating, and also locating data is usable from coding tools without you having to manually organize the arrays, and variables in your program, or code.
+
+  <br /><br />
+
+  Lastly your standard primitive data types are your building blocks, for custom data structures, and arrays. Which the primitive data types can be processed using the basic CPU arithmetic/FPU instructions.
 
   <h1>x86 register naming scheme.</h1>
 
@@ -623,7 +829,7 @@
 
   <br /><br />
 
-  Data structures are easy to identify, and so are arrays. I may add a section on the index, and base address scheme soon.
+  Data structures are easy to identify, and so are arrays.
 
   <br /><br />
 
