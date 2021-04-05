@@ -7,7 +7,7 @@
   <h1>JFH-Disassembly.</h1>
   Welcome to JFH disassembly. A all in one multi-platform binary tool.
 
-  <br /><Br />
+  <br /><br />
 
   Conditional code, and condition Flags: <a href="#cond">Link</a><br />
   Functions, Interrupts (Stack memory): <a href="#func">Link</a><br />
@@ -447,7 +447,7 @@
 
   <br /><br />
 
-  The first thing an operating system does is set up a list of location at address 0 and up.
+  One of the Traditional thing an operating system does is set up a list of location at address 0 and up.
 
   <br /><br />
 
@@ -471,7 +471,7 @@
 
   <br /><br />
 
-  Interrupts are just a fancy CALL instruction that uses a list of locations at address 0 in RAM.
+  Interrupts are just a fancy CALL instruction that uses an array of locations at address 0 in RAM.
 
   <br /><br />
 
@@ -499,7 +499,7 @@
 
   <br /><br />
 
-  The loop instructions are the same as your jump instructions. Except it jumps and subtracts the counting register by one.
+  The loop instructions are the same as your jump instructions. Except it jumps, and subtracts the counting register by one.
 
   <br /><br />
 
@@ -507,7 +507,7 @@
 
   <br /><br />
 
-  Once the counting register is 0 the LOOP instruction no longer jumps back. Allowing the next instructions to run.
+  Once the counting register is 0, then the LOOP instruction no longer jumps back. Allowing the next instructions to run.
 
   <br /><br />
 
@@ -515,19 +515,31 @@
 
   <br /><br />
 
-  The Repeat prefix can be used before any x86 data processing operation. The REP prefix will continue the instruction until the counting register is zero as well.
+  The Repeat prefix can be used before any x86 data processing operation. The REP prefix will continue repeat the next instruction until the counting register is zero as well.
 
   <br /><br />
 
-  There are a few special move operations for moving data around. They are operation codes A4, A5. These instructions automatically use two RAM address locations using two registers.
+  The repeat prefix is much more efficient than a loop, if only you want to do the same instruction multiple times.
 
   <br /><br />
 
-  When you are using instruction MOVS, si is considered as the source register, while di is considered as the destination register.
+  There are a few special move operations, for moving data around. They are operation codes A4, A5. These instructions automatically use two RAM address locations using two registers.
 
   <br /><br />
 
-  The instruction MOVSB adds one to both SI and DI as it writes one byte from SI location to the location of DI.
+  A4 = MOVS BYTE PTR [RDI],BYTE PTR [RSI]
+
+  <br /><br />
+
+  This instuction does not let you encode which registers to use.
+
+  <br /><br />
+
+  When you are using instruction MOVS, SI is considered as the source register, while DI is considered as the destination register.
+
+  <br /><br />
+
+  The instruction MOVS adds one to both SI, and DI as it writes one byte from SI location to the location of DI.
 
   <br /><br />
 
@@ -535,7 +547,15 @@
   
   <br /><br />
   
-  So by using the repeat prefix to repeat this instruction. We can have this move data as large as we want to the value we set the counting register.
+  So by using the repeat prefix to repeat the next instruction. We can have this move data as large as we want to the value we set the counting register.
+
+  <br /><br />
+
+  The repeat prefix is byte code F3 hex. So you may see the byte sequence F3 A4. You can also come up with ways in which the repeat prefix may be useful with one instuction.
+
+  <br /><br />
+
+  F3 A4 = REP MOVS BYTE PTR [RDI],BYTE PTR [RSI]
 
   <br /><br />
 
@@ -569,7 +589,7 @@
 
   <br /><br />
 
-  If we make this into a loop and add the RDI register by one each time. We are effectively adding 78 to all indexes after index 7.
+  If we make this into a loop, and add the RDI register by one each time. We are effectively adding 78 to all indexes after index 7.
 
   <br /><br />
 
@@ -607,11 +627,11 @@
 
   <br /><br />
 
-  This time the first array does not hold the values we want. Instead it locates to another array. So we are asking for the location to the 9th array.
+  This time the first array stores the location to another array. So we are asking for the location to the 9th array.
 
   <br /><br />
 
-  We then set RBX to the location of the 9th array. We then set RSI to the index in the second array, and move the value into the RDX register.
+  We then set RBX to the location of the 9th array. We then set RSI to 2. Which moves the value into the RDX register.
 
   <br /><br />
 
@@ -641,11 +661,11 @@
   
   <br /><br />
   
-  This is because we have to write out each location RBX will be set. Thus it must line up to the base position of each array.
+  Because, we have to write out each location RBX will be set. Thus it must line up to the base position of each array.
   
   <br /><br />
 
-  However in a programing language. The coding tool will line up the linear space for your array. Also the more dimensions you add to your array the slower your code may become.
+  However in a programing language. The coding tool will line up the linear space, for your array. Also the more dimensions you add to your array slower your code may become.
 
   <br /><br />
 
@@ -729,19 +749,23 @@
 
   <br /><br />
 
-  Thus we can iterate over the 3D array of 3D placed houses. If this was for real I would make the Array one dimensional with each house containing an x, y, z position to be placed.
+  Thus we can iterate over the 3D array of 3D placed houses.
   
   <br /><br />
   
-  However, we generally do not have to make every array location a custom data structure.
+  However, the best way of writing this code is to make a one dimensional Array with each house containing an x, y, z position that it is placed.
+  
+  <br /><br />
+  
+  We also generally do not want to make a custom data structure if we do not need one.
 
   <br /><br />
 
-  Thus this completes the complete introduction to the x86 <a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400">Scale index base</a> system.
+  This completes the complete introduction to the x86 <a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400">Scale index base</a> system.
 
   <br /><br />
 
-  Data structures can also exist as a single location as well in a program, or files. Such as the header data structure at the start of a binary file.
+  Data structures can also exist as a single location as well in a program, or as the header data structure at the start of a binary file.
 
   <br /><br />
 
@@ -753,11 +777,43 @@
 
   <br /><br />
 
-  All the different ways of iterating, and also locating data is usable from coding tools without you having to manually organize the arrays, and variables in your program, or code.
+  All the different ways of iterating, and also pointing to data is usable from coding tools without you having to manually organize the arrays, and variables in your program, or code.
 
   <br /><br />
 
   Lastly your standard primitive data types are your building blocks, for custom data structures, and arrays. Which the primitive data types can be processed using the basic CPU arithmetic/FPU instructions.
+
+  <h2>Adding methods to data structures.</h2>
+
+  Programming languages can let you define methods inside of a data structure. Which are called Objects rather than data structures.
+  
+  <br /><br />
+  
+  This allows you to do thing like this <strong>MyHouse.wallAndFloorSame()</strong>.
+
+  <br /><br />
+
+  Which can be a simple method that reads what flooring is, and then sets the walls to the same byte value. Or you could do <strong>MyHouse.wallsRandom()</strong>.
+
+  <br /><br />
+
+  This is done to organize your code better. A complier may not write out the instruction as a call. So what ends up happening is the location is wrote to.
+
+  <br /><br />
+
+  <strong>MyHouse.wallAndFloorSame()</strong> can end up changing back into <strong>Location.Thing0 = Location.Thing1</strong>.
+
+  <br /><br />
+
+  Some compilers will only writes it out as a standalone method, if it is used in more than one location of your code, and is a large set of steps.
+
+  <br /><br />
+
+  In the reverse process, we can end up loosing which methods belong to a object, and also loose the names things are given as they are locations only.
+
+  <br /><br />
+
+  The code we end up with compiles back out and runs the same. Just that it might not match exactly how you wrote it.
 
   <h1>x86 register naming scheme.</h1>
 
@@ -801,7 +857,7 @@
 
   <br /><br />
 
-  The easy part is defining function calls, and variables. Giving the variables a meaningful name for what they are used for can be tricky sometimes.
+  The easy part is defining function calls, and variables. Giving the variables/locations a meaningful name for what they are used for can be tricky sometimes.
 
   <br /><br />
 
@@ -821,7 +877,7 @@
 
   <br /><br />
   
-  A programming language is a syntax, for organizing your code better. All the ways of iterating data, or looping through things have to be structured, otherwise the machine code has to change during a loop.
+  A programming language is a syntax, for organizing your code better. All the ways of dividing up memory, and iterating data, or looping through things have to be structured, otherwise the machine code has to change during a loop.
   
   <br /><br />
   
