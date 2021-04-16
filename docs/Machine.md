@@ -1,14 +1,13 @@
+---
+layout: default
+---
+
 <html>
 <head>
   <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
   <title>Machine Code architecture Basics.</title>
 </head>
 <body>
-  <h1>JFH-Disassembly.</h1>
-  Welcome to JFH disassembly. A all in one multi-platform binary tool.
-
-  <br />
-
   <h1>Machine code Introduction.</h1>
 
   In the <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">basics document</a> we discussed the basic primitive data types that processors can work with, and do operations with.

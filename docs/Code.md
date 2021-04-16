@@ -1,19 +1,20 @@
+---
+layout: default
+---
+
 <html>
 <head>
   <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
   <title>Translating to high level code.</title>
 </head>
 <body>
-  <h1>JFH-Disassembly.</h1>
-  Welcome to JFH disassembly. A all in one multi-platform binary tool.
-
-  <br /><br />
-
   Conditional code, and condition Flags: <a href="#cond">Link</a><br />
   Functions, Interrupts (Stack memory): <a href="#func">Link</a><br />
   Loops, and repeat <a href="#loops">Link</a><br />
   Array's, and data structure: <a href="#data">Link</a><br />
-  Complications, and Conclusion: <a href="#end">Link</a><br />
+  Complications, and Conclusion: <a href="#end">Link</a>
+  
+  <br /><br />
 
   <h1>Pre compiled binary.</h1>
   

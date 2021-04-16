@@ -3,7 +3,7 @@ JFH-Disassembly.
 
 Welcome to Java Forensics Hex editor.
 
-This tool is designed to be user friendly. For both prelesional, and absolute beginners.
+This tool is designed to be user friendly. For both professional, and absolute beginners.
 
 This tool makes binary files, and formats visual, and also easy to understand, and modify.
 
@@ -29,19 +29,19 @@ However only supports Microsoft binary format at the moment. If you wish to cont
 Help, and documentation.
 ------------------------------------------------------------
 
-Using JFH-Disassembly Basics: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">Link</a><br />
-Machine code: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Machine.html">Link</a><br />
-High Level Code: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Code.html">Link</a>
+Using JFH-Disassembly Basics: <a href="https://recoskie.github.io/test/docs/Basics.html">Link</a><br />
+Machine code: <a href="https://recoskie.github.io/test/docs/Machine.html">Link</a><br />
+High Level Code: <a href="https://recoskie.github.io/test/docs/Code.html">Link</a>
 
 ------------------------------------------------------------
 Running the application.
 ------------------------------------------------------------
 
-To run the application you only need the <a href="https://github.com/Recoskie/JFH-Disassembly/raw/master/JFHApp.jar">JFHApp.jar</a> file. It does not install to the system.
+To run the application you need to open the file <strong>JFHApp.jar</strong>. It does not install to the system.
+
+You will also need Java 8, or later installed (latest version is preferred).
 
 You can also download the project. Clone the entire project if you wish to make changes, or have a copy of the source code.
-
-You also need java 8, or higher. Which added support, for unsignified numbers.
 
 ------------------------------------------------------------
 The Microcode Disassembler.

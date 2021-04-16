@@ -1,18 +1,20 @@
+---
+layout: default
+---
+
 <html>
 <head>
   <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
   <title>Binary Data Basics.</title>
 </head>
 <body>
-  <h1>JFH-Disassembly.</h1>
-  Welcome to JFH-disassembly. A all in one multi platform binary tool.
-
-  <br /><br />
   
   System Memory: <a href="#SysMem">Link</a><br />
   Processor data types: <a href="#dTypes">Link</a><br />
   Overview of data types: <a href="#Overview">Link</a><br />
-  Basic binary files, and headers: <a href="#Hfiles">Link</a><br />
+  Basic binary files, and headers: <a href="#Hfiles">Link</a>
+  
+  <br /><br />
 
   <h1 id="SysMem">Reading, and editing binary data.</h1>
 
