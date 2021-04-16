@@ -1,5 +1,5 @@
 title: JFH-Disassembly
-description: Tool for analyzing programs, and binary files.
+description: Analyzer, for programs, and binary files.
 show_downloads: true
 google_analytics:
 theme: jekyll-theme-hacker
