@@ -2,6 +2,4 @@ title: JFH-Disassembly
 description: Tool for analyzing programs, and binary files.
 show_downloads: true
 google_analytics:
-image:
-    path: https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1
 theme: jekyll-theme-hacker
