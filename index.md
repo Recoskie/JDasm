@@ -22,9 +22,9 @@ However only supports Microsoft binary format at the moment.
 
 # Help, and documentation.
 
-Using JFH-Disassembly Basics: <a href="http://recoskie.github.io/JFH-Disassembly/docs/Basics.html">Link</a><br />
-Machine code: <a href="http://recoskie.github.io/JFH-Disassembly/docs/Machine.html">Link</a><br />
-High Level Code: <a href="http://recoskie.github.io/JFH-Disassembly/docs/Code.html">Link</a>
+Using JFH-Disassembly Basics: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">Link</a><br />
+Machine code: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Machine.html">Link</a><br />
+High Level Code: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Code.html">Link</a>
 
 # Running the application.
 
