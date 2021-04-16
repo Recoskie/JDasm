@@ -10,21 +10,21 @@ This project is meant to support many different binary file formats, and applica
 
 However only supports Microsoft binary format at the moment. If you wish to contribute a Format. Put it under the format folder.
 
-------------------------------------------------------------
+<br />
 
 # Help, and documentation.
 
-------------------------------------------------------------
+<br />
 
 Using JFH-Disassembly Basics: <a href="http://recoskie.github.io/JFH-Disassembly/docs/Basics.html">Link</a><br />
 Machine code: <a href="http://recoskie.github.io/JFH-Disassembly/docs/Machine.html">Link</a><br />
-High Level Code: <a href="http://recoskie.github.io/JFH-Disassembly/test/docs/Code.html">Link</a>
+High Level Code: <a href="http://recoskie.github.io/JFH-Disassembly/docs/Code.html">Link</a>
 
-------------------------------------------------------------
+<br />
 
 # Running the application.
 
-------------------------------------------------------------
+<br />
 
 To run the application you need to open the file <strong>JFHApp.jar</strong>. It does not install to the system.
 
@@ -32,11 +32,11 @@ You will also need Java 8, or later installed (latest version is preferred).
 
 You can also download the project. Clone the entire project if you wish to make changes, or have a copy of the source code.
 
-------------------------------------------------------------
+<br />
 
 # The Microcode Disassembler.
 
-------------------------------------------------------------
+<br />
 
 It was cool to write it in JavaScript. The project can be found <a href="https://github.com/Recoskie/X86-64-CPU-Binary-Code-Disassembler-JS">Here</a>.
 
@@ -44,11 +44,11 @@ The disassembler is rebuilt in Java, for this project.
 
 I plan on creating a ARM core disassembler as well, for mobile devices.
 
-------------------------------------------------------------
+<br />
 
 # The new Virtual address mapper.
 
-------------------------------------------------------------
+<br />
 
 The improved address mapper can be found <a href="https://github.com/Recoskie/RandomAccessFileV">here</a>.
 
@@ -56,19 +56,19 @@ Without it you do not have a nice virtually mapped binary application in it's pr
 
 Also without it. You would not be able to accurately make changes to sections of a program, or read it.
 
-------------------------------------------------------------
+<br />
 
 # Virtual memory view, and hex editor.
 
-------------------------------------------------------------
+<br />
 
 A fast custom UI hex editor component: https://github.com/Recoskie/VHex
 
-------------------------------------------------------------
+<br />
 
 # Additional planed tools.
 
-------------------------------------------------------------
+<br />
 
 [ ] Boot sector decompilation.
 
