@@ -1,18 +1,3 @@
-JFH-Disassembly.
-=============================
-
-Welcome to Java Forensics Hex editor.
-
-This tool is designed to be user friendly. For both professional, and absolute beginners.
-
-This tool makes binary files, and formats visual, and also easy to understand, and modify.
-
-Is designed, for anyone new learning how binary files are read, or professional use.
-
-The tools are explained in help, and documentation.
-
-------------------------------------------------------------
-
 This tool allows you to decompile software. Allowing you to create source code, of binary files.
 
 It is also a hex editor, and data forensics tool, for binary files.
@@ -27,6 +12,7 @@ However only supports Microsoft binary format at the moment. If you wish to cont
 
 ------------------------------------------------------------
 Help, and documentation.
+
 ------------------------------------------------------------
 
 Using JFH-Disassembly Basics: <a href="https://recoskie.github.io/test/docs/Basics.html">Link</a><br />
@@ -35,6 +21,7 @@ High Level Code: <a href="https://recoskie.github.io/test/docs/Code.html">Link</
 
 ------------------------------------------------------------
 Running the application.
+
 ------------------------------------------------------------
 
 To run the application you need to open the file <strong>JFHApp.jar</strong>. It does not install to the system.
@@ -45,6 +32,7 @@ You can also download the project. Clone the entire project if you wish to make 
 
 ------------------------------------------------------------
 The Microcode Disassembler.
+
 ------------------------------------------------------------
 
 It was cool to write it in JavaScript. The project can be found <a href="https://github.com/Recoskie/X86-64-CPU-Binary-Code-Disassembler-JS">Here</a>.
@@ -55,6 +43,7 @@ I plan on creating a ARM core disassembler as well, for mobile devices.
 
 ------------------------------------------------------------
 The new Virtual address mapper.
+
 ------------------------------------------------------------
 
 The improved address mapper can be found <a href="https://github.com/Recoskie/RandomAccessFileV">here</a>.
@@ -65,12 +54,14 @@ Also without it. You would not be able to accurately make changes to sections of
 
 ------------------------------------------------------------
 Virtual memory view, and hex editor.
+
 ------------------------------------------------------------
 
 A fast custom UI hex editor component: https://github.com/Recoskie/VHex
 
 ------------------------------------------------------------
 Additional planed tools.
+
 ------------------------------------------------------------
 
 *Boot sector decompilation.
