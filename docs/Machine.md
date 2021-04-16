@@ -1,11 +1,6 @@
----
-layout: default
----
-
 <html>
 <head>
   <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
-  <title>Machine Code architecture Basics.</title>
 </head>
 <body>
   <h1>Machine code Introduction.</h1>
