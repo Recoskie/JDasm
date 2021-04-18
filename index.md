@@ -10,7 +10,7 @@ Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link
 Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a><br />
 High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a>
 
-------------------------------------------------------------
+## What is J-Disassembly.
 
 J-Disassembly is designed to be user friendly. For both professional, and absolute beginners.
 
@@ -30,7 +30,7 @@ You can also read disk drives sector by sector (one binary digit at a time from 
 
 # Running the application.
 
-Download as zip, and the file <strong>JD-asm.jar</strong> is the application.
+Download as zip. The file <strong>JD-asm.jar</strong> is the application.
 
 You will need Java 8, or later installed (latest version is preferred).
 
@@ -52,7 +52,7 @@ Also without it. You would not be able to accurately make changes to sections of
 
 # Virtual memory view, and hex editor.
 
-A fast custom UI hex editor component: https://github.com/Recoskie/VHex
+A fast custom UI hex editor component: <a href="https://github.com/Recoskie/VHex">here</a>.
 
 # Additional planed tools.
 

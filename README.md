@@ -3,12 +3,17 @@ J-Disassembly.
 
 ## Help, and documentation.
 
-Main Page: <a href="https://recoskie.github.io/J-Disassembly/">Link</a><br />
+Main Page: <a href="https://recoskie.github.io/J-Disassembly/">Link</a>
+
+------------------------------------------------------------
+
 Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a><br />
 Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a><br />
 High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a>
 
 ------------------------------------------------------------
+
+## What is J-Disassembly.
 
 J-Disassembly is designed to be user friendly. For both professional, and absolute beginners.
 
@@ -40,7 +45,7 @@ However, only supports Microsoft binary format at the moment. If you wish to con
 Running the application.
 ------------------------------------------------------------
 
-Download as zip, and the file <strong>JD-asm.jar</strong> is the application.
+Download as zip. The file <strong>JD-asm.jar</strong> is the application.
 
 You will need Java 8, or later installed (latest version is preferred).
 
