@@ -11,9 +11,9 @@ The tools are explained in help, and documentation.
 
 ------------------------------------------------------------
 
-This tool can be used to create source code, of binary files no matter what operating system you are on, or CPU.
+J-Disassembly can take binary software apart visually to create source code. No matter what operating system you are on, or CPU.
 
-J-Disassembly also visualizes binary data, and file types. Showing you what every binary digit read, and is use for.
+J-Disassembly also visualizes binary data, and file types. Showing you what every binary digit read, is used for.
 
 This tool is also a hex editor, and data forensics tool, for binary files that is fun, visual, easy to use, and understand.
 
@@ -21,11 +21,11 @@ You can also read disk drives sector by sector (one binary digit at a time from 
 
 ------------------------------------------------------------
 
-This application currently supports Microsoft binaries formats .exe, .dll, .sys, .drv, .ocx.
+This application currently supports Microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx.
 
 This project is meant to support many different binary file formats, and application formats.
 
-However, only supports Microsoft binary format at the moment. If you wish to contribute a Format. Put it under the format folder.
+However, only supports Microsoft binary format at the moment. If you wish to contribute a Format. Then put it under the format folder.
 
 ------------------------------------------------------------
 Help, and documentation.
