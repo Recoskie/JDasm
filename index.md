@@ -12,7 +12,7 @@ High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.htm
 
 ## What is J-Disassembly.
 
-<table>
+<table style="width:60%;">
   <tr>
     <td>
       <a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif" target="_blank"><img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif" style="width:50%;"></a>
