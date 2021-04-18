@@ -38,7 +38,7 @@ This meant mostly AMD, Intel cores, and some off brand x86 cores that run x86 in
 
 <br />
 
-You can learn some of the basics of machine code, and processor architecture the following <a href="https://recoskie.github.io/JFH-Disassembly/docs/Machine.html">link</a>.
+You can learn some of the basics of machine code, and processor architecture the following <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">link</a>.
 
 <h1>Dynamically generated code.</h1>
 

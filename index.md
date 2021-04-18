@@ -4,11 +4,23 @@ image:
   path: https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1
 ---
 
+## Help, and documentation.
+
+Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a><br />
+Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a><br />
+High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a>
+
+------------------------------------------------------------
+
 J-Disassembly is designed to be user friendly. For both professional, and absolute beginners.
 
 This tool makes binary files, and formats visual, and also easy to understand, and modify.
 
-J-Disassembly can take binary software apart visually to create source code. No matter what operating system you are on, or CPU.
+Is designed, for anyone new learning how binary files are read, or professional use.
+
+The tools are explained in help, and documentation.
+
+J-Disassembly can visually take binary software apart to create source code. No matter what operating system you are on, or CPU.
 
 J-Disassembly also visualizes binary data, and file types. Showing you what every binary digit read, is used for.
 
@@ -16,19 +28,11 @@ This tool is also a hex editor, and data forensics tool, for binary files that i
 
 You can also read disk drives sector by sector (one binary digit at a time from start, to end).
 
-# Help, and documentation.
-
-Using JFH-Disassembly Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a><br />
-Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a><br />
-High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a>
-
 # Running the application.
 
-To run the application you need to open the file <strong>JD-asm.jar</strong>.
+Download as zip, and the file <strong>JD-asm.jar</strong> is the application.
 
-You will also need Java 8, or later installed (latest version is preferred).
-
-You can also download the project. Clone the entire project if you wish to make changes, or have a copy of the source code.
+You will need Java 8, or later installed (latest version is preferred).
 
 # The Microcode Disassembler.
 

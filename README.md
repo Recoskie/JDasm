@@ -40,7 +40,7 @@ However, only supports Microsoft binary format at the moment. If you wish to con
 Running the application.
 ------------------------------------------------------------
 
-To run the application. Download as zip, and the file <strong>JD-asm.jar</strong> is the application.
+Download as zip, and the file <strong>JD-asm.jar</strong> is the application.
 
 You will need Java 8, or later installed (latest version is preferred).
 
