@@ -28,6 +28,14 @@ This tool is also a hex editor, and data forensics tool, for binary files that i
 
 You can also read disk drives sector by sector (one binary digit at a time from start, to end).
 
+# Supported formats.
+
+This application currently supports Microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx.
+
+This project is meant to support many different binary file formats, and application formats.
+
+However, only supports Microsoft binary format at the moment. If you wish to contribute a Format. Then put it under the format folder.
+
 # Running the application.
 
 Download as zip. The file <strong>JD-asm.jar</strong> is the application.

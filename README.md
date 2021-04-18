@@ -1,11 +1,9 @@
 J-Disassembly.
 =============================
 
-## Help, and documentation.
-
 Main Page: <a href="https://recoskie.github.io/J-Disassembly/">Link</a>
 
-------------------------------------------------------------
+## Help, and documentation.
 
 Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a><br />
 Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a><br />
@@ -33,6 +31,8 @@ This tool is also a hex editor, and data forensics tool, for binary files that i
 
 You can also read disk drives sector by sector (one binary digit at a time from start, to end).
 
+------------------------------------------------------------
+Supported formats.
 ------------------------------------------------------------
 
 This application currently supports Microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx.
