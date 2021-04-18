@@ -12,13 +12,13 @@ High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.htm
 
 ## What is J-Disassembly.
 
-<table style="width:60%;">
+<table style="width:50%;">
   <tr>
     <td>
-      <a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif" target="_blank"><img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif" style="width:50%;"></a>
+      <a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif" target="_blank"><img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif"></a>
     </td>
     <td>
-      <a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre2.gif" target="_blank"><img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre2.gif" style="width:50%;"></a>
+      <a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre2.gif" target="_blank"><img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre2.gif"></a>
     </td>
   </tr>
 </table>
