@@ -1,661 +1,698 @@
 ---
 layout: default
 image:
-    path: https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1
+  path: https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1
 ---
 
-<html>
-<body>
-  <h1>Machine code Introduction.</h1>
+<h1>Machine code Introduction.</h1>
 
-  In the <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">basics document</a> we discussed the basic primitive data types that processors can work with, and do operations with.
+In the <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">basics document</a> we discussed the basic primitive data types that processors can work with, and do operations with.
 
-  <br /><br />
+<br />
 
-  In this document we will discuss basic machine code, and what we actually mean by system architecture. Thus what instruction sets are.
+In this document we will discuss basic machine code, and what we actually mean by system architecture. Thus what instruction sets are.
 
-  <br /><br />
+<br />
 
-  When you compare a x86 core from the 80's like the 16 bit Intel 8086 to a modern AMD ryzen. The first thought that runs through peoples heads is that they run completely different machine code.
+When you compare a x86 core from the 80's like the 16 bit Intel 8086 to a modern AMD ryzen. The first thought that runs through peoples heads is that they run completely different machine code.
 
-  <br /><br />
+<br />
 
-  Well modern x86 can still run 16 bit 8086 machine code in 16 bit mode. This is called the processor <strong>instruction set architecture</strong>.
+Well modern x86 can still run 16 bit 8086 machine code in 16 bit mode. This is called the processor <strong>instruction set architecture</strong>.
 
-  <br /><br />
+<br />
 
-  Even though it's a AMD core. It still runs the same x86 machine code as a Intel x86. As x86 is the <strong>instruction set architecture</strong>.
+Even though it's a AMD core. It still runs the same x86 machine code as a Intel x86. As x86 is the <strong>instruction set architecture</strong>.
 
-  <br /><br />
+<br />
 
-  A processor that is architecture x86. Means it runs x86 machine code natively without translation. This means binary software wrote in the 80's still runs on the most modern x86 core made by any company.
+A processor that is architecture x86. Means it runs x86 machine code natively without translation. This means binary software wrote in the 80's still runs on the most modern x86 core made by any company.
 
-  <br /><br />
+<br />
 
-  A processor has a foundational instruction set that can do arithmetic with the basic primitive data types, and at least do comparison.
+A processor has a foundational instruction set that can do arithmetic with the basic primitive data types, and at least do comparison.
 
-  <br /><br />
+<br />
 
-  The binary encoded instructions the processor understand as a particular command do not change in later x86 cores.
-  
-  <br /><br />
-  
-  However the internal design of the circuits may change, but the binary encoding, for each instruction does not change.
+The binary encoded instructions the processor understand as a particular command do not change in later x86 cores.
 
-  <br /><br />
+<br />
 
-  <h1>Instruction encoding.</h1>
+However the internal design of the circuits may change, but the binary encoding, for each instruction does not change.
 
-  A single 0 to 255 byte value is used, for which operation you wish the CPU to do in a x86 core. This is called the opcode.
+<br />
 
-  <br /><br />
+<h1>Instruction encoding.</h1>
 
-  The bytes that come after the instruction number is what the instruction uses as input.
+A single 0 to 255 byte value is used, for which operation you wish the CPU to do in a x86 core. This is called the opcode.
 
-  <br /><br />
+<br />
 
-  This <a href="http://www.mlsite.net/8086/" target="_blank">link</a> is a mapping of the original 8086 instructions. Without any added instructions that became available in later cores.
+The bytes that come after the instruction number is what the instruction uses as input.
 
-  <br /><br />
+<br />
 
-  The 8086 map is the original foundation, for x86 machine code. Thus modern x86 cores even AMD ones still run the same basic operations using exactly the same encoding.
+This <a href="http://www.mlsite.net/8086/" target="_blank">link</a> is a mapping of the original 8086 instructions. Without any added instructions that became available in later cores.
 
-  <br /><br />
+<br />
 
-  For now lets start with a few sample codes.
+The 8086 map is the original foundation, for x86 machine code. Thus modern x86 cores even AMD ones still run the same basic operations using exactly the same encoding.
 
-  <br /><br />
+<br />
 
-  A processor has variables called registers. Which operations are completed with. In this example we use the ADD operation code 02.
+For now lets start with a few sample codes.
 
-  <br /><br />
+<br />
 
-  MOV AH,97<br />
-  MOV BX,3333<br />
-  ADD AH, BYTE PTR[BX]
+A processor has variables called registers. Which operations are completed with. In this example we use the ADD operation code 02.
 
-  <br /><br />
+<br />
 
-  Machine code:<br />
-  B4 97<br />
-  BB 33 33<br />
-  02 27
-  
-  <br /><br />
+~~~nams
+MOV AH,97
+MOV BX,3333
+ADD AH, BYTE PTR[BX]
+~~~
 
-  MOV is short for move. MOV sets the value of the AH register 97, and then BX is set 3333. The ADD operation uses the BX register as a location to a byte that is added with AH.
+<br />
 
-  <br /><br />
+Machine code:<br />
 
-  There are two 8 bit ADD operations. The other ADD operation ADD's, and stores the result at a memory location. This is ADD operation code 00.
+~~~
+B4 97
+BB 33 33
+02 27
+~~~
 
-  <br /><br />
-  
-  MOV AH,97<br />
-  MOV BX,3333<br />
-  ADD BYTE PTR[BX], AH
+<br />
 
-  <br /><br />
+MOV is short for move. MOV sets the value of the AH register 97, and then BX is set 3333. The ADD operation uses the BX register as a location to a byte that is added with AH.
 
-  Machine code:<br />
-  B4 97<br />
-  BB 33 33<br />
-  00 27
+<br />
 
-  <br /><br />
+There are two 8 bit ADD operations. The other ADD operation ADD's, and stores the result at a memory location. This is ADD operation code 00.
 
-  There is also two 16 bit ADD operations that do the same operation. Codes 01, and 03.
+<br />
 
-  <br /><br />
+~~~nasm
+MOV AH,97
+MOV BX,3333
+ADD BYTE PTR[BX], AH
+~~~
 
-  Lastly there also is two ADD operations that add a register by the next two byes, or one byte after the ADD operation.
+<br />
 
-  <br /><br />
+Machine code:<br />
 
-  Add operation opcode 04.
+~~~
+B4 97
+BB 33 33
+00 27
+~~~
 
-  <br /><br />
+<br />
 
-  MOV AL, 97<br />
-  ADD AL, 33
+There is also two 16 bit ADD operations that do the same operation. Codes 01, and 03.
 
-  <br /><br />
+<br />
 
-  Machine code:<br />
-  B4 97<br />
-  04 33
+Lastly there also is two ADD operations that add a register by the next two byes, or one byte after the ADD operation.
 
-  <br /><br />
+<br />
 
-  And two byte (16 bit add) add operation code 05.
+Add operation opcode 04.
 
-  <br /><br />
+<br />
 
-  MOV AX, 9763<br />
-  ADD AX, 3333
+~~~nasm
+MOV AL, 97
+ADD AL, 33
+~~~
 
-  <br /><br />
+<br />
 
-  Machine code:<br />
-  B8 97 63<br />
-  05 33 33
+Machine code:<br />
 
-  <br /><br />
+~~~
+B4 97
+04 33
+~~~
 
-  This makes a total of 6 ADD operations. Which is why there are multiple ADD operation codes.
+<br />
 
-  <br /><br />
+And two byte (16 bit add) add operation code 05.
 
-  The two MOV operation codes we have been using are B0 to B7 hex. Which puts the next byte into a selected register, and operation codes B8 to BF hex. Which moves the next two bytes into selected register.
+<br />
 
-  <br /><br />
+~~~nams
+MOV AX, 9763
+ADD AX, 3333
+~~~
 
-  There are 8 general arithmetic registers in total, so there is 8 MOV operation, for 8 bit, and 16 bit move.
+<br />
 
-  <br /><br />
+Machine code:<br />
 
-  So you can key in this entire binary code your self on a AMD, or Intel x86 core if you liked.
-  
-  <br /><br />
-  
-  <strong>Or you can use an assembler program. Which a assembler program uses a x86 instruction map to generate the operation codes, for you.</strong>
+~~~
+B8 97 63
+05 33 33
+~~~
 
-  <h2>32 bit x86.</h2>
+<br />
 
-  With the introduction of 32 bit. The 16 bit operations are made 32 bit's long. Thus two byte add became also 4 byte add. The 8 bit operations remain 8 bit's in length.
+This makes a total of 6 ADD operations. Which is why there are multiple ADD operation codes.
 
-  <br /><br />
+<br />
 
-  Operation code 66 hex is used to make 32 bit operations switch to the original 16 bit version. After the instruction completes. It switches back to 32 bits.
+The two MOV operation codes we have been using are B0 to B7 hex. Which puts the next byte into a selected register, and operation codes B8 to BF hex. Which moves the next two bytes into selected register.
 
-  <br /><br />
+<br />
 
-  So operation code 66 hex become known as the <strong>operand override prefix</strong>. As it was used before every 32 bit operation to make the operation the original 16 bit operation.
+There are 8 general arithmetic registers in total, so there is 8 MOV operation, for 8 bit, and 16 bit move.
 
-  <br /><br />
+<br />
 
-  This way both 16 bit operations, and 32 bit operations can be mixed in 32 bit mode.
+So you can key in this entire binary code your self on a AMD, or Intel x86 core if you liked.
 
-  <br /><br />  
-  
-  <strong>A bit mode setting was added that lets you set the CPU 16 bit mode.</strong>
+<br />
 
-  <br /><br />
-  
-  In 16 bit mode all 32 bit operations are their original 16 bit size without using the operand override prefix 66 hex before every operation.
+<strong>Or you can use an assembler program. Which a assembler program uses a x86 instruction map to generate the operation codes, for you.</strong>
 
-  <br /><br />
+<h2>32 bit x86.</h2>
 
-  This allowed 16 bit 8086 to be directly run as it would on a 16 bit core. Plus with the prefix code 66 in 32 bit allowed both 16 bit, and 32 bit to be mixed.
+With the introduction of 32 bit. The 16 bit operations are made 32 bit's long. Thus two byte add became also 4 byte add. The 8 bit operations remain 8 bit's in length.
 
-  <h2>64 bit x86.</h2>
+<br />
 
-  With the introduction of 64 bit by AMD. All instructions stayed 32 bit. So using 66 before an 32 bit operation allowed the operation to go 16 bit.
-  
-  <br /><br />  
-  
-  Thus a new code was added that could only be used in 64 bit mode. The REX prefix uses operation codes 40 to 4F.
+Operation code 66 hex is used to make 32 bit operations switch to the original 16 bit version. After the instruction completes. It switches back to 32 bits.
 
-  <br /><br />
+<br />
 
-  The REX Prefix allowed us to set 64 bits before the next operation, and 3 additional settings.
-  
-  <br /><br />
-  
-  <strong>When we set bit mode 32 bit. The instructions 40 to 4F, are usable again, as the REX prefix is disabled.</strong>
+So operation code 66 hex become known as the <strong>operand override prefix</strong>. As it was used before every 32 bit operation to make the operation the original 16 bit operation.
 
-  <br /><br />
+<br />
 
-  Meaning 32 bit machine code has full backwards compatibility without any software emulation, or translation.
+This way both 16 bit operations, and 32 bit operations can be mixed in 32 bit mode.
 
-  <br /><br />
+<br />  
 
-  Thus Intel uses AMD's 64 bit REX prefix as it is a good system. Plus does not effect compatibility to original 16 bit 8086 instruction to 32 bit to 64.
+<strong>A bit mode setting was added that lets you set the CPU 16 bit mode.</strong>
 
-  <br /><br />
+<br />
 
-  So even today the most modern x86 cores still runs the same operation codes. With prefixes that change the size of the next operation code.
+In 16 bit mode all 32 bit operations are their original 16 bit size without using the operand override prefix 66 hex before every operation.
 
-  <h2>Two byte instruction codes.</h2>
+<br />
 
-  Both Intel, and AMD run out of room to put operation codes in 0 to 255. As each instruction code must have a unique number in order to ensure that older software runs without translation.
-  
-  <br /><br />  
-  
-  So the instruction code 0F hex is removed, from later processor cores, that originally did the operation "POP CS".
+This allowed 16 bit 8086 to be directly run as it would on a 16 bit core. Plus with the prefix code 66 in 32 bit allowed both 16 bit, and 32 bit to be mixed.
 
-  <br /><br />
+<h2>64 bit x86.</h2>
 
-  The instruction "POP CS" was never really used. So getting rid of the instruction affect no software programs that used the operation.
+With the introduction of 64 bit by AMD. All instructions stayed 32 bit. So using 66 before an 32 bit operation allowed the operation to go 16 bit.
 
-  <br /><br />
+<br />  
 
-  Instead code 0F read the next byte as a new operation code. Giving a new set of operations 0 to 255. And a new Two byte instruction code map.
+Thus a new code was added that could only be used in 64 bit mode. The REX prefix uses operation codes 40 to 4F.
 
-  <br /><br />
+<br />
 
-  This was also done with two byte instructions 0F 38, and 0F 3A. Which allowed, for two more sets of 0 to 255 instruction codes. Which are called three byte opcode maps.
+The REX Prefix allowed us to set 64 bits before the next operation, and 3 additional settings.
 
-  <h2>Adding operation codes to x86.</h2>
+<br />
 
-  Intel, and AMD used prefix operations to add additional settings that expanded x86 without breaking compatibility with older machine code.
+<strong>When we set bit mode 32 bit. The instructions 40 to 4F, are usable again, as the REX prefix is disabled.</strong>
 
-  <br /><br />
+<br />
 
-  And to not break compatibility with operating systems that are compiled in x86 machine code. Such as DOS, windows, UNIX, MAC OS X x86, and even Linux x86. 
+Meaning 32 bit machine code has full backwards compatibility without any software emulation, or translation.
 
-  <br /><br />
+<br />
 
-  Which is how machine code is supposed to work. <strong>As a x86 is a instruction set architecture.</strong> Every operation code must use a unique operation code, for each operation.
+Thus Intel uses AMD's 64 bit REX prefix as it is a good system. Plus does not effect compatibility to original 16 bit 8086 instruction to 32 bit to 64.
 
-  <br /><br />
+<br />
 
-  Say you are working at AMD, and wish to implement a new operation code under 0F 77. However you find out Intel already uses that two byte operation code, for the <strong>EMMS</strong> operation.
+So even today the most modern x86 cores still runs the same operation codes. With prefixes that change the size of the next operation code.
 
-  <br /><br />
+<h2>Two byte instruction codes.</h2>
 
-  You can include the patented instruction <strong>EMMS</strong>, from Intel into your AMD x86 core. However you are not allowed to put your own AMD operation code here.
+Both Intel, and AMD run out of room to put operation codes in 0 to 255. As each instruction code must have a unique number in order to ensure that older software runs without translation.
 
-  <br /><br />
+<br />  
 
-  You have to find ways of adding in your operations that do not use other operation codes taken by other companies. So companies keep x86 instruction architecture maps in order to make is easy to see opcodes not yet used.
+So the instruction code 0F hex is removed, from later processor cores, that originally did the operation "POP CS".
 
-  <br /><br />
+<br />
 
-  This ensures every operation code has a unique operation code number, and can not be anything other than it's operation.
+The instruction "POP CS" was never really used. So getting rid of the instruction affect no software programs that used the operation.
 
-  <br /><br />
+<br />
 
-  There has been actual legal battles in which AMD, and Intel fight, for operation code space.
+Instead code 0F read the next byte as a new operation code. Giving a new set of operations 0 to 255. And a new Two byte instruction code map.
 
-  <br /><br />
+<br />
 
-  Also x86 is old, and companies have to be really careful with how they add new operation codes to x86 instruction map. Without causing problems with x86 compiled operating systems, and software.
-  
-  <h1>Operation size naming.</h1>
+This was also done with two byte instructions 0F 38, and 0F 3A. Which allowed, for two more sets of 0 to 255 instruction codes. Which are called three byte opcode maps.
 
-  Because 16 bit, 32 bit, and 64 bit code can be mixed in x86 binary code using prefixes. With 8 bit operations having their own operation code.
+<h2>Adding operation codes to x86.</h2>
 
-  <br /><br />  
-  
-  The registrars are given different names based on the size of a operation.
+Intel, and AMD used prefix operations to add additional settings that expanded x86 without breaking compatibility with older machine code.
 
-  <br /><br />
-  
-  We have 8 general purposes registers that we can use with arithmetic operation codes. Each register has a three bit code that is used to select which register to use with the operation code.
+<br />
 
-  <br /><br />
+And to not break compatibility with operating systems that are compiled in x86 machine code. Such as DOS, windows, UNIX, MAC OS X x86, and even Linux x86. 
 
-  <table border="1">
-    <tr><td>code</td><td>000</td><td>001</td><td>010</td><td>011</td><td>100</td><td>101</td><td>110</td><td>111</td></tr>
-    <tr><td>r64</td><td>RAX</td><td>RCX</td><td>RDX</td><td>RBX</td><td>RSP</td><td>RBP</td><td>RSI</td><td>RDI</td></tr>
-    <tr><td>r32</td><td>EAX</td><td>ECX</td><td>EDX</td><td>EBX</td><td>ESP</td><td>EBP</td><td>ESI</td><td>EDI</td></tr>
-    <tr><td>r16</td><td>AX</td><td>CX</td><td>DX</td><td>BX</td><td>SP</td><td>BP</td><td>SI</td><td>DI</td></tr>
-    <tr><td>r8</td><td>AL</td><td>CL</td><td>DL</td><td>BL</td><td>AH</td><td>CH</td><td>DH</td><td>BH</td></tr>
-  </table>
+<br />
 
-  <br />
+Which is how machine code is supposed to work. <strong>As a x86 is a instruction set architecture.</strong> Every operation code must use a unique operation code, for each operation.
 
-  When the size of the operation changes, so does the register size.
-  
-  <br /><br />
-  
-  The "A" register is called RAX when it is 64 in length.<br />
-  The "A" register is called EAX when it is 32 in length.<br />
-  The "A" register is called AX when it is 16 in length.
-  
-  <br /><br />
+<br />
 
-  When doing a 64 in length add with "RAX", and say we go to read the value of "AX". We then see the first 16 digits of the add operation out of 64.
+Say you are working at AMD, and wish to implement a new operation code under 0F 77. However you find out Intel already uses that two byte operation code, for the <strong>EMMS</strong> operation.
 
-  <br /><br />
+<br />
 
-  The registers are given a different name based on the size. Meanwhile the selected register is still the same.
- 
-  <br /><br />
-  
-  There is only one small catch. All 8 bit operations use the first 4 registers in low, and switch to high byte order.
+You can include the patented instruction <strong>EMMS</strong>, from Intel into your AMD x86 core. However you are not allowed to put your own AMD operation code here.
 
-  <br /><br />
+<br />
 
-  The "A" register is called AL when it is the first 8 bit's of the "A" register.<br />
-  The "A" register is called AH when it is the next 8 bits of the "A" register.
+You have to find ways of adding in your operations that do not use other operation codes taken by other companies. So companies keep x86 instruction architecture maps in order to make is easy to see opcodes not yet used.
 
-  <br /><br />
+<br />
 
-  Say we set the AX value 8877 hex. The value of AH is then 77, and the value of AL is then 88 hex. Only 8 bit operations use this.
+This ensures every operation code has a unique operation code number, and can not be anything other than it's operation.
 
-  <br /><br />
+<br />
 
-  When reading memory we use BYTE (8 bit), WORD (16 bit), DWORD (32 bit), QWORD (64 bit). for the size of the number we wish to read, and ADD with the size of our register.
+There has been actual legal battles in which AMD, and Intel fight, for operation code space.
 
-  <br /><br />
+<br />
 
-  ADD RAX, QWORD PTR [RDI]<br />
-  ADD EAX, DWORD PTR [RDI]<br />
-  ADD AX, WORD PTR [RDI]
+Also x86 is old, and companies have to be really careful with how they add new operation codes to x86 instruction map. Without causing problems with x86 compiled operating systems, and software.
 
-  <br /><br />
+<h1>Operation size naming.</h1>
 
-  Machine code:<br />
-  48 03 07<br />
-  03 07<br />
-  66 03 07
+Because 16 bit, 32 bit, and 64 bit code can be mixed in x86 binary code using prefixes. With 8 bit operations having their own operation code.
 
-  <br /><br />
+<br />  
 
-  This is still the 16 bit ADD operation 03 in 8086.
-  
-  <br /><br />
-  
-  However in 64 bit mode. It is 32 in length by default. The register that is used as the memory location becomes 64 in length.<br />
-  In 32 bit code, or 32 bit mode. The register RDI in the address would be EDI as 32 in length.
+The registrars are given different names based on the size of a operation.
 
-  <br /><br />
+<br />
 
-  48 hex is used before the operation code 03 to make it 64 bit in size. Lastly 66 hex is used before operation code 03 to make it 16 bit.
+We have 8 general purposes registers that we can use with arithmetic operation codes. Each register has a three bit code that is used to select which register to use with the operation code.
 
-  <br /><br />
+<br />
 
-  Using codes 48, or 66 before a 8 bit operation does nothing to the 8 in size operation.
+<table border="1">
+  <tr><td>code</td><td>000</td><td>001</td><td>010</td><td>011</td><td>100</td><td>101</td><td>110</td><td>111</td></tr>
+  <tr><td>r64</td><td>RAX</td><td>RCX</td><td>RDX</td><td>RBX</td><td>RSP</td><td>RBP</td><td>RSI</td><td>RDI</td></tr>
+  <tr><td>r32</td><td>EAX</td><td>ECX</td><td>EDX</td><td>EBX</td><td>ESP</td><td>EBP</td><td>ESI</td><td>EDI</td></tr>
+  <tr><td>r16</td><td>AX</td><td>CX</td><td>DX</td><td>BX</td><td>SP</td><td>BP</td><td>SI</td><td>DI</td></tr>
+  <tr><td>r8</td><td>AL</td><td>CL</td><td>DL</td><td>BL</td><td>AH</td><td>CH</td><td>DH</td><td>BH</td></tr>
+</table>
 
-  <h1>Operand encoding.</h1>
+<br />
 
-  48 03 07 = ADD RAX, QWORD PTR [RDI]
+When the size of the operation changes, so does the register size.
 
-  <br /><br />
+<br />
 
-  The value 07 after the operation code is 00000111 binary. The binary splits apart as follows 00, 000, 111. The first two digits is the mode. The 3 digits after mode is the register code. The last 3 digits is the register code for the address.
+The "A" register is called RAX when it is 64 in length.<br />
+The "A" register is called EAX when it is 32 in length.<br />
+The "A" register is called AX when it is 16 in length.
 
-  <br /><br />
+<br />
 
-  This is called a ModR/M byte. This is used with every register, and memory operation in x86. When the first two mode bits are set 11 then the address is switched to a register.
-  
-  <br /><br />
-  
-  So 11, 101, 011 = EB.
+When doing a 64 in length add with "RAX", and say we go to read the value of "AX". We then see the first 16 digits of the add operation out of 64.
 
-  <br /><br />
+<br />
 
-  48 03 EB = ADD RBP,RBX
+The registers are given a different name based on the size. Meanwhile the selected register is still the same.
 
-  <br /><br />
+<br />
 
-  Thus register code 101 is RBP, and code 011 is register RBX. Don't forget the registers changes name based on the size of the operation.
+There is only one small catch. All 8 bit operations use the first 4 registers in low, and switch to high byte order.
 
-  <br /><br />
+<br />
 
-  The ModR/M encoding is what makes x86 operations flexible. Switch mode to 00 with 00, 101, 011 = 2B.
+The "A" register is called AL when it is the first 8 bit's of the "A" register.<br />
+The "A" register is called AH when it is the next 8 bits of the "A" register.
 
-  <br /><br />
+<br />
 
-  48 03 2B = ADD RBP,QWORD PTR [RBX]
+Say we set the AX value 8877 hex. The value of AH is then 77, and the value of AL is then 88 hex. Only 8 bit operations use this.
 
-  <br /><br />
+<br />
 
-  The selected register moves into the memory address as a location. The other two mode setting 01, and 10 add a byte after the ModR/M to the address.
+When reading memory we use BYTE (8 bit), WORD (16 bit), DWORD (32 bit), QWORD (64 bit). for the size of the number we wish to read, and ADD with the size of our register.
 
-  <br /><br />
-  
-  So 01, 101, 011 = 6B.
+<br />
 
-  <br /><br />
+~~~nasm
+ADD RAX, QWORD PTR [RDI]
+ADD EAX, DWORD PTR [RDI]
+ADD AX, WORD PTR [RDI]
+~~~
 
-  48 03 6B 72 = ADD RBP,QWORD PTR [RBX+72]
+<br />
 
-  <br /><br />
+Machine code:<br />
 
-  The next byte is added to the address. This is called a 8 bit displacement.
+~~~
+48 03 07
+03 07
+66 03 07
+~~~
 
-  <br /><br />
-  
-  And finally 10, 101, 011 = AB.
+<br />
 
-  <br /><br />
+This is still the 16 bit ADD operation 03 in 8086.
 
-  48 03 AB 11 22 33 44 = ADD RBP,QWORD PTR [RBX+44332211]
+<br />
 
-  <br /><br />
+However in 64 bit mode. It is 32 in length by default. The register that is used as the memory location becomes 64 in length.<br />
+In 32 bit code, or 32 bit mode. The register RDI in the address would be EDI as 32 in length.
 
-  The next 4 bytes is added to the address. This is called a 32 bit displacement also called a dword displacement.
+<br />
 
-  <br /><br />
+48 hex is used before the operation code 03 to make it 64 bit in size. Lastly 66 hex is used before operation code 03 to make it 16 bit.
 
-  <strong>As flexible as the ModR/M byte seamed. More was added to it. The register code 100 is not usable in the address.</strong>
+<br />
 
-  <br /><br />
-  
-  So 00, 101, 100 = 2C.
+Using codes 48, or 66 before a 8 bit operation does nothing to the 8 in size operation.
 
-  <br /><br />
+<h1>Operand encoding.</h1>
 
-  48 03 2C 00 = ADD RBP,QWORD PTR [ RAX + RAX ]
+~~~nasm
+48 03 07 = ADD RAX, QWORD PTR [RDI]
+~~~
 
-  <br /><br />
+<br />
 
-  When register code 100 is used. The next value becomes two register selections added together for the address.
+The value 07 after the operation code is 00000111 binary. The binary splits apart as follows 00, 000, 111. The first two digits is the mode. The 3 digits after mode is the register code. The last 3 digits is the register code for the address.
 
-  <br /><br />
-  
-  So 00, 101, 100 = 2C. ModR/M byte.
-  Then 00, 001, 100 = 0C. SIB byte.
+<br />
 
-  <br /><br />
+This is called a ModR/M byte. This is used with every register, and memory operation in x86. When the first two mode bits are set 11 then the address is switched to a register.
 
-  48 03 2C 0C = ADD RBP,QWORD PTR [RSP+RCX]
+<br />
 
-  <br /><br />
+So 11, 101, 011 = EB.
 
-  The second byte is called the SIB address. We can choose any two registers we wish to add together in the address. This is called the index, plus base address. The first 2 digits are 00 = *1, 01 = *2, 10 = *4, 11 = *8.
+<br />
 
-  <br /><br />
-  
-  So 00, 101, 100 = 2C. ModR/M byte.
-  Then 10, 001, 100 = 8C. SIB byte.
+48 03 EB = ADD RBP,RBX
 
-  <br /><br />
+<br />
 
-  48 03 2C 8C = ADD RBP,QWORD PTR [RSP+RCX*4]
+Thus register code 101 is RBP, and code 011 is register RBX. Don't forget the registers changes name based on the size of the operation.
 
-  <br /><br />
+<br />
 
-  Lastly the displacement mode in the ModR/M is added after the SIB byte.
+The ModR/M encoding is what makes x86 operations flexible. Switch mode to 00 with 00, 101, 011 = 2B.
 
-  <br /><br />
+<br />
 
-  So 00, 101, 100 = 2C. ModR/M byte.
-  Then 10, 001, 100 = 8C. SIB byte.
+~~~nasm
+48 03 2B = ADD RBP,QWORD PTR [RBX]
+~~~
 
-  <br /><br />
+<br />
 
-  48 03 AC 8C 11 22 33 44 = ADD RBP,QWORD PTR [ RSP + RCX * 4 + 44332211 ]
+The selected register moves into the memory address as a location. The other two mode setting 01, and 10 add a byte after the ModR/M to the address.
 
-  <br /><br />
+<br />
 
-  This made the address system very flexible.
+So 01, 101, 011 = 6B.
 
-  <br /><br />
+<br />
 
-  This makes the total instruction encoding for all operations as follows.
+~~~nasm
+48 03 6B 72 = ADD RBP,QWORD PTR [RBX+72]
+~~~
 
-  <br /><br />
+<br />
 
-  <img src="Figs/x86-fig1.gif" />
+The next byte is added to the address. This is called a 8 bit displacement.
 
-  <br /><br />
+<br />
 
-  This is the instruction format that is used with all binary instructions. Even to 8086. From <a href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-2a-manual.pdf#page=35" target="_blank">64 ia 32 architectures software developer</a>.
+And finally 10, 101, 011 = AB.
 
-  <br /><br />
+<br />
 
-  You can also use the Intel x86 architecture reference, for AMD x86 cores. As x86 is the instruction set architecture. See <a href="https://www.felixcloutier.com/x86/" target="_blank">AMD Instruction list.</a> Derived by Intel architecture manual.
-  
-  <br /><br />
-  
-  Even though it's a AMD core. It still runs the same x86 machine code as a Intel x86. As x86 is the <strong>instruction set architecture</strong>. So in reality the official documentation by Intel is better.
+~~~nasm
+48 03 AB 11 22 33 44 = ADD RBP,QWORD PTR [RBX+44332211]
+~~~
 
-  <br /><br />
+<br />
 
-  There is not much left to teach you here about x86 encoded instructions. You can, however test out your coding skills with <a href="https://recoskie.github.io/X86-64-Disassembler-JS/Basic%20Live%20View.html" target="_blank">Web x86 code disassembler</a>.
+The next 4 bytes is added to the address. This is called a 32 bit displacement also called a dword displacement.
 
-  <br /><br />
+<br />
 
-  The three other settings I did not go in depth about in the REX prefix are called register extension bits. It added a extra binary digit to your selected register codes in the ModR/M, and SIB. This upped the number of usable registers from 8 to 16.
+<strong>As flexible as the ModR/M byte seamed. More was added to it. The register code 100 is not usable in the address.</strong>
 
-  <br /><br />
+<br />
 
-  <strong>Also some institutions only use one input. Such as left shift a value, or right shift a value.</strong>
+So 00, 101, 100 = 2C.
 
-  <br /><br />
+<br />
 
-  In these instructions the first register code was never used in ModR/M. So instead of wasting instruction space. The unused register was used to select from 8 instructions that used one input.
+~~~nasm
+48 03 2C 00 = ADD RBP,QWORD PTR [ RAX + RAX ]
+~~~
 
-  <br /><br />
+<br />
 
-  Additionally the register names can change depending on operation. For example vector operations use MMX registers flowed by the selected register number in your ModR/M byte. The Instruction encoding, however does not changes format.
+When register code 100 is used. The next value becomes two register selections added together for the address.
 
-  <br /><br />
+<br />
 
-  Even the FPU uses the same instruction format. The only thing changing is the register you are picking from, and the word size of memory.
+So 00, 101, 100 = 2C. ModR/M byte.
+Then 00, 001, 100 = 0C. SIB byte.
 
-  <br /><br />
+<br />
 
-  My advice to you. Is to actually test the encodings your self, and to learn from the Intel document.
+~~~nasm
+48 03 2C 0C = ADD RBP,QWORD PTR [RSP+RCX]
+~~~
 
-  <br /><br />
+<br />
 
-  You may also like <a href="http://www.mlsite.net/blog/?p=55">Things that were not immediately obvious to me</a>. Preview bellow.
+The second byte is called the SIB address. We can choose any two registers we wish to add together in the address. This is called the index, plus base address. The first 2 digits are 00 = *1, 01 = *2, 10 = *4, 11 = *8.
 
-  <br /><br />
-  
-  <img src="Figs/x86-fig2.gif" />
+<br />
 
-  <h1>ARM architecture.</h1>
+So 00, 101, 100 = 2C. ModR/M byte.
+Then 10, 001, 100 = 8C. SIB byte.
 
-  Now lets switch to a different processor architecture. Companies that create ARM cores also have to keep instruction maps as well. As the company has to find unused instructions not used by other companies to add new instructions in ARM.
-  
-  <br /><br />
-  
-  Even though it's a snapdragon ARM core. It still runs the same ARM machine code as a Apple bionic ARM core. As ARM is the <strong>instruction set architecture</strong>. So in reality the official documentation by ARM is best.
+<br />
 
-  <br /><br />
+~~~nasm
+48 03 2C 8C = ADD RBP,QWORD PTR [RSP+RCX*4]
+~~~
 
-  People had fun with ARM in IPhone. Creating emulators that recompiled code into ARM code. It's not hard to do as the machine code is not a big secret.
+<br />
 
-  <br /><br />
+Lastly the displacement mode in the ModR/M is added after the SIB byte.
 
-  The internal circuits can change. However, the instruction encodings do not. ARM as a company has all the listings, for all ARM instruction encodings which is freely available.
+<br />
 
-  <br /><br />
+So 00, 101, 100 = 2C. ModR/M byte.
+Then 10, 001, 100 = 8C. SIB byte.
 
-  <img src="Figs/fig5.gif" />
+<br />
 
-  <br /><br />
+~~~nasm
+48 03 AC 8C 11 22 33 44 = ADD RBP,QWORD PTR [ RSP + RCX * 4 + 44332211 ]
+~~~
 
-  Apple does not like people building emulators. So they made it that the binary is checked before it loads, for if it jump a core to manually generated codes. Which is called JIT compilation.
+<br />
 
-  <br /><br />
+This made the address system very flexible.
 
-  Nothing is stopping anyone from looking at any part of the IOS system. Thus decoding any part to what it does. If you wish to spend the time to dissemble ARM core codes, from the ARM code map, or use a ARM disassembler.
+<br />
 
-  <br /><br />
+This makes the total instruction encoding for all operations as follows.
 
-  Taking the IOS system apart makes it easy to built a jail break, however, it is a long, and slow process.
+<br />
 
-  <br /><br />
+<img src="Figs/x86-fig1.gif" />
 
-  <strong>Microsoft even created windows RT. Which is a complete recompilation of windows. Allowing windows to run on ARM cores. However all x86 Microsoft programs could not be loaded on Windows ARM.</strong>
+<br />
 
-  <br /><br />
+This is the instruction format that is used with all binary instructions. Even to 8086. From <a href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-2a-manual.pdf#page=35" target="_blank">64 ia 32 architectures software developer</a>.
 
-  It required every developer to recompile their code into ARM machine code. As windows does not translate binary code in EXE files. Actually no operating system does. It is expected that the CPU runs the binary code without error by Architecture type.
+<br />
 
-  <br /><br />
+You can also use the Intel x86 architecture reference, for AMD x86 cores. As x86 is the instruction set architecture. See <a href="https://www.felixcloutier.com/x86/" target="_blank">AMD Instruction list.</a> Derived by Intel architecture manual.
 
-  <strong>Unlike x86 where there is a binary operation, for everything.</strong> ARM focuses on doing things in software with a smaller instruction set. Which is why we call a <stong>x86 core a CISC core, and a ARM an RISC core</stong>.
+<br />
 
-  <br /><br />
+Even though it's a AMD core. It still runs the same x86 machine code as a Intel x86. As x86 is the <strong>instruction set architecture</strong>. So in reality the official documentation by Intel is better.
 
-  <strong>CISC means Complex Instruction Set Computing. Thus RISC means Reduced instruction set computing.</strong>
+<br />
 
-  <br /><br />
+There is not much left to teach you here about x86 encoded instructions. You can, however test out your coding skills with <a href="https://recoskie.github.io/X86-64-Disassembler-JS/Basic%20Live%20View.html" target="_blank">Web x86 code disassembler</a>.
 
-  ARM cores may not have a bunch of operations codes, however, can be clocked much higher, and generate less heat. Use less power. So in a way fewer operation codes is better. Since all instructions can be created using a few simple arithmetic operation codes.
+<br />
 
-  <br /><br />
+The three other settings I did not go in depth about in the REX prefix are called register extension bits. It added a extra binary digit to your selected register codes in the ModR/M, and SIB. This upped the number of usable registers from 8 to 16.
 
-  All ARM codes are 32 bits long in memory. Unlike x86 which has variable length instructions.
+<br />
 
-  <br /><br />
+<strong>Also some institutions only use one input. Such as left shift a value, or right shift a value.</strong>
 
-  The following link is a simple introduction to ARM technology. Used in cell phones, and other mobile devices: <a href="http://www.csbio.unc.edu/mcmillan/Comp411F18/Lecture06.pdf">Link</a>.
+<br />
 
-  <br /><br />
+In these instructions the first register code was never used in ModR/M. So instead of wasting instruction space. The unused register was used to select from 8 instructions that used one input.
 
-  In a way ARM has a much more flexible instruction set. Thus instructions can be conditional to the result of the previous instruction. Making it easy to build complex functions using a reduced instruction set.
+<br />
 
-  <br /><br />
+Additionally the register names can change depending on operation. For example vector operations use MMX registers flowed by the selected register number in your ModR/M byte. The Instruction encoding, however does not changes format.
 
-  The following <a href="https://developer.arm.com/architectures/cpu-architecture/a-profile/docs">link</a> is from ARM.
+<br />
 
-  <br /><br />
+Even the FPU uses the same instruction format. The only thing changing is the register you are picking from, and the word size of memory.
 
-  Plus all you have to do is just map the instructions. Write a Assembler if you like. You can also write your own programming language if you liked. The same can be said, for x86.
+<br />
 
-  <br /><br />
+My advice to you. Is to actually test the encodings your self, and to learn from the Intel document.
 
-  It is just a matter of what instruction architecture you want your system to run on. Thus what type of cores you want to be stuck to that manufactures will make.
-  
-  <br /><br />
-  
-  Thus the same is true, for operating systems. As you must pick a architecture language that the whole system will run in.
+<br />
 
-  <h1>Self modifying code.</h1>
+You may also like <a href="http://www.mlsite.net/blog/?p=55">Things that were not immediately obvious to me</a>. Preview bellow.
 
-  It turns out we can write self modifying code. Once you understand the basics of a processor architecture. You can then write byte sequences out in memory, and run them directly.
+<br />
 
-  <br /><br />
+<img src="Figs/x86-fig2.gif" />
 
-  There are still developers that actually know how to write code that compares data, and makes changes on it's own. It is not magic once you know what processor architecture is.
+<h1>ARM architecture.</h1>
 
-  <br /><br />
+Now lets switch to a different processor architecture. Companies that create ARM cores also have to keep instruction maps as well. As the company has to find unused instructions not used by other companies to add new instructions in ARM.
 
-  Self modifying code is very powerful in creating realistic artificial intelligence systems that perform quickly. Without any slow compiler, or interpreter, or Assembler level tool between.
+<br />
 
-  <h1>Malicious code.</h1>
+Even though it's a snapdragon ARM core. It still runs the same ARM machine code as a Apple bionic ARM core. As ARM is the <strong>instruction set architecture</strong>. So in reality the official documentation by ARM is best.
 
-  One of the problems with processor design is that it has to be mapped, and standardized, for software to work, or run.
+<br />
 
-  <br /><br />
-  
-  It, however, makes it easy to write binary code that infects all systems. Since machine code is architecture based, and not Vendor, or company specific.
+People had fun with ARM in IPhone. Creating emulators that recompiled code into ARM code. It's not hard to do as the machine code is not a big secret.
 
-  <br /><br />
+<br />
 
-  This makes it easy, for people to do a thing called code injection. Which is something I worry about. Thus I think you should be too. However there is not much we can do.
+The internal circuits can change. However, the instruction encodings do not. ARM as a company has all the listings, for all ARM instruction encodings which is freely available.
 
-  <br /><br />
+<br />
 
-  We came up with instruction set encryption. It is not practical though as it requires the encryption key set in the CPU core to change after, so much time.
+<img src="Figs/fig5.gif" />
 
-  <br /><br />
+<br />
 
-  Each time the encryption key changes it then has to decrypt, and re-encrypt the entire program. So if another code tries to write to a running binary, it then would have to know the current encryption key set in the CPU core.
+Apple does not like people building emulators. So they made it that the binary is checked before it loads, for if it jump a core to manually generated codes. Which is called JIT compilation.
 
-  <br /><br />
+<br />
 
-  IT works good when security is a must. However it is slow, and is not practical.
+Nothing is stopping anyone from looking at any part of the IOS system. Thus decoding any part to what it does. If you wish to spend the time to dissemble ARM core codes, from the ARM code map, or use a ARM disassembler.
 
-  <br /><br />
+<br />
 
-  Also the following document, <a href="https://scholarworks.sjsu.edu/cgi/viewcontent.cgi?referer=https%3A%2F%2Fwww.google.com%2F&httpsredir=1&article=1154&context=etd_projects">Approximate Disassembly</a>, from the University of San Jose State discusses how to detect such code.
-  
-  <br /><br />
+Taking the IOS system apart makes it easy to built a jail break, however, it is a long, and slow process.
 
-  No matter how good of a detection model we make though. It is not full proof to those that design the code to not be detected.
+<br />
 
-  <br /><br />
+<strong>Microsoft even created windows RT. Which is a complete recompilation of windows. Allowing windows to run on ARM cores. However all x86 Microsoft programs could not be loaded on Windows ARM.</strong>
 
-  This is why detection software has to be update constantly. As it is not hard to make stuff pass through the scanner undetected.
-</body>
-</html>
+<br />
+
+It required every developer to recompile their code into ARM machine code. As windows does not translate binary code in EXE files. Actually no operating system does. It is expected that the CPU runs the binary code without error by Architecture type.
+
+<br />
+
+<strong>Unlike x86 where there is a binary operation, for everything.</strong> ARM focuses on doing things in software with a smaller instruction set. Which is why we call a <stong>x86 core a CISC core, and a ARM an RISC core</stong>.
+
+<br />
+
+<strong>CISC means Complex Instruction Set Computing. Thus RISC means Reduced instruction set computing.</strong>
+
+<br />
+
+ARM cores may not have a bunch of operations codes, however, can be clocked much higher, and generate less heat. Use less power. So in a way fewer operation codes is better. Since all instructions can be created using a few simple arithmetic operation codes.
+
+<br />
+
+All ARM codes are 32 bits long in memory. Unlike x86 which has variable length instructions.
+
+<br />
+
+The following link is a simple introduction to ARM technology. Used in cell phones, and other mobile devices: <a href="http://www.csbio.unc.edu/mcmillan/Comp411F18/Lecture06.pdf">Link</a>.
+
+<br />
+
+In a way ARM has a much more flexible instruction set. Thus instructions can be conditional to the result of the previous instruction. Making it easy to build complex functions using a reduced instruction set.
+
+<br />
+
+The following <a href="https://developer.arm.com/architectures/cpu-architecture/a-profile/docs">link</a> is from ARM.
+
+<br />
+
+Plus all you have to do is just map the instructions. Write a Assembler if you like. You can also write your own programming language if you liked. The same can be said, for x86.
+
+<br />
+
+It is just a matter of what instruction architecture you want your system to run on. Thus what type of cores you want to be stuck to that manufactures will make.
+
+<br />
+
+Thus the same is true, for operating systems. As you must pick a architecture language that the whole system will run in.
+
+<h1>Self modifying code.</h1>
+
+It turns out we can write self modifying code. Once you understand the basics of a processor architecture. You can then write byte sequences out in memory, and run them directly.
+
+<br />
+
+There are still developers that actually know how to write code that compares data, and makes changes on it's own. It is not magic once you know what processor architecture is.
+
+<br />
+
+Self modifying code is very powerful in creating realistic artificial intelligence systems that perform quickly. Without any slow compiler, or interpreter, or Assembler level tool between.
+
+<h1>Malicious code.</h1>
+
+One of the problems with processor design is that it has to be mapped, and standardized, for software to work, or run.
+
+<br />
+
+It, however, makes it easy to write binary code that infects all systems. Since machine code is architecture based, and not Vendor, or company specific.
+
+<br />
+
+This makes it easy, for people to do a thing called code injection. Which is something I worry about. Thus I think you should be too. However there is not much we can do.
+
+<br />
+
+We came up with instruction set encryption. It is not practical though as it requires the encryption key set in the CPU core to change after, so much time.
+
+<br />
+
+Each time the encryption key changes it then has to decrypt, and re-encrypt the entire program. So if another code tries to write to a running binary, it then would have to know the current encryption key set in the CPU core.
+
+<br />
+
+IT works good when security is a must. However it is slow, and is not practical.
+
+<br />
+
+Also the following document, <a href="https://scholarworks.sjsu.edu/cgi/viewcontent.cgi?referer=https%3A%2F%2Fwww.google.com%2F&httpsredir=1&article=1154&context=etd_projects">Approximate Disassembly</a>, from the University of San Jose State discusses how to detect such code.
+
+<br />
+
+No matter how good of a detection model we make though. It is not full proof to those that design the code to not be detected.
+
+<br />
+
+This is why detection software has to be update constantly. As it is not hard to make stuff pass through the scanner undetected.
