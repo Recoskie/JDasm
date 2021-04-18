@@ -68,7 +68,7 @@ A processor has variables called registers. Which operations are completed with.
 
 <br />
 
-~~~nams
+~~~nasm
 MOV AH,97
 MOV BX,3333
 ADD AH, BYTE PTR[BX]
@@ -144,7 +144,7 @@ And two byte (16 bit add) add operation code 05.
 
 <br />
 
-~~~nams
+~~~nasm
 MOV AX, 9763
 ADD AX, 3333
 ~~~
@@ -384,7 +384,7 @@ Using codes 48, or 66 before a 8 bit operation does nothing to the 8 in size ope
 
 <h1>Operand encoding.</h1>
 
-~~~nasm
+~~~
 48 03 07 = ADD RAX, QWORD PTR [RDI]
 ~~~
 
@@ -414,7 +414,7 @@ The ModR/M encoding is what makes x86 operations flexible. Switch mode to 00 wit
 
 <br />
 
-~~~nasm
+~~~
 48 03 2B = ADD RBP,QWORD PTR [RBX]
 ~~~
 
@@ -428,7 +428,7 @@ So 01, 101, 011 = 6B.
 
 <br />
 
-~~~nasm
+~~~
 48 03 6B 72 = ADD RBP,QWORD PTR [RBX+72]
 ~~~
 
@@ -442,7 +442,7 @@ And finally 10, 101, 011 = AB.
 
 <br />
 
-~~~nasm
+~~~
 48 03 AB 11 22 33 44 = ADD RBP,QWORD PTR [RBX+44332211]
 ~~~
 
@@ -460,7 +460,7 @@ So 00, 101, 100 = 2C.
 
 <br />
 
-~~~nasm
+~~~
 48 03 2C 00 = ADD RBP,QWORD PTR [ RAX + RAX ]
 ~~~
 
@@ -475,7 +475,7 @@ Then 00, 001, 100 = 0C. SIB byte.
 
 <br />
 
-~~~nasm
+~~~
 48 03 2C 0C = ADD RBP,QWORD PTR [RSP+RCX]
 ~~~
 
@@ -490,7 +490,7 @@ Then 10, 001, 100 = 8C. SIB byte.
 
 <br />
 
-~~~nasm
+~~~
 48 03 2C 8C = ADD RBP,QWORD PTR [RSP+RCX*4]
 ~~~
 
@@ -505,7 +505,7 @@ Then 10, 001, 100 = 8C. SIB byte.
 
 <br />
 
-~~~nasm
+~~~
 48 03 AC 8C 11 22 33 44 = ADD RBP,QWORD PTR [ RSP + RCX * 4 + 44332211 ]
 ~~~
 
