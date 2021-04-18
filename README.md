@@ -15,13 +15,16 @@ High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.htm
 
 ## What is J-Disassembly.
 
-<a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif" target="_blank">
-  <img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif" style="width:50%;">
-</a>
-
-<a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre2.gif" target="_blank">
-  <img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre2.gif" style="width:50%;">
-</a>
+<table>
+  <tr>
+    <td>
+      <a href="/docs/Figs/pre1.gif" target="_blank"><img src="/docs/Figs/pre1.gif" style="width:50%;"></a>
+    </td>
+    <td>
+      <a href="/docs/Figs/pre2.gif" target="_blank"><img src="/docs/Figs/pre2.gif" style="width:50%;"></a>
+    </td>
+  </tr>
+</table>
 
 J-Disassembly is designed to be user friendly. For both professional, and absolute beginners.
 
