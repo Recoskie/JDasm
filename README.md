@@ -1,6 +1,15 @@
 J-Disassembly.
 =============================
 
+## Help, and documentation.
+
+Main Page: <a href="https://recoskie.github.io/J-Disassembly/">Link</a><br />
+Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a><br />
+Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a><br />
+High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a>
+
+------------------------------------------------------------
+
 J-Disassembly is designed to be user friendly. For both professional, and absolute beginners.
 
 This tool makes binary files, and formats visual, and also easy to understand, and modify.
@@ -28,23 +37,12 @@ This project is meant to support many different binary file formats, and applica
 However, only supports Microsoft binary format at the moment. If you wish to contribute a Format. Then put it under the format folder.
 
 ------------------------------------------------------------
-Help, and documentation.
-------------------------------------------------------------
-
-Main Page: <a href="https://recoskie.github.io/J-Disassembly/">Link</a><br />
-J-Disassembly Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a><br />
-Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a><br />
-High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a>
-
-------------------------------------------------------------
 Running the application.
 ------------------------------------------------------------
 
-To run the application you only need the <a href="https://github.com/Recoskie/J-Disassembly/raw/master/JFHApp.jar">JFHApp.jar</a> file. It does not install to the system.
+To run the application. Download as zip, and the file <strong>JD-asm.jar</strong> is the application.
 
-You can also download the project. Clone the entire project if you wish to make changes, or have a copy of the source code.
-
-You also need java 8, or higher. Which added support, for unsignified numbers.
+You will need Java 8, or later installed (latest version is preferred).
 
 ------------------------------------------------------------
 The Microcode Disassembler.
