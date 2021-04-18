@@ -15,10 +15,10 @@ High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.htm
 <table>
   <tr>
     <td>
-      <a href="/Figs/pre1.gif" target="_blank"><img src="/Figs/pre1.gif" style="width:50%;"></a>
+      <a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif" target="_blank"><img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif" style="width:50%;"></a>
     </td>
     <td>
-      <a href="/Figs/pre2.gif" target="_blank"><img src="/Figs/pre2.gif" style="width:50%;"></a>
+      <a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre2.gif" target="_blank"><img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre2.gif" style="width:50%;"></a>
     </td>
   </tr>
 </table>
