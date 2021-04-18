@@ -33,13 +33,16 @@ public class Descriptor
 
   public Descriptor( RandomAccessFileV b, boolean V )
   {
-    Virtual = V;
+    if( b != null )
+    {
+      Virtual = V;
     
-    try { pos = V ? b.getVirtualPointer() : b.getFilePointer(); } catch(java.io.IOException e) { }
+      try { pos = V ? b.getVirtualPointer() : b.getFilePointer(); } catch(java.io.IOException e) { }
 
-    rpos.add( 0 ); apos.add( 0 );
+      rpos.add( 0 ); apos.add( 0 );
     
-    IOStream = b;
+      IOStream = b;
+    }
   }
 
   //Defined data types.

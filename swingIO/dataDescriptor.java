@@ -154,9 +154,9 @@ public class dataDescriptor extends JComponent
 
   //Main use is for setting a blank data model.
 
-  public void clear( Descriptor d )
+  public void clear()
   {
-    data = d;
+    data = new Descriptor( null );
     
     if( !set ) { cset = false; set = true; td.setModel( dModel ); }
 

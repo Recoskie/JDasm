@@ -38,7 +38,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   {
     //Create GUI.
 
-    createGUI("JFH-Disassembly", this, this); new DropTarget(winFrame, DnDConstants.ACTION_LINK, this, true);
+    createGUI("J-Disassembly", this, this); new DropTarget(winFrame, DnDConstants.ACTION_LINK, this, true);
 
     //Display GUI.
     

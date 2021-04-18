@@ -29,10 +29,6 @@ public class EXE extends Data implements JDEventListener
 
   public Descriptor[] RSRC_des;
 
-  //A blank data Descriptor.
-
-  public Descriptor blank;
-
   //Nodes that can be added to when Adding section format readers.
 
   JDNode root;
@@ -61,7 +57,7 @@ public class EXE extends Data implements JDEventListener
 
   public EXE()
   {
-    blank = new Descriptor( file ); tree.setEventListener( this );
+    tree.setEventListener( this );
 
     file.Events = false;
 
@@ -527,7 +523,7 @@ public class EXE extends Data implements JDEventListener
     }
     else { info(""); }
 
-    ds.clear( blank );
+    ds.clear();
   }
 
   //Disassembler.

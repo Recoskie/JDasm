@@ -55,7 +55,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   //Font is loaded on Initialize.
 
-  Font font;
+  private Font font;
 
   //Hex editor offset.
 
@@ -424,7 +424,7 @@ public class VHex extends JComponent implements IOEventListener, MouseWheelListe
 
   //Initialize the draw area and component size.
 
-  public void init()
+  private void init()
   {
     scrollBarSize = ((Integer)UIManager.get("ScrollBar.width")).intValue();
 
