@@ -4,21 +4,17 @@ image:
     path: https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1
 ---
 
-Java Forensics Hex editor allows you to decompile software.
+# Help, and documentation.
 
-Allowing you to create source code, of binary files no matter what operating system you are on.
+JFH-Disassembly allows you to decompile software.
 
-It is also a hex editor, and data forensics tool, for binary files.
+Allowing you to create source code, of binary files no matter what operating system you are on, or CPU.
 
-You can also read disk drives sector by sector.
+JFH-Disassembly also visualizes binary data, and file types. Showing you what every binary digit read, and it's use.
 
-This application currently supports Microsoft binary formats: **.exe, .dll, .sys, .drv, .ocx**.
+This tool is also a hex editor, and data forensics tool, for binary files that is fun, visual, easy to use, and understand.
 
-This project is meant to support many different binary file formats, and application formats.
-
-However only supports Microsoft binary format at the moment.
-
-**If you wish to contribute a Format. Put it under the format folder.**
+You can also read disk drives sector by sector (one binary digit at a time from start, to end).
 
 # Help, and documentation.
 
