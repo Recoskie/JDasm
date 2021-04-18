@@ -6,11 +6,11 @@ image:
 
 # Help, and documentation.
 
-JFH-Disassembly allows you to decompile software.
+J-Disassembly allows you to decompile software.
 
 Allowing you to create source code, of binary files no matter what operating system you are on, or CPU.
 
-JFH-Disassembly also visualizes binary data, and file types. Showing you what every binary digit read, and it's use.
+J-Disassembly also visualizes binary data, and file types. Showing you what every binary digit read, and is use for.
 
 This tool is also a hex editor, and data forensics tool, for binary files that is fun, visual, easy to use, and understand.
 
@@ -18,13 +18,13 @@ You can also read disk drives sector by sector (one binary digit at a time from 
 
 # Help, and documentation.
 
-Using JFH-Disassembly Basics: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">Link</a><br />
-Machine code: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Machine.html">Link</a><br />
-High Level Code: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Code.html">Link</a>
+Using JFH-Disassembly Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a><br />
+Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a><br />
+High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a>
 
 # Running the application.
 
-To run the application you need to open the file <strong>JFHApp.jar</strong>. It does not install to the system.
+To run the application you need to open the file <strong>JD-asm.jar</strong>.
 
 You will also need Java 8, or later installed (latest version is preferred).
 

@@ -1,7 +1,7 @@
 J-Disassembly.
 =============================
 
-J-Disassembly is designed to be user friendly. For both prelesional, and absolute beginners.
+J-Disassembly is designed to be user friendly. For both professional, and absolute beginners.
 
 This tool makes binary files, and formats visual, and also easy to understand, and modify.
 
@@ -31,15 +31,16 @@ However, only supports Microsoft binary format at the moment. If you wish to con
 Help, and documentation.
 ------------------------------------------------------------
 
-Using J-Disassembly Basics: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">Link</a><br />
-Machine code: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Machine.html">Link</a><br />
-High Level Code: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Code.html">Link</a>
+Main Page: <a href="https://recoskie.github.io/J-Disassembly/">Link</a><br />
+J-Disassembly Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a><br />
+Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a><br />
+High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a>
 
 ------------------------------------------------------------
 Running the application.
 ------------------------------------------------------------
 
-To run the application you only need the <a href="https://github.com/Recoskie/JFH-Disassembly/raw/master/JFHApp.jar">JFHApp.jar</a> file. It does not install to the system.
+To run the application you only need the <a href="https://github.com/Recoskie/J-Disassembly/raw/master/JFHApp.jar">JFHApp.jar</a> file. It does not install to the system.
 
 You can also download the project. Clone the entire project if you wish to make changes, or have a copy of the source code.
 
