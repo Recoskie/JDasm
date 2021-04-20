@@ -1,0 +1,3 @@
+[submodule "swingIO"]
+	path = swingIO
+	url = https://github.com/Recoskie/swingIO
