@@ -6,9 +6,11 @@ image:
 
 ## Help, and documentation.
 
-Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a><br />
-Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a><br />
-High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a>
+<table border="1">
+  <tr><td>Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a></td></tr>
+  <tr><td>Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a></td></tr>
+  <tr><td>High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a></td></tr>
+</table>
 
 ## What is J-Disassembly.
 
@@ -33,7 +35,7 @@ The tools are explained in help, and documentation.
 
 J-Disassembly can visually take binary software apart to create source code. No matter what operating system you are on, or CPU.
 
-J-Disassembly also visualizes binary data, and file types. Showing you what every binary digit read, is used for.
+J-Disassembly also visualizes binary data, and file types. Showing you what every binary digit read is used for.
 
 This tool is also a hex editor, and data forensics tool, for binary files that is fun, visual, easy to use, and understand.
 
@@ -53,27 +55,39 @@ Download as zip. The file <strong>JD-asm.jar</strong> is the application.
 
 You will need Java 8, or later installed (latest version is preferred).
 
-# The Microcode Disassembler.
+# IO system.
 
-It was cool to write it in JavaScript. The project can be found <a href="https://github.com/Recoskie/X86-64-CPU-Binary-Code-Disassembler-JS">Here</a>.
+RandomAccessFileV Is an IO system that can map virtual addresses to byte positions in a file, or disk.
+
+It also has a new IO event system. Which the swing IO components operate on.
+
+The IO system can be found <a href="https://github.com/Recoskie/RandomAccessFileV">here</a>.
+
+Without it. You do not have a nice virtually mapped binary application in it's proper address space.
+
+Also without it. You would not be able to accurately make changes to sections of a program, or read it.
+
+# Window GUI components.
+
+swing IO is a new set of swing components that respond to IO events.
+
+Such as read, or write, and seek to position in memory.
+
+Without these components. We would not be able to structure binary information visually.
+
+We also would not have a interactive hex editor that updates when you click on a type of data in a data descriptor.
+
+The swing IO components can be found <a href="https://github.com/Recoskie/swingIO">here</a>.
+
+# The Disassembler.
+
+It was cool to write it in JavaScript. The project can be found <a href="https://github.com/Recoskie/X86-64-CPU-Binary-Code-Disassembler-JS">here</a>.
 
 The disassembler is rebuilt in Java, for this project.
 
 I plan on creating a ARM core disassembler as well, for mobile devices.
 
-# The new Virtual address mapper.
-
-The improved address mapper can be found <a href="https://github.com/Recoskie/RandomAccessFileV">here</a>.
-
-Without it you do not have a nice virtually mapped binary application in it's proper address space.
-
-Also without it. You would not be able to accurately make changes to sections of a program, or read it.
-
-# Virtual memory view, and hex editor.
-
-A fast custom UI hex editor component: <a href="https://github.com/Recoskie/VHex">here</a>.
-
-# Additional planed tools.
+# Planed tools.
 
 [ ] Boot sector decompilation.
 

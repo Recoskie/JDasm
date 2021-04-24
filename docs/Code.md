@@ -4,13 +4,13 @@ image:
   path: https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1
 ---
 
-Conditional code, and condition Flags: <a href="#cond">Link</a><br />
-Functions, Interrupts (Stack memory): <a href="#func">Link</a><br />
-Loops, and repeat <a href="#loops">Link</a><br />
-Array's, and data structure: <a href="#data">Link</a><br />
-Complications, and Conclusion: <a href="#end">Link</a>
-
-<br />
+<table border="1">
+  <tr><td>Conditional code, and condition Flags: <a href="#cond">Link</a></td></tr>
+  <tr><td>Functions, Interrupts (Stack memory): <a href="#func">Link</a></td></tr>
+  <tr><td>Loops, and repeat <a href="#loops">Link</a></td></tr>
+  <tr><td>Array's, and data structure: <a href="#data">Link</a></td></tr>
+  <tr><td>Complications, and Conclusion: <a href="#end">Link</a></td></tr>
+</table>
 
 <h1>Pre compiled binary.</h1>
 

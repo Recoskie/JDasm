@@ -4,12 +4,12 @@ image:
   path: https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1
 ---
 
-System Memory: <a href="#SysMem">Link</a><br />
-Processor data types: <a href="#dTypes">Link</a><br />
-Overview of data types: <a href="#Overview">Link</a><br />
-Basic binary files, and headers: <a href="#Hfiles">Link</a>
-
-<br />
+<table border="1">
+  <tr><td>System Memory: <a href="#SysMem">Link</a></td></tr>
+  <tr><td>Processor data types: <a href="#dTypes">Link</a></td></tr>
+  <tr><td>Overview of data types: <a href="#Overview">Link</a></td></tr>
+  <tr><td>Basic binary files, and headers: <a href="#Hfiles">Link</a></td></tr>
+</table>
 
 <h1 id="SysMem">Reading, and editing binary data.</h1>
 
