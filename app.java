@@ -344,6 +344,10 @@ public class app extends Window implements ActionListener, DropTargetListener, J
       
         Virtual.setVisible(false); Offset.setVisible(true); di.setVisible(true);
       }
+      
+      //Set back tools after disk finish loading.
+
+      if( e.getArg(0) == -2 ) { winFrame.setContentPane( tools ); }
 
       //Adjust the window.
 
@@ -351,12 +355,14 @@ public class app extends Window implements ActionListener, DropTargetListener, J
       {
         winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); winFrame.revalidate();
       }
-      
-      //Set back tools after disk finish loading.
 
-      if( e.getArg(0) == -2 ) { winFrame.setContentPane( tools ); }
-      
-      tools.rowMaximize(0); tools.update();
+      SwingUtilities.invokeLater(new Runnable() 
+      {
+        public void run()
+        {
+          tools.rowMaximize(0); tools.update();
+        }
+      });
     }
 
     //Failed to read file, or disk.
