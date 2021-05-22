@@ -1,5 +1,6 @@
 ---
 layout: default
+title: High Level Code Analysis
 image:
   path: https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1
 ---
