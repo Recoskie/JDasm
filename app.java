@@ -351,18 +351,9 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       //Adjust the window.
 
-      if( winFrame.getExtendedState() != JFrame.MAXIMIZED_BOTH )
-      {
-        winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); winFrame.revalidate();
-      }
+      if( winFrame.getExtendedState() != JFrame.MAXIMIZED_BOTH ) { winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); }
 
-      SwingUtilities.invokeLater(new Runnable() 
-      {
-        public void run()
-        {
-          tools.rowMaximize(0); tools.update();
-        }
-      });
+      SwingUtilities.invokeLater( new Runnable() { public void run() { tools.rowMaximize(0); tools.update(); } } );
     }
 
     //Failed to read file, or disk.
