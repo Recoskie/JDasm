@@ -56,7 +56,7 @@ Double clicking any hex digit will let you type a 0 to 9, and A to F value. You 
 
 <br />
 
-There is a square around every two hex, because every eight binary digits is one position in memory.
+There is a square around every two hex digits, because every eight binary digits is one position in memory.
 
 <br />
 
@@ -64,7 +64,7 @@ Each hex digit is four binary digits. So every two digits is eight binary digits
 
 <br />
 
-Eight binary digits is called a byte. All memory devices operate in bytes, CD ROMs, blue rays, DVD, Solid state drives, RAM memory, and floppy disks. It is a standard.
+Eight binary digits is called a byte. All memory devices operate in bytes, CD ROMs, blue rays, DVD, Solid state drives, RAM memory, and floppy disks. It is a memory standard.
 
 <br />
 
@@ -74,7 +74,7 @@ Eight binary digits is called a byte. All memory devices operate in bytes, CD RO
 
 <br />
 
-The highlighted square is position 9 in the binary file.
+The highlighted square above is position 9 in the binary file.
 
 <br />
 
@@ -82,7 +82,7 @@ The highlighted square is position 9 in the binary file.
 
 <br />
 
-The highlighted square is position 15 in the binary file.
+The highlighted square above is position 15 in the binary file.
 
 <br />
 
@@ -90,7 +90,7 @@ The highlighted square is position 15 in the binary file.
 
 <br />
 
-The highlighted square is position 16 in the binary file. And so on. Also any memory device can not have data smaller than a byte (eight binary digits) as it is a standard.
+The highlighted square above is position 16 in the binary file. And so on. Also any memory device can not have data smaller than a byte (eight binary digits) as it is a memory standard.
 
 <br />
 
@@ -102,15 +102,15 @@ A standard unit of memory is 8 binary digits. Which is called a byte.
 
 <br />
 
-Position 0 is byte one. Position one is then byte two. From the start of the memory device to the end of the memory device.
+Position zero is byte one. Position one is then byte two. From the start of the memory device to the end of the memory device.
 
 <br />
 
-Thus every 1000 metric size of bytes forum a measurement for how big your disk drive is, floppy disk, RAM Memory, or any digital memory conceivable.
+Every 1000 metric size of bytes forum a measurement for how big your disk drive is, floppy disk, RAM Memory, or any digital memory conceivable.
 
 <br />
 
-Thus 1000 is 1 kilo in metric. So 1000 kilo is 1 mega in metric. The word "byte" is added to each of these metric sizes to forum how many bytes in metric.
+Also 1000 is 1 kilo in metric. So 1000 kilo is 1 mega in metric. The word "byte" is added to each of these metric sizes to forum how many bytes in metric.
 
 <br />
 
@@ -157,7 +157,7 @@ Every position of memory is in bytes no matter what you are using to store the b
 
 <br />
 
-However terms like a peta byte of memory is rarely used. You will however hear sizes like this when talking super computers.
+However terms like a peta byte of memory is rarely used. You will, however hear sizes like this when talking super computers.
 
 <h1 id="dTypes" style="clear:left;"><hr />Data types.</h1>
 
@@ -185,7 +185,7 @@ Processors are designed to read bytes of data. Which is the standard unit of mem
 
 <br />
 
-Originally two bytes created a "word". Thus two words created a "double word" shortened to DWORD. Also tow DWORD created a "quad word" called QWORD.
+Originally two bytes created a "word". Thus two words created a "double word" shortened to "DWORD". Also tow "DWORD" created a "quad word" called "QWORD".
 
 <br />
 
@@ -481,7 +481,8 @@ The space bar is 20 hex. Without space as a code there is no space between words
 
 <br />
 
-<strong>When dividing a binary number by any base 2 to 36. Any remainder that is less than 10 is added to 30 hex. Which creates numbers 0 to 9 per place value.
+<strong>
+When dividing a binary number by any base 2 to 36. Any remainder that is less than 10 is added to 30 hex. Which creates numbers 0 to 9 per place value.
 
 <br />
 
@@ -489,7 +490,8 @@ When remainders are higher than 10 we subtract 10, and add the extra to 60 hex f
 
 <br />
 
-This is how the <em>toString</em> method is implemented in all programming languages to convert any number to any number base 2 to 36.</strong>
+This is how the <em>toString</em> method is implemented in all programming languages to convert any number to any number base 2 to 36.
+</strong>
 
 <br />
 
@@ -687,7 +689,7 @@ All primitive data types can be read one after another linearly in an array. Whi
 
 <br />
 
-Each number in the array can locate to a string. Which a string is a variable in length array built on char, or another array in the case of a 2D array.
+Each number in the array can locate to a string. Which a string is a variable in length array built on char UTF8/UTF16, or another array in the case of a 2D array.
 
 <br />
 

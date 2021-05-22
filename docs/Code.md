@@ -72,11 +72,15 @@ However, if you use the JIT compiler, or interpreter as the base of your operati
 
 These are your android systems, and SUN micro systems OS (Solar OS).
 
-<br /><hr />
+<br />
+
+<hr />
 
 Cases in which dynamically generated code speeds stuff up is.
 
-<hr /><br />
+<hr />
+
+<br />
 
 Dynamically generated AI (Artificial intelligence) code. This is somewhat different as it takes information in to generate changes to itself.
 
@@ -176,7 +180,7 @@ A simple ALU design is that of the 74181 which started the design of single chip
 
 <br />
 
-All processors today have very small ALU which is designed to do all arithmetic operations. The small size is achieved by having the S inputs change the logical combination input to output.
+All processors today have very small ALU's which are designed to do all arithmetic operations. The small size is achieved by having the S inputs change the logical combination between input to output.
 
 <br />
 
@@ -240,7 +244,7 @@ On an ARM core. All instructions have a condition code. Which means the instruct
 
 <br />
 
-<img src="Figs/ARM-cond.gif"></img>
+<img src="Figs/ARM-cond.gif" />
 
 <br />
 

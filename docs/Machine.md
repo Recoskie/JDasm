@@ -116,7 +116,7 @@ There is also two 16 bit ADD operations that do the same operation. Codes 01, an
 
 <br />
 
-Lastly there also is two ADD operations that add a register by the next two byes, or one byte after the ADD operation.
+Lastly there also is two ADD operations that add a register by the next two bytes, or one byte after the ADD operation.
 
 <br />
 
@@ -296,7 +296,7 @@ Because 16 bit, 32 bit, and 64 bit code can be mixed in x86 binary code using pr
 
 <br />  
 
-The registrars are given different names based on the size of a operation.
+The registers are given different names based on the size of a operation.
 
 <br />
 
@@ -341,7 +341,7 @@ The "A" register is called AH when it is the next 8 bits of the "A" register.
 
 <br />
 
-Say we set the AX value 8877 hex. The value of AH is then 77, and the value of AL is then 88 hex. Only 8 bit operations use this.
+Say we set the AX value 8877 hex. The value of AH is then 88, and the value of AL is then 77 hex. Only 8 bit operations use this.
 
 <br />
 
