@@ -374,7 +374,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
         {
           JOptionPane.showMessageDialog(null,"Need Administrative privilege to read disk drives.");
 
-          if( Sys.promptAdmin("disk " + e.getID() ) ) { System.exit(0); }
+          if( Sys.promptAdmin("disk " + e.getID() ) ) { System.exit(0); } else { winFrame.setContentPane( tools ); winFrame.setJMenuBar( fcBar ); winFrame.revalidate(); }
         }
       }
 
