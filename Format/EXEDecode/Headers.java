@@ -114,7 +114,7 @@ public class Headers extends Data
     op.LUINT32( "Check Sum" );
 
     op.LUINT16( "Sub system" );
-    op.Other( "Dll Characteristics", 2 );
+    op.LUINT16( "Dll Characteristics" );
 
     //64 bit stack.
 
@@ -136,7 +136,7 @@ public class Headers extends Data
       op.LUINT32( "Size Of Heap Commit" );
     }
 
-    op.Other( "Loader Flags", 4 );
+    op.LUINT32( "Loader Flags" );
     op.LUINT32( "Data Directory Array Size" ); DDS = ((Integer)op.value).intValue();
 
     op.setEvent(this::opInfo);
@@ -412,31 +412,71 @@ public class Headers extends Data
   "<html>" + Ver + "<br /><br />The linker links the sections together into a EXE, or DLL.</html>",
   "<html>" + Ver + "<br /><br />The linker links the sections together into a EXE, or DLL.</html>",
   "<html>Adding this to \"Base of code\" marks the end of the machine code. Plus the \"Base Address\".</html>",
-  "",
-  "",
+  "<html>The size of the initialized data section, or the sum of all such sections if there are multiple data sections.</html>",
+  "<html>The size of the uninitialized data section (BSS), or the sum of all such sections if there are multiple BSS sections.</html>",
   "<html>Start of the binaries machine code in virtual space. Plus the \"Base Address\".</html>",
   "<html>The beginning of the machine code section. Plus the \"Base Address\".<br /><br />The start position does not have to be at the very start of the machine code section.</html>",
   "<html>The Data section is a safe spot to put results from operations without writing over program machine code.<br /><br />In code these are called variables.</html>",
   "<html>Base address is added to all virtual addresses.<br /><br />It is the preferred address to load the mapped sections in RAM from this file.<br /><br />Windows may add to this number to space programs apart in virtual space.</html>",
-  "",
-  "",
+  "<html>The alignment (in bytes) of sections when they are loaded into memory. It must be greater than or equal to FileAlignment. The default is the page size for the architecture.</html>",
+  "<html>The alignment factor (in bytes) that is used to align the raw data of sections in the image file.<br /><br />The value should be a power of 2 between 512 and 64 K, inclusive.<br /><br />" +
+  "The default is 512. If the SectionAlignment is less than the architecture's page size, then FileAlignment must match SectionAlignment.</html>",
   "<html>" + Ver + "<br /><br />The version number of the required operating system.</html>",
   "<html>" + Ver + "<br /><br />The version number of the required operating system.</html>",
   "<html>" + Ver + "<br /><br />The version number of this file.</html>",
   "<html>" + Ver + "<br /><br />The version number of this file.</html>",
   "<html>" + Ver + "<br /><br />The subsystem version.</html>",
   "<html>" + Ver + "<br /><br />The subsystem version.</html>",
-  "<html>The win 32 Value has never been used.</html>",
+  "<html>Reserved, must be zero.<br /><br />" + res + "</html>",
   "<html>The size of this file.</html>",
   "<html>The size of the headers, for setting up the virtual space of this binary. Excluding the rest of the data.</html>",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
+  "<html>The image file checksum. The algorithm for computing the checksum is incorporated into IMAGHELP.DLL.<br /><br />" +
+  "The following are checked for validation at load time: all drivers, any DLL loaded at boot time, and any DLL that is loaded into a critical Windows process.</html>",
+  "<html>The subsystem does not change how the application runs.<br /><br />" +
+  "It is compiler specific identifers. It makes it easy to identify the intended purpose of the binary file, or where it came from.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Value</td><td>Use</td></tr>" +
+  "<tr><td>00 00</td><td>An unknown subsystem.</td></tr>" +
+  "<tr><td>01 00</td><td>Device drivers and native Windows processes.</td></tr>" +
+  "<tr><td>02 00</td><td>The Windows graphical user interface (GUI) subsystem.</td></tr>" +
+  "<tr><td>03 00</td><td>The Windows character subsystem.</td></tr>" +
+  "<tr><td>05 00</td><td>The OS/2 character subsystem.</td></tr>" +
+  "<tr><td>07 00</td><td>The Posix character subsystem.</td></tr>" +
+  "<tr><td>08 00</td><td>Native Win9x driver.</td></tr>" +
+  "<tr><td>09 00</td><td>Windows CE.</td></tr>" +
+  "<tr><td>0A 00</td><td>An Extensible Firmware Interface (EFI) application.</td></tr>" +
+  "<tr><td>0B 00</td><td>An EFI driver with boot services.</td></tr>" +
+  "<tr><td>0C 00</td><td>An EFI driver with run-time services.</td></tr>" +
+  "<tr><td>0D 00</td><td>An EFI ROM image.</td></tr>" +
+  "<tr><td>0E 00</td><td>XBOX</td></tr>" +
+  "<tr><td>0F 00</td><td>Windows boot application.</td></tr>" +
+  "</table>",
+  "Each binary digit that is set 1 represents a setting.<br /><br />" +
+  "The binary value 0010000100000000 is the tow settings \"A WDM driver\", and \"Image is NX compatible\".<br /><br />" +
+  " Set data inspector to binary, and use the following table to adjust the settings, or to read them.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Value</td><td>Use</td></tr>" +
+  "<tr><td>0000000000000001</td><td>Reserved, must be zero.</td></tr>" +
+  "<tr><td>0000000000000010</td><td>Reserved, must be zero.</td></tr>" +
+  "<tr><td>0000000000000100</td><td>Reserved, must be zero.</td></tr>" +
+  "<tr><td>0000000000001000</td><td>Reserved, must be zero.</td></tr>" +
+  "<tr><td>0000000000100000</td><td>Image can handle a high entropy 64-bit virtual address space.</td></tr>" +
+  "<tr><td>0000000001000000</td><td>DLL can be relocated at load time.</td></tr>" +
+  "<tr><td>0000000010000000</td><td>Code Integrity checks are enforced.</td></tr>" +
+  "<tr><td>0000000100000000</td><td>Image is NX compatible.</td></tr>" +
+  "<tr><td>0000001000000000</td><td>Isolation aware, but do not isolate the image.</td></tr>" +
+  "<tr><td>0000010000000000</td><td>Does not use structured exception (SE) handling. No SE handler may be called in this image.</td></tr>" +
+  "<tr><td>0000100000000000</td><td>Do not bind the image.</td></tr>" +
+  "<tr><td>0001000000000000</td><td>Image must execute in an AppContainer.</td></tr>" +
+  "<tr><td>0010000000000000</td><td>A WDM driver.</td></tr>" +
+  "<tr><td>0100000000000000</td><td>Image supports Control Flow Guard.</td></tr>" +
+  "<tr><td>1000000000000000</td><td>Terminal Server aware.</td></tr>" +
+  "</table>",
+  "<html>The size of the stack to reserve. Only SizeOfStackCommit is committed; the rest is made available one page at a time until the reserve size is reached.</html>",
+  "<html>The size of the stack to commit.</html>",
+  "<html>The size of the local heap space to reserve. Only SizeOfHeapCommit is committed; the rest is made available one page at a time until the reserve size is reached.</html>",
+  "<html>The size of the local heap space to commit.</html>",
+  "<html>Reserved, must be zero.<br /><br />" + res + "</html>",
   "<html>Data Directory Array can be made bigger than it's default size 16.<br /><br />Which allows for more features to be added to the windows application format.</html>"};
 
   public void opInfo( int el )
