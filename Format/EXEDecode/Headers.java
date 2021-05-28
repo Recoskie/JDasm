@@ -230,7 +230,7 @@ public class Headers extends Data
 
       //Section FLAGS.
 
-      sd.Other( "Section flags", 4 );
+      sd.LUINT32( "Section flags" );
 
       //Add virtual address to IO system.
 
@@ -542,7 +542,55 @@ public class Headers extends Data
   "<html>Number of bytes to read from file.<br /><br />The number of bytes read, may not all be put in RAM. If Number of bytes to put in virtual space is smaller.<br /><br />This happens, because sections are aligned in multiples by the linker.</html>",
   "<html>The position of the file to read.</html>",
   "<html>" + res + "</html>",
-  ""};
+  "Each binary digit that is set 1 represents a setting except the \"Align data\" setting.<br /><br />" +
+  "The binary value 00000100001100000000000000000000 is the tow settings \"Align data on a 4-byte boundary\", and \"The section cannot be cached\".<br /><br />" +
+  "There can only be one \"Align data\" setting, as it is a number combination.<br /><br />It is used during compiling your binary in order to line up the sections in even multiples.<br /><br />" +
+  "The alignment setting is not used by the actual binary, or DLL.<br /><br />" +
+  "Set data inspector to binary, and use the following table to adjust the settings, or to read them.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Value</td><td>Use</td></tr>" +
+  "<tr><td>00000000000000000000000000000001</td><td>Reserved for future use.</td></tr>" +
+  "<tr><td>00000000000000000000000000000010</td><td>Reserved for future use.</td></tr>" +
+  "<tr><td>00000000000000000000000000000100</td><td>Reserved for future use.</td></tr>" +
+  "<tr><td>00000000000000000000000000001000</td><td>The section should not be padded to the next boundary. This flag is obsolete and is replaced by \"Align data\". This is valid only for object files.</td></tr>" +
+  "<tr><td>00000000000000000000000000010000</td><td>Reserved for future use.</td></tr>" +
+  "<tr><td>00000000000000000000000000100000</td><td>The section contains executable code.</td></tr>" +
+  "<tr><td>00000000000000000000000001000000</td><td>The section contains initialized data.</td></tr>" +
+  "<tr><td>00000000000000000000000010000000</td><td>The section contains uninitialized data.</td></tr>" +
+  "<tr><td>00000000000000000000000100000000</td><td>Reserved for future use.</td></tr>" +
+  "<tr><td>00000000000000000000001000000000</td><td>The section contains comments or other information. The .drectve section has this type. This is valid for object files only.</td></tr>" +
+  "<tr><td>00000000000000000000010000000000</td><td>Reserved for future use.</td></tr>" +
+  "<tr><td>00000000000000000000100000000000</td><td>The section will not become part of the image. This is valid only for object files.</td></tr>" +
+  "<tr><td>00000000000000000001000000000000</td><td>The section contains COMDAT data.</td></tr>" +
+  "<tr><td>00000000000000000010000000000000</td><td>The section contains data referenced through the global pointer (GP).</td></tr>" +
+  "<tr><td>00000000000000000100000000000000</td><td>Reserved for future use.</td></tr>" +
+  "<tr><td>00000000000000001000000000000000</td><td>Reserved for future use.</td></tr>" +
+  "<tr><td>00000000000000010000000000000000</td><td>Reserved for future use.</td></tr>" +
+  "<tr><td>00000000000000100000000000000000</td><td>Reserved for future use.</td></tr>" +
+  "<tr><td>00000000000001000000000000000000</td><td>Align data on a 1-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000000010000000000000000000</td><td>Align data on a 2-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000000011000000000000000000</td><td>Align data on a 4-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000000100000000000000000000</td><td>Align data on an 8-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000000101000000000000000000</td><td>Align data on a 16-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000000110000000000000000000</td><td>Align data on a 32-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000000111000000000000000000</td><td>Align data on a 64-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000001000000000000000000000</td><td>Align data on a 128-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000001001000000000000000000</td><td>Align data on a 256-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000001010000000000000000000</td><td>Align data on a 512-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000001011000000000000000000</td><td>Align data on a 1024-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000001100000000000000000000</td><td>Align data on a 2048-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000001101000000000000000000</td><td>Align data on a 4096-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000000001110000000000000000000</td><td>Align data on an 8192-byte boundary. Valid only for object files.</td></tr>" +
+  "<tr><td>00000001000000000000000000000000</td><td>The section contains extended relocations.</td></tr>" +
+  "<tr><td>00000010000000000000000000000000</td><td>The section can be discarded as needed.</td></tr>" +
+  "<tr><td>00000100000000000000000000000000</td><td>The section cannot be cached.</td></tr>" +
+  "<tr><td>00001000000000000000000000000000</td><td>The section is not pageable.</td></tr>" +
+  "<tr><td>00010000000000000000000000000000</td><td>The section can be shared in memory.</td></tr>" +
+  "<tr><td>00100000000000000000000000000000</td><td>The section can be executed as code.</td></tr>" +
+  "<tr><td>01000000000000000000000000000000</td><td>The section can be read.</td></tr>" +
+  "<tr><td>10000000000000000000000000000000</td><td>The section can be written to.</td></tr>" +
+  "</table>"
+  };
 
   public void sdInfo( int el )
   {
