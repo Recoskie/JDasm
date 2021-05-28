@@ -56,7 +56,7 @@ public class Headers extends Data
     pe.LUINT32( "Pointer To Symbol Table" );
     pe.LUINT32( "Number Of Symbols" );
     pe.LUINT16( "Size Of OP Header" );
-    pe.Other( "Characteristics", 2 );
+    pe.LUINT16( "Characteristics" );
 
     pe.setEvent(this::peInfo);
     
@@ -346,6 +346,8 @@ public class Headers extends Data
 
   //Detailed description of the PE header.
 
+  public static final String symbols = "Lines of code are changed to machine code. Symbols are line numbers relative to the machine code start-end positions.<br /><br />It allows us to see our source code line number when a problem happens in the binary file CPU instructions.<br /><br />";
+
   public static final String[] PEinfo = new String[]{"<html>The PE header must start with PE = 50 45 00 00.<br /><br />If it does not pass the signature test then the windows binary is corrupted.</html>",
   "<html>Windows does not translate binary to match other cores. It sets a core to the start of the program if CPU is compatible.<br /><br /><table border='1'>" +
   "<tr><td>Value</td><td>Type</td></tr>" +
@@ -383,13 +385,37 @@ public class Headers extends Data
   "There is also windows RT. Which RT is a ARM core compilation of windows. In which case you might see Machine ARM.</html>",
   "<html>This is the number of sections to read after the OP header. In the \"Mapped SECTIONS TO RAM\".<br /><br />" +
   "The sections specify a position to read the file, and virtual address to place the section, from the windows binary in RAM.</html>",
-  "<html>A date time stamp is in seconds. The seconds are added to the starting date \"Wed Dec 31 7:00:00PM 1969\".<br /><br />" +
-  "If the time date stamp is \"37\" in value, then it is plus 37 second giving \"Wed Dec 31 7:00:37PM 1969\".</html>",
-  "",
-  "",
-  "",
-  "",
-  ""};
+  "<html>The Date this binary was created.<br /><br />The date time stamp is in seconds. The seconds are added to the starting date \"00:00 January 1, 1970\".<br /><br />" +
+  "If the time date stamp is \"37\" in value, then it is plus 37 second giving \"00:37 January 1, 1970\".<br /><br />" +
+  "The time date stamp is defined in UTC time, so it may be a day different in time, or few hours different depending on your time zone.</html>",
+  "<html>" + symbols + "The file offset of the symbol table, or zero if no symbol table is present.<br /><br />This value should be zero for an binary, because debugging information is usually removed.</html>",
+  "<html>" + symbols + "The number of entries in the symbol table.<br /><br />This data can be used to locate the string table, which immediately follows the symbol table.<br /><br />" +
+  "This value should be zero for an binary, because debugging information is usually removed.</html>",
+  "<html>The size of the optional header. Which is read after the PE header.</html>",
+  "<html>The flags that indicate the attributes of the file.<br /><br />" +
+  "Each binary digit that is set 1 represents a setting.<br /><br />" +
+  "The binary value 0001000000100000 is the tow settings \"Application can handle > 2-GB addresses.\", and \"The binary file is a system file, not a user program.\".<br /><br />" +
+  "Set data inspector to binary, and use the following table to adjust the settings, or to read them.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Value</td><td>Use</td></tr>" +
+  "<tr><td>0000000000000001</td><td>Windows CE, and Microsoft Windows NT and later. This indicates that the file does not contain base relocations and must therefore be loaded at its preferred base address.</td></tr>" +
+  "<tr><td>0000000000000010</td><td>This indicates that the binary file is valid and can be run. If this flag is not set, it indicates a linker error.</td></tr>" +
+  "<tr><td>0000000000000100</td><td>Debug line numbers have been removed. This flag is deprecated and should be zero.</td></tr>" +
+  "<tr><td>0000000000001000</td><td>Debug symbol table entries have been removed. This flag is deprecated and should be zero.</td></tr>" +
+  "<tr><td>0000000000010000</td><td>Aggressively trim working set. This flag is deprecated for Windows 2000 and later and must be zero. Obsolete.</td></tr>" +
+  "<tr><td>0000000000100000</td><td>Application can handle bigger than 2-GB addresses.</td></tr>" +
+  "<tr><td>0000000001000000</td><td>This flag is reserved for future use.</td></tr>" +
+  "<tr><td>0000000010000000</td><td>Binary is little endian instead of big endian. This flag is deprecated and should be zero.</td></tr>" +
+  "<tr><td>0000000100000000</td><td>Machine is based on a 32-bit-word architecture.</td></tr>" +
+  "<tr><td>0000001000000000</td><td>Debugging information is removed from the binary file.</td></tr>" +
+  "<tr><td>0000010000000000</td><td>If the binary is running on removable media, then copy it to the swap file.</td></tr>" +
+  "<tr><td>0000100000000000</td><td>If the binary is running on network, then copy it to the swap file.</td></tr>" +
+  "<tr><td>0001000000000000</td><td>The binary file is a system file, not a user program.</td></tr>" +
+  "<tr><td>0010000000000000</td><td>The binary file is a DLL file. Such files are considered executable files for almost all purposes, although they cannot be directly run.</td></tr>" +
+  "<tr><td>0100000000000000</td><td>The file should be run only on a uniprocessor machine.</td></tr>" +
+  "<tr><td>1000000000000000</td><td>Binary is big endian instead of little endian. This flag is deprecated and should be zero.</td></tr>" +
+  "</table></html>"
+  };
 
   public void peInfo( int el )
   {
