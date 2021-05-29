@@ -13,12 +13,12 @@ public class Headers extends Data
     Descriptor mz = new Descriptor( file );
 
     mz.String8( "SIGNATURE", 2 ); String sig = mz.value + "";
-    mz.LUINT16( "Size of Last Page" );
-    mz.LUINT16( "Number of 512 byte pages in file" );
+    mz.LUINT16( "Last 512 bytes" );
+    mz.LUINT16( "512 bytes in file" );
     mz.LUINT16( "Number of Relocation Entries" );
-    mz.LUINT16( "Header size in Paragraphs" );
-    mz.LUINT16( "Minimum additional Memory required in paragraphs" );
-    mz.LUINT16( "Maximum additional Memory required in paragraphs" );
+    mz.LUINT16( "Header size" );
+    mz.LUINT16( "Minimum Memory" );
+    mz.LUINT16( "Maximum Memory" );
     mz.LUINT16( "Initial SS relative to start of file" );
     mz.LUINT16( "Initial SP" );
     mz.LUINT16( "Checksum (unused)" );
@@ -262,23 +262,30 @@ public class Headers extends Data
   "This was done to make the address space bigger in 16 bit computers.<br /><br />" +
   "Thus 32 bit, and 64 bit systems no longer use a segment. Unless set 16 bit mode.<br /><br />";
 
+  public static final String MZReloc = "The relocations are a list of 16 bit numbers. The numbers are Offsets that are added to by the position the program put in memory.<br /><br />" +
+  "In 16 bit MS-DOS this allowed more than one program to be loaded.";
+
+  public static final String FSize = "Both \"Last 512 bytes\", and \"512 bytes in file\" are used to calculate the MS-DOS binary size.<br /><br />";
+
   public static final String[] MZinfo = new String[]{"<html>The signature must always be 4D 5A = MZ.<br /><br />" + 
   "It must be at the start of any windows binary.<br /><br />" +
   "If the file does not pass this test. Then it is corrupted.<br /><br />" + 
   "Or is a different file type disguise as a windows binary.</html>",
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
+  "<html>"+ FSize + "If this value is zero, that means the entire last multiple of 512 is used (i.e. the effective value is 512).</html>",
+  "<html>" + FSize + "The size of the program in 512 bytes. Subtract this value by 1, multiple by 512, and add \"Last 512 bytes\".</html>",
+  "<html>Number of relocation entries stored after the header. May be zero..<br /><br />" + MZReloc + "</html>",
+  "<html>The size of this MZ header. Multiply this value by 16 to get it's actual size.<br /><br />" +
+  "The program begins just after the header, and this field can be used to calculate the appropriate file offset.<br /><br />" +
+  "Note that the header size includes the relocation entries.</html>",
+  "<html>Multiply this value by 16 for the minium amount of memory this application needs.<br /><br />The program can't be loaded if there isn't at least this much memory available to it.</html>",
+  "<html>Multiply this value by 16, for additional memory.<br /><br />Normally, the OS reserves all the remaining conventional memory for your program, but you can limit it with this field.</html>",
   "<html>" + sseg + stack + "</html>",
   "<html>" + sseg + stack + "</html>",
-  "",
+  "<html>If set properly, the 16-bit sum of all words in the file should be zero.<br /><br />Usually, this isn't filled in.</html>",
   "<html>" + cseg + Instruct + "</html>",
   "<html>" + cseg + Instruct + "</html>",
-  "",
-  "",
+  "<html>Offset of the first relocation item in the file.<br /><br />" + MZReloc + "</html>",
+  "<html>Normally zero, meaning that it's the main program.</html>",
   "<html>" + res + "</html>",
   "",
   "",
