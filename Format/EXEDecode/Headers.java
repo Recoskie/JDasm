@@ -24,7 +24,7 @@ public class Headers extends Data
     mz.LUINT16( "Checksum (unused)" );
     mz.LUINT16( "Initial IP" );
     mz.LUINT16( "Initial CS relative to start of file" );
-    mz.LUINT16( "Offset within Header of Relocation Table" );
+    mz.LUINT16( "Relocations Offset" );
     mz.LUINT16( "Overlay Number" );
     mz.Other( "Reserved", 8 );
     mz.LUINT16( "ID" );
@@ -262,8 +262,8 @@ public class Headers extends Data
   "This was done to make the address space bigger in 16 bit computers.<br /><br />" +
   "Thus 32 bit, and 64 bit systems no longer use a segment. Unless set 16 bit mode.<br /><br />";
 
-  public static final String MZReloc = "The relocations are a list of 16 bit numbers. The numbers are Offsets that are added to by the position the program put in memory.<br /><br />" +
-  "In 16 bit MS-DOS this allowed more than one program to be loaded.";
+  public static final String MZReloc = "The relocations are a list of 16 bit numbers. The numbers are Offsets that are added to by the position the program is put in memory.<br /><br />" +
+  "In 16 bit MS-DOS, this allowed more than one program to be loaded.";
 
   public static final String FSize = "Both \"Last 512 bytes\", and \"512 bytes in file\" are used to calculate the MS-DOS binary size.<br /><br />";
 
