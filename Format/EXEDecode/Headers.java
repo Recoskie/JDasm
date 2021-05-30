@@ -264,7 +264,7 @@ public class Headers extends Data
 
   public static final String MZReloc = "The DOS relocations are a list of 16 bit numbers. The numbers are Offsets that are added to by the position the program is put in memory.<br /><br />" +
   "In 16 bit MS-DOS, this allowed more than one program to be loaded.<br /><br />" +
-  "Relocations are common in 16Bit, or 32Bit x86, but 64bit x86 software uses relative addresses.";
+  "Relocations are common in 16Bit, or 32Bit x86. However, 64bit x86 machine code uses relative addresses.";
 
   public static final String FSize = "Both \"Last 512 bytes\", and \"512 bytes in file\" are used to calculate the MS-DOS binary size.<br /><br />";
 

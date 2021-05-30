@@ -185,7 +185,7 @@ public class Window
           
       Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
     }
-    catch(Exception e){ }
+    catch(Exception e){ e.printStackTrace(); }
 
     Virtual.setComponentPopupMenu(pm); Offset.setComponentPopupMenu(pm);
 
