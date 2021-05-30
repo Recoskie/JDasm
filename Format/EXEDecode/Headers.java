@@ -103,13 +103,13 @@ public class Headers extends Data
 
     op.LUINT16( "Major Operating System Version" );
     op.LUINT16( "Minor Operating System Version" );
-    op.LUINT16( "Major Image Version" );
-    op.LUINT16( "Minor Image Version" );
+    op.LUINT16( "Major binary Version" );
+    op.LUINT16( "Minor binary Version" );
     op.LUINT16( "Major Sub system Version" );
     op.LUINT16( "Minor Sub system Version" );
 
     op.LUINT32( "Win 32 Version Value" );
-    op.LUINT32( "Size Of Image" );
+    op.LUINT32( "Size Of binary" );
     op.LUINT32( "Size Of Headers" );
     op.LUINT32( "Check Sum" );
 
@@ -262,8 +262,9 @@ public class Headers extends Data
   "This was done to make the address space bigger in 16 bit computers.<br /><br />" +
   "Thus 32 bit, and 64 bit systems no longer use a segment. Unless set 16 bit mode.<br /><br />";
 
-  public static final String MZReloc = "The relocations are a list of 16 bit numbers. The numbers are Offsets that are added to by the position the program is put in memory.<br /><br />" +
-  "In 16 bit MS-DOS, this allowed more than one program to be loaded.";
+  public static final String MZReloc = "The DOS relocations are a list of 16 bit numbers. The numbers are Offsets that are added to by the position the program is put in memory.<br /><br />" +
+  "In 16 bit MS-DOS, this allowed more than one program to be loaded.<br /><br />" +
+  "Relocations are common in 16Bit, or 32Bit x86, but 64bit x86 software uses relative addresses.";
 
   public static final String FSize = "Both \"Last 512 bytes\", and \"512 bytes in file\" are used to calculate the MS-DOS binary size.<br /><br />";
 
@@ -273,7 +274,7 @@ public class Headers extends Data
   "Or is a different file type disguise as a windows binary.</html>",
   "<html>"+ FSize + "If this value is zero, that means the entire last multiple of 512 is used (i.e. the effective value is 512).</html>",
   "<html>" + FSize + "The size of the program in 512 bytes. Subtract this value by 1, multiple by 512, and add \"Last 512 bytes\".</html>",
-  "<html>Number of relocation entries stored after the header. May be zero..<br /><br />" + MZReloc + "</html>",
+  "<html>Number of relocation entries stored after the header. May be zero.<br /><br />" + MZReloc + "</html>",
   "<html>The size of this MZ header. Multiply this value by 16 to get it's actual size.<br /><br />" +
   "The program begins just after the header, and this field can be used to calculate the appropriate file offset.<br /><br />" +
   "Note that the header size includes the relocation entries.</html>",
@@ -291,7 +292,7 @@ public class Headers extends Data
   "",
   "<html>" + res + "</html>",
   "<html>" + res + "<br /><br />Instead of adding to DOS. Microsoft created a new system that uses the reserved section to locate to the PE header.</html>",
-  "This is a x86 binary that gets loaded by DOS in 16 bit.<br /><br />The new \"Windows\" system used the PE location to go to the new PE header.<br /><br />"};
+  "This is the x86 binary that gets loaded by DOS in 16 bit.<br /><br />The new \"Windows\" system used the PE location to go to the new PE header.<br /><br />"};
 
   public void mzInfo( int el )
   {
@@ -353,7 +354,9 @@ public class Headers extends Data
 
   //Detailed description of the PE header.
 
-  public static final String symbols = "Lines of code are changed to machine code. Symbols are line numbers relative to the machine code start-end positions.<br /><br />It allows us to see our source code line number when a problem happens in the binary file CPU instructions.<br /><br />";
+  public static final String symbols = "Lines of code are changed to machine code. Symbols are line numbers relative to the generated machine code start-end positions.<br /><br />It allows us to see our source code line number when a problem happens in the binary file CPU instructions.<br /><br />";
+
+  public static final String Debug = "This value should be zero for an binary, because debugging information is usually removed.<br /><br />Takes up extra space, and makes it even easier to reconstruct the original source code.";
 
   public static final String[] PEinfo = new String[]{"<html>The PE header must start with PE = 50 45 00 00.<br /><br />If it does not pass the signature test then the windows binary is corrupted.</html>",
   "<html>Windows does not translate binary to match other cores. It sets a core to the start of the program if CPU is compatible.<br /><br /><table border='1'>" +
@@ -395,9 +398,8 @@ public class Headers extends Data
   "<html>The Date this binary was created.<br /><br />The date time stamp is in seconds. The seconds are added to the starting date \"00:00 January 1, 1970\".<br /><br />" +
   "If the time date stamp is \"37\" in value, then it is plus 37 second giving \"00:37 January 1, 1970\".<br /><br />" +
   "The time date stamp is defined in UTC time, so it may be a day different in time, or few hours different depending on your time zone.</html>",
-  "<html>" + symbols + "The file offset of the symbol table, or zero if no symbol table is present.<br /><br />This value should be zero for an binary, because debugging information is usually removed.</html>",
-  "<html>" + symbols + "The number of entries in the symbol table.<br /><br />This data can be used to locate the string table, which immediately follows the symbol table.<br /><br />" +
-  "This value should be zero for an binary, because debugging information is usually removed.</html>",
+  "<html>" + symbols + "The file offset of the symbol table, or zero if no symbol table is present.<br /><br />"+ Debug +"</html>",
+  "<html>" + symbols + "The number of entries in the symbol table.<br /><br />This data can be used to locate the string table, which immediately follows the symbol table.<br /><br />" + Debug + "</html>",
   "<html>The size of the optional header. Which is read after the PE header.</html>",
   "<html>The flags that indicate the attributes of the file.<br /><br />" +
   "Each binary digit that is set 1 represents a setting.<br /><br />" +
@@ -452,7 +454,7 @@ public class Headers extends Data
   "<html>The Data section is a safe spot to put results from operations without writing over program machine code.<br /><br />In code these are called variables.</html>",
   "<html>Base address is added to all virtual addresses.<br /><br />It is the preferred address to load the mapped sections in RAM from this file.<br /><br />Windows may add to this number to space programs apart in virtual space.</html>",
   "<html>The alignment (in bytes) of sections when they are loaded into memory. It must be greater than or equal to FileAlignment. The default is the page size for the architecture.</html>",
-  "<html>The alignment factor (in bytes) that is used to align the raw data of sections in the image file.<br /><br />The value should be a power of 2 between 512 and 64 K, inclusive.<br /><br />" +
+  "<html>The alignment factor (in bytes) that is used to align the raw data of sections in the binary file.<br /><br />The value should be a power of 2 between 512 and 64 K, inclusive.<br /><br />" +
   "The default is 512. If the SectionAlignment is less than the architecture's page size, then FileAlignment must match SectionAlignment.</html>",
   "<html>" + Ver + "<br /><br />The version number of the required operating system.</html>",
   "<html>" + Ver + "<br /><br />The version number of the required operating system.</html>",
@@ -460,10 +462,10 @@ public class Headers extends Data
   "<html>" + Ver + "<br /><br />The version number of this file.</html>",
   "<html>" + Ver + "<br /><br />The subsystem version.</html>",
   "<html>" + Ver + "<br /><br />The subsystem version.</html>",
-  "<html>Reserved, must be zero.<br /><br />" + res + "</html>",
+  "<html>Reserved for future use, must be set zero.<br /><br />" + res + "</html>",
   "<html>The size of this file.</html>",
   "<html>The size of the headers, for setting up the virtual space of this binary. Excluding the rest of the data.</html>",
-  "<html>The image file checksum. The algorithm for computing the checksum is incorporated into IMAGHELP.DLL.<br /><br />" +
+  "<html>The algorithm for computing the checksum is incorporated into IMAGHELP.DLL.<br /><br />" +
   "The following are checked for validation at load time: all drivers, any DLL loaded at boot time, and any DLL that is loaded into a critical Windows process.</html>",
   "<html>The subsystem does not change how the application runs.<br /><br />" +
   "It is compiler specific identifers. It makes it easy to identify the intended purpose of the binary file, or where it came from.<br /><br />" +
@@ -485,31 +487,31 @@ public class Headers extends Data
   "<tr><td>0F 00</td><td>Windows boot application.</td></tr>" +
   "</table>",
   "Each binary digit that is set 1 represents a setting.<br /><br />" +
-  "The binary value 0010000100000000 is the tow settings \"A WDM driver\", and \"Image is NX compatible\".<br /><br />" +
+  "The binary value 0010000100000000 is the tow settings \"A WDM driver\", and \"binary is NX compatible\".<br /><br />" +
   " Set data inspector to binary, and use the following table to adjust the settings, or to read them.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Value</td><td>Use</td></tr>" +
-  "<tr><td>0000000000000001</td><td>Reserved, must be zero.</td></tr>" +
-  "<tr><td>0000000000000010</td><td>Reserved, must be zero.</td></tr>" +
-  "<tr><td>0000000000000100</td><td>Reserved, must be zero.</td></tr>" +
-  "<tr><td>0000000000001000</td><td>Reserved, must be zero.</td></tr>" +
-  "<tr><td>0000000000100000</td><td>Image can handle a high entropy 64-bit virtual address space.</td></tr>" +
+  "<tr><td>0000000000000001</td><td>Reserved for future use, must be set zero.</td></tr>" +
+  "<tr><td>0000000000000010</td><td>Reserved for future use, must be set zero.</td></tr>" +
+  "<tr><td>0000000000000100</td><td>Reserved for future use, must be set zero.</td></tr>" +
+  "<tr><td>0000000000001000</td><td>Reserved for future use, must be set zero.</td></tr>" +
+  "<tr><td>0000000000100000</td><td>Binary can handle a high entropy 64-bit virtual address space.</td></tr>" +
   "<tr><td>0000000001000000</td><td>DLL can be relocated at load time.</td></tr>" +
   "<tr><td>0000000010000000</td><td>Code Integrity checks are enforced.</td></tr>" +
-  "<tr><td>0000000100000000</td><td>Image is NX compatible.</td></tr>" +
-  "<tr><td>0000001000000000</td><td>Isolation aware, but do not isolate the image.</td></tr>" +
-  "<tr><td>0000010000000000</td><td>Does not use structured exception (SE) handling. No SE handler may be called in this image.</td></tr>" +
-  "<tr><td>0000100000000000</td><td>Do not bind the image.</td></tr>" +
-  "<tr><td>0001000000000000</td><td>Image must execute in an AppContainer.</td></tr>" +
+  "<tr><td>0000000100000000</td><td>Binary is NX compatible.</td></tr>" +
+  "<tr><td>0000001000000000</td><td>Isolation aware, but do not isolate the binary.</td></tr>" +
+  "<tr><td>0000010000000000</td><td>Does not use structured exception (SE) handling. No SE handler may be called in this binary.</td></tr>" +
+  "<tr><td>0000100000000000</td><td>Do not bind the binary.</td></tr>" +
+  "<tr><td>0001000000000000</td><td>Binary must execute in an AppContainer.</td></tr>" +
   "<tr><td>0010000000000000</td><td>A WDM driver.</td></tr>" +
-  "<tr><td>0100000000000000</td><td>Image supports Control Flow Guard.</td></tr>" +
+  "<tr><td>0100000000000000</td><td>Binary supports Control Flow Guard.</td></tr>" +
   "<tr><td>1000000000000000</td><td>Terminal Server aware.</td></tr>" +
   "</table>",
   "<html>The size of the stack to reserve. Only SizeOfStackCommit is committed; the rest is made available one page at a time until the reserve size is reached.</html>",
   "<html>The size of the stack to commit.</html>",
   "<html>The size of the local heap space to reserve. Only SizeOfHeapCommit is committed; the rest is made available one page at a time until the reserve size is reached.</html>",
   "<html>The size of the local heap space to commit.</html>",
-  "<html>Reserved, must be zero.<br /><br />" + res + "</html>",
+  "<html>Reserved for future use, must be set zero.<br /><br />" + res + "</html>",
   "<html>Data Directory Array can be made bigger than it's default size 16.<br /><br />Which allows for more features to be added to the windows application format.</html>"};
 
   public void opInfo( int el )
@@ -567,7 +569,7 @@ public class Headers extends Data
   "<tr><td>00000000000000000000000100000000</td><td>Reserved for future use.</td></tr>" +
   "<tr><td>00000000000000000000001000000000</td><td>The section contains comments or other information. The .drectve section has this type. This is valid for object files only.</td></tr>" +
   "<tr><td>00000000000000000000010000000000</td><td>Reserved for future use.</td></tr>" +
-  "<tr><td>00000000000000000000100000000000</td><td>The section will not become part of the image. This is valid only for object files.</td></tr>" +
+  "<tr><td>00000000000000000000100000000000</td><td>The section will not become part of the binary. This is valid only for object files.</td></tr>" +
   "<tr><td>00000000000000000001000000000000</td><td>The section contains COMDAT data.</td></tr>" +
   "<tr><td>00000000000000000010000000000000</td><td>The section contains data referenced through the global pointer (GP).</td></tr>" +
   "<tr><td>00000000000000000100000000000000</td><td>Reserved for future use.</td></tr>" +

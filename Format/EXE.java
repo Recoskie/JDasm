@@ -267,7 +267,7 @@ public class EXE extends Data implements JDEventListener
 
     else if( e.getPath().equals("Header Data") )
     {
-      //Offset.setSelected( 0, ( Header_des[4].pos + Header_des[4].length ) - 1 );
+      Offset.setSelected( 0, ( Header_des[4].pos + Header_des[4].length ) - 1 );
 
       info("<html>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
       "Export Table can not be located.<br /><br />" +
@@ -411,7 +411,11 @@ public class EXE extends Data implements JDEventListener
       info("<html>Relocations are used if the program is not loaded at it's preferred base Address set in the op header.<br /><br />" +
       "The difference is added to locations defined in the address list in this relocation section.<br /><br />" +
       "Relocations are not needed, for this disassembler as the program is always mapped at it's preferred base address.<br /><br />" +
-      "A reader can be designed for the relocation section, but is not really necessary.</html>");
+      "A reader can be designed for the relocation section, but is not really necessary.<br /><br /><br /><br />" +
+      "Relocations are common in 16Bit, or 32Bit x86, but 64bit x86 software uses relative addresses.<br /><br />" +
+      "Relative addresses are added to the current instruction position in the binary.<br /><br />" +
+      "Allowing the binary to be placed anywhere in memory without having to change the address locations.<br /><br />" +
+      "It is very rare for there to be relocations if it is a 64bit x86 binary.</html>");
     }
     else if( e.getPath().equals("DEBUG TABLE.h") )
     {
