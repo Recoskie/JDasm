@@ -2598,6 +2598,17 @@ public class X86 extends X86Types implements core.Core
 
     Code_end = data.getVirtualPointer();
 
+    clean(); reset();
+
+    return( t );
+  }
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Cleans up the address maped locations.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  public void clean()
+  {
     long n1,n2;
     boolean exists = false;
 
@@ -2631,10 +2642,6 @@ public class X86 extends X86Types implements core.Core
         }
       }
     }
-
-    reset();
-
-    return( t );
   }
 
   /*-------------------------------------------------------------------------------------------------------------------------

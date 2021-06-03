@@ -26,6 +26,10 @@ public interface Core
   public String pos() throws java.io.IOException;
   public String posV() throws java.io.IOException;
 
+  //Method for cleaning up addressees.
+
+  public void clean();
+
   //Core bit mode.
 
   public void setBit( int mode );

@@ -2,29 +2,35 @@ package Format.EXEDecode;
 
 import java.io.*;
 import swingIO.*;
-import core.x86.*;
+import swingIO.tree.JDNode;
 
 public class Headers extends Data
 {
   //*********************************creates the data of the MZ header***********************************
 
-  public Descriptor readMZ() throws IOException
+  public Descriptor[] readMZ( JDNode DOS ) throws IOException
   {
-    Descriptor mz = new Descriptor( file );
+    Descriptor mz = new Descriptor( file ), Reloc = mz;
 
-    mz.String8( "SIGNATURE", 2 ); String sig = mz.value + "";
+    String sig = "";
+
+    int R_Size = 0; long R_Loc = 0;
+
+    DOS.add( new JDNode( "DOS 2.0 Header.h", "M", 0 ) );
+
+    mz.String8( "SIGNATURE", 2 ); sig = mz.value + "";
     mz.LUINT16( "Last 512 bytes" );
     mz.LUINT16( "512 bytes in file" );
-    mz.LUINT16( "Number of Relocation Entries" );
-    mz.LUINT16( "Header size" );
+    mz.LUINT16( "Number of Relocation Entries" ); R_Size = ((Short)mz.value).intValue();
+    mz.LUINT16( "Header size" ); MZSize = ((Short)mz.value).intValue()*16;
     mz.LUINT16( "Minimum Memory" );
     mz.LUINT16( "Maximum Memory" );
     mz.LUINT16( "Initial SS relative to start of file" );
     mz.LUINT16( "Initial SP" );
     mz.LUINT16( "Checksum (unused)" );
-    mz.LUINT16( "Initial IP" );
-    mz.LUINT16( "Initial CS relative to start of file" );
-    mz.LUINT16( "Relocations Offset" );
+    mz.LUINT16( "Initial IP" ); MZMain = ((Short)mz.value).intValue();
+    mz.LUINT16( "Initial CS relative to start of file" ); MZMain += ((Short)mz.value).intValue() * 16;
+    mz.LUINT16( "Relocations Offset" ); R_Loc = ((Short)mz.value).longValue();
     mz.LUINT16( "Overlay Number" );
     mz.Other( "Reserved", 8 );
     mz.LUINT16( "ID" );
@@ -32,13 +38,20 @@ public class Headers extends Data
     mz.Other( "Reserved", 20 );
     mz.LUINT32( "PE Header Location" ); PE = ((Integer)mz.value).longValue();
 
-    file.addV( file.getFilePointer(), PE - mz.length, 256, PE - mz.length );
+    if( R_Size != 0 )
+    {
+      file.seek( R_Loc ); Reloc = new Descriptor( file );
 
-    mz.Other( "8086 16-bit", (int)(PE - mz.length) );
+      for( int i = 0; i < R_Size; i++ ) { Reloc.Array("Location #" + i + "", 4); Reloc.LUINT16("Offset"); Reloc.LUINT16("Segment"); }
+
+      DOS.add( new JDNode( "DOS Relocations.h", "M", 1 ) );
+    }
+
+    DOS.add( new JDNode( "Program Start (Machine Code).h", "Dis16", MZMain ) );
 
     mz.setEvent(this::mzInfo);
 
-    Data.error = !sig.equals("MZ"); return( mz );
+    Data.error = !sig.equals("MZ"); return( new Descriptor[] { mz, Reloc } );
   }
 
   //*********************************creates the nicely styled data of the PE header***********************************
@@ -50,6 +63,9 @@ public class Headers extends Data
     //data decode to table
 
     pe.String8( "SIGNATURE", 4 ); byte[] sig = ( pe.value + "" ).getBytes();
+
+    Data.DOS = !( sig[0] == 0x50 && sig[1] == 0x45 && sig[2] == 0 && sig[3] == 0 );
+
     pe.LUINT16( "Machine" ); coreType = ((Short)pe.value).shortValue();
     pe.LUINT16( "Number Of Sections" ); NOS = ((Short)pe.value).shortValue();
     pe.LUINT32( "Time Date Stamp" );
@@ -60,7 +76,7 @@ public class Headers extends Data
 
     pe.setEvent(this::peInfo);
     
-    Data.error = !( sig[0] == 0x50 && sig[1] == 0x45 && sig[2] == 0 && sig[3] == 0 ); return( pe );
+    return( pe );
   }
 
   //************************************************READ OP HEADER********************************************
@@ -302,50 +318,6 @@ public class Headers extends Data
         "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
         "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.</html>");
     }
-
-    //Disassemble 16 bit section.
-
-    if( el == 19 )
-    {
-      String t = "", t1 = "", t2 = "";
-
-      int Dos_exit = 0; //DOS has a exit code.
-
-      //16 bit x86 DOS.
-
-      X86 temp = new X86( file ); temp.setBit( X86.x86_16 );
-
-      temp.setSeg( (short)0x0010 ); //Sets the code segment.
-
-      try
-      {
-        //Disassemble till end, or return from application.
-        //Note that more can be added here such as the jump operation.
-
-        file.seekV( 256 );
-
-        while( file.getFilePointer() < Data.PE )
-        {
-          t1 = temp.posV(); t2 = temp.disASM();
-          
-          if( Dos_exit == 0 && t2.equals("MOV AX,4C01") ) { Dos_exit = 1; }
-          else if( Dos_exit == 1 && t2.equals("INT 21") ) { Dos_exit = 2; }
-          
-          t += t1 + " " + t2 + "<br />";
-
-          if( Dos_exit == 2 ) { break; }
-        }
-
-        long pos = file.getFilePointer() - 1, posV = file.getVirtualPointer() - 1;
-        
-        file.seekV( 256 );
-        Virtual.setSelectedEnd( posV ); Offset.setSelectedEnd( pos );
-        
-        info( "<html>" + MZinfo[ el ] + t + "</html>" );
-      }
-      catch( Exception e ) { }
-    }
-
     else
     {
       info( MZinfo[ el ] );

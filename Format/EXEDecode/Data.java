@@ -13,6 +13,19 @@ public class Data extends Window.Window
   //The PE header changes format if program is 64 bit.
 
   public static boolean is64bit = false;
+  public static boolean DosMode = false;
+
+  //It is posable that it is a DOS binary instead of a windows PE file.
+
+  public static boolean DOS = false;
+
+  //Dos header size.
+
+  public static int MZSize = 0;
+
+  //Dos application start position.
+
+  public static int MZMain = 0;
 
   //PE Header Location.
 

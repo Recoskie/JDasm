@@ -13,9 +13,13 @@ import core.x86.*; //X86.
 
 public class EXE extends Data implements JDEventListener
 {
+  //Dos header.
+
+  public Descriptor[] DOS_des = new Descriptor[2];
+
   //The new Descriptor table allows a description of clicked.
 
-  public Descriptor[] Header_des = new Descriptor[6];
+  public Descriptor[] Header_des = new Descriptor[5];
 
   //Exportable methods.
 
@@ -32,6 +36,7 @@ public class EXE extends Data implements JDEventListener
   //Nodes that can be added to when Adding section format readers.
 
   JDNode root;
+  JDNode MSDos = new JDNode("MZ Header", -1);
   JDNode Export = new JDNode("function Export Table.h", -1);
   JDNode Import = new JDNode("DLL Import Table.h", -1);
   JDNode RE = new JDNode("Resource Files.h", -1);
@@ -73,15 +78,20 @@ public class EXE extends Data implements JDEventListener
 
     try
     {
-      Header_des[0] = Header.readMZ();
-      if(!error) { Header_des[1] = Header.readPE(); }
-      if(!error) { Header_des[2] = Header.readOP(); }
-      if(!error) { Header_des[3] = Header.readDataDirectory(); }
-      if(!error) { Header_des[4] = Header.readSections(); }
+      DOS_des = Header.readMZ(MSDos); Headers.add(MSDos);
+      
+      if(!error) { Header_des[0] = Header.readPE(); }
+      if( !DOS )
+      {
+        if(!error) { Header_des[1] = Header.readOP(); }
+        if(!error) { Header_des[2] = Header.readDataDirectory(); }
+        if(!error) { Header_des[3] = Header.readSections(); }
+      }
+      else{ core = new X86( file ); core.setEvent( this::Dis ); coreLoaded = true; }
     }
     catch(java.io.IOException e) { error = true; }
 
-    if( error ) { DataDirUsed = new boolean[15]; } //Error.
+    if( error || DOS ) { DataDirUsed = new boolean[15]; } //Error, Or if MS-DOS binary.
     else
     {
       //Load processor core type.
@@ -100,17 +110,23 @@ public class EXE extends Data implements JDEventListener
       }
     }
 
-    Headers.add(new JDNode("MZ Header.h", "H", 0));
-    Headers.add(new JDNode("PE Header.h", "H", 1));
-    Headers.add(new JDNode("OP Header.h", "H", 2));
-    Headers.add(new JDNode("Data Directory Array.h", "H", 3));
-    Headers.add(new JDNode("Mapped SECTIONS TO RAM.h", "H", 4));
+    if( !DOS )
+    {
+      Headers.add(new JDNode("PE Header.h", "H", 0));
+      Headers.add(new JDNode("OP Header.h", "H", 1));
+      Headers.add(new JDNode("Data Directory Array.h", "H", 2));
+      Headers.add(new JDNode("Mapped SECTIONS TO RAM.h", "H", 3));
+    }
+    else
+    {
+      try { PE = file.length() - MZSize; } catch(IOException e) { }
+    }
 
-    root.add( Headers );
+    root.add( Headers ); file.addV( MZSize, PE, 0, PE - MZSize );
 
     //Start of code.
 
-    if( baseOfCode != 0 )  { root.add(new JDNode( "Program Start (Machine code).h", "Dis", imageBase + startOfCode ) ); }
+    if( !DOS && baseOfCode != 0 )  { root.add(new JDNode( "Program Start (Machine code).h", "Dis", imageBase + startOfCode ) ); }
 
     //Location of the export directory
 
@@ -176,7 +192,14 @@ public class EXE extends Data implements JDEventListener
 
     file.Events = true;
 
-    tree.setSelectionPath( new TreePath( Headers.getPath() ) ); open( new JDEvent( this, "Header Data", -1 ) );
+    if( DOS )
+    {
+      tree.setSelectionPath( new TreePath( ((DefaultMutableTreeNode)MSDos.getFirstChild()).getPath() ) ); open( new JDEvent( this, "", "", "M", 0 ) );
+    }
+    else
+    {
+      tree.setSelectionPath( new TreePath( Headers.getPath() ) ); open( new JDEvent( this, "Header Data", -1 ) );
+    }
   }
 
   //Change What To Display Based on what the user clicks on.
@@ -189,16 +212,18 @@ public class EXE extends Data implements JDEventListener
     {
       //Start Disassembling instructions.
     
-      if( e.getID().equals("Dis") )
+      if( e.getID().startsWith("Dis") )
       {
         //If import table is not loaded. It should be loaded to map method calls.
 
-        if( DLL_des == null ) { open( new JDEvent( this, "DLL Import Table", -1 ) ); }
+        if( !(DosMode = e.getID().length() > 3) && DLL_des == null ) { open( new JDEvent( this, "DLL Import Table", -1 ) ); }
 
         //Begin disassembly.
 
         if( coreLoaded )
         {
+          if( DosMode ) { core.setBit(X86.x86_16); } else { core.setBit( is64bit ? X86.x86_64 : X86.x86_32 ); }
+
           core.locations.clear(); core.data_off.clear(); core.code.clear();
 
           core.locations.add( e.getArg(0) );
@@ -206,6 +231,13 @@ public class EXE extends Data implements JDEventListener
           Dis( core.locations.get(0) ); ds.setDescriptor( core );
         }
         else { noCore(); }
+      }
+
+      //Dos Header
+
+      else if( e.getID().equals("M") )
+      {
+        ds.setDescriptor( DOS_des[ (int)e.getArg(0) ] );
       }
 
       //Headers.
@@ -265,14 +297,25 @@ public class EXE extends Data implements JDEventListener
 
     //Headers must be decoded before any other part of the program can be read.
 
+    else if( e.getPath().equals("MZ Header") )
+    {
+      Offset.setSelected( 0, MZSize - 1 );
+    
+      info("<html>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
+      "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
+      "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.</html>");
+    }
+
+    //Headers must be decoded before any other part of the program can be read.
+
     else if( e.getPath().equals("Header Data") )
     {
-      Offset.setSelected( 0, ( Header_des[4].pos + Header_des[4].length ) - 1 );
+      Offset.setSelected( 0, DOS ? MZSize - 1 : ( Header_des[3].pos + Header_des[3].length ) - 1 );
 
       info("<html>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
       "Export Table can not be located.<br /><br />" +
       "Files that are included in the binary. Called Resource Files. Also can not be located.<br /><br />" +
-      "Nether can the machine code Start position.</html>");
+      "Nether can the machine code Start position be located.</html>");
     }
 
     //Seek virtual address position. Thus begin reading section.
@@ -534,21 +577,63 @@ public class EXE extends Data implements JDEventListener
 
   public void Dis( long loc )
   {
-    try
+    //If we are taking apart a Dos application.
+
+    System.out.println("Disassemble = " + loc + ", DosMode = " + DosMode + "");
+
+    if(DosMode)
     {
-      file.seekV( loc );
+      try
+      {
+        //Disassemble till end, or return from application.
+        //Note that more can be added here such as the jump operation.
 
-      long floc = file.getFilePointer();
+        file.seekV( loc );
 
-      String d = core.disASM_Code();
+        String t1 = "", t2 = "", t = "";
 
-      info( "<html>" + d + "</html>" );
+        int Dos_exit = 0;
 
-      Virtual.setSelected( loc, file.getVirtualPointer() - 1 ); Offset.setSelected( floc, file.getFilePointer() - 1 );
+        while( true )
+        {
+          t1 = core.posV(); t2 = core.disASM();
+          
+          if( Dos_exit == 0 && t2.equals("MOV AX,4C01") ) { Dos_exit = 1; }
+          else if( Dos_exit == 1 && t2.equals("INT 21") ) { Dos_exit = 2; }
+          
+          t += t1 + " " + t2 + "<br />";
 
-      ds.setDescriptor( core );
+          if( Dos_exit == 2 || t2.startsWith("RET") ) { break; }
+        }
+
+        info( "<html>" + t + "</html>" ); core.clean();
+
+        long pos = file.getFilePointer() - 1, posV = file.getVirtualPointer() - 1;
+        
+        file.seekV( loc ); Virtual.setSelectedEnd( posV ); Offset.setSelectedEnd( pos );
+
+        ds.setDescriptor( core );
+      }
+      catch( Exception e ) { e.printStackTrace(); }
     }
-    catch( IOException e ) { }
+    else
+    {
+      try
+      {
+        file.seekV( loc );
+
+        long floc = file.getFilePointer();
+
+        String d = core.disASM_Code();
+
+        info( "<html>" + d + "</html>" );
+
+        Virtual.setSelected( loc, file.getVirtualPointer() - 1 ); Offset.setSelected( floc, file.getFilePointer() - 1 );
+
+        ds.setDescriptor( core );
+      }
+      catch( IOException e ) { e.printStackTrace(); }
+    }
   }
 
   //No Decoder.
