@@ -398,6 +398,27 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     }
   }
 
+  //Core default Disassemble routine.
+
+  public void Dis( long loc )
+  {
+    try
+    {
+      file.seekV( loc );
+  
+      long floc = file.getFilePointer();
+  
+      String d = core.disASM_Code();
+  
+      info( "<html>" + d + "</html>" );
+  
+      Virtual.setSelected( loc, file.getVirtualPointer() - 1 ); Offset.setSelected( floc, file.getFilePointer() - 1 );
+  
+      ds.setDescriptor( core );
+    }
+    catch( IOException e ) { e.printStackTrace(); }
+  }
+
   //File check on drag and drop.
   
   @SuppressWarnings({"unchecked"}) public void dragOver(DropTargetDragEvent dtde)

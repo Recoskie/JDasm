@@ -70,10 +70,6 @@ public class Data extends Window.Window
 
   public static boolean error = false;
 
-  //Processor core interface engine.
-
-  public static core.Core core;
-
   //If the core is loaded.
 
   public static boolean coreLoaded = false;

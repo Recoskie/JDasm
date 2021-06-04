@@ -1,5 +1,7 @@
 package core;
 
+import RandomAccessFileV.RandomAccessFileV;
+
 public interface Core
 {
   //Pointer of named methods and imports.
@@ -12,6 +14,10 @@ public interface Core
   public java.util.LinkedList<Long> locations = new java.util.LinkedList<Long>();
   public java.util.LinkedList<Long> code = new java.util.LinkedList<Long>();
   public java.util.LinkedList<Long> data_off = new java.util.LinkedList<Long>();
+
+  //The core type.
+
+  public int type();
 
   //Disassemble a single operation.
 
@@ -27,12 +33,17 @@ public interface Core
   public String posV() throws java.io.IOException;
 
   //Method for cleaning up addressees.
+  //All addresses are removed from start to end except the start address for section of code.
 
   public void clean( long start, long end );
 
   //Core bit mode.
 
   public void setBit( int mode );
+
+  //Get the bit mode.
+
+  public int getBit();
 
   //Set code segment position. May be blank in some core engines.
 
@@ -49,4 +60,8 @@ public interface Core
   //Lets us set the event that is triggered when disassembling a new location.
 
   public void setEvent( java.util.function.LongConsumer e );
+
+  //Set the file target.
+
+  public void setTarget( RandomAccessFileV t );
 }

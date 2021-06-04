@@ -13,6 +13,10 @@ public class Window
 
   public static RandomAccessFileV file;
 
+  //Processor core interface, for decompiling software.
+
+  public static core.Core core;
+
   //Main application Window.
 
   public static JFrame winFrame;

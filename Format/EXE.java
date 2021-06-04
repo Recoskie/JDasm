@@ -87,7 +87,11 @@ public class EXE extends Data implements JDEventListener
         if(!error) { Header_des[2] = Header.readDataDirectory(); }
         if(!error) { Header_des[3] = Header.readSections(); }
       }
-      else{ core = new X86( file ); core.setEvent( this::Dis ); coreLoaded = true; }
+      else
+      {
+        if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
+        core.setEvent( this::Dis ); coreLoaded = true;
+      }
     }
     catch(java.io.IOException e) { error = true; }
 
@@ -96,15 +100,9 @@ public class EXE extends Data implements JDEventListener
     {
       //Load processor core type.
 
-      if( coreType == 0x014C )
+      if( coreType == 0x014C || coreType == (short)0x8664 )
       {
-        core = new X86( file ); core.setBit( X86.x86_32 );
-        
-        core.setEvent( this::Dis ); coreLoaded = true;
-      }
-      else if( coreType == (short)0x8664 )
-      {
-        core = new X86( file ); core.setBit( X86.x86_64 );
+        if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
         
         core.setEvent( this::Dis ); coreLoaded = true;
       }
@@ -578,8 +576,6 @@ public class EXE extends Data implements JDEventListener
   public void Dis( long loc )
   {
     //If we are taking apart a Dos application.
-
-    System.out.println("Disassemble = " + loc + ", DosMode = " + DosMode + "");
 
     if(DosMode)
     {
