@@ -155,7 +155,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
           }
           else
           {
-            while( pos < end ) { data += String.format( "%1$02X", file.readV() ); pos += 1; }
+            while( pos < end ) { data += String.format( "%1$02X", file.readV() & 0xFF ); pos += 1; }
           }
 
           file.seekV( t );
@@ -172,7 +172,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
           }
           else
           {
-            while( pos < end ) { data += String.format( "%1$02X", file.read() ); pos += 1; }
+            while( pos < end ) { data += String.format( "%1$02X", file.read() & 0xFF ); pos += 1; }
           }
 
           file.seek(pos);
