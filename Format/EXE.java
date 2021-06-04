@@ -606,7 +606,7 @@ public class EXE extends Data implements JDEventListener
           if( Dos_exit == 2 || t2.startsWith("RET") ) { break; }
         }
 
-        info( "<html>" + t + "</html>" ); core.clean();
+        info( "<html>" + t + "</html>" ); core.clean(loc, file.getVirtualPointer());
 
         long pos = file.getFilePointer() - 1, posV = file.getVirtualPointer() - 1;
         

@@ -28,7 +28,7 @@ public interface Core
 
   //Method for cleaning up addressees.
 
-  public void clean();
+  public void clean( long start, long end );
 
   //Core bit mode.
 
