@@ -296,6 +296,10 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     if( bdBar.getMenuCount() > 2 ) { bdBar.remove(BootSector); }
   }
 
+  /*************************************************************************************
+  Main handler for opening and reading file types.
+  *************************************************************************************/
+
   public void open( JDEvent e )
   {
     //Set the IO target.
@@ -359,12 +363,16 @@ public class app extends Window implements ActionListener, DropTargetListener, J
       
           Virtual.setVisible(true); Offset.setVisible(true); di.setVisible(true);
         }
-        catch(Exception er) { I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); }
+        catch(Exception er) { I = -2; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); }
       }
+
+      //Check file extensions.
+
+      else if( I == -1 ) { I = ExtensionOnly(e.getExtension()); }
 
       //If it is not an recognized file, or file format reader failed. Open using data types, and hex editor.
 
-      if( I < 0 )
+      if( I == -2 )
       {
         stree.setVisible(false); ds.setVisible(false); iData.setVisible(false);
       
@@ -468,6 +476,9 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   public void dragExit(DropTargetEvent dte) { }
 
+  //The preferred method is to check file types by signature, however some files may not contain a header, or file signature.
+  //Files that can not be recognized by file signature are put under the method "ExtensionOnly(String ex)".
+
   public int DefaultProgram()
   {
     boolean Valid = true; file.Events = false; try{ file.read( Sig ); file.seek(0); } catch( IOException err ) { } file.Events = true;
@@ -480,5 +491,39 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     }
       
     return( -1 );
+  }
+
+  //Some formats have no headers. They can only be recognized by file extension.
+
+  public int ExtensionOnly(String ex)
+  {
+    int check = -2;
+
+    //DOS COM files loaded at address 0x0100. The CPU instructions are in 16 bit x86. There is no setup information, or header.
+
+    if( ex.equals(".com") )
+    {
+      check = -1;
+
+      stree.setVisible(false); ds.setVisible(true); iData.setVisible(true);
+      
+      Virtual.setVisible(true); Offset.setVisible(true); di.setVisible(true);
+      
+      tools.update();
+
+      if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
+
+      try { file.addV( 0, file.length(), 0x0100, file.length() + 0x0100 ); } catch( Exception e ) { }
+
+      disEnd = null; core.setBit(X86.x86_16); core.setEvent( this::Dis );
+
+      core.locations.clear(); core.data_off.clear(); core.code.clear();
+
+      core.locations.add( 0x0100L ); Dis( core.locations.get(0) );
+
+      tools.rowMaximize(0);
+    }
+
+    return( check );
   }
 }

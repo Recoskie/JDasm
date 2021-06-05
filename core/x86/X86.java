@@ -1810,8 +1810,6 @@ public class X86 extends X86Types implements core.Core
     if( I.length == 2 )
     {
       bits = ( ( ModRMByte & 0xFF ) >> 6 ) == 3 ? 1 : 0;
-
-      System.out.println("Bits = " + bits + "");
       
       if(I[bits] instanceof String)
       {
