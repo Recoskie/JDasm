@@ -426,7 +426,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   {
     try
     {
-      file.seek( loc );
+      file.seekV( loc );
   
       long floc = file.getFilePointer();
   
