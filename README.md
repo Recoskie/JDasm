@@ -122,4 +122,12 @@ I plan on creating a ARM core disassembler as well, for mobile devices.
 Planed tools.
 ------------------------------------------------------------
 
-[ ] File system array structure reader (NTFS, FAT32, EXT)
+- [ ] Linux ELF reader.
+
+- [ ] Mach-o, for MaxOSX reader.
+
+- [ ] Bitmap reader, and editor.
+
+- [ ] ARM core, for mobile systems.
+
+- [ ] ARM boot sector decompiler.
