@@ -52,11 +52,11 @@ You can also read disk drives sector by sector (one binary digit at a time from 
 Supported formats.
 ------------------------------------------------------------
 
-This application currently supports Microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx.
+This application currently supports Microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx, DOS, MS-DOS.
 
-This project is meant to support many different binary file formats, and application formats.
+This project is meant to support many different binary file formats, and application formats, and DOS.
 
-However, only supports Microsoft binary format at the moment. If you wish to contribute a Format. Then put it under the format folder.
+If you wish to contribute a Format. Then put it under the format folder.
 
 ------------------------------------------------------------
 x86 Boot sectors.
