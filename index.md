@@ -103,7 +103,7 @@ I plan on creating a ARM core disassembler as well, for mobile devices.
 
 - [ ] Linux ELF reader.
 
-- [ ] Mach-o, for MaxOSX reader.
+- [ ] Mach-o, for MacOSX reader.
 
 - [ ] Bitmap reader, and editor.
 
