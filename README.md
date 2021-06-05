@@ -124,7 +124,7 @@ Planed tools.
 
 - [ ] Linux ELF reader.
 
-- [ ] Mach-o, for MaxOSX reader.
+- [ ] Mach-O, for MacOSX reader.
 
 - [ ] Bitmap reader, and editor.
 
