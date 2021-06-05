@@ -29,6 +29,10 @@ public class Window
 
   public static JMenuBar bdBar;
 
+  //Boot Sector option is only available when a disk is open.
+
+  public static JMenuItem BootSector;
+
   //Menu item actions.
 
   public static JPopupMenu pm;
@@ -108,6 +112,7 @@ public class Window
 
     bdBar = new JMenuBar();
 
+    BootSector = new JMenuItem( "Disassemble x86 Boot Program", new ImageIcon( Window.class.getResource( "AppPictures/OpenDisk.png" ) ) );
     JMenu fm = new JMenu("File");
     JMenu vm = new JMenu("View");
     JMenu tm = new JMenu("Tools");
@@ -162,6 +167,8 @@ public class Window
     t1.addActionListener(app); t2.addActionListener(app);
 
     p1.addActionListener(app); p2.addActionListener(app); p3.addActionListener(app);
+
+    BootSector.setActionCommand( "boot" ); BootSector.addActionListener(app);
 
     //The tree is used for file chooser, and for decoded data view.
 

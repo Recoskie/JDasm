@@ -6,6 +6,7 @@ import Window.*;
 import swingIO.tree.*;
 import java.awt.dnd.*;
 import java.awt.datatransfer.DataFlavor;
+import core.x86.*;
 
 public class app extends Window implements ActionListener, DropTargetListener, JDEventListener
 {
@@ -88,6 +89,23 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     //Disk selector.
     
     if( e.getActionCommand() == "O" ) { if( !fc.disks() ) { javax.swing.JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); } }
+
+    //Disassemble boot program.
+    
+    if( e.getActionCommand() == "boot" )
+    {
+      ds.setVisible(true); iData.setVisible(true); tools.update();
+
+      if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
+
+      core.setBit(X86.x86_16); core.setEvent( this::Dis );
+
+      core.locations.clear(); core.data_off.clear(); core.code.clear();
+
+      core.locations.add( 0L ); Dis( core.locations.get(0) );
+
+      tools.rowMaximize(0);
+    }
 
     //Binary tool display controls.
 
@@ -270,6 +288,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     Virtual.setVisible(false); Offset.setVisible(false); di.setVisible(false);
 
     winFrame.setJMenuBar(fcBar); fc.setTree( tree ); tree.singleClick = false;
+
+    if( bdBar.getMenuCount() > 2 ) { bdBar.remove(BootSector); }
   }
 
   public void open( JDEvent e )
@@ -307,6 +327,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
       {
         winFrame.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) );
         file = new RandomAccessDevice( e.getID(), "r" );
+
+        bdBar.add(BootSector);
       }
 
       //Set io components to target.
@@ -404,7 +426,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   {
     try
     {
-      file.seekV( loc );
+      file.seek( loc );
   
       long floc = file.getFilePointer();
   

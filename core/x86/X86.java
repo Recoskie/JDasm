@@ -508,6 +508,7 @@ public class X86 extends X86Types implements core.Core
     Mnemonics[0x17C] = new Object[]{"???",new String[]{"HADDPD","HADDPD","",""},"???",new String[]{"HADDPS","HADDPS","",""}};
     Mnemonics[0x17D] = new Object[]{"???",new String[]{"HSUBPD","HSUBPD","",""},"???",new String[]{"HSUBPS","HSUBPS","",""}};
     Mnemonics[0x17E] = new Object[]{new String[]{"MOVD","","",""},new String[]{"MOVD","","MOVQ"},new Object[]{"MOVQ","MOVQ",new String[]{"???","","MOVQ"},""},"???"};
+    Mnemonics[0x184] = "JE"; Mnemonics[0x185] = "JNE";
     Mnemonics[0x190] = new Object[]{new Object[]{"SETO",new String[]{"KMOVW","","KMOVQ"},"",""},new Object[]{"SETO",new String[]{"KMOVB","","KMOVD"},"",""},"",""};
     Mnemonics[0x192] = new Object[]{new Object[]{"SETB",new String[]{"KMOVW","","???"},"",""},new Object[]{"SETB",new String[]{"KMOVB","","???"},"",""},"",new Object[]{"SETB",new String[]{"KMOVD","","KMOVQ"},"",""}};
     Mnemonics[0x193] = new Object[]{new Object[]{"SETAE",new String[]{"KMOVW","","???"},"",""},new Object[]{"SETAE",new String[]{"KMOVB","","???"},"",""},"",new Object[]{"SETAE",new String[]{"KMOVD","","KMOVQ"},"",""}};
@@ -544,6 +545,7 @@ public class X86 extends X86Types implements core.Core
     Operands[0x17C] = new Object[]{"",new String[]{"0A040604","0B7013700770","",""},"",new String[]{"0A040604","0B7013700770","",""}};
     Operands[0x17D] = new Object[]{"",new String[]{"0A040604","0B7013700770","",""},"",new String[]{"0A040604","0B7013700770","",""}};
     Operands[0x17E] = new Object[]{new String[]{"070C0A0A","","",""},new String[]{"06240A040108","","06360A040108"},new Object[]{"0A040646","0A040646",new String[]{"","","0A0406460108"},""},""};
+    Operands[0x184] = "1106000C"; Operands[0x185] = "1106000C";
     Operands[0x190] = new Object[]{new Object[]{"0600",new String[]{"0A0F0612","","0A0F0636"},"",""},new Object[]{"0600",new String[]{"0A0F0600","","0A0F0624"},"",""},"",""};
     Operands[0x192] = new Object[]{new Object[]{"0600",new String[]{"0A0F06F4","",""},"",""},new Object[]{"0600",new String[]{"0A0F06F4","",""},"",""},"",new Object[]{"0600",new String[]{"0A0F06F6","","0A0F06F6"},"",""}};
     Operands[0x193] = new Object[]{new Object[]{"0600",new String[]{"06F40A0F","",""},"",""},new Object[]{"0600",new String[]{"06F40A0F","",""},"",""},"",new Object[]{"0600",new String[]{"06F60A0F","","06F60A0F"},"",""}};
@@ -561,6 +563,8 @@ public class X86 extends X86Types implements core.Core
       Mnemonics[0x145] = new Object[]{new String[]{"CMOVNE","KOR","",""},"","",""};
       Mnemonics[0x146] = new Object[]{new String[]{"CMOVBE","KXNOR","",""},"","",""};
       Mnemonics[0x147] = new Object[]{new String[]{"CMOVA","KXOR","",""},"","",""};
+      Mnemonics[0x184] = new Object[]{new String[]{"JE","JKZD","",""},"","",""};
+      Mnemonics[0x185] = new Object[]{new String[]{"JNE","JKNZD","",""},"","",""};
       Mnemonics[0x190] = new Object[]{new String[]{"SETO","KMOV","",""},"","",""};
       Mnemonics[0x192] = new Object[]{new String[]{"SETB","KMOV","",""},"","",""};
       Mnemonics[0x193] = new Object[]{new String[]{"SETAE","KMOV","",""},"","",""};
@@ -571,6 +575,8 @@ public class X86 extends X86Types implements core.Core
       Operands[0x145] = new Object[]{new String[]{"0A02070E0180","0A0F06FF","",""},"","",""};
       Operands[0x146] = new Object[]{new String[]{"0B0E070E0180","0A0F06FF","",""},"","",""};
       Operands[0x147] = new Object[]{new String[]{"0B0E070E0180","0A0F06FF","",""},"","",""};
+      Operands[0x184] = new Object[]{new String[]{"1106000C","120F1002","",""},"","",""};
+      Operands[0x185] = new Object[]{new String[]{"1106000C","120F1002","",""},"","",""};
       Operands[0x190] = new Object[]{new String[]{"0600","0A0F06FF","",""},"","",""};
       Operands[0x192] = new Object[]{new String[]{"0600","06FF0B06","",""},"","",""};
       Operands[0x193] = new Object[]{new String[]{"0600","07060A0F","",""},"","",""};
@@ -1803,7 +1809,7 @@ public class X86 extends X86Types implements core.Core
 
     if( I.length == 2 )
     {
-      bits = ( ModRMByte >> 6 ) & ( ModRMByte >> 7 );
+      bits = ( ModRMByte >> 6 ) == ( ModRMByte >> 7 ) ? 1 : 0;
       
       if(I[bits] instanceof String)
       {

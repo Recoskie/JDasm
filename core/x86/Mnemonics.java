@@ -82,9 +82,10 @@ public class Mnemonics
     new String[]{"ADD","OR","ADC","SBB","AND","SUB","XOR","CMP"},
     new String[]{"ADD","OR","ADC","SBB","AND","SUB","XOR","CMP"},
     "TEST","TEST","XCHG","XCHG",
-    "MOV","MOV","MOV","MOV","MOV",
+    "MOV","MOV","MOV","MOV",
+    new String[]{"MOV","MOV"},
     new String[]{"LEA","???"}, //*ModR/M Register, and memory mode separation.
-    "MOV",
+    new String[]{"MOV","MOV"},
     new String[]{"POP","???","???","???","???","???","???","???"},
     new Object[]{new String[]{"NOP","","",""},new String[]{"NOP","","",""},new String[]{"PAUSE","","",""},new String[]{"NOP","","",""}},
     "XCHG","XCHG","XCHG","XCHG","XCHG","XCHG","XCHG",
@@ -495,9 +496,8 @@ public class Mnemonics
       new Object[]{"MOVDQU","MOVDQU",new String[]{"MOVDQU32","","MOVDQU64"},""},
       new Object[]{"???","",new String[]{"MOVDQU8","","MOVDQU16"},""}
     },
-    "JO","JNO","JB","JAE",
-    new Object[]{new String[]{"JE","JKZD","",""},"","",""},new Object[]{new String[]{"JNE","JKNZD","",""},"","",""}, //K1OM.
-    "JBE","JA","JS","JNS","JP","JNP","JL","JGE","JLE","JG",
+    "JO","JNO","JB","JAE","JE","JNE","JBE","JA",
+    "JS","JNS","JP","JNP","JL","JGE","JLE","JG",
     new Object[]{
       new Object[]{"SETO",new String[]{"KMOVW","","KMOVQ"},"",""},
       new Object[]{"SETO",new String[]{"KMOVB","","KMOVD"},"",""},"",""
