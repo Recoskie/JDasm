@@ -131,3 +131,5 @@ Planed tools.
 - [ ] ARM core, for mobile systems.
 
 - [ ] ARM boot sector decompiler.
+
+- [ ] File system array structure reader (NTFS, FAT32, EXT).
