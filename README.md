@@ -59,6 +59,20 @@ This project is meant to support many different binary file formats, and applica
 However, only supports Microsoft binary format at the moment. If you wish to contribute a Format. Then put it under the format folder.
 
 ------------------------------------------------------------
+x86 Boot sectors.
+------------------------------------------------------------
+
+A boot sector is the first 512 bytes of a disk that contains machine instructions, for a blank computer to start running at address 0.
+
+Boot sectors run across the line of all AMD, and Intel processors, because the machine code x86 cores run does not change between newer, or older systems.
+
+A windows, or linux installation disk also has a boot sector at address 0 that begins writing the OS to a blank disk that you choose.
+
+Thus it writes a boot sector to the disk you want to put the operating system on. However, that boot sector begins the operating system.
+
+You can analyze boot sectors and bootable media that run on blank computers with J-Disassembly.
+
+------------------------------------------------------------
 Running the application.
 ------------------------------------------------------------
 
@@ -107,7 +121,5 @@ I plan on creating a ARM core disassembler as well, for mobile devices.
 ------------------------------------------------------------
 Planed tools.
 ------------------------------------------------------------
-
-[ ] Boot sector decompilation.
 
 [ ] File system array structure reader (NTFS, FAT32, EXT)
