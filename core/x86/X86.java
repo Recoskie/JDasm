@@ -2625,6 +2625,28 @@ public class X86 extends X86Types implements core.Core
     return( t );
   }
 
+  public String disASM_Code( long end ) throws java.io.IOException
+  {
+    //Clear the location list.
+
+    t = ""; t1 = ""; t2 = "";
+
+    //Disassemble till return from application, or JUMP.
+
+    Code_start = data.getVirtualPointer();
+
+    while( !( Instruction.equals("RET") || Instruction.equals("JMP") ) && data.getVirtualPointer() < end )
+    {
+      t1 = posV(); t2 = disASM(); t += t1 + " " + t2 + "<br />";
+    }
+
+    Code_end = data.getVirtualPointer();
+
+    clean(Code_start, Code_end); reset();
+
+    return( t );
+  }
+
   /*-------------------------------------------------------------------------------------------------------------------------
   Cleans up the address maped locations.
   -------------------------------------------------------------------------------------------------------------------------*/
