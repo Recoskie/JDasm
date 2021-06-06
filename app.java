@@ -102,7 +102,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
 
-      disEnd = 512L; core.setBit(X86.x86_16); core.setEvent( this::Dis );
+      disEnd = 512L; core.setBit(X86.x86_16);
 
       core.locations.clear(); core.data_off.clear(); core.code.clear();
 
@@ -294,6 +294,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     winFrame.setJMenuBar(fcBar); fc.setTree( tree ); tree.singleClick = false;
 
     if( bdBar.getMenuCount() > 2 ) { bdBar.remove(BootSector); }
+
+    core.setEvent( this::Dis ); disEnd = null;
   }
 
   /*************************************************************************************
@@ -347,7 +349,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       //If file format is Supported. Open in reader with binary tools.
 
-      int I = DefaultProgram();
+      int I = DefaultProgram(), E = -1; if( I < 0 ) { E = I = ExtensionOnly(e.getExtension()); }
 
       //If is a recognized file.
 
@@ -357,22 +359,20 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
         try
         {
-          if( I >= 0 ) { Class.forName(DecodeAPP[I]).getConstructor().newInstance(); tree.singleClick = true; }
+          if( E >= 0 ) {} else if( I >= 0 ) { Class.forName(DecodeAPP[I]).getConstructor().newInstance(); }
+
+          tree.singleClick = true;
 
           stree.setVisible(true); ds.setVisible(true); iData.setVisible(true);
       
           Virtual.setVisible(true); Offset.setVisible(true); di.setVisible(true);
         }
-        catch(Exception er) { I = -2; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); }
+        catch(Exception er) { I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); }
       }
-
-      //Check file extensions.
-
-      else if( I == -1 ) { I = ExtensionOnly(e.getExtension()); }
 
       //If it is not an recognized file, or file format reader failed. Open using data types, and hex editor.
 
-      if( I == -2 )
+      if( I < 0 )
       {
         stree.setVisible(false); ds.setVisible(false); iData.setVisible(false);
       
@@ -497,32 +497,11 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   public int ExtensionOnly(String ex)
   {
-    int check = -2;
+    int check = -1;
 
     //DOS COM files loaded at address 0x0100. The CPU instructions are in 16 bit x86. There is no setup information, or header.
 
-    if( ex.equals(".com") )
-    {
-      check = -1;
-
-      stree.setVisible(false); ds.setVisible(true); iData.setVisible(true);
-      
-      Virtual.setVisible(true); Offset.setVisible(true); di.setVisible(true);
-      
-      tools.update();
-
-      if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
-
-      try { file.addV( 0, file.length(), 0x0100, file.length() + 0x0100 ); } catch( Exception e ) { }
-
-      disEnd = null; core.setBit(X86.x86_16); core.setEvent( this::Dis );
-
-      core.locations.clear(); core.data_off.clear(); core.code.clear();
-
-      core.locations.add( 0x0100L ); Dis( core.locations.get(0) );
-
-      tools.rowMaximize(0);
-    }
+    if( ex.equals(".com") ) { check = 0; try{ new Format.COM(); core.setEvent( this::Dis ); } catch( Exception er ) { er.printStackTrace(); } }
 
     return( check );
   }
