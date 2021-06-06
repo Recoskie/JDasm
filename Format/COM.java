@@ -51,4 +51,43 @@ public class COM extends Window.Window implements JDEventListener
       core.locations.add( 0x0100L ); core.disLoc(0); ds.setDescriptor( core );
     }
   }
+
+  //Disassemble routine.
+
+  public void Dis( long loc )
+  {
+    try
+    {
+      //Disassemble till end, or return from application.
+      //Note that more can be added here such as the jump operation.
+
+      file.seekV( loc );
+
+      String t1 = "", t2 = "", t = "";
+
+      int Dos_exit = 0;
+
+      while( true )
+      {
+        t1 = core.posV(); t2 = core.disASM();
+        
+        if( Dos_exit == 0 && ( t2.startsWith("MOV AX,4C") || t2.startsWith("MOV AH,4C") ) ) { Dos_exit = 1; }
+        else if( Dos_exit == 1 && ( t2.indexOf("AX,") > 0 || t2.indexOf("AH,") > 0 ) ) { Dos_exit = 0; }
+        if( ( Dos_exit == 1 && t2.equals("INT 21") ) || t2.equals("INT 20") ) { Dos_exit = 2; }
+        
+        t += t1 + " " + t2 + "<br />";
+
+        if( Dos_exit == 2 || t2.startsWith("RET") ) { break; }
+      }
+
+      info( "<html>" + t + "</html>" ); core.clean(loc, file.getVirtualPointer());
+
+      long pos = file.getFilePointer() - 1, posV = file.getVirtualPointer() - 1;
+      
+      file.seekV( loc ); Virtual.setSelectedEnd( posV ); Offset.setSelectedEnd( pos );
+
+      ds.setDescriptor( core );
+    }
+    catch( Exception e ) { e.printStackTrace(); }
+  }
 }

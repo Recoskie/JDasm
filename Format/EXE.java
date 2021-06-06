@@ -594,8 +594,9 @@ public class EXE extends Data implements JDEventListener
         {
           t1 = core.posV(); t2 = core.disASM();
           
-          if( Dos_exit == 0 && t2.equals("MOV AX,4C01") ) { Dos_exit = 1; }
-          else if( Dos_exit == 1 && t2.equals("INT 21") ) { Dos_exit = 2; }
+          if( Dos_exit == 0 && ( t2.startsWith("MOV AX,4C") || t2.startsWith("MOV AH,4C") ) ) { Dos_exit = 1; }
+          else if( Dos_exit == 1 && ( t2.indexOf("AX,") > 0 || t2.indexOf("AH,") > 0 ) ) { Dos_exit = 0; }
+          if( ( Dos_exit == 1 && t2.equals("INT 21") ) || t2.equals("INT 20") ) { Dos_exit = 2; }
           
           t += t1 + " " + t2 + "<br />";
 
