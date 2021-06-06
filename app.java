@@ -29,6 +29,14 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   private String DecodeAPP[] = new String[]{ "Format.EXE" };
 
+  //By file extension.
+
+  private String Extension[] = new String[]{ ".com" };
+
+  //What file to load by file extension.
+
+  private String DecodeAPP_EX[] = new String[]{ "Format.COM" };
+
   //Drag and drop file handling.
   
   private String df = "";
@@ -359,7 +367,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
         try
         {
-          if( E >= 0 ) {} else if( I >= 0 ) { Class.forName(DecodeAPP[I]).getConstructor().newInstance(); }
+          if( E >= 0 ) { Class.forName(DecodeAPP_EX[E]).getConstructor().newInstance(); }
+          else if( I >= 0 ) { Class.forName(DecodeAPP[I]).getConstructor().newInstance(); }
 
           tree.singleClick = true;
 
@@ -495,14 +504,5 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   //Some formats have no headers. They can only be recognized by file extension.
 
-  public int ExtensionOnly(String ex)
-  {
-    int check = -1;
-
-    //DOS COM files loaded at address 0x0100. The CPU instructions are in 16 bit x86. There is no setup information, or header.
-
-    if( ex.equals(".com") ) { check = 0; try{ new Format.COM(); core.setEvent( this::Dis ); } catch( Exception er ) { er.printStackTrace(); } }
-
-    return( check );
-  }
+  public int ExtensionOnly(String ex) { for( int i = 0; i < Extension.length; i++ ) { if( ex.equals(Extension[i]) ) { return( i ); } } return( -1 ); }
 }
