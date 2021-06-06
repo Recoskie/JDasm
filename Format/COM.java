@@ -28,7 +28,7 @@ public class COM extends Window.Window implements JDEventListener
 
     if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
 
-    try { file.addV( 0, file.length(), 0x0100, file.length() + 0x0100 ); } catch( Exception e ) { }
+    try { file.addV( 0, file.length(), 0x0100, file.length() ); } catch( Exception e ) { }
 
     core.setBit(X86.x86_16); core.setEvent( this::Dis );
 
@@ -73,11 +73,11 @@ public class COM extends Window.Window implements JDEventListener
         
         if( Dos_exit == 0 && ( t2.startsWith("MOV AX,4C") || t2.startsWith("MOV AH,4C") ) ) { Dos_exit = 1; }
         else if( Dos_exit == 1 && ( t2.indexOf("AX,") > 0 || t2.indexOf("AH,") > 0 ) ) { Dos_exit = 0; }
-        if( ( Dos_exit == 1 && t2.equals("INT 21") ) || t2.equals("INT 20") ) { Dos_exit = 2; }
+        if( Dos_exit == 1 && t2.equals("INT 21") ) { Dos_exit = 2; }
         
         t += t1 + " " + t2 + "<br />";
 
-        if( Dos_exit == 2 || t2.startsWith("RET") ) { break; }
+        if( Dos_exit == 2 || t2.startsWith("RET") || t2.startsWith("JMP") || t2.equals("INT 20") ) { break; }
       }
 
       info( "<html>" + t + "</html>" ); core.clean(loc, file.getVirtualPointer());
