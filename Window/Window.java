@@ -17,6 +17,10 @@ public class Window
 
   public static core.Core core;
 
+  //The end position for disassembly.
+
+  public static Long disEnd = null;
+
   //Main application Window.
 
   public static JFrame winFrame;
@@ -237,5 +241,26 @@ public class Window
     //Set application icon image.
 
     winFrame.setIconImage( new ImageIcon( Window.class.getResource( "AppPictures/app.png" ) ).getImage() );
+  }
+
+  //Core default Disassemble routine.
+
+  public void Dis( long loc )
+  {
+    try
+    {
+      file.seekV( loc );
+    
+      long floc = file.getFilePointer();
+    
+      String d = disEnd != null ? core.disASM_Code( disEnd ) : core.disASM_Code();
+    
+      info( "<html>" + d + "</html>" );
+    
+      Virtual.setSelected( loc, file.getVirtualPointer() - 1 ); Offset.setSelected( floc, file.getFilePointer() - 1 );
+    
+      ds.setDescriptor( core );
+    }
+    catch( java.io.IOException e ) { e.printStackTrace(); }
   }
 }

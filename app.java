@@ -41,10 +41,6 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   
   private String df = "";
 
-  //The end position for disassembly.
-
-  private Long disEnd = null;
-
   //Create the application.
 
   public app( String Arg_file, boolean isDisk )
@@ -110,7 +106,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
 
-      disEnd = 512L; core.setBit(X86.x86_16);
+      disEnd = 512L; core.setBit(X86.x86_16); core.setEvent( this::Dis );
 
       core.locations.clear(); core.data_off.clear(); core.code.clear();
 
@@ -439,27 +435,6 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       Reset();
     }
-  }
-
-  //Core default Disassemble routine.
-
-  public void Dis( long loc )
-  {
-    try
-    {
-      file.seekV( loc );
-  
-      long floc = file.getFilePointer();
-  
-      String d = disEnd != null ? core.disASM_Code( disEnd ) : core.disASM_Code();
-  
-      info( "<html>" + d + "</html>" );
-  
-      Virtual.setSelected( loc, file.getVirtualPointer() - 1 ); Offset.setSelected( floc, file.getFilePointer() - 1 );
-  
-      ds.setDescriptor( core );
-    }
-    catch( IOException e ) { e.printStackTrace(); }
   }
 
   //File check on drag and drop.

@@ -30,7 +30,7 @@ public class COM extends Window.Window implements JDEventListener
 
     try { file.addV( 0, file.length(), 0x0100, file.length() + 0x0100 ); } catch( Exception e ) { }
 
-    core.setBit(X86.x86_16);
+    core.setBit(X86.x86_16); core.setEvent( this::Dis );
 
     ((DefaultTreeModel)tree.getModel()).setRoot(root);
 
