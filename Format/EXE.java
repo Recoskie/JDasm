@@ -106,6 +106,11 @@ public class EXE extends Data implements JDEventListener
         
         core.setEvent( this::Dis ); coreLoaded = true;
       }
+      else
+      {
+        if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
+        core.setEvent( this::Dis ); coreLoaded = false;
+      }
     }
 
     if( !DOS )
@@ -218,7 +223,7 @@ public class EXE extends Data implements JDEventListener
 
         //Begin disassembly.
 
-        if( coreLoaded )
+        if( coreLoaded || DosMode )
         {
           if( DosMode ) { core.setBit(X86.x86_16); } else { core.setBit( is64bit ? X86.x86_64 : X86.x86_32 ); }
 
