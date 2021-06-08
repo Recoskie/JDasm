@@ -16,7 +16,7 @@ public class Headers extends Data
 
     int R_Size = 0; long R_Loc = 0;
 
-    DOS.add( new JDNode( "DOS 2.0 Header.h", "M", 0 ) );
+    DOS.add( new JDNode( "DOS 2.0 Header.h", new long[]{ 0, 0 } ));
 
     mz.String8( "SIGNATURE", 2 ); sig = mz.value + "";
     mz.LUINT16( "Last 512 bytes" );
@@ -44,10 +44,10 @@ public class Headers extends Data
 
       for( int i = 0; i < R_Size; i++ ) { Reloc.Array("Location #" + i + "", 4); Reloc.LUINT16("Offset"); Reloc.LUINT16("Segment"); }
 
-      DOS.add( new JDNode( "DOS Relocations.h", "M", 1 ) );
+      DOS.add( new JDNode( "DOS Relocations.h", new long[]{ 0, 1 } ));
     }
 
-    DOS.add( new JDNode( "Program Start (Machine Code).h", "Dis16", MZMain ) );
+    DOS.add( new JDNode( "Program Start (Machine Code).h", "Dis16", new long[]{ -2, MZMain } ) );
 
     mz.setEvent(this::mzInfo);
 
@@ -216,9 +216,7 @@ public class Headers extends Data
   //The PE header defines the number of sections. Without this the virtual addresses of each section in DataDrectory is useless.
 
   public Descriptor readSections() throws IOException
-  {
-    byte[] bd = new byte[ 12 ];
-    
+  {    
     long virtualSize = 0, virtualOffset = 0, size = 0, offset = 0;
 
     //Create table data.

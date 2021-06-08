@@ -3,7 +3,7 @@ import java.io.*;
 import swingIO.*;
 import swingIO.tree.*;
 
-public class Resource extends Data
+public class Resource extends Data implements sec
 {
   //Data structure data descriptors.
 
@@ -21,11 +21,11 @@ public class Resource extends Data
 
   //Use current IO potion if no defined position.
 
-  public Descriptor[] readResource( JDNode Dir ) throws IOException { return( readResource( Dir, 0 ) ); }
+  public Descriptor[] read( JDNode Dir ) throws IOException { return( read( Dir, 0 ) ); }
 
   //Recursively read Resource at a set position.
 
-  public Descriptor[] readResource( JDNode Dir, long pos ) throws IOException
+  public Descriptor[] read( JDNode Dir, long pos ) throws IOException
   {
     Descriptor des_Dir;
 
@@ -54,7 +54,7 @@ public class Resource extends Data
 
     des.add(des_Dir);
 
-    Dir.add( new JDNode( "Directory Info.h", "R", ref ) ); ref += 1;
+    Dir.add( new JDNode( "Directory Info.h", new long[]{ 4, ref } )); ref += 1;
 
     for( int i = 0; i < size; i++ )
     {
@@ -74,7 +74,7 @@ public class Resource extends Data
 
         File_Str.LUINT16("Name length"); File_Str.LString16("Entire Name", ((Short)File_Str.value).intValue() );
         
-        nDir = new JDNode( File_Str.value.toString(), "R", ref ); ref += 1;
+        nDir = new JDNode( File_Str.value.toString(), new long[]{ 4, ref } ); ref += 1;
 
         file.seekV( t );
       }
@@ -95,7 +95,7 @@ public class Resource extends Data
       {
         Pos = file.getVirtualPointer();
         
-        readResource( nDir, ( pos & 0x7FFFFFFF ) + DataDir[4] );
+        read( nDir, ( pos & 0x7FFFFFFF ) + DataDir[4] );
         
         file.seekV( Pos );
       }
@@ -104,14 +104,14 @@ public class Resource extends Data
       
       else
       {
-        nDir.add( new JDNode( "File Info.h", "R", ref ) ); ref += 1;
+        nDir.add( new JDNode( "File Info.h", new long[]{ 4, ref } )); ref += 1;
         
         t = file.getVirtualPointer(); file.seekV( pos + DataDir[4] );
 
         File_Str = new Descriptor( file, true ); File_Str.setEvent( this::fileInfo );
 
         File_Str.LUINT32("File location"); pos = ((Integer)File_Str.value).longValue() + imageBase;
-        File_Str.LUINT32("File size"); nDir.add( new JDNode( "File Data", "Sv", new long[]{ pos, pos + ( ( (Integer)File_Str.value ).longValue() ) - 1 } ) );
+        File_Str.LUINT32("File size"); nDir.add( new JDNode( "File Data", new long[]{ -4, pos, pos + ( ( (Integer)File_Str.value ).longValue() ) - 1 } ) );
         File_Str.LUINT32("Code Page");
         File_Str.LUINT32("Reserved");
 

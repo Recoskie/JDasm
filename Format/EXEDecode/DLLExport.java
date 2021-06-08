@@ -3,9 +3,9 @@ import java.io.*;
 import swingIO.*;
 import swingIO.tree.*;
 
-public class DLLExport extends Data
+public class DLLExport extends Data implements sec
 {
-  public Descriptor[] LoadExport( JDNode Export ) throws IOException
+  public Descriptor[] read( JDNode Export ) throws IOException
   {
     java.util.LinkedList<Descriptor> des = new java.util.LinkedList<Descriptor>();
 
@@ -38,7 +38,7 @@ public class DLLExport extends Data
 
     //Begin reeding, and mapping the export method locations.
 
-    Export.add( new JDNode( "Export info.h", "E", ref ) ); ref += 1;
+    Export.add( new JDNode( "Export info.h", new long[]{ 2, ref } )); ref += 1;
 
     Data = new Descriptor( file, true ); Data.setEvent( this::exportInfo );
 
@@ -80,9 +80,9 @@ public class DLLExport extends Data
 
     Str.String8("Export Name.", ((byte)0x00));
 
-    Methods = new JDNode( Str.value.toString(), "E", ref ); des.add( Str ); Str.setEvent( this::strInfo ); ref += 1;
+    Methods = new JDNode( Str.value.toString(), new long[]{ 2, ref } ); des.add( Str ); Str.setEvent( this::strInfo ); ref += 1;
 
-    Methods.add( new JDNode( "Address list location.h", "E", ref ) ); ref += 1;
+    Methods.add( new JDNode( "Address list location.h", new long[]{ 2, ref } )); ref += 1;
 
     //The Address list.
     
@@ -106,13 +106,13 @@ public class DLLExport extends Data
       order[i] = ( ((Short)Data.value).intValue() & 0xFFFF ); named[ order[i] + base ] = true;
     }
 
-    Methods.add( new JDNode( "Order list location.h", "E", ref ) ); des.add( Data ); Data.setEvent( this::OlistInfo ); ref += 1;
+    Methods.add( new JDNode( "Order list location.h", new long[]{ 2, ref } )); des.add( Data ); Data.setEvent( this::OlistInfo ); ref += 1;
 
     //Names. Our sorted location list should now locate to each named method.
     
     file.seekV( name_List ); Data = new Descriptor( file, true );
 
-    Methods.insert( new JDNode( "Name list location.h", "E", ref ), 1 ); des.add( Data ); Data.setEvent( this::MlistInfo ); ref += 1;
+    Methods.insert( new JDNode( "Name list location.h", "E", new long[]{ 2, ref } ), 1 ); des.add( Data ); Data.setEvent( this::MlistInfo ); ref += 1;
 
     //The named methods.
 
@@ -127,12 +127,12 @@ public class DLLExport extends Data
 
       Str.String8("Name.", ((byte)0x00)); file.seekV( t );
 
-      Method_loc = new JDNode( Str.value + "() #" + order[i], "E", ref ); ref += 1;
+      Method_loc = new JDNode( Str.value + "() #" + order[i], new long[]{ 2, ref } ); ref += 1;
 
       if( loc[ order[i] + base ] > imageBase )
       {
-        Method_loc.add( new JDNode( "Goto Location.h", "Sv", new long[]{ loc[ order[i] + base ], loc[ order[i] + base ] } ) );
-        Method_loc.add( new JDNode( "Disassemble Location.h", "Dis", loc[ order[i] + base ] ) );
+        Method_loc.add( new JDNode( "Goto Location.h", new long[]{ -4, loc[ order[i] + base ], loc[ order[i] + base ] } ) );
+        Method_loc.add( new JDNode( "Disassemble Location.h", new long[]{ -1, loc[ order[i] + base ] } ) );
       }
       else
       {
@@ -152,8 +152,8 @@ public class DLLExport extends Data
 
         if( loc[i] > imageBase )
         {
-          Method_loc.add( new JDNode( "Goto Location.h", "Sv", new long[]{ loc[i], loc[i] } ) );
-          Method_loc.add( new JDNode( "Disassemble Location.h", "Dis", loc[i] ) );
+          Method_loc.add( new JDNode( "Goto Location.h", new long[]{ -4, loc[i], loc[i] } ) );
+          Method_loc.add( new JDNode( "Disassemble Location.h", new long[]{ -1, loc[i] } ) );
         }
         else
         {

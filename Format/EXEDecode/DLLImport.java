@@ -3,9 +3,9 @@ import java.io.*;
 import swingIO.*;
 import swingIO.tree.*;
 
-public class DLLImport extends Data
+public class DLLImport extends Data implements sec
 {
-  public Descriptor[] LoadDLLImport( JDNode IMPORT ) throws IOException
+  public Descriptor[] read( JDNode IMPORT ) throws IOException
   {
     //get the physical address to data directory array links to dll import table
 
@@ -13,7 +13,7 @@ public class DLLImport extends Data
 
     //for dll names, and function list.
 
-    IMPORT.add( new JDNode( "DLL Import Array Decode.h", "D", 0 ) );
+    IMPORT.add( new JDNode( "DLL Import Array Decode.h", new long[]{ 3, 0 } ));
 
     Descriptor DLLArray = new Descriptor( file, true );
     Descriptor DLLName, FuncArray1, FuncArray2, Method;
@@ -46,7 +46,7 @@ public class DLLImport extends Data
 
       //Load the two Function list.
 
-      DLLFunc = new JDNode( DLLName.value.toString(), "D", ref ); des.add( DLLName ); ref += 1;
+      DLLFunc = new JDNode( DLLName.value.toString(), new long[]{ 3, ref } ); des.add( DLLName ); ref += 1;
       
       if( ( d1 | d2 | d3 | d4 | d5 ) != 0 )
       {
@@ -114,17 +114,17 @@ public class DLLImport extends Data
 
             core.mapped_loc.add( Method.value + "" );
 
-            DLLFunc.add( new JDNode( Method.value + "().dll", "D", ref ) ); ref += 1; file.seekV(t2);
+            DLLFunc.add( new JDNode( Method.value + "().dll", new long[]{ 3, ref } )); ref += 1; file.seekV(t2);
           }
         }
 
         core.mapped_pos.add( file.getVirtualPointer() );
 
-        DLLFunc.insert( new JDNode( "Function Array Decode 1.h", "D", ref ), 0 );
+        DLLFunc.insert( new JDNode( "Function Array Decode 1.h", new long[]{ 3, ref } ), 0 );
 
         FuncArray1.setEvent( this::funcInfo ); des.add( FuncArray1 ); ref += 1;
         
-        DLLFunc.insert( new JDNode( "Function Array Decode 2.h", "D", ref ), 1 );
+        DLLFunc.insert( new JDNode( "Function Array Decode 2.h", new long[]{ 3, ref } ), 1 );
         
         FuncArray2.setEvent( this::funcInfo ); des.add( FuncArray2 ); ref += 1;
 
