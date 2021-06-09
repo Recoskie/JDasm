@@ -91,6 +91,144 @@ public class Headers extends Data
     Data.error = !( sig[0] == 0x7F && sig[1] == 0x45 && sig[2] == 0x4C && sig[3] == 0x46 ); return( elf );
   }
 
+  //*********************************Reads the Program header***********************************
+
+  public Descriptor readProgram() throws IOException
+  {
+    file.seek( programHeader ); Descriptor prh = new Descriptor( file );
+
+    for( int i = 0; i < prSize; i++ )
+    {
+      prh.Array("Program entire " + i + "", elPrSize );
+
+      if( isLittle )
+      {
+        prh.LUINT32("Type");
+
+        if( is64Bit )
+        {
+          prh.LUINT32("flag 64");
+          prh.LUINT64("Offset");
+          prh.LUINT64("Virtual");
+          prh.LUINT64("Physical Address");
+          prh.LUINT64("Section size");
+          prh.LUINT64("Size in memory");
+          prh.LUINT64("Alignment");
+        }
+        else
+        {
+          prh.LUINT32("Offset");
+          prh.LUINT32("Virtual");
+          prh.LUINT32("Physical Address");
+          prh.LUINT32("Section size");
+          prh.LUINT32("Size in memory");
+          prh.LUINT32("flag 32");
+          prh.LUINT32("Alignment");
+        }
+      }
+      else
+      {
+        prh.UINT32("Type");
+
+        if( is64Bit )
+        {
+          prh.UINT32("flag 64");
+          prh.UINT64("Offset");
+          prh.UINT64("Virtual");
+          prh.UINT64("Physical Address");
+          prh.UINT64("Section size");
+          prh.UINT64("Size in memory");
+          prh.UINT64("Alignment");
+        }
+        else
+        {
+          prh.UINT32("Offset");
+          prh.UINT32("Virtual");
+          prh.UINT32("Physical Address");
+          prh.UINT32("Section size");
+          prh.UINT32("Size in memory");
+          prh.UINT32("flag 32");
+          prh.UINT32("Alignment");
+        }
+      }
+    }
+      
+    return( prh );
+  }
+
+  //*********************************Reads the Section header***********************************
+
+  public Descriptor readSections() throws IOException
+  {
+    file.seek( Sections ); Descriptor sec = new Descriptor( file );
+
+    for( int i = 0; i < secSize; i++ )
+    {
+      sec.Array("Section entire " + i + "", elSecSize );
+
+      if( is64Bit )
+      {
+        if( isLittle )
+        {
+          sec.LUINT32("Entire Name Location");
+          sec.LUINT32("Section Type");
+          sec.LUINT64("flag 64");
+          sec.LUINT64("Virtual");
+          sec.LUINT64("Offset");
+          sec.LUINT64("Section Size");
+          sec.LUINT32("LINK");
+          sec.LUINT32("INFO");
+          sec.LUINT64("Alignment");
+          sec.LUINT64("Entire Size");
+        }
+        else
+        {
+          sec.UINT32("Entire Name Location");
+          sec.UINT32("Section Type");
+          sec.UINT64("flag 64");
+          sec.UINT64("Virtual");
+          sec.UINT64("Offset");
+          sec.UINT64("Section Size");
+          sec.UINT32("LINK");
+          sec.UINT32("INFO");
+          sec.UINT64("Alignment");
+          sec.UINT64("Entire Size");
+        }
+      }
+      else
+      {
+        if( isLittle )
+        {
+          sec.LUINT32("Entire Name Location");
+          sec.LUINT32("Section Type");
+          sec.LUINT32("flag 32");
+          sec.LUINT32("Virtual");
+          sec.LUINT32("Offset");
+          sec.LUINT32("Section Size");
+          sec.LUINT32("LINK");
+          sec.LUINT32("INFO");
+          sec.LUINT32("Alignment");
+          sec.LUINT32("Entire Size");
+        }
+        else
+        {
+          sec.UINT32("Entire Name Location");
+          sec.UINT32("Section Type");
+          sec.UINT32("flag 64");
+          sec.UINT32("Virtual");
+          sec.UINT32("Offset");
+          sec.UINT32("Section Size");
+          sec.UINT32("LINK");
+          sec.UINT32("INFO");
+          sec.UINT32("Alignment");
+          sec.UINT32("Entire Size");
+        }
+      }
+    }
+      
+    return( sec );
+  }
+
   //Detailed description of the MZ header.
 
   public static final String[] ELFInfo = new String[]{"<html>The signature must always be 7F, 45, 4C, 46 = ELF.<br /><br />" + 

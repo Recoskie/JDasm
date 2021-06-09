@@ -40,8 +40,8 @@ public class ELF extends Data implements JDEventListener
     try
     {
       des[0][0] = header.readELF();
-      //des[0][1] = header.readProgram();
-      //des[0][2] = header.readSections();
+      if( !Data.error ) { des[0][1] = header.readProgram(); }
+      if( !Data.error ) { des[0][2] = header.readSections(); }
     }
     catch(Exception e) { Data.error = true; }
 
@@ -49,7 +49,7 @@ public class ELF extends Data implements JDEventListener
     {
       //Decode the setup headers.
     
-      root.add(ELFHeader); ((DefaultTreeModel)tree.getModel()).setRoot(root);
+      root.add(ELFHeader); root.add(PHeader); root.add(SECHeader); ((DefaultTreeModel)tree.getModel()).setRoot(root);
 
       file.Events = true;
 
