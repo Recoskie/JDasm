@@ -49,7 +49,7 @@ public class Headers extends Data
 
     DOS.add( new JDNode( "Program Start (Machine Code).h", "Dis16", new long[]{ -2, MZMain } ) );
 
-    mz.setEvent(this::mzInfo);
+    mz.setEvent(this::mzInfo); Reloc.setEvent(this::mzRelocInfo);
 
     Data.error = !sig.equals("MZ"); return( new Descriptor[] { mz, Reloc } );
   }
@@ -282,7 +282,7 @@ public class Headers extends Data
 
   public static final String FSize = "Both \"Last 512 bytes\", and \"512 bytes in file\" are used to calculate the MS-DOS binary size.<br /><br />";
 
-  public static final String[] MZinfo = new String[]{"<html>The signature must always be 4D 5A = MZ.<br /><br />" + 
+  public static final String[] MZInfo = new String[]{"<html>The signature must always be 4D 5A = MZ.<br /><br />" + 
   "It must be at the start of any windows binary.<br /><br />" +
   "If the file does not pass this test. Then it is corrupted.<br /><br />" + 
   "Or is a different file type disguise as a windows binary.</html>",
@@ -305,8 +305,7 @@ public class Headers extends Data
   "",
   "",
   "<html>" + res + "</html>",
-  "<html>" + res + "<br /><br />Instead of adding to DOS. Microsoft created a new system that uses the reserved section to locate to the PE header.</html>",
-  "This is the x86 binary that gets loaded by DOS in 16 bit.<br /><br />The new \"Windows\" system used the PE location to go to the new PE header.<br /><br />"};
+  "<html>" + res + "<br /><br />Instead of adding to DOS. Microsoft created a new system that uses the reserved section to locate to the PE header.</html>"};
 
   public void mzInfo( int el )
   {
@@ -318,8 +317,18 @@ public class Headers extends Data
     }
     else
     {
-      info( MZinfo[ el ] );
+      info( MZInfo[ el ] );
     }
+  }
+
+  //Detailed description of the MZ Relocations.
+
+  public void mzRelocInfo( int el )
+  {
+    info("<html>Segment is multiplied by 16 plus the offset to forum the address location.<br /><br />" +
+    "If the program can not load at it's set location in MZ header. Then the difference is added to the defined locations in the relocation list.<br /><br />" +
+    "The segment register is always part of the address in 16bit x86. A Segment allowed us to use more than 64 kilobytes of memory.<br /><br />" +
+    "The segment also worked as a way of separating data, and programs in memory. Segment is 0 plus an offset, for programs smaller than 64 kilobytes in size.</html>");
   }
 
   //Detailed description of the PE header.
@@ -328,7 +337,7 @@ public class Headers extends Data
 
   public static final String Debug = "This value should be zero for an binary, because debugging information is usually removed.<br /><br />Takes up extra space, and makes it even easier to reconstruct the original source code.";
 
-  public static final String[] PEinfo = new String[]{"<html>The PE header must start with PE = 50 45 00 00.<br /><br />If it does not pass the signature test then the windows binary is corrupted.</html>",
+  public static final String[] PEInfo = new String[]{"<html>The PE header must start with PE = 50 45 00 00.<br /><br />If it does not pass the signature test then the windows binary is corrupted.</html>",
   "<html>Windows does not translate binary to match other cores. It sets a core to the start of the program if CPU is compatible.<br /><br /><table border='1'>" +
   "<tr><td>Value</td><td>Type</td></tr>" +
   "<tr><td>4C 01</td><td>Intel 386</td></tr>" +
@@ -403,14 +412,14 @@ public class Headers extends Data
       info("<html>The PE header marks the start of the new Executable format. If the file is not loaded in DOS.<br /><br />" +
         "This header specifies the number of sections to map in virtual space. The processor type, and date of compilation.</html>");
     }
-    else { info( PEinfo[ el ] ); }
+    else { info( PEInfo[ el ] ); }
   }
 
   //Detailed description of the OP header.
 
   public static final String Ver = "Major, and Minor are put together to forum the version number.<br /><br />Example.<br /><br />Major version = 5<br /><br />Minor version = 12<br /><br />Would mean version 5.12V.";
   
-  public static final String[] OPinfo = new String[]{"<html>The Optional header has three different possible signatures.<br /><br />" +
+  public static final String[] OPInfo = new String[]{"<html>The Optional header has three different possible signatures.<br /><br />" +
   "0B 01 = 32 Bit binary.<br /><br />0B 02 = 64 Bit binary<br /><br />07 01 = ROM Image file.<br /><br />" +
   "The only time the OP header changes format is the 64 bit version of the Header.<br /><br />" +
   "If this section does not test true, for any of the three signatures, then the file is corrupted.</html>",
@@ -490,12 +499,12 @@ public class Headers extends Data
     {
       info("<html>At the end of the PE header is the start of the Optional header. However, this header is not optional.</html>");
     }
-    else { info( OPinfo[ el >= 8 && is64bit ? el + 1 : el ] ); }
+    else { info( OPInfo[ el >= 8 && is64bit ? el + 1 : el ] ); }
   }
 
   //Detailed description of the data Directory Array.
 
-  public static final String[] DDinfo = new String[]{"<html>Array element consisting of two 32 bit values.</html>",
+  public static final String[] DDInfo = new String[]{"<html>Array element consisting of two 32 bit values.</html>",
   "<html>Virtual Address of section.<br /><br />Plus the programs base address. The Base address is defined in OP header.</html>",
   "<html>Size of section data.</html>"};
 
@@ -506,12 +515,12 @@ public class Headers extends Data
       info("<html>This is the Data directory array section of the OP header. Every element has a different use.<br /><br />The virtual address positions are useless without setting up the mapped sections after the array.<br /><br />" +
         "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.<br /><br />Anything that is 0, is not used.</html>");
     }
-    else { info( DDinfo[ el % 3 ] ); }
+    else { info( DDInfo[ el % 3 ] ); }
   }
 
   //Detailed description of the sections to RAM memory.
 
-  public static final String[] Sinfo = new String[]{"<html>Array element consisting of A section name, and some 32 bit values, for the location to put the data in memory.</html>",
+  public static final String[] SInfo = new String[]{"<html>Array element consisting of A section name, and some 32 bit values, for the location to put the data in memory.</html>",
   "<html>The 8 bytes can be given any text based name you like. It is not used for anything by the system.<br /><br />" +
   "The names can be very deceiving. As x86 compilers can compile out the code section giving it a \".text\" name.<br /><br />" +
   "Don't worry about the names. The data Directory Array defines what each section is after it is in virtual space.<br /><br />" +
@@ -578,6 +587,6 @@ public class Headers extends Data
       info("<html>Number of sections to read was defined in the OP header.<br /><br />The virtual address positions are useless without setting up the mapped sections.<br /><br />" +
         "The virtual addresses are added to the programs \"Base Address\". The \"Base Address\" is defined by the OP header.</html>");
     }
-    else { info( Sinfo[ el % 8 ] ); }
+    else { info( SInfo[ el % 8 ] ); }
   }
 }

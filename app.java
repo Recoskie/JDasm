@@ -437,6 +437,28 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     }
   }
 
+
+  //The preferred method is to check file types by signature, however some files may not contain a header, or file signature.
+  //Files that can not be recognized by file signature are put under the method "ExtensionOnly(String ex)".
+
+  public int DefaultProgram()
+  {
+    boolean Valid = true; file.Events = false; try{ file.read( Sig ); file.seek(0); } catch( IOException err ) { } file.Events = true;
+
+    for( int i1 = 0; i1 < Signature.length; i1++ )
+    {
+      Valid = true; for( int i2 = 0; i2 < Signature[i1].length && Valid; i2++ ) { Valid = Signature[i1][i2] == Sig[i2]; }
+
+      if( Valid ) { return( i1 ); }
+    }
+      
+    return( -1 );
+  }
+
+  //Some formats have no headers. They can only be recognized by file extension.
+
+  public int ExtensionOnly(String ex) { for( int i = 0; i < Extension.length; i++ ) { if( ex.equals(Extension[i]) ) { return( i ); } } return( -1 ); }
+
   //File check on drag and drop.
   
   @SuppressWarnings({"unchecked"}) public void dragOver(DropTargetDragEvent dtde)
@@ -459,25 +481,4 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   public void dragEnter(DropTargetDragEvent dtde) { }
 
   public void dragExit(DropTargetEvent dte) { }
-
-  //The preferred method is to check file types by signature, however some files may not contain a header, or file signature.
-  //Files that can not be recognized by file signature are put under the method "ExtensionOnly(String ex)".
-
-  public int DefaultProgram()
-  {
-    boolean Valid = true; file.Events = false; try{ file.read( Sig ); file.seek(0); } catch( IOException err ) { } file.Events = true;
-
-    for( int i1 = 0; i1 < Signature.length; i1++ )
-    {
-      Valid = true; for( int i2 = 0; i2 < Signature[i1].length && Valid; i2++ ) { Valid = Signature[i1][i2] == Sig[i2]; }
-
-      if( Valid ) { return( i1 ); }
-    }
-      
-    return( -1 );
-  }
-
-  //Some formats have no headers. They can only be recognized by file extension.
-
-  public int ExtensionOnly(String ex) { for( int i = 0; i < Extension.length; i++ ) { if( ex.equals(Extension[i]) ) { return( i ); } } return( -1 ); }
 }

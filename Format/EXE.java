@@ -243,7 +243,7 @@ public class EXE extends Data implements JDEventListener
 
           core.disLoc(0); ds.setDescriptor( core ); return;
         }
-        else { noCore(); }
+        else { try{ file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) ); } catch(Exception er) { } noCore(); }
       }
 
       //Offset.
