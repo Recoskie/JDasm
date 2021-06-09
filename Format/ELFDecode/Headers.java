@@ -128,7 +128,7 @@ public class Headers extends Data
   "<html>Currently unused, should be zero.</html>",
   "<html>Application File type.</html>",
   "<html>The processor type the binary is meant to run natively on. Majority of linux/unix systems are Intel/AMD x86.<br /><br />" +
-  "The tow settings you will see the most are 003E = 64bit x86, and 0003 = 32bit x86.<br />" +
+  "The tow settings you will see the most are 003E = 64bit x86, and 0003 = 32bit x86.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Value</td><td>CPU</td></tr>" +
   "<tr><td>0001</td><td>AT&T WE 32100</td></tr>" +
