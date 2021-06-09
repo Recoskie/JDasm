@@ -67,21 +67,21 @@ public class Headers extends Data
     {
       elf.LUINT32( "Flags" );
       elf.LUINT16( "Size of ELF header" );
-      elf.LUINT16( "Program header entire size" );
-      elf.LUINT16( "Entires in Program header" );
-      elf.LUINT16( "Section header entire size" );
-      elf.LUINT16( "Entries in section header" );
+      elf.LUINT16( "Program header entire size" ); elPrSize = (Short)elf.value;
+      elf.LUINT16( "Entires in Program header" ); prSize = (Short)elf.value;
+      elf.LUINT16( "Section header entire size" ); elSecSize = (Short)elf.value;
+      elf.LUINT16( "Entries in section header" ); secSize = (short)elf.value;
       elf.LUINT16( "Section names" );
     }
     else
     {
-      elf.LUINT32( "Flags" );
-      elf.LUINT16( "Size of ELF header" );
-      elf.LUINT16( "Program header entire size" );
-      elf.LUINT16( "Entires in Program header" );
-      elf.LUINT16( "Section header entire size" );
-      elf.LUINT16( "Entries in section header" );
-      elf.LUINT16( "Section names" );
+      elf.UINT32( "Flags" );
+      elf.UINT16( "Size of ELF header" );
+      elf.UINT16( "Program header entire size" ); elPrSize = (Short)elf.value;
+      elf.UINT16( "Entires in Program header" ); prSize = (Short)elf.value;
+      elf.UINT16( "Section header entire size" ); elSecSize = (Short)elf.value;
+      elf.UINT16( "Entries in section header" ); secSize = (short)elf.value;
+      elf.UINT16( "Section names" );
     }
 
     elf.setEvent(this::elfInfo);

@@ -21,10 +21,15 @@ public class Data extends Window.Window
   //Program information.
 
   public static long programHeader = 0;
+  public static int elPrSize = 0;
+  public static int prSize = 0;
 
   //The sections location.
 
   public static long Sections = 0;
+  public static int elSecSize = 0;
+  public static int secSize = 0;
+  public static int namesEl = 0;
 
   //The machine core type.
 
