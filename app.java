@@ -18,16 +18,17 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   private byte Signature[][] = new byte[][]
   {
-    new byte[] { 0x4D, 0x5A } //Microsoft binaries.
+    new byte[] { 0x4D, 0x5A }, //Microsoft binaries.
+    new byte[] { 0x7F, 0x45, 0x4C, 0x46 } //Linux/UNIX binaries.
   };
 
   //Buffer should be set to the length of the largest signature sequence.
 
-  private byte[] Sig = new byte[2];
+  private byte[] Sig = new byte[4];
 
   //The file to load. To begin decoding file types.
 
-  private String DecodeAPP[] = new String[]{ "Format.EXE" };
+  private String DecodeAPP[] = new String[]{ "Format.EXE", "Format.ELF" };
 
   //By file extension.
 
