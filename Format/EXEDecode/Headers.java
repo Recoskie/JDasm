@@ -47,7 +47,7 @@ public class Headers extends Data
       DOS.add( new JDNode( "DOS Relocations.h", new long[]{ 0, 1 } ));
     }
 
-    DOS.add( new JDNode( "Program Start (Machine Code).h", "Dis16", new long[]{ -2, MZMain } ) );
+    DOS.add( new JDNode( "Program Start (Machine Code).h", new long[]{ -2, MZMain } ) );
 
     mz.setEvent(this::mzInfo); Reloc.setEvent(this::mzRelocInfo);
 
@@ -313,7 +313,7 @@ public class Headers extends Data
     {
       info("<html>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
         "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
-        "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.</html>");
+        "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.<br /><br />Though it can be a full-fledged DOS version of the program.</html>");
     }
     else
     {

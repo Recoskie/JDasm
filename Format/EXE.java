@@ -51,7 +51,7 @@ public class EXE extends Data implements JDEventListener
     //DOS header.
     "<html>This is the original DOS header. Which must be at the start of all windows binary files.<br /><br />Today the reserved bytes are used to locate to the new Portable executable header format.<br /><br />" +
     "However, on DOS this header still loads as the reserved bytes that locate to the PE header do nothing in DOS.<br /><br />Thus the small 16 bit binary at the end will run. " +
-    "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.</html>",
+    "Which normally contains a small 16 bit code that prints the message that this program can not be run in DOS mode.<br /><br />Though it can be a full-fledged DOS version of the program.</html>",
     //Microsoft headers.
     "<html>The headers setup the Microsoft binary virtual space.<br /><br />Otherwise The import table can not be located.<br /><br />" +
     "Export Table can not be located.<br /><br />" +
@@ -225,7 +225,7 @@ public class EXE extends Data implements JDEventListener
     {
       //Start Disassembling instructions.
     
-      if( e.getArg(0) == -1 || (DosMode = e.getArg(0) == -2) )
+      if( (DosMode = e.getArg(0) == -2) || e.getArg(0) == -1 )
       {
         //If import table is not loaded. It should be loaded to map method calls.
 
