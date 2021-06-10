@@ -2,6 +2,7 @@ package Format.ELFDecode;
 
 import java.io.*;
 import swingIO.*;
+import swingIO.tree.JDNode;
 
 public class Headers extends Data
 {
@@ -71,7 +72,7 @@ public class Headers extends Data
       elf.LUINT16( "Entires in Program header" ); prSize = (Short)elf.value;
       elf.LUINT16( "Section header entire size" ); elSecSize = (Short)elf.value;
       elf.LUINT16( "Entries in section header" ); secSize = (short)elf.value;
-      elf.LUINT16( "Section names" );
+      elf.LUINT16( "Section names" ); namesEl = (short)elf.value;
     }
     else
     {
@@ -81,7 +82,7 @@ public class Headers extends Data
       elf.UINT16( "Entires in Program header" ); prSize = (Short)elf.value;
       elf.UINT16( "Section header entire size" ); elSecSize = (Short)elf.value;
       elf.UINT16( "Entries in section header" ); secSize = (short)elf.value;
-      elf.UINT16( "Section names" );
+      elf.UINT16( "Section names" ); namesEl = (short)elf.value;
     }
 
     elf.setEvent(this::elfInfo);
@@ -158,26 +159,47 @@ public class Headers extends Data
 
   //*********************************Reads the Section header***********************************
 
-  public Descriptor readSections() throws IOException
+  class sect
   {
-    file.seek( Sections ); Descriptor sec = new Descriptor( file );
+    long virtual, offset, size, name;
 
-    long offset=0, virtual=0, size=0;
+    public sect()
+    {
+
+    }
+  }
+
+  public Descriptor[] readSections( JDNode Sec ) throws IOException
+  {
+    JDNode tNode;
+
+    sect s;
+
+    java.util.LinkedList<Descriptor> des = new java.util.LinkedList<Descriptor>();
+    java.util.LinkedList<sect> st = new java.util.LinkedList<sect>();
+
+    Descriptor sec, Name;
+
+    //Now we dump all sections excluding the name section we just dumped.
+
+    file.seek( Sections ); sec = new Descriptor( file ); des.add( sec );
 
     for( int i = 0; i < secSize; i++ )
     {
+      s = new sect();
+
       sec.Array("Section entire " + i + "", elSecSize );
 
       if( is64Bit )
       {
         if( isLittle )
         {
-          sec.LUINT32("Entire Name Location");
+          sec.LUINT32("Entire Name Location"); s.name = (Integer)sec.value;
           sec.LUINT32("Section Type");
           sec.LUINT64("flag 64");
-          sec.LUINT64("Virtual"); virtual = (long)sec.value;
-          sec.LUINT64("Offset"); offset = (long)sec.value;
-          sec.LUINT64("Section Size"); size = (long)sec.value;
+          sec.LUINT64("Virtual"); s.virtual = (long)sec.value;
+          sec.LUINT64("Offset"); s.offset = (long)sec.value;
+          sec.LUINT64("Section Size"); s.size = (long)sec.value;
           sec.LUINT32("LINK");
           sec.LUINT32("INFO");
           sec.LUINT64("Alignment");
@@ -185,12 +207,12 @@ public class Headers extends Data
         }
         else
         {
-          sec.UINT32("Entire Name Location");
+          sec.UINT32("Entire Name Location"); s.name = (Integer)sec.value;
           sec.UINT32("Section Type");
           sec.UINT64("flag 64");
-          sec.UINT64("Virtual"); virtual = (long)sec.value;
-          sec.UINT64("Offset"); offset = (long)sec.value;
-          sec.UINT64("Section Size"); size = (long)sec.value;
+          sec.UINT64("Virtual"); s.virtual = (long)sec.value;
+          sec.UINT64("Offset"); s.offset = (long)sec.value;
+          sec.UINT64("Section Size"); s.size = (long)sec.value;
           sec.UINT32("LINK");
           sec.UINT32("INFO");
           sec.UINT64("Alignment");
@@ -201,12 +223,12 @@ public class Headers extends Data
       {
         if( isLittle )
         {
-          sec.LUINT32("Entire Name Location");
+          sec.LUINT32("Entire Name Location"); s.name = (Integer)sec.value;
           sec.LUINT32("Section Type");
           sec.LUINT32("flag 32");
-          sec.LUINT32("Virtual"); virtual = ((Integer)sec.value).longValue();
-          sec.LUINT32("Offset"); offset = ((Integer)sec.value).longValue();
-          sec.LUINT32("Section Size"); size = ((Integer)sec.value).longValue();
+          sec.LUINT32("Virtual"); s.virtual = ((Integer)sec.value).longValue();
+          sec.LUINT32("Offset"); s.offset = ((Integer)sec.value).longValue();
+          sec.LUINT32("Section Size"); s.size = ((Integer)sec.value).longValue();
           sec.LUINT32("LINK");
           sec.LUINT32("INFO");
           sec.LUINT32("Alignment");
@@ -214,12 +236,12 @@ public class Headers extends Data
         }
         else
         {
-          sec.UINT32("Entire Name Location");
+          sec.UINT32("Entire Name Location"); s.name = (Integer)sec.value;
           sec.UINT32("Section Type");
           sec.UINT32("flag 64");
-          sec.UINT32("Virtual"); virtual = ((Integer)sec.value).longValue();
-          sec.UINT32("Offset"); offset = ((Integer)sec.value).longValue();
-          sec.UINT32("Section Size"); size = ((Integer)sec.value).longValue();
+          sec.UINT32("Virtual"); s.virtual = ((Integer)sec.value).longValue();
+          sec.UINT32("Offset"); s.offset = ((Integer)sec.value).longValue();
+          sec.UINT32("Section Size"); s.size = ((Integer)sec.value).longValue();
           sec.UINT32("LINK");
           sec.UINT32("INFO");
           sec.UINT32("Alignment");
@@ -227,10 +249,32 @@ public class Headers extends Data
         }
       }
 
-      file.addV( offset, size, virtual, size );
+      file.addV( s.offset, s.size, s.virtual, s.size ); st.add(s);
+    }
+
+    //Create nodes for section data and names.
+
+    for( int i = 0, i2 = 1; i < secSize; i++ )
+    {
+      s = st.get(i);
+      
+      if( s.name == 0 )
+      {
+        Sec.add( new JDNode( "No Name"+".h" ) );
+      }
+      else
+      {
+        file.seekV(s.name); Name = new Descriptor(file,true);
+      
+        Name.String8("Section name location", (byte)0x00); des.add(Name);
+
+        tNode = new JDNode( Name.value + "", new long[]{ 1, i2 } ); tNode.add( new JDNode( "Section Data.h", new long[]{ -2, s.offset, s.virtual, s.size } ) );
+      
+        Sec.add( tNode ); i2 += 1;
+      }
     }
       
-    return( sec );
+    return( des.toArray( new Descriptor[ des.size() ] ) );
   }
 
   //Detailed description of the MZ header.

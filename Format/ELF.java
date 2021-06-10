@@ -11,13 +11,15 @@ public class ELF extends Data implements JDEventListener
 {
   //Descriptors.
 
-  private Descriptor[][] des = new Descriptor[1][];
+  private Descriptor[][] des = new Descriptor[2][];
 
   private JDNode root;
 
   //ELF reader plugins.
 
-  private static Headers header = new Headers(); 
+  private static Headers header = new Headers();
+
+  JDNode SECHeader;
 
   //Read the ELF binary.
 
@@ -35,7 +37,7 @@ public class ELF extends Data implements JDEventListener
   
     JDNode ELFHeader = new JDNode( "ELF Header.h", new long[]{ 0, 0 } );
     JDNode PHeader = new JDNode( "Program Header.h", new long[]{ 0, 1 } );
-    JDNode SECHeader = new JDNode( "Section Header.h", new long[]{ 0, 2 } );
+    SECHeader = new JDNode( "Section Header", new long[]{ 1, 0 } );
     
     des[0] = new Descriptor[3];
 
@@ -43,7 +45,7 @@ public class ELF extends Data implements JDEventListener
     {
       des[0][0] = header.readELF(); root.add(ELFHeader); 
       if( !Data.error ) { des[0][1] = header.readProgram(); root.add(PHeader); }
-      if( !Data.error ) { des[0][2] = header.readSections(); root.add(SECHeader); }
+      if( !Data.error ) { des[1] = header.readSections(SECHeader); root.add(SECHeader); }
     }
     catch(Exception e) { Data.error = true; }
 
@@ -76,21 +78,33 @@ public class ELF extends Data implements JDEventListener
 
   public void open( JDEvent e )
   {
-    if( e.getArg(0) < 0)
+    if( e.getArg(0) < 0 )
     {
-      if( coreLoaded )
+      if( e.getArg(0) == -1 )
       {
-        core.setBit( is64Bit ? X86.x86_64 : X86.x86_32 );
+        if( coreLoaded )
+        {
+          core.setBit( is64Bit ? X86.x86_64 : X86.x86_32 );
 
-        core.locations.clear(); core.data_off.clear(); core.code.clear();
+          core.locations.clear(); core.data_off.clear(); core.code.clear();
 
-        core.locations.add( e.getArg(1) );
+          core.locations.add( e.getArg(1) );
 
-        core.disLoc(0); ds.setDescriptor( core ); return;
+          core.disLoc(0); ds.setDescriptor( core ); return;
+        }
+        else { try{ file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) ); } catch(Exception er) { } noCore(); }
       }
-      else { try{ file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) ); } catch(Exception er) { } noCore(); }
+      else if( e.getArg(0) == -2 )
+      {
+        try
+        {
+          file.seekV( e.getArg(2) );
+          Offset.setSelected( e.getArg(1), e.getArg(1) + e.getArg(3) - 1 );
+          Virtual.setSelected( e.getArg(2), e.getArg(2) + e.getArg(3) - 1 );
+        } catch( Exception er ) { } 
+      }
     }
-    if( e.getArgs().length > 1 ) { ds.setDescriptor( des[ (int)e.getArg(0) ][ (int)e.getArg(1) ] ); }
+    else if( e.getArgs().length > 1 ) { ds.setDescriptor( des[ (int)e.getArg(0) ][ (int)e.getArg(1) ] ); }
   }
 
   public void noCore() { info("<html>The processor core engine is not supported.</html>"); }
