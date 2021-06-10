@@ -5,6 +5,8 @@ import swingIO.tree.*;
 import javax.swing.tree.*;
 import Format.ELFDecode.*;
 
+import core.x86.*;
+
 public class ELF extends Data implements JDEventListener
 {
   //Descriptors.
@@ -39,19 +41,31 @@ public class ELF extends Data implements JDEventListener
 
     try
     {
-      des[0][0] = header.readELF();
-      if( !Data.error ) { des[0][1] = header.readProgram(); }
-      if( !Data.error ) { des[0][2] = header.readSections(); }
+      des[0][0] = header.readELF(); root.add(ELFHeader); 
+      if( !Data.error ) { des[0][1] = header.readProgram(); root.add(PHeader); }
+      if( !Data.error ) { des[0][2] = header.readSections(); root.add(SECHeader); }
     }
     catch(Exception e) { Data.error = true; }
 
     if( !Data.error )
     {
+      //Load processor core type.
+
+      if( coreType == 0x0003 || coreType == 0x003E )
+      {
+        if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
+              
+        core.setEvent( this::Dis ); coreLoaded = true;
+      }
+      else { coreLoaded = false; }
+
+      //Machine code start pos.
+
+      root.add( new JDNode( "Program Start (Machine code).h", new long[]{ -1, start } ) );
+
       //Decode the setup headers.
     
-      root.add(ELFHeader); root.add(PHeader); root.add(SECHeader); ((DefaultTreeModel)tree.getModel()).setRoot(root);
-
-      file.Events = true;
+      ((DefaultTreeModel)tree.getModel()).setRoot(root); file.Events = true;
 
       //Set the default node.
 
@@ -62,6 +76,22 @@ public class ELF extends Data implements JDEventListener
 
   public void open( JDEvent e )
   {
+    if( e.getArg(0) < 0)
+    {
+      if( coreLoaded )
+      {
+        core.setBit( is64Bit ? X86.x86_64 : X86.x86_32 );
+
+        core.locations.clear(); core.data_off.clear(); core.code.clear();
+
+        core.locations.add( e.getArg(1) );
+
+        core.disLoc(0); ds.setDescriptor( core ); return;
+      }
+      else { try{ file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) ); } catch(Exception er) { } noCore(); }
+    }
     if( e.getArgs().length > 1 ) { ds.setDescriptor( des[ (int)e.getArg(0) ][ (int)e.getArg(1) ] ); }
   }
+
+  public void noCore() { info("<html>The processor core engine is not supported.</html>"); }
 }

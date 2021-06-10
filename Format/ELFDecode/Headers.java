@@ -162,6 +162,8 @@ public class Headers extends Data
   {
     file.seek( Sections ); Descriptor sec = new Descriptor( file );
 
+    long offset=0, virtual=0, size=0;
+
     for( int i = 0; i < secSize; i++ )
     {
       sec.Array("Section entire " + i + "", elSecSize );
@@ -173,9 +175,9 @@ public class Headers extends Data
           sec.LUINT32("Entire Name Location");
           sec.LUINT32("Section Type");
           sec.LUINT64("flag 64");
-          sec.LUINT64("Virtual");
-          sec.LUINT64("Offset");
-          sec.LUINT64("Section Size");
+          sec.LUINT64("Virtual"); virtual = (long)sec.value;
+          sec.LUINT64("Offset"); offset = (long)sec.value;
+          sec.LUINT64("Section Size"); size = (long)sec.value;
           sec.LUINT32("LINK");
           sec.LUINT32("INFO");
           sec.LUINT64("Alignment");
@@ -186,9 +188,9 @@ public class Headers extends Data
           sec.UINT32("Entire Name Location");
           sec.UINT32("Section Type");
           sec.UINT64("flag 64");
-          sec.UINT64("Virtual");
-          sec.UINT64("Offset");
-          sec.UINT64("Section Size");
+          sec.UINT64("Virtual"); virtual = (long)sec.value;
+          sec.UINT64("Offset"); offset = (long)sec.value;
+          sec.UINT64("Section Size"); size = (long)sec.value;
           sec.UINT32("LINK");
           sec.UINT32("INFO");
           sec.UINT64("Alignment");
@@ -202,9 +204,9 @@ public class Headers extends Data
           sec.LUINT32("Entire Name Location");
           sec.LUINT32("Section Type");
           sec.LUINT32("flag 32");
-          sec.LUINT32("Virtual");
-          sec.LUINT32("Offset");
-          sec.LUINT32("Section Size");
+          sec.LUINT32("Virtual"); virtual = ((Integer)sec.value).longValue();
+          sec.LUINT32("Offset"); offset = ((Integer)sec.value).longValue();
+          sec.LUINT32("Section Size"); size = ((Integer)sec.value).longValue();
           sec.LUINT32("LINK");
           sec.LUINT32("INFO");
           sec.LUINT32("Alignment");
@@ -215,15 +217,17 @@ public class Headers extends Data
           sec.UINT32("Entire Name Location");
           sec.UINT32("Section Type");
           sec.UINT32("flag 64");
-          sec.UINT32("Virtual");
-          sec.UINT32("Offset");
-          sec.UINT32("Section Size");
+          sec.UINT32("Virtual"); virtual = ((Integer)sec.value).longValue();
+          sec.UINT32("Offset"); offset = ((Integer)sec.value).longValue();
+          sec.UINT32("Section Size"); size = ((Integer)sec.value).longValue();
           sec.UINT32("LINK");
           sec.UINT32("INFO");
           sec.UINT32("Alignment");
           sec.UINT32("Entire Size");
         }
       }
+
+      file.addV( offset, size, virtual, size );
     }
       
     return( sec );
