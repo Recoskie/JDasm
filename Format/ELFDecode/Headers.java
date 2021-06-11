@@ -159,36 +159,39 @@ public class Headers extends Data
 
   //*********************************Reads the Section header***********************************
 
-  class sect
-  {
-    long virtual, offset, size, name;
-
-    public sect()
-    {
-
-    }
-  }
+  private class sect { long virtual, offset, size, name; }
 
   public Descriptor[] readSections( JDNode Sec ) throws IOException
   {
-    JDNode tNode;
+    /******************************************************************************************
+    Note we can dump the section names first as follows.
 
-    sect s;
+    file.seek( Sections + ( elSecSize * namesEl ) + ( is64Bit ? 16 : 12 ) ); file.read(24);
+
+    virtual = file.toLLong(); offset = file.toLLong(8); size = file.toLLong(16);
+
+    file.addV( offset, size, virtual, size );
+
+    However some sections will write over it before the names section is added.
+    So it is best we read and dump the sections first then locate the section names. 
+    ******************************************************************************************/
 
     java.util.LinkedList<Descriptor> des = new java.util.LinkedList<Descriptor>();
     java.util.LinkedList<sect> st = new java.util.LinkedList<sect>();
 
     Descriptor sec, Name;
 
-    //Now we dump all sections excluding the name section we just dumped.
+    JDNode tNode;
+
+    sect s;
+
+    //Now we dump all sections to create The ELF Virtual space.
 
     file.seek( Sections ); sec = new Descriptor( file ); des.add( sec );
 
     for( int i = 0; i < secSize; i++ )
     {
-      s = new sect();
-
-      sec.Array("Section entire " + i + "", elSecSize );
+      s = new sect(); sec.Array("Section entire " + i + "", elSecSize );
 
       if( is64Bit )
       {
@@ -252,7 +255,7 @@ public class Headers extends Data
       file.addV( s.offset, s.size, s.virtual, s.size ); st.add(s);
     }
 
-    //Create nodes for section data and names.
+    //Create nodes for section data, and names.
 
     for( int i = 0, i2 = 1; i < secSize; i++ )
     {
@@ -260,7 +263,11 @@ public class Headers extends Data
       
       if( s.name == 0 )
       {
-        Sec.add( new JDNode( "No Name"+".h" ) );
+        tNode = new JDNode( "No Name" + ( s.size == 0 ? ".h" : "" ) );
+
+        if( s.size > 0 ) { tNode.add( new JDNode( "Section Data.h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
+
+        Sec.add( tNode );
       }
       else
       {
@@ -268,7 +275,9 @@ public class Headers extends Data
       
         Name.String8("Section name location", (byte)0x00); des.add(Name);
 
-        tNode = new JDNode( Name.value + "", new long[]{ 1, i2 } ); tNode.add( new JDNode( "Section Data.h", new long[]{ -2, s.offset, s.virtual, s.size } ) );
+        tNode = new JDNode( Name.value + ( s.size == 0 ? ".h" : "" ), new long[]{ 1, i2 } );
+        
+        if( s.size > 0 ) { tNode.add( new JDNode( "Section Data.h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
       
         Sec.add( tNode ); i2 += 1;
       }

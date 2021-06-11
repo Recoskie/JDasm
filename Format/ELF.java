@@ -31,7 +31,7 @@ public class ELF extends Data implements JDEventListener
 
     //Root node is now the target file.
  
-    ((DefaultTreeModel)tree.getModel()).setRoot(null); tree.setRootVisible(true); tree.setShowsRootHandles(true); root = new JDNode( fc.getFileName() + ".exe" );
+    ((DefaultTreeModel)tree.getModel()).setRoot(null); tree.setRootVisible(true); tree.setShowsRootHandles(true); root = new JDNode( fc.getFileName() + ( fc.getFileName().indexOf(".") > 0 ? "" : ".elf" ) );
 
     //The ELF header.
   
@@ -44,8 +44,8 @@ public class ELF extends Data implements JDEventListener
     try
     {
       des[0][0] = header.readELF(); root.add(ELFHeader); 
-      if( !Data.error ) { des[0][1] = header.readProgram(); root.add(PHeader); }
-      if( !Data.error ) { des[1] = header.readSections(SECHeader); root.add(SECHeader); }
+      if( !Data.error && Data.programHeader != 0 ) { des[0][1] = header.readProgram(); root.add(PHeader); }
+      if( !Data.error && Data.Sections != 0 ) { des[1] = header.readSections(SECHeader); root.add(SECHeader); }
     }
     catch(Exception e) { Data.error = true; }
 
@@ -56,6 +56,8 @@ public class ELF extends Data implements JDEventListener
       if( coreType == 0x0003 || coreType == 0x003E )
       {
         if( core == null || core.type() != 0 ){ core = new X86( file ); } else { core.setTarget( file ); }
+
+        core.setBit( is64Bit ? X86.x86_64 : X86.x86_32 );
               
         core.setEvent( this::Dis ); coreLoaded = true;
       }
@@ -84,8 +86,6 @@ public class ELF extends Data implements JDEventListener
       {
         if( coreLoaded )
         {
-          core.setBit( is64Bit ? X86.x86_64 : X86.x86_32 );
-
           core.locations.clear(); core.data_off.clear(); core.code.clear();
 
           core.locations.add( e.getArg(1) );
@@ -99,6 +99,7 @@ public class ELF extends Data implements JDEventListener
         try
         {
           file.seekV( e.getArg(2) );
+          file.seek( e.getArg(1) ); //Incase virtual address was overwritten.
           Offset.setSelected( e.getArg(1), e.getArg(1) + e.getArg(3) - 1 );
           Virtual.setSelected( e.getArg(2), e.getArg(2) + e.getArg(3) - 1 );
         } catch( Exception er ) { } 
