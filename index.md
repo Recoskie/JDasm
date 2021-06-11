@@ -105,8 +105,6 @@ I plan on creating a ARM core disassembler as well, for mobile devices.
 
 # Planed tools.
 
-- [ ] Linux ELF reader.
-
 - [ ] Mach-o, for MacOSX reader.
 
 - [ ] Bitmap reader, and editor.
