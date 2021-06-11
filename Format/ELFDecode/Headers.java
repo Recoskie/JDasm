@@ -172,7 +172,7 @@ public class Headers extends Data
 
     file.addV( offset, size, virtual, size );
 
-    However some sections will write over it before the names section is added.
+    However some sections will write over it. Thus the names section is usually added last.
     So it is best we read and dump the sections first then locate the section names. 
     ******************************************************************************************/
 
@@ -296,7 +296,8 @@ public class Headers extends Data
   "This also changes the section header size, and program header size.</html>",
   "<html>This byte is set 1, for little endian byte order, or is set 2 for big endian byte order.<br /><br />" +
   "This affects interpretation of multi-byte fields.</html>",
-  "<html>Usually set to 1 for the original and current version of ELF.</html>",
+  "<html>Usually set to 1 for the original and current version of ELF.<br /><br />" +
+  "Higher version numbers may be eventually added. Note 0 is an invalid setting.</html>",
   "<html>Identifies the target operating system (It is often set to 0 regardless of the target platform).<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Value</td><td>Operating System</td></tr>" +
@@ -321,7 +322,20 @@ public class Headers extends Data
   "</table></html>",
   "<html>The intended version of the OS this EFL is meant to run on.</html>",
   "<html>Currently unused, should be zero.</html>",
-  "<html>Application File type.</html>",
+  "<html>Application File type.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Value</td><td>Type</td></tr>" +
+  "<tr><td>0000</td><td>An unknown type.</td></tr>" +
+  "<tr><td>0001</td><td>A relocatable file.</td></tr>" +
+  "<tr><td>0002</td><td>An executable file.</td></tr>" +
+  "<tr><td>0003</td><td>A shared object.</td></tr>" +
+  "<tr><td>0004</td><td>A core file.</td></tr>" +
+  "<tr><td>FE00</td><td>Operating system specific.</td></tr>" +
+  "<tr><td>FEFF</td><td>Operating system specific.</td></tr>" +
+  "<tr><td>FF00</td><td>Processor specific.</td></tr>" +
+  "<tr><td>FFFF</td><td>Processor specific.</td></tr>" +
+  "</table>" +
+  "</html>",
   "<html>The processor type the binary is meant to run natively on. Majority of linux/unix systems are Intel/AMD x86.<br /><br />" +
   "The tow settings you will see the most are 003E = 64bit x86, and 0003 = 32bit x86.<br /><br />" +
   "<table border=\"1\">" +
@@ -375,7 +389,7 @@ public class Headers extends Data
   "<tr><td>00F7</td><td>Berkeley Packet Filter</td></tr>" +
   "<tr><td>0101</td><td>WDC 65C816</td></tr>" +
   "</table></html>",
-  "<html>Usually Set to 1 for the original version of ELF.</html>",
+  "<html>Usually Set to 1 for the original version of ELF.<br /><br />Note 0 is an invalid setting.</html>",
   "<html>This is the Virtual address that the program starts at.</html>",
   "<html>Location to the program information header.</html>",
   "<html>Location to the section header.</html>",
