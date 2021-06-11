@@ -45,7 +45,7 @@ You can also read disk drives sector by sector (one binary digit at a time from 
 
 This application currently supports Microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx, .com, DOS, MS-DOS.
 
-Also supports Unix/Linux binaries formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod, .so
+Also supports Unix/Linux binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod, .so
 
 Also supports .efi binary boot binaries, and boot sector disassembly.
 
