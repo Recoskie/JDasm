@@ -271,7 +271,7 @@ public class Headers extends Data
       }
       else
       {
-        file.seekV(s.name); Name = new Descriptor(file,true);
+        file.seekV(s.name); Name = new Descriptor(file,true); Name.setEvent( this::secName );
       
         Name.String8("Section name location", (byte)0x00); des.add(Name);
 
@@ -297,7 +297,7 @@ public class Headers extends Data
   "<html>This byte is set 1, for little endian byte order, or is set 2 for big endian byte order.<br /><br />" +
   "This affects interpretation of multi-byte fields.</html>",
   "<html>Usually set to 1 for the original and current version of ELF.<br /><br />" +
-  "Higher version numbers may be eventually added. Note 0 is an invalid setting.</html>",
+  "Higher version numbers may be eventually added.<br /><br />Note 0 is an invalid setting.</html>",
   "<html>Identifies the target operating system (It is often set to 0 regardless of the target platform).<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Value</td><td>Operating System</td></tr>" +
@@ -397,11 +397,11 @@ public class Headers extends Data
   "<html>The size of this ELF header.</html>",
   "<html>The size of each entry in the program header.<br /><br />Multiplying this by how many entries gives us the size of the program header.<br /><br />" +
   "These tow properties are used to read the Program header.</html>",
-  "<html>The Number of entry in the program Header.<br /><br />Multiplying this by the size of each entire gives us the size of the program header.<br /><br />" +
+  "<html>The Number of entries in the program Header.<br /><br />Multiplying this by the size of each entire gives us the size of the program header.<br /><br />" +
   "These tow properties are used to read the Program header.</html>",
   "<html>The size of each entry in the section header.<br /><br />Multiplying this by how many entries gives us the size of the section header.<br /><br />" +
   "These tow properties are used to read the Section header.</html>",
-  "<html>The Number of entry in the section Header.<br /><br />Multiplying this by the size of each entire gives us the size of the section header.<br /><br />" +
+  "<html>The Number of entries in the section Header.<br /><br />Multiplying this by the size of each entire gives us the size of the section header.<br /><br />" +
   "These tow properties are used to read the Section header.</html>",
   "<html>The section header entire that contains the section names.</html>"
 };
@@ -416,5 +416,45 @@ public class Headers extends Data
     {
       info( ELFInfo[ el ] );
     }
+  }
+
+  public void secName( int el )
+  {
+    info("<html>Sections are given default names by compilers, for what they are used for.<br /><br />" +
+    "Bellow is a list of section names and what they are used for.<br /><br >" +
+    "<table border=\"1\">"+
+    "<tr><td>Section Name.</td><td>Use</td></tr>" +
+    "<tr><td>.shstrtab</td><td>This section holds section names.</td></tr>" +
+    "<tr><td>.init</td><td>This section holds executable instructions, for program initialization. Section is run before calling the main program entry point.</td></tr>" +
+    "<tr><td>.text</td><td>This section holds executable instructions, for the main program entry.</td></tr>" +
+    "<tr><td>.fini</td><td>This section holds executable instructions, for ending the program (exit/taskkill).</td></tr>" +
+    "<tr><td>.note</td><td>This section holds various notes.</td></tr>" +
+    "<tr><td>.rodata1</td><td>This section holds read-only data.</td></tr>" +
+    "<tr><td>.bss</td><td>This section holds uninitialized data. The system initializes the data with zeros when the program begins to run.</td></tr>" +
+    "<tr><td>.data</td><td>This section holds initialize data that contribute to the program's memory.</td></tr>" +
+    "<tr><td>.data1</td><td>This section holds initialize data that contribute to the program's memory.</td></tr>" +
+    "<tr><td>.line</td><td>This section holds line number information for symbolic debugging, which describes the correspondence between the program source and the machine code.</td></tr>" +
+    "<tr><td>.comment</td><td>This section holds version control information.</td></tr>" +
+    "<tr><td>.ctors</td><td>This section holds initialized pointers to the C++ constructor functions.</td></tr>" +
+    "<tr><td>.debug</td><td>This section holds information for symbolic debugging.</td></tr>" +
+    "<tr><td>.dtors</td><td>This section holds initialized pointers to the C++ destructor functions.</td></tr>" +
+    "<tr><td>.dynamic</td><td>This section holds dynamic linking information.</td></tr>" +
+    "<tr><td>.dynstr</td><td>This section holds strings needed for dynamic linking.</td></tr>" +
+    "<tr><td>.dynsym</td><td>This section holds the dynamic linking symbol table.</td></tr>" +
+    "<tr><td>.gnu.version</td><td>This section holds the version symbol array.</td></tr>" +
+    "<tr><td>.gnu.version_d</td><td>This section holds the version symbol definitions array.</td></tr>" +
+    "<tr><td>.gnu.version_r</td><td>This section holds the version symbol needed elements array.</td></tr>" +
+    "<tr><td>.got</td><td>This section holds the global offset table.</td></tr>" +
+    "<tr><td>.hash</td><td>This section holds a symbol hash table.</td></tr>" +
+    "<tr><td>.interp</td><td>This section holds the pathname of a program interpreter.</td></tr>" +
+    "<tr><td>.note.ABI-tag</td><td>This section is used to declare the expected run-time of the ELF image. It may include the operating system name and its run-time versions.</td></tr>" +
+    "<tr><td>.note.gnu.build-id</td><td>This section is used to hold an ID that uniquely identifies the contents of the ELF image.  Different files with the same build ID should contain the same executable content.</td></tr>" +
+    "<tr><td>.note.GNU-stack</td><td>This section is used in Linux object files for declaring stack attributes.</td></tr>" +
+    "<tr><td>.note.openbsd.ident</td><td>OpenBSD native executables usually contain this section to identify themselves so the kernel can bypass any compatibility ELF binary emulation tests when loading the file.</td></tr>" +
+    "<tr><td>.plt</td><td>This section holds the procedure linkage table.</td></tr>" +
+    "<tr><td>.strtab</td><td>This section holds strings, most commonly the strings that represent the names associated with symbol table entries.</td></tr>" +
+    "<tr><td>.symtab</td><td>This section holds a symbol table.</td></tr>" +
+    "</table>" +
+    "</html>");
   }
 }

@@ -106,6 +106,10 @@ public class ELF extends Data implements JDEventListener
       }
     }
     else if( e.getArgs().length > 1 ) { ds.setDescriptor( des[ (int)e.getArg(0) ][ (int)e.getArg(1) ] ); }
+    else
+    {
+      ds.clear(); info("<html></html>");
+    }
   }
 
   public void noCore() { info("<html>The processor core engine is not supported.</html>"); }
