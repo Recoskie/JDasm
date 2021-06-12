@@ -486,9 +486,10 @@ public class Headers extends Data
   {
     if( el < 0 )
     {
-      info("<html>The section header is the most important header in an ELF.<br /><br />" +
-      "The sections setup the applications virtual space, and also specifies which sections have processor instruction.<br /><br />" +
-      "The sections can also specify if the section can only be read, or written to.</html>");
+      info("<html>The section header can have relocations sections. Symbol tables.<br /><br />" +
+      "Also weather the section has processor instructions, or is readable, writable.<br /><br />" +
+      "The sections also can have a name. In which the program header had no names.<br /><br />" +
+      "Each section has a type setting for what type of data it has. Similar to the program header.</html>");
     }
     else
     {
@@ -501,7 +502,7 @@ public class Headers extends Data
     info("<html>Sections are given default names by compilers, for what they are used for.<br /><br />" +
     "Bellow is a list of section names and what they are used for.<br /><br >" +
     "Also take note that a sections name does not have to reflect it's intended operation all the time." +
-    "As the flag settings in sections identify what the section does.<br /><br />" +
+    "As the section type, and flag settings identify what the section does.<br /><br />" +
     "<table border=\"1\">"+
     "<tr><td>Section Name.</td><td>Use</td></tr>" +
     "<tr><td>.shstrtab</td><td>This section holds section names.</td></tr>" +
