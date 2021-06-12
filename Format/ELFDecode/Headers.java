@@ -120,11 +120,11 @@ public class Headers extends Data
         }
         else
         {
-          prh.LUINT32("Offset"); offset = ((long)prh.value);
-          prh.LUINT32("Virtual"); virtual = ((long)prh.value);
+          prh.LUINT32("Offset"); offset = ((int)prh.value);
+          prh.LUINT32("Virtual"); virtual = ((int)prh.value);
           prh.LUINT32("Physical Address");
-          prh.LUINT32("Section size"); flen = ((long)prh.value);
-          prh.LUINT32("Size in memory"); vlen = ((long)prh.value);
+          prh.LUINT32("Section size"); flen = ((int)prh.value);
+          prh.LUINT32("Size in memory"); vlen = ((int)prh.value);
           prh.LUINT32("flag");
           prh.LUINT32("Alignment");
         }
@@ -145,11 +145,11 @@ public class Headers extends Data
         }
         else
         {
-          prh.UINT32("Offset"); offset = ((long)prh.value);
-          prh.UINT32("Virtual"); virtual = ((long)prh.value);
+          prh.UINT32("Offset"); offset = ((int)prh.value);
+          prh.UINT32("Virtual"); virtual = ((int)prh.value);
           prh.UINT32("Physical Address");
-          prh.UINT32("Section size"); flen = ((long)prh.value);
-          prh.UINT32("Size in memory"); vlen = ((long)prh.value);
+          prh.UINT32("Section size"); flen = ((int)prh.value);
+          prh.UINT32("Size in memory"); vlen = ((int)prh.value);
           prh.UINT32("flag");
           prh.UINT32("Alignment");
         }
