@@ -19,7 +19,7 @@ public class ELF extends Data implements JDEventListener
 
   private static Headers header = new Headers();
 
-  JDNode SECHeader;
+  JDNode Headers = new JDNode("Headers");
 
   //Read the ELF binary.
 
@@ -36,18 +36,20 @@ public class ELF extends Data implements JDEventListener
     //The ELF header.
   
     JDNode ELFHeader = new JDNode( "ELF Header.h", new long[]{ 0, 0 } );
-    JDNode PHeader = new JDNode( "Program Header.h", new long[]{ 0, 1 } );
-    SECHeader = new JDNode( "Section Header", new long[]{ 1, 0 } );
+    JDNode PHeader = new JDNode( "Program Header", new long[]{ 0, 1 } );
+    JDNode SECHeader = new JDNode( "Section Header", new long[]{ 1, 0 } );
     
     des[0] = new Descriptor[3];
 
     try
     {
-      des[0][0] = header.readELF(); root.add(ELFHeader); 
-      if( !Data.error && Data.programHeader != 0 ) { des[0][1] = header.readProgram(); root.add(PHeader); }
-      if( !Data.error && Data.Sections != 0 ) { des[1] = header.readSections(SECHeader); root.add(SECHeader); }
+      des[0][0] = header.readELF(); Headers.add(ELFHeader); 
+      if( !Data.error && Data.programHeader != 0 ) { des[0][1] = header.readProgram(PHeader); Headers.add(PHeader); }
+      if( !Data.error && Data.Sections != 0 ) { des[1] = header.readSections(SECHeader); Headers.add(SECHeader); }
     }
     catch(Exception e) { Data.error = true; }
+
+    root.add(Headers);
 
     if( !Data.error )
     {
@@ -108,7 +110,7 @@ public class ELF extends Data implements JDEventListener
     else if( e.getArgs().length > 1 ) { ds.setDescriptor( des[ (int)e.getArg(0) ][ (int)e.getArg(1) ] ); }
     else
     {
-      ds.clear(); info("<html></html>");
+      ds.clear();
     }
   }
 

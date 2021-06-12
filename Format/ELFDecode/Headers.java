@@ -94,9 +94,11 @@ public class Headers extends Data
 
   //*********************************Reads the Program header***********************************
 
-  public Descriptor readProgram() throws IOException
+  public Descriptor readProgram( JDNode Pr ) throws IOException
   {
-    file.seek( programHeader ); Descriptor prh = new Descriptor( file );
+    file.seek( programHeader ); Descriptor prh = new Descriptor( file ); prh.setEvent( this::prInfo );
+
+    long offset = 0, flen = 0, virtual = 0, vlen = 0; 
 
     for( int i = 0; i < prSize; i++ )
     {
@@ -108,22 +110,22 @@ public class Headers extends Data
 
         if( is64Bit )
         {
-          prh.LUINT32("flag 64");
-          prh.LUINT64("Offset");
-          prh.LUINT64("Virtual");
+          prh.LUINT32("flag");
+          prh.LUINT64("Offset"); offset = ((long)prh.value);
+          prh.LUINT64("Virtual"); virtual = ((long)prh.value);
           prh.LUINT64("Physical Address");
-          prh.LUINT64("Section size");
-          prh.LUINT64("Size in memory");
+          prh.LUINT64("Section size"); flen = ((long)prh.value);
+          prh.LUINT64("Size in memory"); vlen = ((long)prh.value);
           prh.LUINT64("Alignment");
         }
         else
         {
-          prh.LUINT32("Offset");
-          prh.LUINT32("Virtual");
+          prh.LUINT32("Offset"); offset = ((long)prh.value);
+          prh.LUINT32("Virtual"); virtual = ((long)prh.value);
           prh.LUINT32("Physical Address");
-          prh.LUINT32("Section size");
-          prh.LUINT32("Size in memory");
-          prh.LUINT32("flag 32");
+          prh.LUINT32("Section size"); flen = ((long)prh.value);
+          prh.LUINT32("Size in memory"); vlen = ((long)prh.value);
+          prh.LUINT32("flag");
           prh.LUINT32("Alignment");
         }
       }
@@ -133,25 +135,29 @@ public class Headers extends Data
 
         if( is64Bit )
         {
-          prh.UINT32("flag 64");
-          prh.UINT64("Offset");
-          prh.UINT64("Virtual");
+          prh.UINT32("flag");
+          prh.UINT64("Offset"); offset = ((long)prh.value);
+          prh.UINT64("Virtual"); virtual = ((long)prh.value);
           prh.UINT64("Physical Address");
-          prh.UINT64("Section size");
-          prh.UINT64("Size in memory");
+          prh.UINT64("Section size"); flen = ((long)prh.value);
+          prh.UINT64("Size in memory"); vlen = ((long)prh.value);
           prh.UINT64("Alignment");
         }
         else
         {
-          prh.UINT32("Offset");
-          prh.UINT32("Virtual");
+          prh.UINT32("Offset"); offset = ((long)prh.value);
+          prh.UINT32("Virtual"); virtual = ((long)prh.value);
           prh.UINT32("Physical Address");
-          prh.UINT32("Section size");
-          prh.UINT32("Size in memory");
-          prh.UINT32("flag 32");
+          prh.UINT32("Section size"); flen = ((long)prh.value);
+          prh.UINT32("Size in memory"); vlen = ((long)prh.value);
+          prh.UINT32("flag");
           prh.UINT32("Alignment");
         }
       }
+
+      file.addV( offset, flen, virtual, vlen );
+
+      Pr.add( new JDNode( "Program entire " + i + " (Data).h", new long[]{ -2, offset, virtual, flen } ) );
     }
       
     return( prh );
@@ -163,19 +169,6 @@ public class Headers extends Data
 
   public Descriptor[] readSections( JDNode Sec ) throws IOException
   {
-    /******************************************************************************************
-    Note we can dump the section names first as follows.
-
-    file.seek( Sections + ( elSecSize * namesEl ) + ( is64Bit ? 16 : 12 ) ); file.read(24);
-
-    virtual = file.toLLong(); offset = file.toLLong(8); size = file.toLLong(16);
-
-    file.addV( offset, size, virtual, size );
-
-    However some sections will write over it. Thus the names section is usually added last.
-    So it is best we read and dump the sections first then locate the section names. 
-    ******************************************************************************************/
-
     java.util.LinkedList<Descriptor> des = new java.util.LinkedList<Descriptor>();
     java.util.LinkedList<sect> st = new java.util.LinkedList<sect>();
 
@@ -187,7 +180,7 @@ public class Headers extends Data
 
     //Now we dump all sections to create The ELF Virtual space.
 
-    file.seek( Sections ); sec = new Descriptor( file ); des.add( sec );
+    file.seek( Sections ); sec = new Descriptor( file ); des.add( sec ); sec.setEvent( this::secInfo );
 
     for( int i = 0; i < secSize; i++ )
     {
@@ -199,7 +192,7 @@ public class Headers extends Data
         {
           sec.LUINT32("Entire Name Location"); s.name = (Integer)sec.value;
           sec.LUINT32("Section Type");
-          sec.LUINT64("flag 64");
+          sec.LUINT64("flags");
           sec.LUINT64("Virtual"); s.virtual = (long)sec.value;
           sec.LUINT64("Offset"); s.offset = (long)sec.value;
           sec.LUINT64("Section Size"); s.size = (long)sec.value;
@@ -212,7 +205,7 @@ public class Headers extends Data
         {
           sec.UINT32("Entire Name Location"); s.name = (Integer)sec.value;
           sec.UINT32("Section Type");
-          sec.UINT64("flag 64");
+          sec.UINT64("flags");
           sec.UINT64("Virtual"); s.virtual = (long)sec.value;
           sec.UINT64("Offset"); s.offset = (long)sec.value;
           sec.UINT64("Section Size"); s.size = (long)sec.value;
@@ -228,7 +221,7 @@ public class Headers extends Data
         {
           sec.LUINT32("Entire Name Location"); s.name = (Integer)sec.value;
           sec.LUINT32("Section Type");
-          sec.LUINT32("flag 32");
+          sec.LUINT32("flags");
           sec.LUINT32("Virtual"); s.virtual = ((Integer)sec.value).longValue();
           sec.LUINT32("Offset"); s.offset = ((Integer)sec.value).longValue();
           sec.LUINT32("Section Size"); s.size = ((Integer)sec.value).longValue();
@@ -241,7 +234,7 @@ public class Headers extends Data
         {
           sec.UINT32("Entire Name Location"); s.name = (Integer)sec.value;
           sec.UINT32("Section Type");
-          sec.UINT32("flag 64");
+          sec.UINT32("flags");
           sec.UINT32("Virtual"); s.virtual = ((Integer)sec.value).longValue();
           sec.UINT32("Offset"); s.offset = ((Integer)sec.value).longValue();
           sec.UINT32("Section Size"); s.size = ((Integer)sec.value).longValue();
@@ -286,7 +279,7 @@ public class Headers extends Data
     return( des.toArray( new Descriptor[ des.size() ] ) );
   }
 
-  //Detailed description of the MZ header.
+  //Detailed description of the ELF header.
 
   public static final String[] ELFInfo = new String[]{"<html>The signature must always be 7F, 45, 4C, 46 = ELF.<br /><br />" + 
   "It must be at the start of any unix/linux binary.<br /><br />" +
@@ -418,10 +411,97 @@ public class Headers extends Data
     }
   }
 
+  //Detailed description of the program header.
+
+  public static final String[] PrInfo = new String[]{"<html>A program entire consisting of a location, and size of data, and type of data.<br /><br />" +
+  "These sections specify important information. Such as dynamic link libraries needed to do a operation or function.<br /><br />" +
+  "It also is used to load data into memory. The flag setting can specify if the data can be read, or wrote to while the program is running.<br /><br />" +
+  "The flag settings can also specify if the section has runnable processor instructions with read, or write privileges.</html>",
+  "<html>This value specifies the kind of data that is in this program section.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Value</td><td>Data type</td></tr>" +
+  "<tr><td>00000000</td><td>Program header table entry unused</td></tr>" +
+  "<tr><td>00000001</td><td>Loadable segment (Data used by program instructions).</td></tr>" +
+  "<tr><td>00000002</td><td>Dynamic linking information.</td></tr>" +
+  "<tr><td>00000003</td><td>Interpreter information.</td></tr>" +
+  "<tr><td>00000004</td><td>Auxiliary information.</td></tr>" +
+  "<tr><td>00000005</td><td>Reserved, for future use.</td></tr>" +
+  "<tr><td>00000006</td><td>Section contains the program header itself.</td></tr>" +
+  "<tr><td>00000007</td><td>Thread-Local Storage.</td></tr>" +
+  "<tr><td>6474E550</td><td>GCC .eh_frame_hdr.</td></tr>" +
+  "<tr><td>6474E551</td><td>Indicates stack executability.</td></tr>" +
+  "<tr><td>6474E552</td><td>Read-only after relocation.</td></tr>" +
+  "<tr><td>60000000 to 6FFFFFFF</td><td>Reserved, for operating system.</td></tr>" +
+  "<tr><td>70000000 to 7FFFFFFF</td><td>Reserved, for processor specific.</td></tr>" +
+  "</table>",
+  "<html>The flags value should be viewed in binary.<br /><br />" +
+  "The value 00001111111100000000000000000011 means CPU can run it's bytes as instruction, is writable, and is OS specific.<br /><br />" +
+  "The table bellow show the break down of what bits have to be set for each setting.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>00000000000000000000000000000001</td><td>This section can be run directly on CPU.</td></tr>" +
+  "<tr><td>00000000000000000000000000000010</td><td>It is legal to write to this section.</td></tr>" +
+  "<tr><td>00000000000000000000000000000100</td><td>It is legal to read bytes from the section.</td></tr>" +
+  "<tr><td>00001111111100000000000000000000</td><td>OS specific.</td></tr>" +
+  "<tr><td>11110000000000000000000000000000</td><td>Processor specific.</td></tr>" +
+  "</table></html>",
+  "<html>Start position for the data in File.</html>",
+  "<html>The position to put the data in virtual space.</html>",
+  "<html>On systems where physical address is relevant (no RAM).</html>",
+  "<html>The size of the section from the Start position for the data in File..</html>",
+  "<html>Size in memory. If this is bigger than the size read in file. The remaining data is set 0.</html>",
+  "<html>0 and 1 specify no alignment. Otherwise should be a power of 2.</html>"
+};
+
+  public void prInfo( int el )
+  {
+    if( el < 0 )
+    {
+      info("<html>The program header specifies dynamic link libraries needed to do a operation, or function.<br /><br />" +
+      "It also is used to load data into memory.<br /><br />" +
+      "The flag settings can specify if the data can be read, or wrote to while the program is running.<br /><br />" +
+      "The flag settings can also specify if the section has runnable processor instructions with read, or write privileges.</html>");
+    }
+    else
+    {
+      if(!is64Bit){ if( el >= 2 ) { el+=1; } el = ( el == 8 ? 2 : ( el > 8 ? el - 1 : el) ); } info( PrInfo[ el % 9 ] );
+    }
+  }
+
+  //Detailed description of the Section header.
+
+  public static final String[] SecInfo = new String[]{"<html>Array</html>",
+  "<html>The Virtual address location to this sections name.</html>",
+  "<html>3</html>",
+  "<html>4</html>",
+  "<html>5</html>",
+  "<html>6</html>",
+  "<html>7</html>",
+  "<html>8</html>",
+  "<html>9</html>",
+  "<html>10</html>",
+  "<html>11</html>"
+};
+
+  public void secInfo( int el )
+  {
+    if( el < 0 )
+    {
+      info("<html>The section header is the most important header in an ELF.<br /><br />" +
+      "The sections setup the applications virtual space, and also specifies which sections have processor instruction.<br /><br />" +
+      "The sections can also specify if the section can only be read, or written to.</html>");
+    }
+    else
+    {
+      info( SecInfo[ el % 11 ] );
+    }
+  }
+
   public void secName( int el )
   {
     info("<html>Sections are given default names by compilers, for what they are used for.<br /><br />" +
     "Bellow is a list of section names and what they are used for.<br /><br >" +
+    "Also take note that a sections name does not have to reflect it's intended operation all the time." +
+    "As the flag settings in sections identify what the section does.<br /><br />" +
     "<table border=\"1\">"+
     "<tr><td>Section Name.</td><td>Use</td></tr>" +
     "<tr><td>.shstrtab</td><td>This section holds section names.</td></tr>" +
