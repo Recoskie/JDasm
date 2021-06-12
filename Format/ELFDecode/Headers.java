@@ -256,7 +256,7 @@ public class Headers extends Data
       
       if( s.name == 0 )
       {
-        tNode = new JDNode( "No Name" + ( s.size == 0 ? ".h" : "" ) );
+        tNode = new JDNode( "No Name #" + i + ( s.size == 0 ? ".h" : "" ) );
 
         if( s.size > 0 ) { tNode.add( new JDNode( "Section Data.h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
 
@@ -268,7 +268,7 @@ public class Headers extends Data
       
         Name.String8("Section name location", (byte)0x00); des.add(Name);
 
-        tNode = new JDNode( Name.value + ( s.size == 0 ? ".h" : "" ), new long[]{ 1, i2 } );
+        tNode = new JDNode( Name.value + " #" + i + ( s.size == 0 ? ".h" : "" ), new long[]{ 1, i2 } );
         
         if( s.size > 0 ) { tNode.add( new JDNode( "Section Data.h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
       
@@ -469,17 +469,63 @@ public class Headers extends Data
 
   //Detailed description of the Section header.
 
-  public static final String[] SecInfo = new String[]{"<html>Array</html>",
+  public static final String[] SecInfo = new String[]{"<html>An array of sections containing different kinds of data.</html>",
   "<html>The Virtual address location to this sections name.</html>",
-  "<html>3</html>",
-  "<html>4</html>",
-  "<html>5</html>",
-  "<html>6</html>",
-  "<html>7</html>",
-  "<html>8</html>",
-  "<html>9</html>",
-  "<html>10</html>",
-  "<html>11</html>"
+  "<html>This specifies the type of data is in this section.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Value</td><td>Type</td></tr>" +
+  "<tr><td>00000000</td><td>No data type specified.</td></tr>" +
+  "<tr><td>00000001</td><td>Program data.</td></tr>" +
+  "<tr><td>00000002</td><td>Symbol table.</td></tr>" +
+  "<tr><td>00000003</td><td>String table.</td></tr>" +
+  "<tr><td>00000004</td><td>Relocation entries with addends.</td></tr>" +
+  "<tr><td>00000005</td><td>Symbol hash table.</td></tr>" +
+  "<tr><td>00000006</td><td>Dynamic linking information.</td></tr>" +
+  "<tr><td>00000007</td><td>Notes.</td></tr>" +
+  "<tr><td>00000008</td><td>Program space with no data (bss).</td></tr>" +
+  "<tr><td>00000009</td><td>Relocation entries, no addends.</td></tr>" +
+  "<tr><td>0000000B</td><td>Dynamic linker symbol table.</td></tr>" +
+  "<tr><td>0000000E</td><td>Array of constructors.</td></tr>" +
+  "<tr><td>0000000F</td><td>Array of destructors.</td></tr>" +
+  "<tr><td>00000010</td><td>Array of pre-constructors.</td></tr>" +
+  "<tr><td>00000011</td><td>Section group.</td></tr>" +
+  "<tr><td>00000012</td><td>Extended section indices.</td></tr>" +
+  "<tr><td>60000000</td><td>Start OS-specific.</td></tr>" +
+  "<tr><td>6FFFFFF5</td><td>Object attributes.</td></tr>" +
+  "<tr><td>6FFFFFF6</td><td>GNU-style hash table.</td></tr>" +
+  "<tr><td>6FFFFFF7</td><td>Prelink library list.</td></tr>" +
+  "<tr><td>6FFFFFF8</td><td>Checksum for DSO content.</td></tr>" +
+  "<tr><td>6FFFFFFD</td><td>Version definition section.</td></tr>" +
+  "<tr><td>6FFFFFFE</td><td>Version needs section.</td></tr>" +
+  "<tr><td>6FFFFFFF</td><td>Version symbol table.</td></tr>" +
+  "<tr><td>70000000 to 7FFFFFFF</td><td>Processor specific.</td></tr>" +
+  "<tr><td>80000000 to 8FFFFFFF</td><td>Application specific.</td></tr>" +
+  "</table></html>",
+  "<html>The flags value should be viewed in binary.<br /><br />" +
+  "The value 00001111111100000000000000000101 means CPU can run it's bytes as instruction, is writable, and is OS specific.<br /><br />" +
+  "The table bellow show the break down of what bits have to be set for each setting.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>00000000000000000000000000000001</td><td>It is legal to write to this section.</td></tr>" +
+  "<tr><td>00000000000000000000000000000010</td><td>Occupies memory during execution.</td></tr>" +
+  "<tr><td>00000000000000000000000000000100</td><td>This section can be run directly on CPU.</td></tr>" +
+  "<tr><td>00000000000000000000000000010000</td><td>Might be merged.</td></tr>" +
+  "<tr><td>00000000000000000000000000100000</td><td>Contains nul-terminated strings.</td></tr>" +
+  "<tr><td>00000000000000000000000001000000</td><td>`sh_info' contains SHT index.</td></tr>" +
+  "<tr><td>00000000000000000000000010000000</td><td>Preserve order after combining.</td></tr>" +
+  "<tr><td>00000000000000000000000100000000</td><td>Non-standard OS specific handling required.</td></tr>" +
+  "<tr><td>00000000000000000000001000000000</td><td>Section is member of a group.</td></tr>" +
+  "<tr><td>00000000000000000000010000000000</td><td>Section holds local thread data.</td></tr>" +
+  "<tr><td>00000000000000000000100000000000</td><td>Section with compressed data.</td></tr>" +
+  "<tr><td>00001111111100000000000000000000</td><td>OS specific.</td></tr>" +
+  "<tr><td>11110000000000000000000000000000</td><td>Processor specific.</td></tr>" +
+  "</table></html>",
+  "<html>The virtual address to put the section.</html>",
+  "<html>The offset of section in the file.</html>",
+  "<html>The size of the section to read and put in virtual space.</html>",
+  "<html></html>",
+  "<html></html>",
+  "<html>0 and 1 specify no alignment. Otherwise should be a power of 2.</html>",
+  "<html>Contains the size, in bytes, of each entry, for sections that contain fixed-size entries. Otherwise, this field contains zero.</html>"
 };
 
   public void secInfo( int el )
@@ -487,7 +533,7 @@ public class Headers extends Data
     if( el < 0 )
     {
       info("<html>The section header can have relocations sections. Symbol tables.<br /><br />" +
-      "Also weather the section has processor instructions, or is readable, writable.<br /><br />" +
+      "Also weather the section has processor instructions, or is writable.<br /><br />" +
       "The sections also can have a name. In which the program header had no names.<br /><br />" +
       "Each section has a type setting for what type of data it has. Similar to the program header.</html>");
     }
