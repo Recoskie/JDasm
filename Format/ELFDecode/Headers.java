@@ -404,8 +404,12 @@ public class Headers extends Data
   "</table></html>",
   "<html>Usually Set to 1 for the original version of ELF.<br /><br />Note 0 is an invalid setting.</html>",
   "<html>This is the Virtual address that the program starts at.</html>",
-  "<html>Location to the program information header.</html>",
-  "<html>Location to the section header.</html>",
+  "<html>Location to the program header.<br /><br />" +
+  "The program header sets up the link libraries. Dumps data used by the program. Also defines sections that must run before calling the program start address.</html>",
+  "<html>Location to the section header.<br /><br />" +
+  "The section header maps all sections of the program even program header entires with actual names.<br /><br />" +
+  "The section header maps other things like debugging information. Which is not really necessary to make the program runnable.<br /><br />" +
+  "The section header defines additional sections, of the program, while the program header are sections that are executed and run before the program starts.</html>",
   "<html>Interpretation of this field depends on the CPU.</html>",
   "<html>The size of this ELF header.</html>",
   "<html>The size of each entry in the program header.<br /><br />Multiplying this by how many entries gives us the size of the program header.<br /><br />" +
