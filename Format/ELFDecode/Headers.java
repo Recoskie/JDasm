@@ -469,10 +469,10 @@ public class Headers extends Data
     if( el < 0 )
     {
       info("<html>The program header specifies dynamic link libraries needed to do a operation, or function.<br /><br />" +
-      "It also is used to load data into memory, and to run small sections of code before calling the start address of the program.<br /><br />" +
-      "The flag settings can specify if the data can be read, or wrote to while the program is running.<br /><br />" +
-      "The flag settings can also specify if the section should be run immediately because it has runnable processor instructions with adjustable read, or write privileges.<br /><br />" +
-      "The program header usually maps the \".init\" code section and runs it before the program starts.</html>");
+      "It also is used to load data into memory, and to run small sections of code before calling the start address defined in the ELF header.<br /><br />" +
+      "The flag settings can also specify if the section should be run immediately, because it has runnable processor instructions.<br /><br />" +
+      "The flag settings can specify read, and write privileges of sections while the program is running.<br /><br />" +
+      "The program header usually maps the \".init\" code section, and runs it before the program starts.</html>");
     }
     else
     {
@@ -547,11 +547,12 @@ public class Headers extends Data
     {
       info("<html>The section header defines the rest of the information of the program.<br /><br />" +
       "The sections in the section header are not run right away before the binary start like the program header.<br /><br />" +
-      "The section header can have relocations sections. Symbol tables, for debuggers.<br /><br />" +
-      "Also weather the section has processor instructions, or is writable (callable functions, or methods).<br /><br />" +
+      "The section header can have relocations sections. Also symbol tables, for debuggers.<br /><br />" +
+      "Also weather the section has processor instructions (callable functions, or methods), or is writable.<br /><br />" +
       "The section header may dump sections that have previously been run, or used by the program header such as the \".init\" section.<br /><br />" +
       "The sections have a name. In which the program header had no names.<br /><br />" +
-      "Each section has a type setting for what type of data it has. Similar to the program header.</html>");
+      "Each section has a type setting for what type of data it has. Similar to the program header.<br /><br />" +
+      "After all sections are placed in memory. The defined start address is called that is defined in the ELF header.</html>");
     }
     else
     {
@@ -562,7 +563,7 @@ public class Headers extends Data
   public void secName( int el )
   {
     info("<html>Sections are given default names by compilers, for what they are used for.<br /><br />" +
-    "Bellow is a list of section names and what they are used for.<br /><br >" +
+    "Bellow is a list of section names and what they are may be used for.<br /><br >" +
     "Also take note that a sections name does not have to reflect it's intended operation all the time." +
     "As the section type, and flag settings identify what the section does.<br /><br />" +
     "<table border=\"1\">"+
