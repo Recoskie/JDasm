@@ -43,5 +43,5 @@ public class Data extends Window.Window
 
   public static swingIO.tree.JDNode code = new swingIO.tree.JDNode("Code Sections"); //Sections that are executable.
   public static swingIO.tree.JDNode data = new swingIO.tree.JDNode("Data Sections"); //Sections that are straight data.
-  public static swingIO.tree.JDNode lnk = new swingIO.tree.JDNode("Link libraries Sections"); //Linked libraries method sections.
+  public static swingIO.tree.JDNode lnk = new swingIO.tree.JDNode("Link libraries"); //Linked libraries method sections.
 }

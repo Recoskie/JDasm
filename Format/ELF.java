@@ -90,7 +90,16 @@ public class ELF extends Data implements JDEventListener
         info("<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
         "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named sections called \".init\".<br /><br />" +
         "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.<br /><br />" +
-        "The \".fini\" section is the termination code that is called to exit the program.</html>");
+        "The \".fini\" section is the termination code that is called to exit the program.<br /><br />" +
+        "We do not have to call it a \".init\" section. As sections are that have runnable processor instructions are defined by flag setting.<br /><br />" +
+        "Any program header entire that is marked as code will run before the programs start position set in the ELF header.</html>");
+    }
+    
+    else if( e.getPath().equals("Link libraries") )
+    {
+      info("<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
+      "The \".dynamic\" section is usually run by the \"program header\" before the \"section header\" maps it as \".dynamic\".<br /><br />" +
+      "Also take note that the section types are identified by type setting, so it could have any name you like if you wanted.</html>");
     }
 
     if( e.getArg(0) < 0 )
