@@ -98,7 +98,9 @@ public class Headers extends Data
   {
     file.seek( programHeader ); Descriptor prh = new Descriptor( file ); prh.setEvent( this::prInfo );
 
-    long offset = 0, flen = 0, virtual = 0, vlen = 0; 
+    long offset = 0, flen = 0, virtual = 0, vlen = 0;
+
+    int type = 0, flags = 0; //Used to organize sections.
 
     for( int i = 0; i < prSize; i++ )
     {
@@ -106,11 +108,11 @@ public class Headers extends Data
 
       if( isLittle )
       {
-        prh.LUINT32("Type");
+        prh.LUINT32("Type"); type = (int)prh.value;
 
         if( is64Bit )
         {
-          prh.LUINT32("flag");
+          prh.LUINT32("flag"); flags = (int)prh.value;
           prh.LUINT64("Offset"); offset = ((long)prh.value);
           prh.LUINT64("Virtual"); virtual = ((long)prh.value);
           prh.LUINT64("Physical Address");
@@ -125,17 +127,17 @@ public class Headers extends Data
           prh.LUINT32("Physical Address");
           prh.LUINT32("Section size"); flen = ((int)prh.value);
           prh.LUINT32("Size in memory"); vlen = ((int)prh.value);
-          prh.LUINT32("flag");
+          prh.LUINT32("flag"); flags = (int)prh.value;
           prh.LUINT32("Alignment");
         }
       }
       else
       {
-        prh.UINT32("Type");
+        prh.UINT32("Type"); type = (int)prh.value;
 
         if( is64Bit )
         {
-          prh.UINT32("flag");
+          prh.UINT32("flag"); flags = (int)prh.value;
           prh.UINT64("Offset"); offset = ((long)prh.value);
           prh.UINT64("Virtual"); virtual = ((long)prh.value);
           prh.UINT64("Physical Address");
@@ -150,7 +152,7 @@ public class Headers extends Data
           prh.UINT32("Physical Address");
           prh.UINT32("Section size"); flen = ((int)prh.value);
           prh.UINT32("Size in memory"); vlen = ((int)prh.value);
-          prh.UINT32("flag");
+          prh.UINT32("flag"); flags = (int)prh.value;
           prh.UINT32("Alignment");
         }
       }
@@ -158,6 +160,10 @@ public class Headers extends Data
       file.addV( offset, flen, virtual, vlen );
 
       Pr.add( new JDNode( "Program entire " + i + " (Data).h", new long[]{ -2, offset, virtual, flen } ) );
+
+      //If section has runnable machine code instruction.
+
+      if( ( flags & 1 ) == 1 ){ code.add( new JDNode("Program entire " + i + ".h", new long[]{ -1, virtual } ) ); }
     }
       
     return( prh );
@@ -165,7 +171,7 @@ public class Headers extends Data
 
   //*********************************Reads the Section header***********************************
 
-  private class sect { long virtual, offset, size, name; }
+  private class sect { long virtual, offset, size, name, flags; int type; }
 
   public Descriptor[] readSections( JDNode Sec ) throws IOException
   {
@@ -190,9 +196,9 @@ public class Headers extends Data
       {
         if( isLittle )
         {
-          sec.LUINT32("Entire Name Location"); s.name = (Integer)sec.value;
-          sec.LUINT32("Section Type");
-          sec.LUINT64("flags");
+          sec.LUINT32("Entire Name Location"); s.name = (int)sec.value;
+          sec.LUINT32("Section Type"); s.type = (int)sec.value;
+          sec.LUINT64("flags"); s.flags = (long)sec.value;
           sec.LUINT64("Virtual"); s.virtual = (long)sec.value;
           sec.LUINT64("Offset"); s.offset = (long)sec.value;
           sec.LUINT64("Section Size"); s.size = (long)sec.value;
@@ -203,9 +209,9 @@ public class Headers extends Data
         }
         else
         {
-          sec.UINT32("Entire Name Location"); s.name = (Integer)sec.value;
-          sec.UINT32("Section Type");
-          sec.UINT64("flags");
+          sec.UINT32("Entire Name Location"); s.name = (int)sec.value;
+          sec.UINT32("Section Type"); s.type = (int)sec.value;
+          sec.UINT64("flags"); s.flags = (long)sec.value;
           sec.UINT64("Virtual"); s.virtual = (long)sec.value;
           sec.UINT64("Offset"); s.offset = (long)sec.value;
           sec.UINT64("Section Size"); s.size = (long)sec.value;
@@ -219,12 +225,12 @@ public class Headers extends Data
       {
         if( isLittle )
         {
-          sec.LUINT32("Entire Name Location"); s.name = (Integer)sec.value;
-          sec.LUINT32("Section Type");
-          sec.LUINT32("flags");
-          sec.LUINT32("Virtual"); s.virtual = ((Integer)sec.value).longValue();
-          sec.LUINT32("Offset"); s.offset = ((Integer)sec.value).longValue();
-          sec.LUINT32("Section Size"); s.size = ((Integer)sec.value).longValue();
+          sec.LUINT32("Entire Name Location"); s.name = (int)sec.value;
+          sec.LUINT32("Section Type"); s.type = (int)sec.value;
+          sec.LUINT32("flags"); s.flags = (int)sec.value;
+          sec.LUINT32("Virtual"); s.virtual = (int)sec.value;
+          sec.LUINT32("Offset"); s.offset = (int)sec.value;
+          sec.LUINT32("Section Size"); s.size = (int)sec.value;
           sec.LUINT32("LINK");
           sec.LUINT32("INFO");
           sec.LUINT32("Alignment");
@@ -232,12 +238,12 @@ public class Headers extends Data
         }
         else
         {
-          sec.UINT32("Entire Name Location"); s.name = (Integer)sec.value;
-          sec.UINT32("Section Type");
-          sec.UINT32("flags");
-          sec.UINT32("Virtual"); s.virtual = ((Integer)sec.value).longValue();
-          sec.UINT32("Offset"); s.offset = ((Integer)sec.value).longValue();
-          sec.UINT32("Section Size"); s.size = ((Integer)sec.value).longValue();
+          sec.UINT32("Entire Name Location"); s.name = (int)sec.value;
+          sec.UINT32("Section Type"); s.type = (int)sec.value;
+          sec.UINT32("flags"); s.flags = (int)sec.value;
+          sec.UINT32("Virtual"); s.virtual = (int)sec.value;
+          sec.UINT32("Offset"); s.offset = (int)sec.value;
+          sec.UINT32("Section Size"); s.size = (int)sec.value;
           sec.UINT32("LINK");
           sec.UINT32("INFO");
           sec.UINT32("Alignment");
@@ -272,7 +278,13 @@ public class Headers extends Data
         
         if( s.size > 0 ) { tNode.add( new JDNode( "Section Data.h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
       
-        Sec.add( tNode ); i2 += 1;
+        Sec.add( tNode );
+        
+        //If section has runnable machine code instruction.
+
+        if( ( s.flags & 4 ) == 4 ){ code.add( new JDNode( Name.value + ".h", new long[]{ -1, s.virtual } ) ); }
+        
+        i2 += 1;
       }
     }
       
@@ -457,9 +469,10 @@ public class Headers extends Data
     if( el < 0 )
     {
       info("<html>The program header specifies dynamic link libraries needed to do a operation, or function.<br /><br />" +
-      "It also is used to load data into memory.<br /><br />" +
+      "It also is used to load data into memory, and to run small sections of code before calling the start address of the program.<br /><br />" +
       "The flag settings can specify if the data can be read, or wrote to while the program is running.<br /><br />" +
-      "The flag settings can also specify if the section has runnable processor instructions with read, or write privileges.</html>");
+      "The flag settings can also specify if the section should be run immediately because it has runnable processor instructions with adjustable read, or write privileges.<br /><br />" +
+      "The program header usually maps the \".init\" code section and runs it before the program starts.</html>");
     }
     else
     {
@@ -532,9 +545,12 @@ public class Headers extends Data
   {
     if( el < 0 )
     {
-      info("<html>The section header can have relocations sections. Symbol tables.<br /><br />" +
-      "Also weather the section has processor instructions, or is writable.<br /><br />" +
-      "The sections also can have a name. In which the program header had no names.<br /><br />" +
+      info("<html>The section header defines the rest of the information of the program.<br /><br />" +
+      "The sections in the section header are not run right away before the binary start like the program header.<br /><br />" +
+      "The section header can have relocations sections. Symbol tables, for debuggers.<br /><br />" +
+      "Also weather the section has processor instructions, or is writable (callable functions, or methods).<br /><br />" +
+      "The section header may dump sections that have previously been run, or used by the program header such as the \".init\" section.<br /><br />" +
+      "The sections have a name. In which the program header had no names.<br /><br />" +
       "Each section has a type setting for what type of data it has. Similar to the program header.</html>");
     }
     else

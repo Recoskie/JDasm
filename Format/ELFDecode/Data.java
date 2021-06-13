@@ -38,4 +38,10 @@ public class Data extends Window.Window
   //Check if core type is loaded.
 
   public static boolean coreLoaded = false;
+
+  //Sections can be separated by the data they contain.
+
+  public static swingIO.tree.JDNode code = new swingIO.tree.JDNode("Code Sections"); //Sections that are executable.
+  public static swingIO.tree.JDNode data = new swingIO.tree.JDNode("Data Sections"); //Sections that are straight data.
+  public static swingIO.tree.JDNode lnk = new swingIO.tree.JDNode("Link libraries Sections"); //Linked libraries method sections.
 }
