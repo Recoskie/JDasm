@@ -52,6 +52,7 @@ public class ELF extends Data implements JDEventListener
     root.add(Headers);
 
     if( code.getChildCount() > 0 ) { root.add( code ); }
+    if( lnk.getChildCount() > 0 ) { root.add( lnk ); }
 
     if( !Data.error )
     {
@@ -117,7 +118,22 @@ public class ELF extends Data implements JDEventListener
         } catch( Exception er ) { } 
       }
     }
-    else if( e.getArgs().length > 1 ) { ds.setDescriptor( des[ (int)e.getArg(0) ][ (int)e.getArg(1) ] ); }
+    else if( e.getArgs().length > 1 )
+    {
+      if( e.getArg(0) >= 2 )
+      {
+        info("<html>There is currently no reader for this section yet.</html>");
+
+        try
+        {
+          file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) + e.getArg(2) - 1 );
+          Offset.setSelected( file.getFilePointer(), file.getFilePointer() + e.getArg(2) - 1 );
+        } catch( Exception er ) { } 
+
+        ds.clear();
+      }
+      else { ds.setDescriptor( des[ (int)e.getArg(0) ][ (int)e.getArg(1) ] ); }
+    }
     else
     {
       ds.clear();

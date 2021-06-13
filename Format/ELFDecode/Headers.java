@@ -164,6 +164,10 @@ public class Headers extends Data
       //If section has runnable machine code instruction.
 
       if( ( flags & 1 ) == 1 ){ code.add( new JDNode("Program entire " + i + ".h", new long[]{ -1, virtual } ) ); }
+
+      //If section is link libraries.
+
+      if( type == 2 ){ lnk.add( new JDNode("Program entire " + i + ".h", new long[]{ 2, virtual, vlen } ) ); }
     }
       
     return( prh );
@@ -283,6 +287,10 @@ public class Headers extends Data
         //If section has runnable machine code instruction.
 
         if( ( s.flags & 4 ) == 4 ){ code.add( new JDNode( Name.value + ".h", new long[]{ -1, s.virtual } ) ); }
+
+        //If section is link libraries.
+
+        if( s.type == 6 ){ lnk.add( new JDNode( Name.value + ".h", new long[]{ 2, s.virtual, s.size } ) ); }
         
         i2 += 1;
       }
