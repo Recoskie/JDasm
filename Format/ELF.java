@@ -87,7 +87,7 @@ public class ELF extends Data implements JDEventListener
     if( e.getPath().equals("Code Sections") )
     {
         info("<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
-        "The \".init\" section is usually run by the program header before the section header maps it as a named sections called \".init\".<br /><br />" +
+        "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named sections called \".init\".<br /><br />" +
         "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.<br /><br />" +
         "The \".fini\" section is the termination code that is called to exit the program.</html>");
     }
