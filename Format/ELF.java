@@ -53,6 +53,9 @@ public class ELF extends Data implements JDEventListener
 
     if( code.getChildCount() > 0 ) { root.add( code ); }
     if( lnk.getChildCount() > 0 ) { root.add( lnk ); }
+    if( reloc.getChildCount() > 0 ) { root.add( reloc ); }
+    if( debug.getChildCount() > 0 ) { root.add( debug ); }
+    if( data.getChildCount() > 0 ) { root.add( data ); }
 
     if( !Data.error )
     {
@@ -78,7 +81,7 @@ public class ELF extends Data implements JDEventListener
 
       //Set the default node.
 
-      tree.setSelectionPath( new TreePath( ELFHeader.getPath() ) ); open( new JDEvent( this, "", new long[]{ 0, 0 } ) );
+      tree.setSelectionPath( new TreePath( Headers.getPath() ) ); open( new JDEvent( this, "", new long[]{ 0, 0 } ) );
     }
     else{ file.Events = true; }
   }
