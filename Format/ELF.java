@@ -93,15 +93,15 @@ public class ELF extends Data implements JDEventListener
       info("<html>An ELF application Has three headers.<br /><br />" +
       "The ELF header defines the CPU type. The start address of the program after all the headers are read.<br /><br />" +
       "The ELF header defines the location to the \"Program Header\", and \"Section header\".<br /><br />" +
-      "The program header defines the link libraries, and section that must be loaded, or run before calling the start address of the program.<br /><br />" +
-      "The Section header gives every section of the program a name. It defines the rest of the program such as debugging information if any.<br /><br />" +
-      "After the program header sections are executed, and loaded, and all section placed in memory. Then the programs start address is called.</html>");
+      "The \"program header\" defines the link libraries, and section that must be loaded, or run before calling the start address of the program.<br /><br />" +
+      "The \"Section header\" gives every section of the program a name. It defines the rest of the program such as debugging information if any.<br /><br />" +
+      "After the \"program header\" sections are executed, and loaded, and all \"section\" placed in memory. Then the programs start address is called.</html>");
     }
 
     else if( e.getPath().equals("Code Sections") )
     {
       info("<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
-      "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named sections called \".init\".<br /><br />" +
+      "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named section called \".init\".<br /><br />" +
       "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.<br /><br />" +
       "The \".fini\" section is the termination code that is called to exit the program.<br /><br />" +
       "We do not have to call it a \".init\" section. As sections that have runnable processor instructions are defined by flag setting.</html>");
