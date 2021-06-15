@@ -19,7 +19,35 @@ public class ELF extends Data implements JDEventListener
 
   private static Headers header = new Headers();
 
-  JDNode Headers = new JDNode("Headers");
+  JDNode Headers = new JDNode("Headers", 0);
+
+  private static final sec[] Reader = new sec[] { null, null, null }; //Section type readers.
+  public static final String[] SInfo = new String[]
+  {
+    //ELF headers.
+    "<html>An ELF application Has three headers.<br /><br />" +
+    "The ELF header defines the CPU type. The start address of the program after all the headers are read.<br /><br />" +
+    "The ELF header defines the location to the \"Program Header\", and \"Section header\".<br /><br />" +
+    "The \"program header\" defines the link libraries, and section that must be loaded, or run before calling the start address of the program.<br /><br />" +
+    "The \"Section header\" gives every section of the program a name. It defines the rest of the program such as debugging information if any.<br /><br />" +
+    "After the \"program header\" sections are executed, and loaded, and all \"section\" placed in memory. Then the programs start address is called.</html>",
+    //Code Sections.
+    "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
+    "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named section called \".init\".<br /><br />" +
+    "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.<br /><br />" +
+    "The \".fini\" section is the termination code that is called to exit the program.<br /><br />" +
+    "We do not have to call it a \".init\" section. As sections that have runnable processor instructions are defined by flag setting.</html>",
+    //Link libraries.
+    "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
+    "The \".dynamic\" section is usually run by the \"program header\" before the \"section header\" maps it as \".dynamic\".<br /><br />" +
+    "Also take note that the section types are identified by type setting, so it could have any name you like if you wanted.</html>",
+    //Relocation.
+    "<html>Relocation are only used if the ELF sections can not be palaced at set Virtual address locations.</html>",
+    //Debug information.
+    "<html>Line number information relative to the emitted machine code, and may also contain variable names.</html>",
+    //Sections defined as data only.
+    "<html>Some sections are marked as data only. Such sections may be file data, or sections used by external tools.</html>"
+  };
 
   //Read the ELF binary.
 
@@ -52,9 +80,7 @@ public class ELF extends Data implements JDEventListener
     root.add(Headers);
 
     if( code.getChildCount() > 0 ) { root.add( code ); }
-    if( lnk.getChildCount() > 0 ) { root.add( lnk ); }
-    if( reloc.getChildCount() > 0 ) { root.add( reloc ); }
-    if( debug.getChildCount() > 0 ) { root.add( debug ); }
+    for( int i = 0; i < sections.length; i++ ) { if ( sections[i].getChildCount() > 0 ) { root.add( sections[i] ); } }
     if( data.getChildCount() > 0 ) { root.add( data ); }
 
     if( !Data.error )
@@ -88,33 +114,9 @@ public class ELF extends Data implements JDEventListener
 
   public void open( JDEvent e )
   {
-    if( e.getPath().equals("Headers") )
-    {
-      info("<html>An ELF application Has three headers.<br /><br />" +
-      "The ELF header defines the CPU type. The start address of the program after all the headers are read.<br /><br />" +
-      "The ELF header defines the location to the \"Program Header\", and \"Section header\".<br /><br />" +
-      "The \"program header\" defines the link libraries, and section that must be loaded, or run before calling the start address of the program.<br /><br />" +
-      "The \"Section header\" gives every section of the program a name. It defines the rest of the program such as debugging information if any.<br /><br />" +
-      "After the \"program header\" sections are executed, and loaded, and all \"section\" placed in memory. Then the programs start address is called.</html>");
-    }
+    if( e.getArgs().length == 1 ) { info(SInfo[(int)e.getArg(0)]); ds.clear(); }
 
-    else if( e.getPath().equals("Code Sections") )
-    {
-      info("<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
-      "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named section called \".init\".<br /><br />" +
-      "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.<br /><br />" +
-      "The \".fini\" section is the termination code that is called to exit the program.<br /><br />" +
-      "We do not have to call it a \".init\" section. As sections that have runnable processor instructions are defined by flag setting.</html>");
-    }
-    
-    else if( e.getPath().equals("Link libraries") )
-    {
-      info("<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
-      "The \".dynamic\" section is usually run by the \"program header\" before the \"section header\" maps it as \".dynamic\".<br /><br />" +
-      "Also take note that the section types are identified by type setting, so it could have any name you like if you wanted.</html>");
-    }
-
-    if( e.getArg(0) < 0 )
+    else if( e.getArg(0) < 0 )
     {
       if( e.getArg(0) == -1 )
       {
@@ -124,7 +126,7 @@ public class ELF extends Data implements JDEventListener
 
           core.locations.add( e.getArg(1) );
 
-          core.disLoc(0); ds.setDescriptor( core ); return;
+          core.disLoc(0); ds.setDescriptor( core );
         }
         else { try{ file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) ); } catch(Exception er) { } noCore(); }
       }
@@ -132,18 +134,26 @@ public class ELF extends Data implements JDEventListener
       {
         try
         {
-          file.seekV( e.getArg(2) );
-          file.seek( e.getArg(1) ); //Incase virtual address was overwritten.
+          file.seekV( e.getArg(2) ); file.seek( e.getArg(1) );
           Offset.setSelected( e.getArg(1), e.getArg(1) + e.getArg(3) - 1 );
           Virtual.setSelected( e.getArg(2), e.getArg(2) + e.getArg(3) - 1 );
-        } catch( Exception er ) { } 
+          info("<html></html>"); ds.clear();
+        }
+        catch( Exception er ) { } 
       }
     }
     else if( e.getArgs().length > 1 )
     {
       if( e.getArg(0) >= 2 )
       {
-        info("<html>There is currently no reader for this section yet.</html>");
+        if( Reader[ (int)e.getArg(0) - 2 ] == null )
+        {
+          info("<html>There is currently no reader for this section yet.</html>"); ds.clear();
+        }
+        else
+        {
+          try{ des[ (int)e.getArg(0) ] = Reader[ (int)e.getArg(0) - 2 ].read( sections[ (int)e.getArg(0) - 2 ] ); } catch( Exception er ) { }
+        }
 
         try
         {
@@ -153,6 +163,9 @@ public class ELF extends Data implements JDEventListener
 
         ds.clear();
       }
+
+      //Section descriptors. Only exist after section is read.
+
       else { ds.setDescriptor( des[ (int)e.getArg(0) ][ (int)e.getArg(1) ] ); }
     }
     else
