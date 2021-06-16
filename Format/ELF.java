@@ -186,6 +186,13 @@ public class ELF extends Data implements JDEventListener
       {
         if( Reader[ (int)e.getArg(0) - 2 ] == null )
         {
+          try
+          {
+            file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) + e.getArg(2) - 1 );
+            Offset.setSelected( file.getFilePointer(), file.getFilePointer() + e.getArg(2) - 1 );
+          }
+          catch( Exception er ) { } 
+
           info("<html>There is currently no reader for this section yet.</html>"); ds.clear();
         }
         else
@@ -205,26 +212,16 @@ public class ELF extends Data implements JDEventListener
             ((DefaultTreeModel)tree.getModel()).nodeChanged( sections[el].getChildAt(i) );
             tree.expandPath( new TreePath( ((JDNode)sections[el].getChildAt(i)).getPath() ) );
           }
-        }
 
-        try
-        {
-          file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) + e.getArg(2) - 1 );
-          Offset.setSelected( file.getFilePointer(), file.getFilePointer() + e.getArg(2) - 1 );
+          open( new JDEvent( this, "", ((JDNode)tree.getLastSelectedPathComponent()).getArgs() ) );
         }
-        catch( Exception er ) { } 
-
-        ds.clear();
       }
 
       //Section descriptors. Only exist after section is read.
 
       else { ds.setDescriptor( des[ (int)e.getArg(0) ][ (int)e.getArg(1) ] ); }
     }
-    else
-    {
-      ds.clear();
-    }
+    else { info("<html></html>"); ds.clear(); }
   }
 
   public void noCore() { info("<html>The processor core engine is not supported.</html>"); }
