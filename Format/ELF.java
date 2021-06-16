@@ -51,6 +51,10 @@ public class ELF extends Data implements JDEventListener
     "<html>Some sections are marked as data only. Such sections may be file data, or sections used by external tools.</html>"
   };
 
+  //Expand sections once on single click.
+
+  private boolean[] expandOnce = new boolean[]{ true, true, true, true, true, true, true };
+
   //Read the ELF binary.
 
   public ELF()
@@ -120,7 +124,11 @@ public class ELF extends Data implements JDEventListener
 
   public void open( JDEvent e )
   {
-    if( e.getArgs().length == 1 ) { info(SInfo[(int)e.getArg(0)]); ds.clear(); }
+    if( e.getArgs().length == 1 )
+    {
+      if( expandOnce[ (int)e.getArg(0) ] ){ expandOnce[ (int)e.getArg(0) ] = false; tree.expandPath( tree.getLeadSelectionPath() ); }
+      info(SInfo[(int)e.getArg(0)]); ds.clear();
+    }
 
     else if( e.getArg(0) < 0 )
     {

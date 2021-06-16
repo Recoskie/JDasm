@@ -74,13 +74,13 @@ public class libReader extends Data implements sec
         {
           if( isLittle )
           {
-            LInfo.LUINT32("Type"); el.type = (long)LInfo.value;
-            LInfo.LUINT32("Value"); el.value = (long)LInfo.value;
+            LInfo.LUINT32("Type"); el.type = (int)LInfo.value;
+            LInfo.LUINT32("Value"); el.value = (int)LInfo.value;
           }
           else
           {
-            LInfo.UINT32("Type"); el.type = (long)LInfo.value;
-            LInfo.UINT32("Value"); el.value = (long)LInfo.value;
+            LInfo.UINT32("Type"); el.type = (int)LInfo.value;
+            LInfo.UINT32("Value"); el.value = (int)LInfo.value;
           }
         }
 
@@ -99,8 +99,6 @@ public class libReader extends Data implements sec
 
         if( el.type == 1 )
         {
-          //Experiencing bugs with seekV. The method seekV needs to be fixed.
-        
           file.seekV( names_loc + el.value ); Name = new Descriptor( file, true );
 
           Name.String8("Link Library name.", (byte)0x00 );
