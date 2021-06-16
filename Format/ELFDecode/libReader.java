@@ -43,9 +43,7 @@ public class libReader extends Data implements sec
 
       //Setup descriptor.
 
-      file.seekV(0); file.seekV(curSec.getArg(1));
-      
-      LInfo = new Descriptor( file, true );
+      file.seekV(curSec.getArg(1)); LInfo = new Descriptor( file, true );
 
       //Setup section node.
 
@@ -57,19 +55,17 @@ public class libReader extends Data implements sec
 
       while( el.type != 0 )
       {
-        el = new libInfo();
+        el = new libInfo(); LInfo.Array("Link info " + LSize + "", is64Bit ? 16 : 8 );
 
         if( is64Bit )
         {
           if( isLittle )
           {
-            LInfo.Array("Link info " + LSize + "", 16);
             LInfo.LUINT64("Type"); el.type = (long)LInfo.value;
             LInfo.LUINT64("Value"); el.value = (long)LInfo.value;
           }
           else
           {
-            LInfo.Array("Link info " + LSize + "", 16);
             LInfo.UINT64("Type"); el.type = (long)LInfo.value;
             LInfo.UINT64("Value"); el.value = (long)LInfo.value;
           }
@@ -78,13 +74,11 @@ public class libReader extends Data implements sec
         {
           if( isLittle )
           {
-            LInfo.Array("Link info " + LSize + "", 8);
             LInfo.LUINT32("Type"); el.type = (long)LInfo.value;
             LInfo.LUINT32("Value"); el.value = (long)LInfo.value;
           }
           else
           {
-            LInfo.Array("Link info " + LSize + "", 8);
             LInfo.UINT32("Type"); el.type = (long)LInfo.value;
             LInfo.UINT32("Value"); el.value = (long)LInfo.value;
           }
@@ -107,15 +101,13 @@ public class libReader extends Data implements sec
         {
           //Experiencing bugs with seekV. The method seekV needs to be fixed.
         
-          /*file.seekV( names_loc + el.value ); Name = new Descriptor( file, true );
+          file.seekV( names_loc + el.value ); Name = new Descriptor( file, true );
 
           Name.String8("Link Library name.", (byte)0x00 );
           
-          curSec.add( new JDNode( (String)Name.value + ".h", new long[]{ 2, ref } ) );
+          curSec.add( new JDNode( (String)Name.value + " #" + i2 + ".h", new long[]{ 2, ref } ) );
           
-          des.add( Name ); ref += 1;*/
-
-          curSec.add( new JDNode( "Link library name location.h", new long[]{ -3, names_loc + el.value, 1 } ) );
+          des.add( Name ); ref += 1;
         }
       }
     }

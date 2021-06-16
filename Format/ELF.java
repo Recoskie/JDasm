@@ -168,15 +168,20 @@ public class ELF extends Data implements JDEventListener
         }
         else
         {
+          file.Events = false;
+
           try
           {
             des[ (int)e.getArg(0) ] = Reader[ (int)e.getArg(0) - 2 ].read();
           }
           catch( Exception er ) { er.printStackTrace(); }
 
+          file.Events = true;
+
           for( int i = 0, el = (int)e.getArg(0) - 2, size = sections[el].getChildCount(); i < size; i++ )
           {
             ((DefaultTreeModel)tree.getModel()).nodeChanged( sections[el].getChildAt(i) );
+            tree.expandPath( new TreePath( ((JDNode)sections[el].getChildAt(i)).getPath() ) );
           }
         }
 
