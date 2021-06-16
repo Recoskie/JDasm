@@ -175,7 +175,7 @@ public class Headers extends Data
 
       //If section is Thread storage.
 
-      else if( type == 7 ){ sections[4].add( new JDNode("Program entire " + i + ".h", new long[]{ 2, virtual, vlen } ) ); }
+      else if( type == 7 ){ sections[3].add( new JDNode("Program entire " + i + ".h", new long[]{ 5, virtual, vlen } ) ); }
     }
       
     return( prh );
@@ -598,7 +598,7 @@ public class Headers extends Data
     "Bellow is a list of section names and what they are may be used for.<br /><br >" +
     "Also take note that a sections name does not have to reflect it's intended operation all the time." +
     "As the section type, and flag settings identify what the section does.<br /><br />" +
-    "<table border=\"1\">"+
+    "<table border=\"1\">" +
     "<tr><td>Section Name.</td><td>Use</td></tr>" +
     "<tr><td>.shstrtab</td><td>This section holds section names.</td></tr>" +
     "<tr><td>.init</td><td>This section holds executable instructions, for program initialization. Section is run before calling the main program entry point.</td></tr>" +
@@ -630,7 +630,6 @@ public class Headers extends Data
     "<tr><td>.plt</td><td>This section holds the procedure linkage table.</td></tr>" +
     "<tr><td>.strtab</td><td>This section holds strings, most commonly the strings that represent the names associated with symbol table entries.</td></tr>" +
     "<tr><td>.symtab</td><td>This section holds a symbol table.</td></tr>" +
-    "</table>" +
-    "</html>");
+    "</table></html>");
   }
 }

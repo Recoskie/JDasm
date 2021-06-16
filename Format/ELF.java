@@ -48,7 +48,21 @@ public class ELF extends Data implements JDEventListener
     //Thread local storage.
     "<html></html>",
     //Sections defined as data only.
-    "<html>Some sections are marked as data only. Such sections may be file data, or sections used by external tools.</html>"
+    "<html>Some sections are marked as data only. Such sections may be file data, or sections used by external tools.<br /><br />"+
+    "<table border=\"1\">" +
+    "<tr><td>Section Name.</td><td>Use</td></tr>" +
+    "<tr><td>.rodata</td><td>This section holds read-only data.</td></tr>" +
+    "<tr><td>.data</td><td>This section holds initialize data that contribute to the program's memory.</td></tr>" +
+    "<tr><td>.comment</td><td>This section holds version control information.</td></tr>" +
+    "<tr><td>.got</td><td>This section holds the global offset table.</td></tr>" +
+    "<tr><td>.interp</td><td>This section holds the pathname of a program interpreter.</td></tr>" +
+    "<tr><td>.note.ABI-tag</td><td>This section is used to declare the expected run-time of the ELF image. It may include the operating system name and its run-time versions.</td></tr>" +
+    "<tr><td>.note.gnu.build-id</td><td>This section is used to hold an ID that uniquely identifies the contents of the ELF image. Different files with the same build ID should contain the same executable content.</td></tr>" +
+    "<tr><td>.note.openbsd.ident</td><td>OpenBSD native executables usually contain this section to identify themselves so the kernel can bypass any compatibility ELF binary emulation tests when loading the file.</td></tr>" +
+    "<tr><td>.gnu_debuglink</td><td>This tells GDB the file that stores the debug information.</td></tr>" +
+    "<tr><td>.eh_frame</td><td>Not needed (call frame), but is used by a program called DWARF, for debugging (try and catch).</td></tr>" +
+    "<tr><td>.eh_framehdr</td><td>Not needed (call frame), but is used by a program called DWARF, for debugging (try and catch).</td></tr>" +
+    "</table></html>"
   };
 
   //Expand sections once on single click.
