@@ -11,7 +11,7 @@ public class ELF extends Data implements JDEventListener
 {
   //Descriptors.
 
-  private Descriptor[][] des = new Descriptor[2][];
+  private Descriptor[][] des = new Descriptor[6][];
 
   private JDNode root;
 
@@ -21,7 +21,7 @@ public class ELF extends Data implements JDEventListener
 
   JDNode Headers = new JDNode("Headers", 0);
 
-  private static final sec[] Reader = new sec[] { null, null, null, null }; //Section type readers.
+  private static final sec[] Reader = new sec[] { new libReader(), null, null, null }; //Section type readers.
   public static final String[] SInfo = new String[]
   {
     //ELF headers.
@@ -147,10 +147,20 @@ public class ELF extends Data implements JDEventListener
         }
         catch( Exception er ) { } 
       }
+      else if( e.getArg(0) == -3 )
+      {
+        try
+        {
+          file.seekV( e.getArg(1) );
+          Virtual.setSelected( e.getArg(1), e.getArg(1) + e.getArg(2) - 1 );
+          info("<html></html>"); ds.clear();
+        }
+        catch( Exception er ) { } 
+      }
     }
     else if( e.getArgs().length > 1 )
     {
-      if( e.getArg(0) >= 2 )
+      if( des[ (int)e.getArg(0) ] == null )
       {
         if( Reader[ (int)e.getArg(0) - 2 ] == null )
         {
@@ -158,14 +168,24 @@ public class ELF extends Data implements JDEventListener
         }
         else
         {
-          try{ des[ (int)e.getArg(0) ] = Reader[ (int)e.getArg(0) - 2 ].read( sections[ (int)e.getArg(0) - 2 ] ); } catch( Exception er ) { }
+          try
+          {
+            des[ (int)e.getArg(0) ] = Reader[ (int)e.getArg(0) - 2 ].read();
+          }
+          catch( Exception er ) { er.printStackTrace(); }
+
+          for( int i = 0, el = (int)e.getArg(0) - 2, size = sections[el].getChildCount(); i < size; i++ )
+          {
+            ((DefaultTreeModel)tree.getModel()).nodeChanged( sections[el].getChildAt(i) );
+          }
         }
 
         try
         {
           file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) + e.getArg(2) - 1 );
           Offset.setSelected( file.getFilePointer(), file.getFilePointer() + e.getArg(2) - 1 );
-        } catch( Exception er ) { } 
+        }
+        catch( Exception er ) { } 
 
         ds.clear();
       }
