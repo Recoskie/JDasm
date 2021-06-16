@@ -21,7 +21,7 @@ public class ELF extends Data implements JDEventListener
 
   JDNode Headers = new JDNode("Headers", 0);
 
-  private static final sec[] Reader = new sec[] { null, null, null }; //Section type readers.
+  private static final sec[] Reader = new sec[] { null, null, null, null }; //Section type readers.
   public static final String[] SInfo = new String[]
   {
     //ELF headers.
@@ -45,6 +45,8 @@ public class ELF extends Data implements JDEventListener
     "<html>Relocation are only used if the ELF sections can not be palaced at set Virtual address locations.</html>",
     //Debug information.
     "<html>Line number information relative to the emitted machine code, and may also contain variable names.</html>",
+    //Thread local storage.
+    "<html></html>",
     //Sections defined as data only.
     "<html>Some sections are marked as data only. Such sections may be file data, or sections used by external tools.</html>"
   };
@@ -66,6 +68,10 @@ public class ELF extends Data implements JDEventListener
     JDNode ELFHeader = new JDNode( "ELF Header.h", new long[]{ 0, 0 } );
     JDNode PHeader = new JDNode( "Program Header", new long[]{ 0, 1 } );
     JDNode SECHeader = new JDNode( "Section Header", new long[]{ 1, 0 } );
+
+    code.removeAllChildren();
+    for( int i = 0; i < sections.length; i++ ) { if ( sections[i].getChildCount() > 0 ) { sections[i].removeAllChildren(); } }
+    data.removeAllChildren();
     
     des[0] = new Descriptor[3];
 

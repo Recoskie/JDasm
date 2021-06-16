@@ -172,6 +172,10 @@ public class Headers extends Data
       //If section is link libraries.
 
       else if( type == 2 ){ sections[0].add( new JDNode("Program entire " + i + ".h", new long[]{ 2, virtual, vlen } ) ); }
+
+      //If section is Thread storage.
+
+      else if( type == 7 ){ sections[4].add( new JDNode("Program entire " + i + ".h", new long[]{ 2, virtual, vlen } ) ); }
     }
       
     return( prh );
