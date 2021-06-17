@@ -56,7 +56,7 @@ This application currently supports Microsoft binaries formats: .exe, .dll, .sys
 
 Also supports Unix/Linux binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod, .so
 
-Also supports .efi binary boot binaries, and boot sector disassembly.
+Also supports .efi boot binaries, and boot sector disassembly.
 
 This project is meant to support many different binary file formats, and application formats, and DOS.
 
