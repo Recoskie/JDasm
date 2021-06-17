@@ -8,6 +8,14 @@ public class libReader extends Data implements sec
 {
   private class libInfo { long type = 0, value = 0; }
 
+  //Location to sting table for names of link libraries.
+  //Type 1, and 14 are added to this value to find the string names,
+  //for link libraries, and shared link libraries.
+
+  private long strTable_loc = 0;
+
+  //Begin the read function.
+
   public Descriptor[] read() throws IOException
   {
     //get the physical address to data directory array links to dll import table
@@ -29,13 +37,14 @@ public class libReader extends Data implements sec
 
     int LSize = 0;
 
-    //Base address locations.
+    //The link library section can also define a lot of other information.
+    //All this information is already sorted out in the Program headers, and section headers.
 
-    long names_loc = 0;
+    long strTable_size = 0, rel_size = 0, rela_size = 0, PLT_size = 0, initArray_size = 0, finiArray_size = 0, pinitArray_size = 0, relaEl_size = 0, relEl_size = 0, symEl_size = 0;
 
     //WE read all link library sections.
 
-    JDNode sects = sections[0], curSec = null;
+    JDNode sects = sections[0], curSec = null, extraData;
 
     for( int i = 0, size = sects.getChildCount(); i < size; i++ )
     {
@@ -50,6 +59,10 @@ public class libReader extends Data implements sec
       curSec.setUserObject( ((String)curSec.getUserObject()).replace(".h","") );
 
       curSec.setArgs( new long[]{ 2, ref } ); des.add( LInfo );  ref += 1;
+
+      //Setup node for sorting the other Data.
+
+      extraData = new JDNode("Other Data");
 
       //Read section.
 
@@ -84,7 +97,17 @@ public class libReader extends Data implements sec
           }
         }
 
-        if( el.type == 5 ){ names_loc = el.value; }
+        if( el.type == 2 ){ PLT_size = el.value; }
+        if( el.type == 5 ){ strTable_loc = el.value; }
+        if( el.type == 8 ){ rela_size = el.value; }
+        if( el.type == 9 ){ relaEl_size = el.value; }
+        if( el.type == 10 ) { strTable_size = el.value; }
+        if( el.type == 11 ) { symEl_size = el.value; }
+        if( el.type == 18 ) { rel_size = el.value; }
+        if( el.type == 19 ) { relEl_size = el.value; }
+        if( el.type == 27 ) { initArray_size = el.value; }
+        if( el.type == 28 ) { finiArray_size = el.value; }
+        if( el.type == 33 ) { pinitArray_size = el.value; }
 
         lib.add(el); LSize += 1;
       }
@@ -95,20 +118,102 @@ public class libReader extends Data implements sec
       {
         el = lib.get(i2);
 
-        //Needed link library name.
+        //Needed link/shared library name.
 
-        if( el.type == 1 )
+        if( el.type == 1 || el.type == 14 )
         {
-          file.seekV( names_loc + el.value ); Name = new Descriptor( file, true );
+          file.seekV( strTable_loc + el.value ); Name = new Descriptor( file, true );
 
-          Name.String8("Link Library name.", (byte)0x00 ); Name.setEvent( this::nameInfo );
+          Name.String8( el.type == 1 ? "Link Library name." : "Shared Library name.", (byte)0x00 ); Name.setEvent( this::nameInfo );
           
           curSec.add( new JDNode( (String)Name.value + " #" + i2 + ".h", new long[]{ 2, ref } ) );
           
           des.add( Name ); ref += 1;
         }
+
+        //String table.
+
+        if( el.type == 4 )
+        {
+          extraData.add( new JDNode( ".hash #" + i2 + ".h", new long[]{ -3, el.value, strTable_size } ) );
+        }
+
+        //String table.
+
+        if( el.type == 5 )
+        {
+          extraData.add( new JDNode( "String Table #" + i2 + ".h", new long[]{ -3, el.value, strTable_size } ) );
+        }
+
+        //Dynamic symbol table.
+
+        if( el.type == 6 )
+        {
+          extraData.add( new JDNode( ".dynsym #" + i2 + ".h", new long[]{ -3, el.value, symEl_size } ) );
+        }
+
+        //Dynamic relocation table.
+
+        if( el.type == 7 )
+        {
+          extraData.add( new JDNode( ".rela.dyn #" + i2 + ".h", new long[]{ -3, el.value, rela_size } ) );
+        }
+
+        //Init/Fini location.
+
+        if( el.type == 12 )
+        {
+          extraData.add( new JDNode( ".init #" + i2 + ".h", new long[]{ -1, el.value } ) );
+        }
+
+        if( el.type == 13 )
+        {
+          extraData.add( new JDNode( ".fini #" + i2 + ".h", new long[]{ -1, el.value } ) );
+        }
+
+        //Dynamic relocation table.
+
+        if( el.type == 17 )
+        {
+          extraData.add( new JDNode( ".rel.dyn #" + i2 + ".h", new long[]{ -3, el.value, rel_size } ) );
+        }
+
+        if( el.type == 23 )
+        {
+          extraData.add( new JDNode( ".rel.plt #" + i2 + ".h", new long[]{ -3, el.value, PLT_size } ) );
+        }
+
+        //.init_array/.fini_array section.
+
+        if( el.type == 25 )
+        {
+          extraData.add( new JDNode( ".init_array #" + i2 + ".h", new long[]{ -3, el.value, initArray_size } ) );
+        }
+
+        if( el.type == 26 )
+        {
+          extraData.add( new JDNode( ".fini_array #" + i2 + ".h", new long[]{ -3, el.value, finiArray_size } ) );
+        }
+
+        if( el.type == 32 )
+        {
+          extraData.add( new JDNode( ".pre-init_array #" + i2 + ".h", new long[]{ -3, el.value, pinitArray_size } ) );
+        }
+      }
+
+      //If there was other additional data defined in the link library section.
+
+      if( extraData.getChildCount() > 0 )
+      {
+        extraData.setArgs(new long[]{2, ref}); ref += 1;
+
+        Name = new Descriptor(file); Name.setEvent( this::extraInfo ); des.add( Name );
+
+        curSec.add(extraData);
       }
     }
+
+
     
     return( des.toArray( new Descriptor[ des.size() ] ) );
   }
@@ -122,7 +227,7 @@ public class libReader extends Data implements sec
     "The value after type can be an address location, an Address plus a base address, a size value, or Other.<br /><br />" +
     "The types \"Address of\" = \"symbol hash table\", \"string table\", \"symbol table\". Are very important as they define base addresses.<br /><br />" +
     "The value after \"Name of needed library\" is not exactly a full address location. It needs to add the address, for \"string table\", for the name location, of the link library.<br /><br />" +
-    "This means the value that comes after type 5 is added with all type 1 values to find the address to the library name.<br /><br />" +
+    "This means the value that comes after type 5 is added with all type 1, and 14 values to find the address to the library name.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>Operation</td></tr>" +
     "<tr><td>0</td><td>Marks end of dynamic section.</td></tr>" +
@@ -150,15 +255,15 @@ public class libReader extends Data implements sec
     "<tr><td>22</td><td>Relocations might modify .text.</td></tr>" +
     "<tr><td>23</td><td>Address to PLT Relocations.</td></tr>" +
     "<tr><td>24</td><td>Process relocations of object.</td></tr>" +
-    "<tr><td>25</td><td>Array with addresses of init fct.</td></tr>" +
-    "<tr><td>26</td><td>Array with addresses of fini fct.</td></tr>" +
-    "<tr><td>27</td><td>Size in bytes of init Array.</td></tr>" +
-    "<tr><td>28</td><td>Size in bytes of fini Array.</td></tr>" +
+    "<tr><td>25</td><td>Location to Array of Constructors. Section \".init_array\".</td></tr>" +
+    "<tr><td>26</td><td>Location to Array of Destructors. Section \".fini_array\".</td></tr>" +
+    "<tr><td>27</td><td>Size in bytes of \".init_array\" section.</td></tr>" +
+    "<tr><td>28</td><td>Size in bytes of \".fini_array\" section.</td></tr>" +
     "<tr><td>29</td><td>Library search path.</td></tr>" +
     "<tr><td>30</td><td>Flags for the object being loaded.</td></tr>" +
     "<tr><td>31</td><td>Start of encoded range.</td></tr>" +
-    "<tr><td>32</td><td>Array with addresses of pre-init fct.</td></tr>" +
-    "<tr><td>33</td><td>Size in bytes, for pre-init Array.</td></tr>" +
+    "<tr><td>32</td><td>Location to Array of pre-Constructors.</td></tr>" +
+    "<tr><td>33</td><td>Size in bytes, for Array of pre-Constructors.</td></tr>" +
     "<tr><td>34</td><td>Address of SYMTAB_SHNDX section.</td></tr>" +
     "<tr><td>35</td><td>Number used.</td></tr>" +
     "<tr><td>6000000D to 6FFFFFFF</td><td>OS specific.</td></tr>" +
@@ -184,5 +289,15 @@ public class libReader extends Data implements sec
   public void nameInfo( int el )
   {
     info("<html>Each link library name end with 00 hex.</html>");
+  }
+
+  //Other data section.
+
+  public void extraInfo( int el )
+  {
+    info("<html>A link library section can locate to previously defined sections in the section headers at the start of the ELF file.<br /><br />" +
+    "It can have the location to the start method, and end of program. It can also define the relocation sections.<br /><br />" +
+    "The size of the section has a type number, and it's location has a type number. The 2 values after type are used to define sections.<br /<br />" +
+    "You can chose to read the size, and locations your self. Thus navigate to the sections you self, however this section does this with the size/location types, for convince.</html>");
   }
 }
