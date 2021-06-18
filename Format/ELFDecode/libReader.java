@@ -266,9 +266,13 @@ public class libReader extends Data implements sec
     "<tr><td>33</td><td>Size in bytes, for Array of pre-Constructors.</td></tr>" +
     "<tr><td>34</td><td>Address of SYMTAB_SHNDX section.</td></tr>" +
     "<tr><td>35</td><td>Number used.</td></tr>" +
-    "<tr><td>6000000D to 6FFFFFFF</td><td>OS specific.</td></tr>" +
-    "<tr><td>70000000 to 7FFFFFFF</td><td>Processor specific.</td></tr>" +
-    "</html>",
+    "</table><br /><br /><table border=\"1\">" +
+    "<tr><td>1610612749 to 1879044096</td><td>OS specific. Listed bellow if any.</td></tr>" +
+    "<tr><td>Reserved</td><td>There are no OS specific types in use.</td></tr>" +
+    "</table><br /><br /><table border=\"1\">" +
+    "<tr><td>1879048192 to 2147483647</td><td>Processor specific. Listed bellow if any.</td></tr>" +
+    "<tr><td>Reserved</td><td>There are no Processor specific types in use.</td></tr>" +
+    "</table></html>",
     "<html>What this value is used for is determined by it's type setting.</html>"
   };
 
