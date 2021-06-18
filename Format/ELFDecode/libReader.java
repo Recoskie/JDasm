@@ -297,7 +297,7 @@ public class libReader extends Data implements sec
   {
     info("<html>A link library section can locate to previously defined sections in the section headers at the start of the ELF file.<br /><br />" +
     "It can have the location to the start method, and end of program. It can also define the relocation sections.<br /><br />" +
-    "The size of the section has a type number, and it's location has a type number. The 2 values after type are used to define sections.<br /<br />" +
-    "You can chose to read the size, and locations your self. Thus navigate to the sections you self, however this section does this with the size/location types, for convince.</html>");
+    "The size of the section type has a type number, and it's location has a type number. The 2 values after type are used to define sections.<br /<br />" +
+    "You can chose to read the size, and locations your self by types. Thus navigate to the sections you self, however this section does this with the size/location types, for convince.</html>");
   }
 }

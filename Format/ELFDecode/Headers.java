@@ -329,98 +329,100 @@ public class Headers extends Data
   "This also changes the section header size, and program header size.</html>",
   "<html>This byte is set 1, for little endian byte order, or is set 2 for big endian byte order.<br /><br />" +
   "This affects interpretation of multi-byte fields.</html>",
-  "<html>Usually set to 1 for the original and current version of ELF.<br /><br />" +
+  "<html>Usually set to 1, for the original and current type of ELF.<br /><br />" +
   "Higher version numbers may be eventually added.<br /><br />Note 0 is an invalid setting.</html>",
   "<html>Identifies the target operating system (It is often set to 0 regardless of the target platform).<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Value</td><td>Operating System</td></tr>" +
-  "<tr><td>00</td><td>System V</td></tr>" +
-  "<tr><td>01</td><td>HP-UX</td></tr>" +
-  "<tr><td>02</td><td>NetBSD</td></tr>" +
-  "<tr><td>03</td><td>Linux</td></tr>" +
-  "<tr><td>04</td><td>GNU Hurd</td></tr>" +
-  "<tr><td>06</td><td>Solaris</td></tr>" +
-  "<tr><td>07</td><td>AIX</td></tr>" +
-  "<tr><td>08</td><td>IRIX</td></tr>" +
-  "<tr><td>09</td><td>FreeBSD</td></tr>" +
-  "<tr><td>0A</td><td>Tru64</td></tr>" +
-  "<tr><td>0B</td><td>Novell Modesto</td></tr>" +
-  "<tr><td>0C</td><td>OpenBSD</td></tr>" +
-  "<tr><td>0D</td><td>OpenVMS</td></tr>" +
-  "<tr><td>0E</td><td>NonStop Kernel</td></tr>" +
-  "<tr><td>0F</td><td>AROS</td></tr>" +
-  "<tr><td>10</td><td>Fenix OS</td></tr>" +
-  "<tr><td>11</td><td>CloudABI</td></tr>" +
-  "<tr><td>12</td><td>Stratus Technologies OpenVOS</td></tr>" +
+  "<tr><td>0</td><td>System V</td></tr>" +
+  "<tr><td>1</td><td>HP-UX</td></tr>" +
+  "<tr><td>2</td><td>NetBSD</td></tr>" +
+  "<tr><td>3</td><td>Linux</td></tr>" +
+  "<tr><td>4</td><td>GNU Hurd</td></tr>" +
+  "<tr><td>6</td><td>Solaris</td></tr>" +
+  "<tr><td>7</td><td>AIX</td></tr>" +
+  "<tr><td>8</td><td>IRIX</td></tr>" +
+  "<tr><td>9</td><td>FreeBSD</td></tr>" +
+  "<tr><td>10</td><td>Tru64</td></tr>" +
+  "<tr><td>11</td><td>Novell Modesto</td></tr>" +
+  "<tr><td>12</td><td>OpenBSD</td></tr>" +
+  "<tr><td>13</td><td>OpenVMS</td></tr>" +
+  "<tr><td>14</td><td>NonStop Kernel</td></tr>" +
+  "<tr><td>15</td><td>AROS</td></tr>" +
+  "<tr><td>16</td><td>Fenix OS</td></tr>" +
+  "<tr><td>17</td><td>CloudABI</td></tr>" +
+  "<tr><td>18</td><td>Stratus Technologies OpenVOS</td></tr>" +
   "</table></html>",
   "<html>The intended version of the OS this EFL is meant to run on.</html>",
   "<html>Currently unused, should be zero.</html>",
   "<html>Application File type.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Value</td><td>Type</td></tr>" +
-  "<tr><td>0000</td><td>An unknown type.</td></tr>" +
-  "<tr><td>0001</td><td>A relocatable file.</td></tr>" +
-  "<tr><td>0002</td><td>An executable file.</td></tr>" +
-  "<tr><td>0003</td><td>A shared object.</td></tr>" +
-  "<tr><td>0004</td><td>A core file.</td></tr>" +
-  "<tr><td>FE00</td><td>Operating system specific.</td></tr>" +
-  "<tr><td>FEFF</td><td>Operating system specific.</td></tr>" +
-  "<tr><td>FF00</td><td>Processor specific.</td></tr>" +
-  "<tr><td>FFFF</td><td>Processor specific.</td></tr>" +
+  "<tr><td>0</td><td>An unknown type.</td></tr>" +
+  "<tr><td>1</td><td>A relocatable file.</td></tr>" +
+  "<tr><td>2</td><td>An executable file.</td></tr>" +
+  "<tr><td>3</td><td>A shared object.</td></tr>" +
+  "<tr><td>4</td><td>A core file.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>65024 to 65279</td><td>Operating system specific.</td></tr>" +
+  "<tr><td>Reserved</td><td>There are no operating system specific types in use.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>65280 to 65535</td><td>Processor specific.</td></tr>" +
+  "<tr><td>Reserved</td><td>There are no Processor specific types in use.</td></tr>" +
   "</table>" +
   "</html>",
   "<html>The processor type the binary is meant to run natively on. Majority of linux/unix systems are Intel/AMD x86.<br /><br />" +
-  "The tow settings you will see the most are 003E = 64bit x86, and 0003 = 32bit x86.<br /><br />" +
+  "The tow settings you will see the most are 62 = 64bit x86, and 3 = 32bit x86.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Value</td><td>CPU</td></tr>" +
-  "<tr><td>0001</td><td>AT&T WE 32100</td></tr>" +
-  "<tr><td>0002</td><td>SPARC</td></tr>" +
-  "<tr><td>0003</td><td>x86</td></tr>" +
-  "<tr><td>0004</td><td>Motorola 68000 (M68k)</td></tr>" +
-  "<tr><td>0005</td><td>Motorola 88000 (M88k)</td></tr>" +
-  "<tr><td>0006</td><td>Intel MCU</td></tr>" +
-  "<tr><td>0007</td><td>Intel 80860</td></tr>" +
-  "<tr><td>0008</td><td>MIPS</td></tr>" +
-  "<tr><td>0009</td><td>IBM_System/370</td></tr>" +
-  "<tr><td>000A</td><td>MIPS RS3000 Little-endian</td></tr>" +
-  "<tr><td>000E</td><td>Hewlett-Packard PA-RISC</td></tr>" +
-  "<tr><td>0013</td><td>Intel 80960</td></tr>" +
-  "<tr><td>0014</td><td>PowerPC</td></tr>" +
-  "<tr><td>0015</td><td>PowerPC (64-bit)</td></tr>" +
-  "<tr><td>0016</td><td>S390, including S390x</td></tr>" +
-  "<tr><td>0017</td><td>IBM SPU/SPC</td></tr>" +
-  "<tr><td>0024</td><td>NEC V800</td></tr>" +
-  "<tr><td>0025</td><td>Fujitsu FR20</td></tr>" +
-  "<tr><td>0026</td><td>TRW RH-32</td></tr>" +
-  "<tr><td>0027</td><td>Motorola RCE</td></tr>" +
-  "<tr><td>0028</td><td>ARM (up to ARMv7/Aarch32)</td></tr>" +
-  "<tr><td>0029</td><td>Digital Alpha</td></tr>" +
-  "<tr><td>002A</td><td>SuperH</td></tr>" +
-  "<tr><td>002B</td><td>SPARC Version 9</td></tr>" +
-  "<tr><td>002C</td><td>Siemens TriCore embedded processor</td></tr>" +
-  "<tr><td>002D</td><td>Argonaut RISC Core</td></tr>" +
-  "<tr><td>002E</td><td>Hitachi H8/300</td></tr>" +
-  "<tr><td>002F</td><td>Hitachi H8/300H</td></tr>" +
-  "<tr><td>0030</td><td>Hitachi H8S</td></tr>" +
-  "<tr><td>0031</td><td>Hitachi H8/500</td></tr>" +
-  "<tr><td>0032</td><td>IA-64</td></tr>" +
-  "<tr><td>0033</td><td>Stanford MIPS-X</td></tr>" +
-  "<tr><td>0034</td><td>Motorola ColdFire</td></tr>" +
-  "<tr><td>0035</td><td>Motorola M68HC12</td></tr>" +
-  "<tr><td>0036</td><td>Fujitsu MMA Multimedia Accelerator</td></tr>" +
-  "<tr><td>0037</td><td>Semen PCP</td></tr>" +
-  "<tr><td>0038</td><td>Sony nCPU embedded RISC processor</td></tr>" +
-  "<tr><td>0039</td><td>Denso NDR1 microprocessor</td></tr>" +
-  "<tr><td>003A</td><td>Motorola Star*Core processor</td></tr>" +
-  "<tr><td>003B</td><td>Toyota ME16 processor</td></tr>" +
-  "<tr><td>003C</td><td>STMicroelectronics ST100 processor</td></tr>" +
-  "<tr><td>003D</td><td>Advanced Logic Corp. TinyJ embedded processor family</td></tr>" +
-  "<tr><td>003E</td><td>AMD x86-64</td></tr>" +
-  "<tr><td>008C</td><td>TMS320C6000 Family</td></tr>" +
-  "<tr><td>00B7</td><td>ARM 64-bits (ARMv8/Aarch64)</td></tr>" +
-  "<tr><td>00F3</td><td>RISC-V</td></tr>" +
-  "<tr><td>00F7</td><td>Berkeley Packet Filter</td></tr>" +
-  "<tr><td>0101</td><td>WDC 65C816</td></tr>" +
+  "<tr><td>1</td><td>AT&T WE 32100</td></tr>" +
+  "<tr><td>2</td><td>SPARC</td></tr>" +
+  "<tr><td>3</td><td>x86</td></tr>" +
+  "<tr><td>4</td><td>Motorola 68000 (M68k)</td></tr>" +
+  "<tr><td>5</td><td>Motorola 88000 (M88k)</td></tr>" +
+  "<tr><td>6</td><td>Intel MCU</td></tr>" +
+  "<tr><td>7</td><td>Intel 80860</td></tr>" +
+  "<tr><td>8</td><td>MIPS</td></tr>" +
+  "<tr><td>9</td><td>IBM_System/370</td></tr>" +
+  "<tr><td>10</td><td>MIPS RS3000 Little-endian</td></tr>" +
+  "<tr><td>14</td><td>Hewlett-Packard PA-RISC</td></tr>" +
+  "<tr><td>19</td><td>Intel 80960</td></tr>" +
+  "<tr><td>20</td><td>PowerPC</td></tr>" +
+  "<tr><td>21</td><td>PowerPC (64-bit)</td></tr>" +
+  "<tr><td>22</td><td>S390, including S390x</td></tr>" +
+  "<tr><td>23</td><td>IBM SPU/SPC</td></tr>" +
+  "<tr><td>36</td><td>NEC V800</td></tr>" +
+  "<tr><td>37</td><td>Fujitsu FR20</td></tr>" +
+  "<tr><td>38</td><td>TRW RH-32</td></tr>" +
+  "<tr><td>39</td><td>Motorola RCE</td></tr>" +
+  "<tr><td>40</td><td>ARM (up to ARMv7/Aarch32)</td></tr>" +
+  "<tr><td>41</td><td>Digital Alpha</td></tr>" +
+  "<tr><td>42</td><td>SuperH</td></tr>" +
+  "<tr><td>43</td><td>SPARC Version 9</td></tr>" +
+  "<tr><td>44</td><td>Siemens TriCore embedded processor</td></tr>" +
+  "<tr><td>45</td><td>Argonaut RISC Core</td></tr>" +
+  "<tr><td>46</td><td>Hitachi H8/300</td></tr>" +
+  "<tr><td>47</td><td>Hitachi H8/300H</td></tr>" +
+  "<tr><td>48</td><td>Hitachi H8S</td></tr>" +
+  "<tr><td>49</td><td>Hitachi H8/500</td></tr>" +
+  "<tr><td>50</td><td>IA-64</td></tr>" +
+  "<tr><td>51</td><td>Stanford MIPS-X</td></tr>" +
+  "<tr><td>52</td><td>Motorola ColdFire</td></tr>" +
+  "<tr><td>53</td><td>Motorola M68HC12</td></tr>" +
+  "<tr><td>54</td><td>Fujitsu MMA Multimedia Accelerator</td></tr>" +
+  "<tr><td>55</td><td>Semen PCP</td></tr>" +
+  "<tr><td>56</td><td>Sony nCPU embedded RISC processor</td></tr>" +
+  "<tr><td>57</td><td>Denso NDR1 microprocessor</td></tr>" +
+  "<tr><td>58</td><td>Motorola Star*Core processor</td></tr>" +
+  "<tr><td>59</td><td>Toyota ME16 processor</td></tr>" +
+  "<tr><td>60</td><td>STMicroelectronics ST100 processor</td></tr>" +
+  "<tr><td>61</td><td>Advanced Logic Corp. TinyJ embedded processor family</td></tr>" +
+  "<tr><td>62</td><td>AMD x86-64</td></tr>" +
+  "<tr><td>140</td><td>TMS320C6000 Family</td></tr>" +
+  "<tr><td>183</td><td>ARM 64-bits (ARMv8/Aarch64)</td></tr>" +
+  "<tr><td>243</td><td>RISC-V</td></tr>" +
+  "<tr><td>247</td><td>Berkeley Packet Filter</td></tr>" +
+  "<tr><td>257</td><td>WDC 65C816</td></tr>" +
   "</table></html>",
   "<html>Usually Set to 1 for the original version of ELF.<br /><br />Note 0 is an invalid setting.</html>",
   "<html>This is the Virtual address that the program starts at.</html>",
@@ -464,29 +466,36 @@ public class Headers extends Data
   "<html>This value specifies the kind of data that is in this program section.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Value</td><td>Data type</td></tr>" +
-  "<tr><td>00000000</td><td>Program header table entry unused</td></tr>" +
-  "<tr><td>00000001</td><td>Loadable segment (Data used by program instructions).</td></tr>" +
-  "<tr><td>00000002</td><td>Dynamic linking information.</td></tr>" +
-  "<tr><td>00000003</td><td>Interpreter information.</td></tr>" +
-  "<tr><td>00000004</td><td>Auxiliary information.</td></tr>" +
-  "<tr><td>00000005</td><td>Reserved, for future use.</td></tr>" +
-  "<tr><td>00000006</td><td>Section contains the program header itself.</td></tr>" +
-  "<tr><td>00000007</td><td>Thread-Local Storage.</td></tr>" +
-  "<tr><td>6474E550</td><td>GCC .eh_frame_hdr.</td></tr>" +
-  "<tr><td>6474E551</td><td>Indicates stack executability.</td></tr>" +
-  "<tr><td>6474E552</td><td>Read-only after relocation.</td></tr>" +
-  "<tr><td>60000000 to 6FFFFFFF</td><td>Reserved, for operating system.</td></tr>" +
-  "<tr><td>70000000 to 7FFFFFFF</td><td>Reserved, for processor specific.</td></tr>" +
+  "<tr><td>0</td><td>Program header table entry unused</td></tr>" +
+  "<tr><td>1</td><td>Loadable segment (Data used by program instructions).</td></tr>" +
+  "<tr><td>2</td><td>Dynamic linking information.</td></tr>" +
+  "<tr><td>3</td><td>Interpreter information.</td></tr>" +
+  "<tr><td>4</td><td>Auxiliary information.</td></tr>" +
+  "<tr><td>5</td><td>Reserved, for future use.</td></tr>" +
+  "<tr><td>6</td><td>Section contains the program header itself.</td></tr>" +
+  "<tr><td>7</td><td>Thread-Local Storage.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>1610612736 to 1879048191</td><td>These are OS specific. Listed bellow if any.</td></tr>" +
+  "<tr><td>1685382480</td><td>GCC .eh_frame_hdr, Call Frame debugging (not really needed).</td></tr>" +
+  "<tr><td>1685382481</td><td>Indicates stack executability.</td></tr>" +
+  "<tr><td>1685382482</td><td>Read-only after relocation.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>1879048192 to 2147483647</td><td>Processor specific. Listed bellow if any.</td></tr>" +
+  "<tr><td>Reserved</td><td>There are no Processor specific sections in use.</td></tr>" +
   "</table>",
   "<html>The flags value should be viewed in binary.<br /><br />" +
-  "The value 00001111111100000000000000000011 means CPU can run it's bytes as instruction, is writable, and is OS specific.<br /><br />" +
+  "The value 00000000000000000000000000000011 means CPU can run it's bytes as instruction, is writable.<br /><br />" +
   "The table bellow show the break down of what bits have to be set for each setting.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>00000000000000000000000000000001</td><td>This section can be run directly on CPU.</td></tr>" +
   "<tr><td>00000000000000000000000000000010</td><td>It is legal to write to this section.</td></tr>" +
   "<tr><td>00000000000000000000000000000100</td><td>It is legal to read bytes from the section.</td></tr>" +
-  "<tr><td>00001111111100000000000000000000</td><td>OS specific.</td></tr>" +
-  "<tr><td>11110000000000000000000000000000</td><td>Processor specific.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>00001111111100000000000000000000</td><td>Digits set 1 are OS specific settings. Listed bellow if any.</td></tr>" +
+  "<tr><td>Reserved</td><td>There are currently no OS specific settings in use.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>11110000000000000000000000000000</td><td>Digits set 1 are Processor specific settings. Listed bellow if any.</td></tr>" +
+  "<tr><td>Reserved</td><td>There are currently no processor specific settings in use.</td></tr>" +
   "</table></html>",
   "<html>Start position for the data in File.</html>",
   "<html>The position to put the data in virtual space.</html>",
@@ -519,35 +528,40 @@ public class Headers extends Data
   "<html>This specifies the type of data is in this section.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Value</td><td>Type</td></tr>" +
-  "<tr><td>00000000</td><td>No data type specified.</td></tr>" +
-  "<tr><td>00000001</td><td>Program data.</td></tr>" +
-  "<tr><td>00000002</td><td>Symbol table.</td></tr>" +
-  "<tr><td>00000003</td><td>String table.</td></tr>" +
-  "<tr><td>00000004</td><td>Relocation entries with addends.</td></tr>" +
-  "<tr><td>00000005</td><td>Symbol hash table.</td></tr>" +
-  "<tr><td>00000006</td><td>Dynamic linking information.</td></tr>" +
-  "<tr><td>00000007</td><td>Notes.</td></tr>" +
-  "<tr><td>00000008</td><td>Program space with no data (bss).</td></tr>" +
-  "<tr><td>00000009</td><td>Relocation entries, no addends.</td></tr>" +
-  "<tr><td>0000000B</td><td>Dynamic linker symbol table.</td></tr>" +
-  "<tr><td>0000000E</td><td>Array of constructors.</td></tr>" +
-  "<tr><td>0000000F</td><td>Array of destructors.</td></tr>" +
-  "<tr><td>00000010</td><td>Array of pre-constructors.</td></tr>" +
-  "<tr><td>00000011</td><td>Section group.</td></tr>" +
-  "<tr><td>00000012</td><td>Extended section indices.</td></tr>" +
-  "<tr><td>60000000</td><td>Start OS-specific.</td></tr>" +
-  "<tr><td>6FFFFFF5</td><td>Object attributes.</td></tr>" +
-  "<tr><td>6FFFFFF6</td><td>GNU-style hash table.</td></tr>" +
-  "<tr><td>6FFFFFF7</td><td>Prelink library list.</td></tr>" +
-  "<tr><td>6FFFFFF8</td><td>Checksum for DSO content.</td></tr>" +
-  "<tr><td>6FFFFFFD</td><td>Version definition section.</td></tr>" +
-  "<tr><td>6FFFFFFE</td><td>Version needs section.</td></tr>" +
-  "<tr><td>6FFFFFFF</td><td>Version symbol table.</td></tr>" +
-  "<tr><td>70000000 to 7FFFFFFF</td><td>Processor specific.</td></tr>" +
-  "<tr><td>80000000 to 8FFFFFFF</td><td>Application specific.</td></tr>" +
+  "<tr><td>0</td><td>No data type specified.</td></tr>" +
+  "<tr><td>1</td><td>Program data.</td></tr>" +
+  "<tr><td>2</td><td>Symbol table.</td></tr>" +
+  "<tr><td>3</td><td>String table.</td></tr>" +
+  "<tr><td>4</td><td>Relocation entries with addends.</td></tr>" +
+  "<tr><td>5</td><td>Symbol hash table.</td></tr>" +
+  "<tr><td>6</td><td>Dynamic linking information.</td></tr>" +
+  "<tr><td>7</td><td>Notes.</td></tr>" +
+  "<tr><td>8</td><td>Program space with no data (bss).</td></tr>" +
+  "<tr><td>9</td><td>Relocation entries, no addends.</td></tr>" +
+  "<tr><td>11</td><td>Dynamic linker symbol table.</td></tr>" +
+  "<tr><td>14</td><td>Array of constructors.</td></tr>" +
+  "<tr><td>15</td><td>Array of destructors.</td></tr>" +
+  "<tr><td>16</td><td>Array of pre-constructors.</td></tr>" +
+  "<tr><td>17</td><td>Section group.</td></tr>" +
+  "<tr><td>18</td><td>Extended section indices.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>1610612736 to 1879048191</td><td>These are OS specific. Listed bellow if any.</td></tr>" +
+  "<tr><td>1879048181</td><td>Object attributes.</td></tr>" +
+  "<tr><td>1879048182</td><td>GNU-style hash table.</td></tr>" +
+  "<tr><td>1879048183</td><td>Prelink library list.</td></tr>" +
+  "<tr><td>1879048184</td><td>Checksum for DSO content.</td></tr>" +
+  "<tr><td>1879048189</td><td>Version definition section.</td></tr>" +
+  "<tr><td>1879048190</td><td>Version needs section.</td></tr>" +
+  "<tr><td>1879048191</td><td>Version symbol table.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>1879048192 to 2147483647</td><td>Processor specific. Listed bellow if any.</td></tr>" +
+  "<tr><td>Reserved</td><td>There are no Processor specific sections in use.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>2147483648 to 2415919103</td><td>Application specific. Listed bellow if any.</td></tr>" +
+  "<tr><td>Reserved</td><td>There are no Application specific sections in use.</td></tr>" +
   "</table></html>",
   "<html>The flags value should be viewed in binary.<br /><br />" +
-  "The value 00001111111100000000000000000101 means CPU can run it's bytes as instruction, is writable, and is OS specific.<br /><br />" +
+  "The value 00000000000000000000000000000101 means CPU can run it's bytes as instruction, is writable.<br /><br />" +
   "The table bellow show the break down of what bits have to be set for each setting.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>00000000000000000000000000000001</td><td>It is legal to write to this section.</td></tr>" +
@@ -561,8 +575,12 @@ public class Headers extends Data
   "<tr><td>00000000000000000000001000000000</td><td>Section is member of a group.</td></tr>" +
   "<tr><td>00000000000000000000010000000000</td><td>Section holds local thread data.</td></tr>" +
   "<tr><td>00000000000000000000100000000000</td><td>Section with compressed data.</td></tr>" +
-  "<tr><td>00001111111100000000000000000000</td><td>OS specific.</td></tr>" +
-  "<tr><td>11110000000000000000000000000000</td><td>Processor specific.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>00001111111100000000000000000000</td><td>The digits set 1 are OS specific settings. Listed bellow if any.</td></tr>" +
+  "<tr><td>Reserved</td><td>There is no OS specific settings in use.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>11110000000000000000000000000000</td><td>The digits set 1 are reserved for Processor specific. Listed bellow if any.</td></tr>" +
+  "<tr><td>Reserved</td><td>There is no processor specific settings in use.</td></tr>" +
   "</table></html>",
   "<html>The virtual address to put the section.</html>",
   "<html>The offset of section in the file.</html>",
