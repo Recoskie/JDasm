@@ -131,11 +131,11 @@ public class libReader extends Data implements sec
           des.add( Name ); ref += 1;
         }
 
-        //String table.
+        //symbolic hash.
 
         if( el.type == 4 )
         {
-          extraData.add( new JDNode( ".hash #" + i2 + ".h", new long[]{ -3, el.value, strTable_size } ) );
+          extraData.add( new JDNode( ".hash #" + i2 + ".h", new long[]{ -3, el.value, 1 } ) );
         }
 
         //String table.
@@ -149,7 +149,7 @@ public class libReader extends Data implements sec
 
         if( el.type == 6 )
         {
-          extraData.add( new JDNode( ".dynsym #" + i2 + ".h", new long[]{ -3, el.value, symEl_size } ) );
+          extraData.add( new JDNode( ".dynsym #" + i2 + ".h", new long[]{ -3, el.value, 1 } ) );
         }
 
         //Dynamic relocation table.
@@ -227,8 +227,8 @@ public class libReader extends Data implements sec
     "The following types define the link libraries.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
-    "<tr><td>1</td><td>Location to Name of needed library plus string table.</td></tr>" +
-    "<tr><td>14</td><td>Location to Name of shared object plus string table.</td></tr>" +
+    "<tr><td>1</td><td>Location to Name of needed library plus string table location.</td></tr>" +
+    "<tr><td>14</td><td>Location to Name of shared object plus string table location.</td></tr>" +
     "</table><br />" +
     "The value after the types 1, 14 is a location to the name of the file. However, the location is added to the string table location.<br /><br />" +
     "<table border=\"1\">" +
@@ -236,17 +236,17 @@ public class libReader extends Data implements sec
     "<tr><td>5</td><td>Address to string table.</td></tr>" +
     "<tr><td>10</td><td>Size of the string table.</td></tr>" +
     "</table><br />The value after these tow types tells us where the string table is, and it's size.<br /><br />" +
-    "Adding the address of the needed library to the string table creates the location to the name.<br /><br />" +
+    "Adding the address of the needed library to the location to string table creates the location to the name.<br /><br />" +
     "A shared library means the file does not need to be in the same location as the binary.<br /><br /><hr /><br />" +
     "A dynamic section may also locate to diffract section types that are defined under the ELF \"section header\" which also specifies the section type.<br /><br />" +
     "Such as relocation section, the size of relocation section, and the individual size of each relocation.<br /><br />" +
-    "You can find the relocation section under the \"Section header\" by section type without having to reed the link library section. Section usually has the name \".rel.dyn\" as well.<br /><br />" +
+    "You can find the relocation sections under the \"Section header\" by section type without having to reed the link library section. Section usually has the name \".rel.dyn\" as well.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
     "<tr><td>18</td><td>Total size of Relocation section.</td></tr>" +
     "<tr><td>19</td><td>Size of one Relocation.</td></tr></table><br />" +
-    "Relocation section with addends. You can find the relocation section under the \"Section header\" by section type without having to reed the link library section. Section usually has the name \".rela.dyn\" as well.<br /><br />" +
+    "Relocation section with addends. You can find the relocation sections under the \"Section header\" by section type without having to reed the link library section. Section usually has the name \".rela.dyn\" as well.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>7</td><td>Address to Relocation section with addends.</td></tr>" +
@@ -261,10 +261,10 @@ public class libReader extends Data implements sec
     "We then also have Array of Constructors, and Array of Destructors. Which can be found under the \"Section header\" by section type without having to reed the link library section.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
-    "<tr><td>25</td><td>Location to Array of Constructors. Section \".init_array\".</td></tr>" +
-    "<tr><td>26</td><td>Location to Array of Destructors. Section \".fini_array\".</td></tr>" +
-    "<tr><td>27</td><td>Size in bytes of \".init_array\" section.</td></tr>" +
-    "<tr><td>28</td><td>Size in bytes of \".fini_array\" section.</td></tr></table><br />" +
+    "<tr><td>25</td><td>Location to Array of Constructors section.</td></tr>" +
+    "<tr><td>26</td><td>Location to Array of Destructors section.</td></tr>" +
+    "<tr><td>27</td><td>Size in bytes, for Array of Constructors section.</td></tr>" +
+    "<tr><td>28</td><td>Size in bytes, for Array of Destructors section.</td></tr></table><br />" +
     "These are defined by the \"section header\" as well by type. They usually have the section names \".init_array\", and \".fini_array\".<br /><br />" +
     "The init array is an array of locations that locate to \"program header\" entires which contain runnable code before the program starts.<br /><br />" +
     "The fini array stores the code to run to exit the program. Usually these arrays only store one init, and one fini. As we only need the location to init, and fini.<br /><br />" +
@@ -274,11 +274,11 @@ public class libReader extends Data implements sec
     "<tr><td>13</td><td>Address of termination function.</td></tr></table><br />" +
     "In some cases a link library section will define both the locations to init, and fini as values, and as a single array element in the init/fini array to the same locations..<br /><br />" +
     "You can view all the information styled nicely under the \"Other Data\" folder. In a way it is a waste of space to redefine everything when it already exists in the \"section header\".<br /><br />" +
-    "Bellow is all the types listed in order.<br /><br />" +
+    "Bellow is all the types listed in order by type.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>0</td><td>Marks end of dynamic section.</td></tr>" +
-    "<tr><td>1</td><td>Name of needed library.</td></tr>" +
+    "<tr><td>1</td><td>Location to Name of needed library plus string table location.</td></tr>" +
     "<tr><td>2</td><td>Size in bytes of PLT Relocations.</td></tr>" +
     "<tr><td>3</td><td>Processor defined value.</td></tr>" +
     "<tr><td>4</td><td>Address to symbol hash table section.</td></tr>" +
@@ -291,21 +291,21 @@ public class libReader extends Data implements sec
     "<tr><td>11</td><td>Size of one symbol table entry.</td></tr>" +
     "<tr><td>12</td><td>Address of init function.</td></tr>" +
     "<tr><td>13</td><td>Address of termination function.</td></tr>" +
-    "<tr><td>14</td><td>Name of shared object.</td></tr>" +
+    "<tr><td>14</td><td>Location to Name of shared object plus string table location.</td></tr>" +
     "<tr><td>15</td><td>Library search path (deprecated).</td></tr>" +
     "<tr><td>16</td><td>Start symbol search.</td></tr>" +
     "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
-    "<tr><td>18</td><td>Total size of Relocation section.</td></tr>" +
+    "<tr><td>18</td><td>Relocation section size.</td></tr>" +
     "<tr><td>19</td><td>Size of one Relocation.</td></tr>" +
     "<tr><td>20</td><td>Type of Relocation in PLT.</td></tr>" +
     "<tr><td>21</td><td>For debugging; unspecified.</td></tr>" +
     "<tr><td>22</td><td>Relocations might modify applications start address code section.</td></tr>" +
     "<tr><td>23</td><td>Address to PLT relocation section.</td></tr>" +
     "<tr><td>24</td><td>Process relocations of object.</td></tr>" +
-    "<tr><td>25</td><td>Location to Array of Constructors. Section \".init_array\".</td></tr>" +
-    "<tr><td>26</td><td>Location to Array of Destructors. Section \".fini_array\".</td></tr>" +
-    "<tr><td>27</td><td>Size in bytes of \".init_array\" section.</td></tr>" +
-    "<tr><td>28</td><td>Size in bytes of \".fini_array\" section.</td></tr>" +
+    "<tr><td>25</td><td>Location to Array of Constructors section.</td></tr>" +
+    "<tr><td>26</td><td>Location to Array of Destructors section.</td></tr>" +
+    "<tr><td>27</td><td>Size in bytes, for Array of Constructors section.</td></tr>" +
+    "<tr><td>28</td><td>Size in bytes, for Array of Destructors section.</td></tr>" +
     "<tr><td>29</td><td>Library search path.</td></tr>" +
     "<tr><td>30</td><td>Flags for the object being loaded.</td></tr>" +
     "<tr><td>32</td><td>Location to Array of pre-Constructors.</td></tr>" +
@@ -348,6 +348,6 @@ public class libReader extends Data implements sec
     info("<html>A link library section can locate to previously defined sections in the section headers at the start of the ELF file.<br /><br />" +
     "It can have the location to the start method, and end of program. It can also define the relocation sections.<br /><br />" +
     "The size of the section type has a type number, and it's location has a type number. The 2 values after type are used to define sections.<br /<br />" +
-    "You can chose to read the size, and locations your self by types. Thus navigate to the sections you self, however this section does this with the size/location types, for convince.</html>");
+    "You can chose to read the size, and locations your self by types. Thus navigate to the sections your self, however this section does this with the size/location types, for convince.</html>");
   }
 }
