@@ -224,36 +224,83 @@ public class libReader extends Data implements sec
   {
     "<html>Array element consisting of a type, and value.</html>",
     "<html>" +
-    "The value after type can be an address location, an Address plus a base address, a size value, or Other.<br /><br />" +
-    "The types \"Address of\" = \"symbol hash table\", \"string table\", \"symbol table\". Are very important as they define base addresses.<br /><br />" +
-    "The value after \"Name of needed library\" is not exactly a full address location. It needs to add the address, for \"string table\", for the name location, of the link library.<br /><br />" +
-    "This means the value that comes after type 5 is added with all type 1, and 14 values to find the address to the library name.<br /><br />" +
+    "The following types define the link libraries.<br /><br />" +
     "<table border=\"1\">" +
-    "<tr><td>Type</td><td>Operation</td></tr>" +
+    "<tr><td>Type</td><td>What value defines.</td></tr>" +
+    "<tr><td>1</td><td>Location to Name of needed library plus string table.</td></tr>" +
+    "<tr><td>14</td><td>Location to Name of shared object plus string table.</td></tr>" +
+    "</table><br />" +
+    "The value after the types 1, 14 is a location to the name of the file. However, the location is added to the string table location.<br /><br />" +
+    "<table border=\"1\">" +
+    "<tr><td>Type</td><td>What value defines.</td></tr>" +
+    "<tr><td>5</td><td>Address to string table.</td></tr>" +
+    "<tr><td>10</td><td>Size of the string table.</td></tr>" +
+    "</table><br />The value after these tow types tells us where the string table is, and it's size.<br /><br />" +
+    "Adding the address of the needed library to the string table creates the location to the name.<br /><br />" +
+    "A shared library means the file does not need to be in the same location as the binary.<br /><br /><hr /><br />" +
+    "A dynamic section may also locate to diffract section types that are defined under the ELF \"section header\" which also specifies the section type.<br /><br />" +
+    "Such as relocation section, the size of relocation section, and the individual size of each relocation.<br /><br />" +
+    "You can find the relocation section under the \"Section header\" by section type without having to reed the link library section. Section usually has the name \".rel.dyn\" as well.<br /><br />" +
+    "<table border=\"1\">" +
+    "<tr><td>Type</td><td>What value defines.</td></tr>" +
+    "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
+    "<tr><td>18</td><td>Total size of Relocation section.</td></tr>" +
+    "<tr><td>19</td><td>Size of one Relocation.</td></tr></table><br />" +
+    "Relocation section with addends. You can find the relocation section under the \"Section header\" by section type without having to reed the link library section. Section usually has the name \".rela.dyn\" as well.<br /><br />" +
+    "<table border=\"1\">" +
+    "<tr><td>Type</td><td>What value defines.</td></tr>" +
+    "<tr><td>7</td><td>Address to Relocation section with addends.</td></tr>" +
+    "<tr><td>8</td><td>Total size of Relocation section with addends.</td></tr>" +
+    "<tr><td>9</td><td>Size of one Relocation with addends.</td></tr></table><br />" +
+    "PLT relocation section. You can find the PLT relocation section under the \"Section header\" by section type without having to reed the link library section. The section also usually has the name \".rel.plt\" as well.<br /><br />" +
+    "<table border=\"1\">" +
+    "<tr><td>Type</td><td>What value defines.</td></tr>" +
+    "<tr><td>23</td><td>Address to PLT Relocation section.</td></tr>" +
+    "<tr><td>2</td><td>Total size of PLT section.</td></tr>" +
+    "<tr><td>20</td><td>Type of Relocation in PLT.</td></tr></table><br />" +
+    "We then also have Array of Constructors, and Array of Destructors. Which can be found under the \"Section header\" by section type without having to reed the link library section.<br /><br />" +
+    "<table border=\"1\">" +
+    "<tr><td>Type</td><td>What value defines.</td></tr>" +
+    "<tr><td>25</td><td>Location to Array of Constructors. Section \".init_array\".</td></tr>" +
+    "<tr><td>26</td><td>Location to Array of Destructors. Section \".fini_array\".</td></tr>" +
+    "<tr><td>27</td><td>Size in bytes of \".init_array\" section.</td></tr>" +
+    "<tr><td>28</td><td>Size in bytes of \".fini_array\" section.</td></tr></table><br />" +
+    "These are defined by the \"section header\" as well by type. They usually have the section names \".init_array\", and \".fini_array\".<br /><br />" +
+    "The init array is an array of locations that locate to \"program header\" entires which contain runnable code before the program starts.<br /><br />" +
+    "The fini array stores the code to run to exit the program. Usually these arrays only store one init, and one fini. As we only need the location to init, and fini.<br /><br />" +
+    "<table border=\"1\">" +
+    "<tr><td>Type</td><td>What value defines.</td></tr>" +
+    "<tr><td>12</td><td>Address of init function.</td></tr>" +
+    "<tr><td>13</td><td>Address of termination function.</td></tr></table><br />" +
+    "In some cases a link library section will define both the locations to init, and fini as values, and as a single array element in the init/fini array to the same locations..<br /><br />" +
+    "You can view all the information styled nicely under the \"Other Data\" folder. In a way it is a waste of space to redefine everything when it already exists in the \"section header\".<br /><br />" +
+    "Bellow is all the types listed in order.<br /><br />" +
+    "<table border=\"1\">" +
+    "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>0</td><td>Marks end of dynamic section.</td></tr>" +
     "<tr><td>1</td><td>Name of needed library.</td></tr>" +
     "<tr><td>2</td><td>Size in bytes of PLT Relocations.</td></tr>" +
     "<tr><td>3</td><td>Processor defined value.</td></tr>" +
-    "<tr><td>4</td><td>Address of symbol hash table.</td></tr>" +
-    "<tr><td>5</td><td>Address of string table.</td></tr>" +
-    "<tr><td>6</td><td>Address of symbol table.</td></tr>" +
-    "<tr><td>7</td><td>Address of Relocation with addends.</td></tr>" +
-    "<tr><td>8</td><td>Total size of Relocation with addends.</td></tr>" +
+    "<tr><td>4</td><td>Address to symbol hash table section.</td></tr>" +
+    "<tr><td>5</td><td>Address to string table section.</td></tr>" +
+    "<tr><td>6</td><td>Address to symbol table section.</td></tr>" +
+    "<tr><td>7</td><td>Address to Relocation section with addends.</td></tr>" +
+    "<tr><td>8</td><td>Total size of Relocation section with addends.</td></tr>" +
     "<tr><td>9</td><td>Size of one Relocation with addends.</td></tr>" +
-    "<tr><td>10</td><td>Size of string table.</td></tr>" +
+    "<tr><td>10</td><td>Size of string table section.</td></tr>" +
     "<tr><td>11</td><td>Size of one symbol table entry.</td></tr>" +
     "<tr><td>12</td><td>Address of init function.</td></tr>" +
     "<tr><td>13</td><td>Address of termination function.</td></tr>" +
     "<tr><td>14</td><td>Name of shared object.</td></tr>" +
     "<tr><td>15</td><td>Library search path (deprecated).</td></tr>" +
     "<tr><td>16</td><td>Start symbol search.</td></tr>" +
-    "<tr><td>17</td><td>Address of Relocations.</td></tr>" +
-    "<tr><td>18</td><td>Total size of Rel Relocations.</td></tr>" +
+    "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
+    "<tr><td>18</td><td>Total size of Relocation section.</td></tr>" +
     "<tr><td>19</td><td>Size of one Relocation.</td></tr>" +
     "<tr><td>20</td><td>Type of Relocation in PLT.</td></tr>" +
     "<tr><td>21</td><td>For debugging; unspecified.</td></tr>" +
-    "<tr><td>22</td><td>Relocations might modify .text.</td></tr>" +
-    "<tr><td>23</td><td>Address to PLT Relocations.</td></tr>" +
+    "<tr><td>22</td><td>Relocations might modify applications start address code section.</td></tr>" +
+    "<tr><td>23</td><td>Address to PLT relocation section.</td></tr>" +
     "<tr><td>24</td><td>Process relocations of object.</td></tr>" +
     "<tr><td>25</td><td>Location to Array of Constructors. Section \".init_array\".</td></tr>" +
     "<tr><td>26</td><td>Location to Array of Destructors. Section \".fini_array\".</td></tr>" +
@@ -261,7 +308,6 @@ public class libReader extends Data implements sec
     "<tr><td>28</td><td>Size in bytes of \".fini_array\" section.</td></tr>" +
     "<tr><td>29</td><td>Library search path.</td></tr>" +
     "<tr><td>30</td><td>Flags for the object being loaded.</td></tr>" +
-    "<tr><td>31</td><td>Start of encoded range.</td></tr>" +
     "<tr><td>32</td><td>Location to Array of pre-Constructors.</td></tr>" +
     "<tr><td>33</td><td>Size in bytes, for Array of pre-Constructors.</td></tr>" +
     "<tr><td>34</td><td>Address of SYMTAB_SHNDX section.</td></tr>" +
