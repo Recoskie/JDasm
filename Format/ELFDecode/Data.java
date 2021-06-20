@@ -41,14 +41,15 @@ public class Data extends Window.Window
 
   //Sections can be separated by the data they contain.
 
-  public static swingIO.tree.JDNode code = new swingIO.tree.JDNode("Code Sections", 1); //Sections that are executable.
-  public static swingIO.tree.JDNode data = new swingIO.tree.JDNode("Other", 6); //Sections that are straight data with no type.
-
   public static swingIO.tree.JDNode[] sections = new swingIO.tree.JDNode[]
   {
+    new swingIO.tree.JDNode("Headers", 0), //Headers.
+    new swingIO.tree.JDNode("Code Sections", 1), //Sections marked as runnable code.
     new swingIO.tree.JDNode("Link libraries", 2), //Linked libraries method sections.
-    new swingIO.tree.JDNode("Relocation Sections", 3), //Relocations to be applied if program loads in different address.
-    new swingIO.tree.JDNode("Debug Sections", 4), //Relocations to be applied if program loads in different address.
-    new swingIO.tree.JDNode("Local thread storage", 5) //The local thread storage section.
+    new swingIO.tree.JDNode("String Table Sections", 3), //String table sections.
+    new swingIO.tree.JDNode("Relocation Sections", 4), //Relocations to be applied if program loads in different address.
+    new swingIO.tree.JDNode("Debug Sections", 5), //Relocations to be applied if program loads in different address.
+    new swingIO.tree.JDNode("Local thread storage", 6), //The local thread storage section.
+    new swingIO.tree.JDNode("Other", 7) //Sections that are marked as straight data with no type.
   };
 }

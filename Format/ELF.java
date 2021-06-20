@@ -19,9 +19,16 @@ public class ELF extends Data implements JDEventListener
 
   private static Headers header = new Headers();
 
-  JDNode Headers = new JDNode("Headers", 0);
+  private static final sec[] Reader = new sec[]
+  {
+    new libReader(),
+    null, //String Table Sections do not need an reader.
+    null, //Relocations.
+    null, //Debug Sections.
+    null, //Local thread storage.
+    null  //Other.
+  };
 
-  private static final sec[] Reader = new sec[] { new libReader(), null, null, null }; //Section type readers.
   public static final String[] SInfo = new String[]
   {
     //ELF headers.
@@ -41,6 +48,10 @@ public class ELF extends Data implements JDEventListener
     "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
     "The \".dynamic\" section is usually run by the \"program header\" before the \"section header\" maps it as \".dynamic\".<br /><br />" +
     "Also take note that the section types are identified by type setting, so it could have any name you like if you wanted.</html>",
+    //String tables.
+    "<html>An string table is just a set of text with a 00 hex code for the end of the text.<br /><br />" +
+    "The \"section header\" names is a string section type usually named \".shstrtab\".<br /><br />" +
+    "The link library section usually uses a string table named \".dynstr\".</html>",
     //Relocation.
     "<html>Relocation are only used if the ELF sections can not be palaced at set Virtual address locations.</html>",
     //Debug information.
@@ -67,7 +78,7 @@ public class ELF extends Data implements JDEventListener
 
   //Expand sections once on single click.
 
-  private boolean[] expandOnce = new boolean[]{ true, true, true, true, true, true, true };
+  private boolean[] expandOnce = new boolean[]{ true, true, true, true, true, true, true, true };
 
   //Read the ELF binary.
 
@@ -87,25 +98,19 @@ public class ELF extends Data implements JDEventListener
     JDNode PHeader = new JDNode( "Program Header", new long[]{ 0, 1 } );
     JDNode SECHeader = new JDNode( "Section Header", new long[]{ 1, 0 } );
 
-    code.removeAllChildren();
     for( int i = 0; i < sections.length; i++ ) { if ( sections[i].getChildCount() > 0 ) { sections[i].removeAllChildren(); } }
-    data.removeAllChildren();
     
     des[0] = new Descriptor[3];
 
     try
     {
-      des[0][0] = header.readELF(); Headers.add(ELFHeader); 
-      if( !Data.error && Data.programHeader != 0 ) { des[0][1] = header.readProgram(PHeader); Headers.add(PHeader); }
-      if( !Data.error && Data.Sections != 0 ) { des[1] = header.readSections(SECHeader); Headers.add(SECHeader); }
+      des[0][0] = header.readELF(); sections[0].add(ELFHeader); 
+      if( !Data.error && Data.programHeader != 0 ) { des[0][1] = header.readProgram(PHeader); sections[0].add(PHeader); }
+      if( !Data.error && Data.Sections != 0 ) { des[1] = header.readSections(SECHeader); sections[0].add(SECHeader); }
     }
     catch(Exception e) { Data.error = true; }
 
-    root.add(Headers);
-
-    if( code.getChildCount() > 0 ) { root.add( code ); }
     for( int i = 0; i < sections.length; i++ ) { if ( sections[i].getChildCount() > 0 ) { root.add( sections[i] ); } }
-    if( data.getChildCount() > 0 ) { root.add( data ); }
 
     if( !Data.error )
     {
@@ -131,7 +136,7 @@ public class ELF extends Data implements JDEventListener
 
       //Set the default node.
 
-      tree.setSelectionPath( new TreePath( Headers.getPath() ) ); open( new JDEvent( this, "", new long[]{ 0, 0 } ) );
+      tree.setSelectionPath( new TreePath( sections[0].getPath() ) ); open( new JDEvent( this, "", 0 ) );
     }
     else{ file.Events = true; }
   }

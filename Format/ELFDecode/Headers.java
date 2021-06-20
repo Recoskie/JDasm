@@ -163,19 +163,19 @@ public class Headers extends Data
 
       //If section has runnable machine code instruction.
 
-      if( ( flags & 1 ) == 1 ){ code.add( new JDNode("Program entire " + i + ".h", new long[]{ -1, virtual } ) ); }
+      if( ( flags & 1 ) == 1 ){ sections[1].add( new JDNode("Program entire " + i + ".h", new long[]{ -1, virtual } ) ); }
 
       //If section is data.
 
-      else if( type == 1 ){ data.add( new JDNode("Program entire " + i + ".h", new long[]{ -2, offset, virtual, flen } ) ); }
+      else if( type == 1 ){ sections[7].add( new JDNode("Program entire " + i + ".h", new long[]{ -2, offset, virtual, flen } ) ); }
 
       //If section is link libraries.
 
-      else if( type == 2 ){ sections[0].add( new JDNode("Program entire " + i + ".h", new long[]{ 2, virtual, vlen } ) ); }
+      else if( type == 2 ){ sections[2].add( new JDNode("Program entire " + i + ".h", new long[]{ 2, virtual, vlen } ) ); }
 
       //If section is Thread storage.
 
-      else if( type == 7 ){ sections[3].add( new JDNode("Program entire " + i + ".h", new long[]{ 5, virtual, vlen } ) ); }
+      else if( type == 7 ){ sections[6].add( new JDNode("Program entire " + i + ".h", new long[]{ 5, virtual, vlen } ) ); }
     }
       
     return( prh );
@@ -294,23 +294,27 @@ public class Headers extends Data
         
         //If section has runnable machine code instruction.
 
-        if( ( s.flags & 4 ) == 4 ){ code.add( new JDNode( Name.value + ".h", new long[]{ -1, s.virtual } ) ); }
+        if( ( s.flags & 4 ) == 4 ){ sections[1].add( new JDNode( Name.value + ".h", new long[]{ -1, s.virtual } ) ); }
 
         //Program data.
 
-        else if( s.type == 1 ){ data.add( new JDNode(Name.value + ".h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
+        else if( s.type == 1 ){ sections[7].add( new JDNode(Name.value + ".h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
 
         //If section is link libraries.
 
-        else if( s.type == 6 ){ sections[0].add( new JDNode( Name.value + ".h", new long[]{ 2, s.virtual, s.size } ) ); }
+        else if( s.type == 6 ){ sections[2].add( new JDNode( Name.value + ".h", new long[]{ 2, s.virtual, s.size } ) ); }
 
         //Relocations.
 
-        else if( s.type == 4 || s.type == 9 ){ sections[1].add( new JDNode(Name.value + ".h", new long[]{ 3, s.virtual, s.size } ) ); }
+        else if( s.type == 4 || s.type == 9 ){ sections[4].add( new JDNode(Name.value + ".h", new long[]{ 3, s.virtual, s.size } ) ); }
+
+        //String table.
+
+        else if( s.type == 3 ){ sections[3].add( new JDNode(Name.value + ".h", new long[]{ -3, s.virtual, s.size } ) ); }
 
         //Debug.
 
-        else if( s.type == 2 ){ sections[2].add( new JDNode(Name.value + ".h", new long[]{ 4, s.virtual, s.size } ) ); }
+        else if( s.type == 2 ){ sections[5].add( new JDNode(Name.value + ".h", new long[]{ 4, s.virtual, s.size } ) ); }
         
         i2 += 1;
       }

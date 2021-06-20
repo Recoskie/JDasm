@@ -44,7 +44,7 @@ public class libReader extends Data implements sec
 
     //WE read all link library sections.
 
-    JDNode sects = sections[0], curSec = null, extraData;
+    JDNode sects = sections[2], curSec = null, extraData;
 
     for( int i = 0, size = sects.getChildCount(); i < size; i++ )
     {
