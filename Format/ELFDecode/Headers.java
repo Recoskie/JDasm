@@ -479,6 +479,8 @@ public class Headers extends Data
   "<tr><td>1685382480</td><td>GCC .eh_frame_hdr, Call Frame debugging (not really needed).</td></tr>" +
   "<tr><td>1685382481</td><td>Indicates stack executability.</td></tr>" +
   "<tr><td>1685382482</td><td>Read-only after relocation.</td></tr>" +
+  "<tr><td>1879048186</td><td>Sun Specific segment.</td></tr>" +
+  "<tr><td>1879048187</td><td>Sun Specific Stack segment.</td></tr>" +
   "</table><br /><br /><table border=\"1\">" +
   "<tr><td>1879048192 to 2147483647</td><td>Processor specific. Listed bellow if any.</td></tr>" +
   "<tr><td>Reserved</td><td>There are no Processor specific sections in use.</td></tr>" +
@@ -580,7 +582,8 @@ public class Headers extends Data
   "<tr><td>Reserved</td><td>There is no OS specific settings in use.</td></tr>" +
   "</table><br /><br /><table border=\"1\">" +
   "<tr><td>11110000000000000000000000000000</td><td>The digits set 1 are reserved for Processor specific. Listed bellow if any.</td></tr>" +
-  "<tr><td>Reserved</td><td>There is no processor specific settings in use.</td></tr>" +
+  "<tr><td>01000000000000000000000000000000</td><td>Special ordering requirement (Solaris).</td></tr>" +
+  "<tr><td>10000000000000000000000000000000</td><td>Section is excluded unless referenced, or allocated (Solaris).</td></tr>" +
   "</table></html>",
   "<html>The virtual address to put the section.</html>",
   "<html>The offset of section in the file.</html>",
