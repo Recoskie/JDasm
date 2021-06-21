@@ -231,32 +231,33 @@ public class libReader extends Data implements sec
     "<tr><td>14</td><td>Location to Name of shared object plus string table location.</td></tr>" +
     "</table><br />" +
     "The value after the types 1, 14 is a location to the name of the file. However, the location is added to the string table location.<br /><br />" +
-    "There is two ways to locate the string table. The string table cen be identified in the ELF \"Section header\" as section type 3, and it may also have the section name \".dynstr\".<br /><br />" +
-    "However it is possible to have more than one string table. The best way is to read the types in the link library section. Which also does a good job at defining sections.<br /><br />" +
+    "There can be more than one string table defined under the ELF \"Section header\". So the library section fixes this by defining which section.<br /><br />" +
+    "Under the ELF \"section header\" it is usually the section named \".dynstr\". However, it could have a unique name.<br /><br />" +
+    "The best way is to read the types in the link library section. Which also does a good job at defining sections.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>5</td><td>Address to string table.</td></tr>" +
     "<tr><td>10</td><td>Size of the string table.</td></tr>" +
-    "</table><br />The value after these tow types tells us where the string table is, and it's size.<br /><br />" +
+    "</table><br />The value after these tow types tells us which string table, and it's size.<br /><br />" +
     "Adding the address of the needed library with the location to string table creates the location to the name.<br /><br />" +
-    "Also a shared library means the file does not need to be in the same location as the binary.<br /><br /><hr /><br />" +
-    "A dynamic section may also locate to different section types that are defined under the ELF \"section header\" which also specifies the section by type.<br /><br />" +
-    "Such as relocation section, the size of relocation section, and the individual size of each relocation.<br /><br />" +
-    "You can find the relocation section under the \"Section header\" by section type 9 without having to reed the link library section. Section usually has the name \".rel.dyn\" as well.<br /><br />" +
+    "Also a shared library means the file does not need to be in the same folder as the binary.<br /><br /><hr /><br />" +
+    "A dynamic section may also locate to different section types that are defined under the ELF \"section header\".<br /><br />" +
+    "Such as relocation section, the size of relocation section, and the individual size of each relocation. Which is needed of the defined virtual address in the \"Section header\" is in use by another program so the locations have to be remapped somewhere else.<br /><br />" +
+    "You can find the relocation section under the \"Section header\" by section type 9 without having to reed the link library section. Section usually has the name \".rel.dyn\" as well (if it is not given a unique name).<br /><br />" +
     "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
     "<tr><td>18</td><td>Total size of Relocation section.</td></tr>" +
     "<tr><td>19</td><td>Size of one Relocation.</td></tr></table><br />" +
-    "Relocation section with addends. You can find the relocation sections under the \"Section header\" by section type 4 without having to reed the link library section. Section usually has the name \".rela.dyn\" as well.<br /><br />" +
+    "Relocation section with addends. You can find the relocation sections under the \"Section header\" by section type 4 without having to reed the link library section. Section usually has the name \".rela.dyn\" as well (if it is not given a unique name).<br /><br />" +
     "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>7</td><td>Address to Relocation section with addends.</td></tr>" +
     "<tr><td>8</td><td>Total size of Relocation section with addends.</td></tr>" +
     "<tr><td>9</td><td>Size of one Relocation with addends.</td></tr></table><br />" +
-    "PLT relocation section. You can find the PLT relocation section under the \"Section header\" by section types 4, or 9 without having to reed the link library section. The section also usually has the name \".rel.plt\", or \".rela.plt\" as well.<br /><br />" +
+    "PLT relocation section. You can find the PLT relocation section under the \"Section header\" by section types 4, or 9 without having to reed the link library section. The section also usually has the name \".rel.plt\", or \".rela.plt\" as well (if it is not given a unique name).<br /><br />" +
     "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
@@ -272,15 +273,15 @@ public class libReader extends Data implements sec
     "<tr><td>27</td><td>Size in bytes, for Array of Constructors section.</td></tr>" +
     "<tr><td>28</td><td>Size in bytes, for Array of Destructors section.</td></tr>" +
     "<tr><td>33</td><td>Size in bytes, for Array of pre-Constructors section.</td></tr></table><br />" +
-    "These are defined by the \"section header\" as types 14 to 16. They usually have the section names \".init_array\", \".fini_array\", and \".pinit_array\".<br /><br />" +
+    "These are defined by the \"section header\" as types 14 to 16. They usually have the section names \".init_array\", \".fini_array\", and \".pre_initarray\".<br /><br />" +
     "The init array is an array of locations that locate to \"program header\" entires which contain runnable code before the program starts.<br /><br />" +
     "The fini array stores the code to run to exit the program. Usually these arrays only store one init, and one fini. As we only need the location to init, and fini.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>12</td><td>Address of init function.</td></tr>" +
     "<tr><td>13</td><td>Address of termination function.</td></tr></table><br />" +
-    "In some cases a link library section will define both the locations to code sections init, and fini as values, and as a single array element in the init/fini array to the same locations..<br /><br />" +
-    "You can view all the information styled nicely under the \"Other Data\" folder. In a way it is a waste of space to redefine everything when it already exists in the \"section header\" by section type.<br /><br />" +
+    "In some cases a link library section will define both the locations to code sections init, and fini as values, and as a single array element in the init/fini array to the same locations.<br /><br />" +
+    "You can view all the information styled nicely under the \"Other Data\" folder. In a way it seems like a waste of space to redefine everything when it already exists in the \"section header\" by section type, but we can have more than one of the same section types.<br /><br />" +
     "Bellow is all the types listed in order by type.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
