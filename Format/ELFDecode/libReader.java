@@ -231,8 +231,8 @@ public class libReader extends Data implements sec
     "<tr><td>14</td><td>Location to Name of shared object plus string table location.</td></tr>" +
     "</table><br />" +
     "The value after the types 1, 14 is a location to the name of the file. However, the location is added to the string table location.<br /><br />" +
-    "There is two ways to locate the string table. The string table cen be specified in the ELF \"Section header\" as section type 3, and it may also have the section name \".dynstr\".<br /><br />" +
-    "The other way is to read the types in the link library section. Which also does a good job at defining sections.<br /><br />" +
+    "There is two ways to locate the string table. The string table cen be identified in the ELF \"Section header\" as section type 3, and it may also have the section name \".dynstr\".<br /><br />" +
+    "However it is possible to have more than one string table. The best way is to read the types in the link library section. Which also does a good job at defining sections.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>5</td><td>Address to string table.</td></tr>" +
@@ -243,18 +243,21 @@ public class libReader extends Data implements sec
     "A dynamic section may also locate to different section types that are defined under the ELF \"section header\" which also specifies the section by type.<br /><br />" +
     "Such as relocation section, the size of relocation section, and the individual size of each relocation.<br /><br />" +
     "You can find the relocation section under the \"Section header\" by section type 9 without having to reed the link library section. Section usually has the name \".rel.dyn\" as well.<br /><br />" +
+    "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
     "<tr><td>18</td><td>Total size of Relocation section.</td></tr>" +
     "<tr><td>19</td><td>Size of one Relocation.</td></tr></table><br />" +
     "Relocation section with addends. You can find the relocation sections under the \"Section header\" by section type 4 without having to reed the link library section. Section usually has the name \".rela.dyn\" as well.<br /><br />" +
+    "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>7</td><td>Address to Relocation section with addends.</td></tr>" +
     "<tr><td>8</td><td>Total size of Relocation section with addends.</td></tr>" +
     "<tr><td>9</td><td>Size of one Relocation with addends.</td></tr></table><br />" +
     "PLT relocation section. You can find the PLT relocation section under the \"Section header\" by section types 4, or 9 without having to reed the link library section. The section also usually has the name \".rel.plt\", or \".rela.plt\" as well.<br /><br />" +
+    "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Type</td><td>What value defines.</td></tr>" +
     "<tr><td>23</td><td>Address to PLT Relocation section.</td></tr>" +

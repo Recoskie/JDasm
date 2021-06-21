@@ -57,7 +57,8 @@ public class ELF extends Data implements JDEventListener
     //Thread local storage.
     "<html></html>",
     //The init, fini, pre-init array sections.
-    "<html></html>",
+    "<html>The init array stores an array of address locations to the program header entires that run before the programs start address defined in the ELF header.<br /><br />" +
+    "The fini array is sections that exit the program, or terminate the processes.</html>",
     //Notes sections.
     "<html></html>",
     //Sections defined as data only.
