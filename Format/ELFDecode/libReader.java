@@ -197,7 +197,7 @@ public class libReader extends Data implements sec
 
         if( el.type == 32 )
         {
-          extraData.add( new JDNode( ".pre-init_array #" + i2 + ".h", new long[]{ -3, el.value, pinitArray_size } ) );
+          extraData.add( new JDNode( ".pre_initarray #" + i2 + ".h", new long[]{ -3, el.value, pinitArray_size } ) );
         }
       }
 
