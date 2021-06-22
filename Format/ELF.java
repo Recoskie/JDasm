@@ -11,7 +11,7 @@ public class ELF extends Data implements JDEventListener
 {
   //Descriptors.
 
-  private Descriptor[][] des = new Descriptor[6][];
+  private Descriptor[][] des = new Descriptor[7][];
 
   private JDNode root;
 
@@ -24,6 +24,7 @@ public class ELF extends Data implements JDEventListener
     new libReader(),
     null, //Relocations.
     null, //Debug Sections.
+    new arrayReader(), //init-fini array reader.
     null, //Local thread storage.
   };
 

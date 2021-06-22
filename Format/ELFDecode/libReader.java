@@ -62,7 +62,7 @@ public class libReader extends Data implements sec
 
       //Setup node for sorting the other Data.
 
-      extraData = new JDNode("Other Data");
+      extraData = new JDNode("Setup Data");
 
       //Read section.
 
@@ -154,7 +154,7 @@ public class libReader extends Data implements sec
           }
         }
 
-        //Define section generically if could not be found.
+        //Define section generically by information in the link library section if could not be found.
 
         if( !found )
         {
@@ -255,8 +255,8 @@ public class libReader extends Data implements sec
   "</table><br />" +
   "The value after the types 1, 14 is a location to the name of the file. However, the location is added to the string table location.<br /><br />" +
   "There can be more than one string table defined under the ELF \"Section header\". So the library section fixes this by defining which section.<br /><br />" +
-  "Under the ELF \"section header\" it is usually the section named \".dynstr\". However, it could have a unique name.<br /><br />" +
-  "The best way is to read the types in the link library section. Which also does a good job at defining sections.<br /><br />" +
+  "However, Under the ELF \"section header\" it is usually the section named \".dynstr\". However, it could have a unique name.<br /><br />" +
+  "The best way is to read the types in the link library section. Which also does a good job at defining section location, and size.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Type</td><td>What value defines.</td></tr>" +
   "<tr><td>5</td><td>Address to string table.</td></tr>" +
@@ -265,9 +265,9 @@ public class libReader extends Data implements sec
   "Adding the address of the needed library with the location to string table creates the location to the name.<br /><br />" +
   "Also a shared library means the file does not need to be in the same folder as the binary.<br /><br /><hr /><br />" +
   "A dynamic section may also locate to different section types that are defined under the ELF \"section header\".<br /><br />" +
-  "Such as relocation section, the size of relocation section, and the individual size of each relocation. Which is needed of the defined virtual address in the \"Section header\" is in use by another program so the locations have to be remapped somewhere else.<br /><br />" +
+  "Such as relocation section, the size of relocation section, and the individual size of each relocation. Which is needed if the defined virtual address in the \"Section header\" is in use by another program so the locations have to be remapped somewhere else.<br /><br />" +
   "You can find the relocation section under the \"Section header\" by section type 9 without having to reed the link library section. Section usually has the name \".rel.dyn\" as well (if it is not given a unique name).<br /><br />" +
-  "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
+  "However, there is usually a relocation section, for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Type</td><td>What value defines.</td></tr>" +
   "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
@@ -297,14 +297,14 @@ public class libReader extends Data implements sec
   "<tr><td>28</td><td>Size in bytes, for Array of Destructors section.</td></tr>" +
   "<tr><td>33</td><td>Size in bytes, for Array of pre-Constructors section.</td></tr></table><br />" +
   "These are defined by the \"section header\" as types 14 to 16. They usually have the section names \".init_array\", \".fini_array\", and \".pre_initarray\".<br /><br />" +
-  "The init array is an array of locations that locate to \"program header\" entires which contain runnable code before the program starts.<br /><br />" +
-  "The fini array stores the code to run to exit the program. Usually these arrays only store one init, and one fini. As we only need the location to init, and fini.<br /><br />" +
+  "The init array is an array of locations that locate to \"program header\" entires which contain runnable code before the program starts. Depending on what the link library does it may need to make a new process of you binary program.<br /><br />" +
+  "The fini array stores the code to run to exit the program. Depending on what the link library does it may need to end the program.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Type</td><td>What value defines.</td></tr>" +
   "<tr><td>12</td><td>Address of init function.</td></tr>" +
   "<tr><td>13</td><td>Address of termination function.</td></tr></table><br />" +
-  "In some cases a link library section will define both the locations to code sections init, and fini as values, and as a single array element in the init/fini array to the same locations.<br /><br />" +
-  "You can view all the information styled nicely under the \"Other Data\" folder. In a way it seems like a waste of space to redefine everything when it already exists in the \"section header\" by section type, but we can have more than one of the same section types.<br /><br />" +
+  "In some cases a link library section will define both the locations to code sections init, and fini as values, and define the init, and fini methods as array element in the init/fini.<br /><br />" +
+  "You can view all the information styled nicely under the \"Setup Data\" folder.<br /><br />" +
   "Bellow is all the types listed in order by type.<br /><br />" +
   "<table border=\"1\">" +
   "<tr><td>Type</td><td>What value defines.</td></tr>" +
@@ -381,8 +381,9 @@ public class libReader extends Data implements sec
   public void extraInfo( int el )
   {
     info("<html>A link library section can locate to previously defined sections in the section headers at the start of the ELF file.<br /><br />" +
-    "It can have the location to the start method, and end of program. It can also define the relocation sections.<br /><br />" +
-    "The size of the section type has a type number, and it's location has a type number. The 2 values after type are used to define sections.<br /<br />" +
+    "It can have the location to the start method, and end of program. This is because alink library may need to end you binary, or create a new instance depending on what it does.<br /><br />" +
+    "It can also define the relocation sections that are needed for the addresses within the section incase it can not be put at it's set base address defined in section header.<br /><br />" +
+    "The size of the section type has a type number, and it's location has a type number. The 2 values after 2 types are used to define sections.<br /<br />" +
     "You can chose to read the size, and locations your self by types. Thus navigate to the sections your self, however this section does this with the size/location types, for convince.</html>");
   }
 }

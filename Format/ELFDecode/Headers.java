@@ -306,23 +306,23 @@ public class Headers extends Data
 
         //If section is link libraries.
 
-        else if( s.type == 7 ){ sections[8].add( new JDNode( Name.value + ".h", new long[]{ -3, s.virtual, s.size } ) ); }
+        else if( s.type == 7 ){ sections[8].add( new JDNode( Name.value + ".h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
 
         //Relocations.
 
-        else if( s.type == 4 || s.type == 9 ){ sections[4].add( new JDNode(Name.value + ".h", new long[]{ 3, s.virtual, s.size } ) ); }
+        else if( s.type == 4 || s.type == 9 ){ sections[4].add( new JDNode(Name.value + ".h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
 
         //String table.
 
-        else if( s.type == 3 ){ sections[3].add( new JDNode(Name.value + ".h", new long[]{ -3, s.virtual, s.size } ) ); }
+        else if( s.type == 3 ){ sections[3].add( new JDNode(Name.value + ".h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
 
         //Debug.
 
-        else if( s.type == 2 ){ sections[5].add( new JDNode(Name.value + ".h", new long[]{ 4, s.virtual, s.size } ) ); }
+        else if( s.type == 2 ){ sections[5].add( new JDNode(Name.value + ".h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
 
         //If section is the init, fini, pre-init types.
 
-        else if( s.type >= 14 && s.type <= 16 ){ sections[7].add( new JDNode( Name.value + ".h", new long[]{ -3, s.virtual, s.size } ) ); }
+        else if( s.type >= 14 && s.type <= 16 ){ sections[7].add( new JDNode( Name.value + ".h", new long[]{ 5, s.virtual, s.size } ) ); }
         
         i2 += 1;
       }
