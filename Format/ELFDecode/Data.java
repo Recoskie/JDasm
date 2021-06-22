@@ -39,6 +39,10 @@ public class Data extends Window.Window
 
   public static boolean coreLoaded = false;
 
+  //section data.
+
+  public static sect[] st;
+
   //Sections can be separated by the data they contain.
 
   public static swingIO.tree.JDNode[] sections = new swingIO.tree.JDNode[]

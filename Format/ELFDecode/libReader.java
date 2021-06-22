@@ -114,6 +114,8 @@ public class libReader extends Data implements sec
 
       //Read over types, and define the link libraries.
 
+      boolean found = false; sect t;
+
       for( int i2 = 0; i2 < LSize; i2++ )
       {
         el = lib.get(i2);
@@ -131,73 +133,99 @@ public class libReader extends Data implements sec
           des.add( Name ); ref += 1;
         }
 
-        //symbolic hash.
+        //Lookup the sections.
 
-        if( el.type == 4 )
+        found = false;
+        if
+        (
+          ( el.type >= 4 && el.type <= 7 ) ||
+          //el.type == 12 || el.type == 13 ||
+          el.type == 17 ||
+          el.type == 23 || el.type == 25 || el.type == 26 ||
+          el.type == 32
+        )
         {
-          extraData.add( new JDNode( ".hash #" + i2 + ".h", new long[]{ -3, el.value, 1 } ) );
+          for( int l = st.length - 1; l > 0; l-- )
+          {
+            if( (t = st[l]).virtual == el.value )
+            {
+              found = true; extraData.add( new JDNode( t.Name + " #" + i2 + ".h", new long[]{ -3, t.virtual, t.size } ) );
+            }
+          }
         }
 
-        //String table.
+        //Define section generically if could not be found.
 
-        if( el.type == 5 )
+        if( !found )
         {
-          extraData.add( new JDNode( ".dynstr #" + i2 + ".h", new long[]{ -3, el.value, strTable_size } ) );
-        }
+          //symbolic hash.
 
-        //Dynamic symbol table.
+          if( el.type == 4 )
+          {
+            extraData.add( new JDNode( ".hash #" + i2 + ".h", new long[]{ -3, el.value, 1 } ) );
+          }
 
-        if( el.type == 6 )
-        {
-          extraData.add( new JDNode( ".dynsym #" + i2 + ".h", new long[]{ -3, el.value, 1 } ) );
-        }
+          //String table.
 
-        //Dynamic relocation table.
+          if( el.type == 5 )
+          {
+            extraData.add( new JDNode( ".dynstr #" + i2 + ".h", new long[]{ -3, el.value, strTable_size } ) );
+          }
 
-        if( el.type == 7 )
-        {
-          extraData.add( new JDNode( ".rela.dyn #" + i2 + ".h", new long[]{ -3, el.value, rela_size } ) );
-        }
+          //Dynamic symbol table.
 
-        //Init/Fini location.
+          if( el.type == 6 )
+          {
+            extraData.add( new JDNode( ".dynsym #" + i2 + ".h", new long[]{ -3, el.value, 1 } ) );
+          }
 
-        if( el.type == 12 )
-        {
-          extraData.add( new JDNode( ".init #" + i2 + ".h", new long[]{ -1, el.value } ) );
-        }
+          //Dynamic relocation table.
 
-        if( el.type == 13 )
-        {
-          extraData.add( new JDNode( ".fini #" + i2 + ".h", new long[]{ -1, el.value } ) );
-        }
+          if( el.type == 7 )
+          {
+            extraData.add( new JDNode( ".rela.dyn #" + i2 + ".h", new long[]{ -3, el.value, rela_size } ) );
+          }
 
-        //Dynamic relocation table.
+          //Init/Fini location.
 
-        if( el.type == 17 )
-        {
-          extraData.add( new JDNode( ".rel.dyn #" + i2 + ".h", new long[]{ -3, el.value, rel_size } ) );
-        }
+          if( el.type == 12 )
+          {
+            extraData.add( new JDNode( ".init #" + i2 + ".h", new long[]{ -1, el.value } ) );
+          }
 
-        if( el.type == 23 )
-        {
-          extraData.add( new JDNode( ".rel.plt #" + i2 + ".h", new long[]{ -3, el.value, PLT_size } ) );
-        }
+          if( el.type == 13 )
+          {
+            extraData.add( new JDNode( ".fini #" + i2 + ".h", new long[]{ -1, el.value } ) );
+          }
 
-        //.init_array/.fini_array section.
+          //Dynamic relocation table.
 
-        if( el.type == 25 )
-        {
-          extraData.add( new JDNode( ".init_array #" + i2 + ".h", new long[]{ -3, el.value, initArray_size } ) );
-        }
+          if( el.type == 17 )
+          {
+            extraData.add( new JDNode( ".rel.dyn #" + i2 + ".h", new long[]{ -3, el.value, rel_size } ) );
+          }
 
-        if( el.type == 26 )
-        {
-          extraData.add( new JDNode( ".fini_array #" + i2 + ".h", new long[]{ -3, el.value, finiArray_size } ) );
-        }
+          if( el.type == 23 )
+          {
+            extraData.add( new JDNode( ".rel.plt #" + i2 + ".h", new long[]{ -3, el.value, PLT_size } ) );
+          }
 
-        if( el.type == 32 )
-        {
-          extraData.add( new JDNode( ".pre_initarray #" + i2 + ".h", new long[]{ -3, el.value, pinitArray_size } ) );
+          //.init_array/.fini_array section.
+
+          if( el.type == 25 )
+          {
+            extraData.add( new JDNode( ".init_array #" + i2 + ".h", new long[]{ -3, el.value, initArray_size } ) );
+          }
+
+          if( el.type == 26 )
+          {
+            extraData.add( new JDNode( ".fini_array #" + i2 + ".h", new long[]{ -3, el.value, finiArray_size } ) );
+          }
+
+          if( el.type == 32 )
+          {
+            extraData.add( new JDNode( ".pre_initarray #" + i2 + ".h", new long[]{ -3, el.value, pinitArray_size } ) );
+          }
         }
       }
 
@@ -220,112 +248,112 @@ public class libReader extends Data implements sec
 
   //Detailed description of the link library sections.
 
+  public static final String readingLib = "<table border=\"1\">" +
+  "<tr><td>Type</td><td>What value defines.</td></tr>" +
+  "<tr><td>1</td><td>Location to Name of needed library plus string table location.</td></tr>" +
+  "<tr><td>14</td><td>Location to Name of shared object plus string table location.</td></tr>" +
+  "</table><br />" +
+  "The value after the types 1, 14 is a location to the name of the file. However, the location is added to the string table location.<br /><br />" +
+  "There can be more than one string table defined under the ELF \"Section header\". So the library section fixes this by defining which section.<br /><br />" +
+  "Under the ELF \"section header\" it is usually the section named \".dynstr\". However, it could have a unique name.<br /><br />" +
+  "The best way is to read the types in the link library section. Which also does a good job at defining sections.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Type</td><td>What value defines.</td></tr>" +
+  "<tr><td>5</td><td>Address to string table.</td></tr>" +
+  "<tr><td>10</td><td>Size of the string table.</td></tr>" +
+  "</table><br />The value after these tow types tells us which string table, and it's size.<br /><br />" +
+  "Adding the address of the needed library with the location to string table creates the location to the name.<br /><br />" +
+  "Also a shared library means the file does not need to be in the same folder as the binary.<br /><br /><hr /><br />" +
+  "A dynamic section may also locate to different section types that are defined under the ELF \"section header\".<br /><br />" +
+  "Such as relocation section, the size of relocation section, and the individual size of each relocation. Which is needed of the defined virtual address in the \"Section header\" is in use by another program so the locations have to be remapped somewhere else.<br /><br />" +
+  "You can find the relocation section under the \"Section header\" by section type 9 without having to reed the link library section. Section usually has the name \".rel.dyn\" as well (if it is not given a unique name).<br /><br />" +
+  "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Type</td><td>What value defines.</td></tr>" +
+  "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
+  "<tr><td>18</td><td>Total size of Relocation section.</td></tr>" +
+  "<tr><td>19</td><td>Size of one Relocation.</td></tr></table><br />" +
+  "Relocation section with addends. You can find the relocation sections under the \"Section header\" by section type 4 without having to reed the link library section. Section usually has the name \".rela.dyn\" as well (if it is not given a unique name).<br /><br />" +
+  "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Type</td><td>What value defines.</td></tr>" +
+  "<tr><td>7</td><td>Address to Relocation section with addends.</td></tr>" +
+  "<tr><td>8</td><td>Total size of Relocation section with addends.</td></tr>" +
+  "<tr><td>9</td><td>Size of one Relocation with addends.</td></tr></table><br />" +
+  "PLT relocation section. You can find the PLT relocation section under the \"Section header\" by section types 4, or 9 without having to reed the link library section. The section also usually has the name \".rel.plt\", or \".rela.plt\" as well (if it is not given a unique name).<br /><br />" +
+  "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Type</td><td>What value defines.</td></tr>" +
+  "<tr><td>23</td><td>Address to PLT Relocation section.</td></tr>" +
+  "<tr><td>2</td><td>Total size of PLT section.</td></tr>" +
+  "<tr><td>20</td><td>Type of Relocation in PLT.</td></tr></table><br />" +
+  "We then also have Array of Constructors, and Array of Destructors. Which can be found under the \"Section header\" by section types 14 to 16 without having to reed the link library section.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Type</td><td>What value defines.</td></tr>" +
+  "<tr><td>25</td><td>Location to Array of Constructors section.</td></tr>" +
+  "<tr><td>26</td><td>Location to Array of Destructors section.</td></tr>" +
+  "<tr><td>32</td><td>Location to Array of pre-Constructors section.</td></tr>" +
+  "<tr><td>27</td><td>Size in bytes, for Array of Constructors section.</td></tr>" +
+  "<tr><td>28</td><td>Size in bytes, for Array of Destructors section.</td></tr>" +
+  "<tr><td>33</td><td>Size in bytes, for Array of pre-Constructors section.</td></tr></table><br />" +
+  "These are defined by the \"section header\" as types 14 to 16. They usually have the section names \".init_array\", \".fini_array\", and \".pre_initarray\".<br /><br />" +
+  "The init array is an array of locations that locate to \"program header\" entires which contain runnable code before the program starts.<br /><br />" +
+  "The fini array stores the code to run to exit the program. Usually these arrays only store one init, and one fini. As we only need the location to init, and fini.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Type</td><td>What value defines.</td></tr>" +
+  "<tr><td>12</td><td>Address of init function.</td></tr>" +
+  "<tr><td>13</td><td>Address of termination function.</td></tr></table><br />" +
+  "In some cases a link library section will define both the locations to code sections init, and fini as values, and as a single array element in the init/fini array to the same locations.<br /><br />" +
+  "You can view all the information styled nicely under the \"Other Data\" folder. In a way it seems like a waste of space to redefine everything when it already exists in the \"section header\" by section type, but we can have more than one of the same section types.<br /><br />" +
+  "Bellow is all the types listed in order by type.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Type</td><td>What value defines.</td></tr>" +
+  "<tr><td>0</td><td>Marks end of dynamic section.</td></tr>" +
+  "<tr><td>1</td><td>Location to Name of needed library plus string table location.</td></tr>" +
+  "<tr><td>2</td><td>Size in bytes of PLT Relocations.</td></tr>" +
+  "<tr><td>3</td><td>Processor defined value.</td></tr>" +
+  "<tr><td>4</td><td>Address to symbol hash table section.</td></tr>" +
+  "<tr><td>5</td><td>Address to string table section.</td></tr>" +
+  "<tr><td>6</td><td>Address to symbol table section.</td></tr>" +
+  "<tr><td>7</td><td>Address to Relocation section with addends.</td></tr>" +
+  "<tr><td>8</td><td>Total size of Relocation section with addends.</td></tr>" +
+  "<tr><td>9</td><td>Size of one Relocation with addends.</td></tr>" +
+  "<tr><td>10</td><td>Size of string table section.</td></tr>" +
+  "<tr><td>11</td><td>Size of one symbol table entry.</td></tr>" +
+  "<tr><td>12</td><td>Address of init function.</td></tr>" +
+  "<tr><td>13</td><td>Address of termination function.</td></tr>" +
+  "<tr><td>14</td><td>Location to Name of shared object plus string table location.</td></tr>" +
+  "<tr><td>15</td><td>Library search path (deprecated).</td></tr>" +
+  "<tr><td>16</td><td>Start symbol search.</td></tr>" +
+  "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
+  "<tr><td>18</td><td>Relocation section size.</td></tr>" +
+  "<tr><td>19</td><td>Size of one Relocation.</td></tr>" +
+  "<tr><td>20</td><td>Type of Relocation in PLT.</td></tr>" +
+  "<tr><td>21</td><td>For debugging; unspecified.</td></tr>" +
+  "<tr><td>22</td><td>Relocations might modify applications start address code section.</td></tr>" +
+  "<tr><td>23</td><td>Address to PLT relocation section.</td></tr>" +
+  "<tr><td>24</td><td>Process relocations of object.</td></tr>" +
+  "<tr><td>25</td><td>Location to Array of Constructors section.</td></tr>" +
+  "<tr><td>26</td><td>Location to Array of Destructors section.</td></tr>" +
+  "<tr><td>27</td><td>Size in bytes, for Array of Constructors section.</td></tr>" +
+  "<tr><td>28</td><td>Size in bytes, for Array of Destructors section.</td></tr>" +
+  "<tr><td>29</td><td>Library search path.</td></tr>" +
+  "<tr><td>30</td><td>Flags for the object being loaded.</td></tr>" +
+  "<tr><td>32</td><td>Location to Array of pre-Constructors section.</td></tr>" +
+  "<tr><td>33</td><td>Size in bytes, for Array of pre-Constructors section.</td></tr>" +
+  "<tr><td>34</td><td>Address of SYMTAB_SHNDX section.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>1610612749 to 1879044096</td><td>OS specific. Listed bellow if any.</td></tr>" +
+  "<tr><td>Reserved</td><td>There are no OS specific types in use.</td></tr>" +
+  "</table><br /><br /><table border=\"1\">" +
+  "<tr><td>1879048192 to 2147483647</td><td>Processor specific. Listed bellow if any.</td></tr>" +
+  "<tr><td>Reserved</td><td>There are no Processor specific types in use.</td></tr>" +
+  "</table></html>";
+
   public static final String[] lInfo = new String[]
   {
     "<html>Array element consisting of a type, and value.</html>",
-    "<html>" +
-    "The following types define the link libraries.<br /><br />" +
-    "<table border=\"1\">" +
-    "<tr><td>Type</td><td>What value defines.</td></tr>" +
-    "<tr><td>1</td><td>Location to Name of needed library plus string table location.</td></tr>" +
-    "<tr><td>14</td><td>Location to Name of shared object plus string table location.</td></tr>" +
-    "</table><br />" +
-    "The value after the types 1, 14 is a location to the name of the file. However, the location is added to the string table location.<br /><br />" +
-    "There can be more than one string table defined under the ELF \"Section header\". So the library section fixes this by defining which section.<br /><br />" +
-    "Under the ELF \"section header\" it is usually the section named \".dynstr\". However, it could have a unique name.<br /><br />" +
-    "The best way is to read the types in the link library section. Which also does a good job at defining sections.<br /><br />" +
-    "<table border=\"1\">" +
-    "<tr><td>Type</td><td>What value defines.</td></tr>" +
-    "<tr><td>5</td><td>Address to string table.</td></tr>" +
-    "<tr><td>10</td><td>Size of the string table.</td></tr>" +
-    "</table><br />The value after these tow types tells us which string table, and it's size.<br /><br />" +
-    "Adding the address of the needed library with the location to string table creates the location to the name.<br /><br />" +
-    "Also a shared library means the file does not need to be in the same folder as the binary.<br /><br /><hr /><br />" +
-    "A dynamic section may also locate to different section types that are defined under the ELF \"section header\".<br /><br />" +
-    "Such as relocation section, the size of relocation section, and the individual size of each relocation. Which is needed of the defined virtual address in the \"Section header\" is in use by another program so the locations have to be remapped somewhere else.<br /><br />" +
-    "You can find the relocation section under the \"Section header\" by section type 9 without having to reed the link library section. Section usually has the name \".rel.dyn\" as well (if it is not given a unique name).<br /><br />" +
-    "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
-    "<table border=\"1\">" +
-    "<tr><td>Type</td><td>What value defines.</td></tr>" +
-    "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
-    "<tr><td>18</td><td>Total size of Relocation section.</td></tr>" +
-    "<tr><td>19</td><td>Size of one Relocation.</td></tr></table><br />" +
-    "Relocation section with addends. You can find the relocation sections under the \"Section header\" by section type 4 without having to reed the link library section. Section usually has the name \".rela.dyn\" as well (if it is not given a unique name).<br /><br />" +
-    "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
-    "<table border=\"1\">" +
-    "<tr><td>Type</td><td>What value defines.</td></tr>" +
-    "<tr><td>7</td><td>Address to Relocation section with addends.</td></tr>" +
-    "<tr><td>8</td><td>Total size of Relocation section with addends.</td></tr>" +
-    "<tr><td>9</td><td>Size of one Relocation with addends.</td></tr></table><br />" +
-    "PLT relocation section. You can find the PLT relocation section under the \"Section header\" by section types 4, or 9 without having to reed the link library section. The section also usually has the name \".rel.plt\", or \".rela.plt\" as well (if it is not given a unique name).<br /><br />" +
-    "However, there is usually a relocation section for the program as well as the dynamic section, so it is best to read the section by types in the link library section.<br /><br />" +
-    "<table border=\"1\">" +
-    "<tr><td>Type</td><td>What value defines.</td></tr>" +
-    "<tr><td>23</td><td>Address to PLT Relocation section.</td></tr>" +
-    "<tr><td>2</td><td>Total size of PLT section.</td></tr>" +
-    "<tr><td>20</td><td>Type of Relocation in PLT.</td></tr></table><br />" +
-    "We then also have Array of Constructors, and Array of Destructors. Which can be found under the \"Section header\" by section types 14 to 16 without having to reed the link library section.<br /><br />" +
-    "<table border=\"1\">" +
-    "<tr><td>Type</td><td>What value defines.</td></tr>" +
-    "<tr><td>25</td><td>Location to Array of Constructors section.</td></tr>" +
-    "<tr><td>26</td><td>Location to Array of Destructors section.</td></tr>" +
-    "<tr><td>32</td><td>Location to Array of pre-Constructors section.</td></tr>" +
-    "<tr><td>27</td><td>Size in bytes, for Array of Constructors section.</td></tr>" +
-    "<tr><td>28</td><td>Size in bytes, for Array of Destructors section.</td></tr>" +
-    "<tr><td>33</td><td>Size in bytes, for Array of pre-Constructors section.</td></tr></table><br />" +
-    "These are defined by the \"section header\" as types 14 to 16. They usually have the section names \".init_array\", \".fini_array\", and \".pre_initarray\".<br /><br />" +
-    "The init array is an array of locations that locate to \"program header\" entires which contain runnable code before the program starts.<br /><br />" +
-    "The fini array stores the code to run to exit the program. Usually these arrays only store one init, and one fini. As we only need the location to init, and fini.<br /><br />" +
-    "<table border=\"1\">" +
-    "<tr><td>Type</td><td>What value defines.</td></tr>" +
-    "<tr><td>12</td><td>Address of init function.</td></tr>" +
-    "<tr><td>13</td><td>Address of termination function.</td></tr></table><br />" +
-    "In some cases a link library section will define both the locations to code sections init, and fini as values, and as a single array element in the init/fini array to the same locations.<br /><br />" +
-    "You can view all the information styled nicely under the \"Other Data\" folder. In a way it seems like a waste of space to redefine everything when it already exists in the \"section header\" by section type, but we can have more than one of the same section types.<br /><br />" +
-    "Bellow is all the types listed in order by type.<br /><br />" +
-    "<table border=\"1\">" +
-    "<tr><td>Type</td><td>What value defines.</td></tr>" +
-    "<tr><td>0</td><td>Marks end of dynamic section.</td></tr>" +
-    "<tr><td>1</td><td>Location to Name of needed library plus string table location.</td></tr>" +
-    "<tr><td>2</td><td>Size in bytes of PLT Relocations.</td></tr>" +
-    "<tr><td>3</td><td>Processor defined value.</td></tr>" +
-    "<tr><td>4</td><td>Address to symbol hash table section.</td></tr>" +
-    "<tr><td>5</td><td>Address to string table section.</td></tr>" +
-    "<tr><td>6</td><td>Address to symbol table section.</td></tr>" +
-    "<tr><td>7</td><td>Address to Relocation section with addends.</td></tr>" +
-    "<tr><td>8</td><td>Total size of Relocation section with addends.</td></tr>" +
-    "<tr><td>9</td><td>Size of one Relocation with addends.</td></tr>" +
-    "<tr><td>10</td><td>Size of string table section.</td></tr>" +
-    "<tr><td>11</td><td>Size of one symbol table entry.</td></tr>" +
-    "<tr><td>12</td><td>Address of init function.</td></tr>" +
-    "<tr><td>13</td><td>Address of termination function.</td></tr>" +
-    "<tr><td>14</td><td>Location to Name of shared object plus string table location.</td></tr>" +
-    "<tr><td>15</td><td>Library search path (deprecated).</td></tr>" +
-    "<tr><td>16</td><td>Start symbol search.</td></tr>" +
-    "<tr><td>17</td><td>Address to Relocation section.</td></tr>" +
-    "<tr><td>18</td><td>Relocation section size.</td></tr>" +
-    "<tr><td>19</td><td>Size of one Relocation.</td></tr>" +
-    "<tr><td>20</td><td>Type of Relocation in PLT.</td></tr>" +
-    "<tr><td>21</td><td>For debugging; unspecified.</td></tr>" +
-    "<tr><td>22</td><td>Relocations might modify applications start address code section.</td></tr>" +
-    "<tr><td>23</td><td>Address to PLT relocation section.</td></tr>" +
-    "<tr><td>24</td><td>Process relocations of object.</td></tr>" +
-    "<tr><td>25</td><td>Location to Array of Constructors section.</td></tr>" +
-    "<tr><td>26</td><td>Location to Array of Destructors section.</td></tr>" +
-    "<tr><td>27</td><td>Size in bytes, for Array of Constructors section.</td></tr>" +
-    "<tr><td>28</td><td>Size in bytes, for Array of Destructors section.</td></tr>" +
-    "<tr><td>29</td><td>Library search path.</td></tr>" +
-    "<tr><td>30</td><td>Flags for the object being loaded.</td></tr>" +
-    "<tr><td>32</td><td>Location to Array of pre-Constructors section.</td></tr>" +
-    "<tr><td>33</td><td>Size in bytes, for Array of pre-Constructors section.</td></tr>" +
-    "<tr><td>34</td><td>Address of SYMTAB_SHNDX section.</td></tr>" +
-    "</table><br /><br /><table border=\"1\">" +
-    "<tr><td>1610612749 to 1879044096</td><td>OS specific. Listed bellow if any.</td></tr>" +
-    "<tr><td>Reserved</td><td>There are no OS specific types in use.</td></tr>" +
-    "</table><br /><br /><table border=\"1\">" +
-    "<tr><td>1879048192 to 2147483647</td><td>Processor specific. Listed bellow if any.</td></tr>" +
-    "<tr><td>Reserved</td><td>There are no Processor specific types in use.</td></tr>" +
-    "</table></html>",
+    "<html>The following types define the link libraries.<br /><br />" + readingLib + "</html>",
     "<html>What this value is used for is determined by it's type setting.</html>"
   };
 
@@ -333,7 +361,7 @@ public class libReader extends Data implements sec
   {
     if( el < 0 )
     {
-      info("<html>The dynamic link library section consists of many different types that define the needed link libraries, and more.</html>");
+      info("<html>The dynamic link library section consists of many different types that define the needed link libraries, and more.<br /><br />" + readingLib + "</html>");
     }
     else
     {

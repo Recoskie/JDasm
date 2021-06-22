@@ -183,12 +183,10 @@ public class Headers extends Data
 
   //*********************************Reads the Section header***********************************
 
-  private class sect { long virtual, offset, size, name, flags; int type; }
-
   public Descriptor[] readSections( JDNode Sec ) throws IOException
   {
     java.util.LinkedList<Descriptor> des = new java.util.LinkedList<Descriptor>();
-    java.util.LinkedList<sect> st = new java.util.LinkedList<sect>();
+    java.util.LinkedList<sect> temp = new java.util.LinkedList<sect>();
 
     Descriptor sec, Name;
 
@@ -263,14 +261,16 @@ public class Headers extends Data
         }
       }
 
-      file.addV( s.offset, s.size, s.virtual, s.size ); st.add(s);
+      file.addV( s.offset, s.size, s.virtual, s.size ); temp.add(s);
     }
+
+    st = temp.toArray( new sect[ temp.size() ] );
 
     //Create nodes for section data, and names.
 
     for( int i = 0, i2 = 1; i < secSize; i++ )
     {
-      s = st.get(i);
+      s = st[i];
       
       if( s.name == 0 )
       {
@@ -284,9 +284,9 @@ public class Headers extends Data
       {
         file.seekV(s.name); Name = new Descriptor(file,true); Name.setEvent( this::secName );
       
-        Name.String8("Section name location", (byte)0x00); des.add(Name);
+        Name.String8("Section name location", (byte)0x00); des.add(Name); s.Name = Name.value + "";
 
-        tNode = new JDNode( Name.value + " #" + i + ( s.size == 0 ? ".h" : "" ), new long[]{ 1, i2 } );
+        tNode = new JDNode( s.Name + " #" + i + ( s.size == 0 ? ".h" : "" ), new long[]{ 1, i2 } );
         
         if( s.size > 0 ) { tNode.add( new JDNode( "Section Data.h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
       
@@ -641,7 +641,6 @@ public class Headers extends Data
     "<tr><td>.rodata1</td><td>This section holds read-only data.</td></tr>" +
     "<tr><td>.bss</td><td>This section holds uninitialized data. The system initializes the data with zeros when the program begins to run.</td></tr>" +
     "<tr><td>.data</td><td>This section holds initialize data that contribute to the program's memory.</td></tr>" +
-    "<tr><td>.data1</td><td>This section holds initialize data that contribute to the program's memory.</td></tr>" +
     "<tr><td>.line</td><td>This section holds line number information for symbolic debugging, which describes the correspondence between the program source and the machine code.</td></tr>" +
     "<tr><td>.comment</td><td>This section holds version control information.</td></tr>" +
     "<tr><td>.ctors</td><td>This section holds initialized pointers to the C++ constructor functions.</td></tr>" +

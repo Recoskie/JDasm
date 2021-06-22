@@ -39,8 +39,10 @@ public class ELF extends Data implements JDEventListener
     //Code Sections.
     "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
     "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named section called \".init\".<br /><br />" +
+    "Also there may even be an \"init_array, or pre-init_array\" section. These sections are a set of addresses that locate to functions within the init section if needed.<br /><br />" +
     "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.<br /><br />" +
     "The \".fini\" section is the termination code that is called to exit the program.<br /><br />" +
+    "Also there may even be an \"fini_array\" section which points to addresses to call to stop threads, and the entire program.<br /><br />" +
     "We do not have to call it a \".init\" section. As sections that have runnable processor instructions are defined by flag setting.</html>",
     //Link libraries.
     "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
@@ -53,11 +55,11 @@ public class ELF extends Data implements JDEventListener
     //Relocation.
     "<html>Relocation are only used if the ELF sections can not be palaced at set Virtual address locations.</html>",
     //Debug information.
-    "<html>Line number information relative to the emitted machine code, and may also contain variable names.</html>",
+    "<html>Line number information relative to the emitted machine code, and may also contain variable names, and functions/methods.</html>",
     //Thread local storage.
     "<html></html>",
     //The init, fini, pre-init array sections.
-    "<html>The init array stores an array of address locations to the program header entires that run before the programs start address defined in the ELF header.<br /><br />" +
+    "<html>The init, and pre-init array stores an array of address locations to the program header entires that run before the programs start address defined in the ELF header.<br /><br />" +
     "The fini array is sections that exit the program, or terminate the processes.</html>",
     //Notes sections.
     "<html></html>",
