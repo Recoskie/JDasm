@@ -401,9 +401,9 @@ public class libReader extends Data implements sec
   public void extraInfo( int el )
   {
     info("<html>A link library section can locate to previously defined sections in the section headers at the start of the ELF file.<br /><br />" +
-    "It can have the location to the start method, and end of program. This is because alink library may need to end you binary, or create a new instance depending on what it does.<br /><br />" +
-    "It can also define the relocation sections that are needed for the addresses within the section incase it can not be put at it's set base address defined in section header.<br /><br />" +
+    "It can have the location to the start method, and end of program. This is because an link library may need to end your binary, or create a new instance depending on what it does.<br /><br />" +
+    "It can also define the relocation sections that are needed for the addresses within the section incase it can not be put at it's set base address defined in \"section header\".<br /><br />" +
     "The size of the section type has a type number, and it's location has a type number. The 2 values after 2 types are used to define sections.<br /<br />" +
-    "You can chose to read the size, and locations your self by types. Thus navigate to the sections your self, however this section does this with the size/location types, for convince.</html>");
+    "You can chose to read the size, and locations your self by types. Thus navigate to the sections your self, however this section does this with the size/location types, for your convince.</html>");
   }
 }
