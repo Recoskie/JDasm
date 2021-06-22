@@ -114,7 +114,7 @@ public class libReader extends Data implements sec
 
       //Read over types, and define the link libraries.
 
-      boolean found = false; sect t;
+      boolean found = false; int SType = 0; sect t;
 
       for( int i2 = 0; i2 < LSize; i2++ )
       {
@@ -133,23 +133,43 @@ public class libReader extends Data implements sec
           des.add( Name ); ref += 1;
         }
 
-        //Lookup the sections.
+        //Lookup the sections. Also link to the sections using command -4. If it is categorized.
 
         found = false;
-        if
-        (
-          ( el.type >= 4 && el.type <= 7 ) ||
-          //el.type == 12 || el.type == 13 ||
-          el.type == 17 ||
-          el.type == 23 || el.type == 25 || el.type == 26 ||
-          el.type == 32
-        )
+
+        SType = ( el.type == 12 || el.type == 13 ) ? 1 : -1;
+        if( SType < 0 ) { SType = el.type == 5 ? 3 : -1; }
+        if( SType < 0 ) { SType = (el.type == 7 || el.type == 17 || el.type == 23) ? 4 : -1; }
+        if( SType < 0 ) { SType = ( el.type == 25 || el.type == 26 || el.type == 32 ) ? 7 : -1; }
+
+        if ( ( el.type >= 4 && el.type <= 7 ) || SType > 0 )
         {
           for( int l = st.length - 1; l > 0; l-- )
           {
             if( (t = st[l]).virtual == el.value )
             {
-              found = true; extraData.add( new JDNode( t.Name + " #" + i2 + ".h", new long[]{ -3, t.virtual, t.size } ) );
+              found = true;
+              
+              if( SType > 0 )
+              {
+                int El = -1; for( int n = 0; n < sections[SType].getChildCount(); n++ )
+                {
+                  if( ((JDNode)sections[SType].getChildAt(n)).getUserObject().toString().startsWith(t.Name) ){ El = n; break; }
+                }
+
+                if( El > -1 )
+                {
+                  extraData.add( new JDNode( t.Name + " #" + i2 + ".h", new long[]{ -4, SType, El } ) );
+                }
+                else
+                {
+                  extraData.add( new JDNode( t.Name + " #" + i2 + ".h", new long[]{ -2, t.offset, t.virtual, t.size } ) );
+                }
+              }
+              else
+              {
+                extraData.add( new JDNode( t.Name + " #" + i2 + ".h", new long[]{ -2, t.offset, t.virtual, t.size } ) );
+              }
             }
           }
         }

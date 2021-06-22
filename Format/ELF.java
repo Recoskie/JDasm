@@ -187,6 +187,19 @@ public class ELF extends Data implements JDEventListener
         }
         catch( Exception er ) { } 
       }
+
+      //Link to section. Some sections define which sections to use. So it makes sense to link to the categorized sections.
+
+      else if( e.getArg(0) == -4 )
+      {
+        JDNode  n = ((JDNode)sections[(int)e.getArg(1)].getChildAt((int)e.getArg(2)));
+
+        tree.scrollPathToVisible( new TreePath( n.getPath() ) );
+
+        tree.setSelectionPath( new TreePath( n.getPath() ) );
+        
+        open( new JDEvent( this, "", n.getArgs() ) );
+      }
     }
     else if( e.getArgs().length > 1 )
     {
