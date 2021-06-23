@@ -23,7 +23,7 @@ public class ELF extends Data implements JDEventListener
   {
     new libReader(),
     null, //Relocations.
-    null, //Debug Sections.
+    null, //Symbol table Sections.
     new arrayReader(), //init-fini array reader.
     null, //Local thread storage.
   };
@@ -56,7 +56,7 @@ public class ELF extends Data implements JDEventListener
     //Relocation.
     "<html>Relocation are only used if the ELF sections can not be palaced at set Virtual address locations.</html>",
     //Debug information.
-    "<html>Line number information relative to the emitted machine code, and may also contain variable names, and functions/methods.</html>",
+    "<html>Defines methods in link library section, and defines code and variables in prgram to arrays in the sections or code that got compiled out.</html>",
     //Thread local storage.
     "<html></html>",
     //The init, fini, pre-init array sections.

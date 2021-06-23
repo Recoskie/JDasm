@@ -316,9 +316,9 @@ public class Headers extends Data
 
         else if( s.type == 3 ){ sections[3].add( new JDNode(Name.value + ".h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
 
-        //Debug.
+        //Symbol table.
 
-        else if( s.type == 2 ){ sections[5].add( new JDNode(Name.value + ".h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
+        else if( s.type == 2 || s.type == 11 ){ sections[5].add( new JDNode(Name.value + ".h", new long[]{ 4, s.virtual, s.size } ) ); }
 
         //If section is the init, fini, pre-init types.
 

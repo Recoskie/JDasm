@@ -40,7 +40,7 @@ public class libReader extends Data implements sec
     //The link library section can also define a lot of other information.
     //All this information is already sorted out in the Program headers, and section headers.
 
-    long strTable_size = 0, rel_size = 0, rela_size = 0, PLT_size = 0, initArray_size = 0, finiArray_size = 0, pinitArray_size = 0, relaEl_size = 0, relEl_size = 0, symEl_size = 0;
+    long strTable_size = 0, rel_size = 0, rela_size = 0, PLT_size = 0, initArray_size = 0, finiArray_size = 0, pinitArray_size = 0; //relaEl_size = 0, relEl_size = 0, symEl_size = 0;
 
     //WE read all link library sections.
 
@@ -100,11 +100,11 @@ public class libReader extends Data implements sec
         if( el.type == 2 ){ PLT_size = el.value; }
         if( el.type == 5 ){ strTable_loc = el.value; }
         if( el.type == 8 ){ rela_size = el.value; }
-        if( el.type == 9 ){ relaEl_size = el.value; }
+        //if( el.type == 9 ){ relaEl_size = el.value; }
         if( el.type == 10 ) { strTable_size = el.value; }
-        if( el.type == 11 ) { symEl_size = el.value; }
+        //if( el.type == 11 ) { symEl_size = el.value; }
         if( el.type == 18 ) { rel_size = el.value; }
-        if( el.type == 19 ) { relEl_size = el.value; }
+        //if( el.type == 19 ) { relEl_size = el.value; }
         if( el.type == 27 ) { initArray_size = el.value; }
         if( el.type == 28 ) { finiArray_size = el.value; }
         if( el.type == 33 ) { pinitArray_size = el.value; }
@@ -137,7 +137,8 @@ public class libReader extends Data implements sec
 
         found = false;
 
-        SType = ( el.type == 12 || el.type == 13 ) ? 1 : -1;
+        SType = ( el.type == 6 ) ? 5 : -1;
+        if( SType < 0 ) { SType = ( el.type == 12 || el.type == 13 ) ? 1 : -1; }
         if( SType < 0 ) { SType = el.type == 5 ? 3 : -1; }
         if( SType < 0 ) { SType = (el.type == 7 || el.type == 17 || el.type == 23) ? 4 : -1; }
         if( SType < 0 ) { SType = ( el.type == 25 || el.type == 26 || el.type == 32 ) ? 7 : -1; }
@@ -170,6 +171,8 @@ public class libReader extends Data implements sec
               {
                 extraData.add( new JDNode( t.Name + " #" + i2 + ".h", new long[]{ -2, t.offset, t.virtual, t.size } ) );
               }
+
+              break;
             }
           }
         }
