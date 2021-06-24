@@ -8,12 +8,6 @@ public class libReader extends Data implements sec
 {
   private class libInfo { long type = 0, value = 0; }
 
-  //Location to sting table for names of link libraries.
-  //Type 1, and 14 are added to this value to find the string names,
-  //for link libraries, and shared link libraries.
-
-  private long strTable_loc = 0;
-
   //Begin the read function.
 
   public Descriptor[] read() throws IOException
@@ -98,7 +92,7 @@ public class libReader extends Data implements sec
         }
 
         if( el.type == 2 ){ PLT_size = el.value; }
-        if( el.type == 5 ){ strTable_loc = el.value; }
+        if( el.type == 5 ){ dynStr = el.value; }
         if( el.type == 8 ){ rela_size = el.value; }
         //if( el.type == 9 ){ relaEl_size = el.value; }
         if( el.type == 10 ) { strTable_size = el.value; }
@@ -124,7 +118,7 @@ public class libReader extends Data implements sec
 
         if( el.type == 1 || el.type == 14 )
         {
-          file.seekV( strTable_loc + el.value ); Name = new Descriptor( file, true );
+          file.seekV( dynStr + el.value ); Name = new Descriptor( file, true );
 
           Name.String8( el.type == 1 ? "Link Library name." : "Shared Library name.", (byte)0x00 ); Name.setEvent( this::nameInfo );
           
@@ -177,7 +171,7 @@ public class libReader extends Data implements sec
           }
         }
 
-        //Define section generically by information in the link library section if could not be found.
+        //Define section generically by information in the link library section if could not be found, or linked to.
 
         if( !found )
         {
@@ -264,8 +258,6 @@ public class libReader extends Data implements sec
       }
     }
 
-
-    
     return( des.toArray( new Descriptor[ des.size() ] ) );
   }
 

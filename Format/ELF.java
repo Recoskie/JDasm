@@ -23,7 +23,7 @@ public class ELF extends Data implements JDEventListener
   {
     new libReader(),
     null, //Relocations.
-    null, //Symbol table Sections.
+    new symReader(), //Symbol table Sections.
     new arrayReader(), //init-fini array reader.
     null, //Local thread storage.
   };
@@ -220,7 +220,20 @@ public class ELF extends Data implements JDEventListener
         {
           file.Events = false;
 
-          try { des[ (int)e.getArg(0) ] = Reader[ (int)e.getArg(0) - 2 ].read(); } catch( Exception er ) { er.printStackTrace(); }
+          try
+          {
+            //WE can not read the dynamic symbol table if we do not read the link library section.
+
+            if( e.getArg(0) == 4 && sections[2].getChildCount() > 0 && des[2] == null )
+            {
+              des[2] = Reader[0].read(); tree.expandPath( new TreePath( ((JDNode)sections[2].getFirstChild()).getPath() ) );
+            }
+
+            //Read section user sleeted.
+
+            des[ (int)e.getArg(0) ] = Reader[ (int)e.getArg(0) - 2 ].read();
+          }
+          catch( Exception er ) { er.printStackTrace(); }
 
           file.Events = true;
 

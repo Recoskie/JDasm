@@ -12,7 +12,7 @@ public class arrayReader extends Data implements sec
 
     int ref = 0, end = 0; Descriptor loc;
 
-    //WE read all link library sections.
+    //WE read all Array sections.
 
     JDNode sects = sections[7], curSec = null;
 

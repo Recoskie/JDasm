@@ -18,6 +18,10 @@ public class Data extends Window.Window
 
   public static long start = 0;
 
+  //Location to the dynamic string table.
+
+  public static long dynStr = 0;
+
   //Program information.
 
   public static long programHeader = 0;
