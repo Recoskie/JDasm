@@ -8,6 +8,7 @@ public class symReader extends Data implements sec
   public Descriptor[] read() throws java.io.IOException
   {
     java.util.ArrayList<Descriptor> sym = new java.util.ArrayList<Descriptor>();
+    java.util.ArrayList<String> sym_n = new java.util.ArrayList<String>();
 
     //We only use one descriptor for each array as it is only disassemble locations.
 
@@ -102,15 +103,18 @@ public class symReader extends Data implements sec
           {
             curSec.add( new JDNode( name.value + " #" + i2 + ".h", new long[]{ 4, ref } ) );
           }
+
+          sym_n.add((String)name.value);
           
           ref += 1; file.seekV( t );
         }
+        else { sym_n.add("No_Name"); }
       }
 
       if( Func.getChildCount() > 0 ) { curSec.insert( Func, 0 ); }
     }
 
-    return( sym.toArray( new Descriptor[ sym.size() ] ) );
+    sym_names = sym_n.toArray( new String[ sym_n.size() ] ); return( sym.toArray( new Descriptor[ sym.size() ] ) );
   }
 
   //Detailed description of the symbol sections.

@@ -47,6 +47,14 @@ public class Data extends Window.Window
 
   public static sect[] st;
 
+  //String array of symbol names.
+
+  public static String[] sym_names;
+
+  //The location of each symbol.
+
+  public static long[] sym_pos;
+
   //Sections can be separated by the data they contain.
 
   public static swingIO.tree.JDNode[] sections = new swingIO.tree.JDNode[]

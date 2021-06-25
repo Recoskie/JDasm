@@ -54,9 +54,14 @@ public class ELF extends Data implements JDEventListener
     "The \"section header\" names is a string section type usually named \".shstrtab\".<br /><br />" +
     "The link library section usually uses a string table named \".dynstr\".</html>",
     //Relocation.
-    "<html>Relocation are only used if the ELF sections can not be palaced at set Virtual address locations.</html>",
+    "<html>The symbol table tells us the name, and type of data, but some symbols have 0 size and location. Relocations tell us which symbol, and it's address that points to that data.<br /><br />" +
+    "The relocations usually locate to an array of pointers stored in the \".got\" section, or \".got.plt\".<br /><br />" +
+    "If the section can not be placed within it's defined address. The relocations are added by the distance away the data is put." +
+    "In the case of this disassembler. We need to read the symbols, and then map there address in the \".got\", and \".got.plt\" section.</html>",
     //Debug information.
-    "<html>Defines methods in link library section, and defines code and variables in prgram to arrays in the sections or code that got compiled out.</html>",
+    "<html>Defines methods in link library section, and defines code and variables in prgram to arrays in the sections or code that got compiled out.<br /><br />" +
+    "In some cases the symbols have no address, or size. Thus we have to read the relocation section. The relocation section tells us which symbol is which address.<br /><br />" +
+    "The addresses the relocations locate to usually are sections named \".got\", and \".got.plt\". Some symbols might have a defined location, and size if they are not dynamically loaded.</html>",
     //Thread local storage.
     "<html></html>",
     //The init, fini, pre-init array sections.
@@ -223,13 +228,21 @@ public class ELF extends Data implements JDEventListener
           try
           {
             //WE can not read the dynamic symbol table if we do not read the link library section.
+            //Before we read the relocations. We must also load the link library, and map the symbols.
 
-            if( e.getArg(0) == 4 && sections[2].getChildCount() > 0 && des[2] == null )
+            if( ( e.getArg(0) == 4 || e.getArg(0) == 3 ) && sections[2].getChildCount() > 0 && des[2] == null )
             {
               des[2] = Reader[0].read(); tree.expandPath( new TreePath( ((JDNode)sections[2].getFirstChild()).getPath() ) );
+
+              //if relocation we must map symbols.
+
+              if( e.getArg(0) == 3 && sections[4].getChildCount() > 0 && des[4] == null )
+              {
+                des[4] = Reader[2].read(); tree.expandPath( new TreePath( ((JDNode)sections[4].getFirstChild()).getPath() ) );
+              }
             }
 
-            //Read section user sleeted.
+            //Read section user selected.
 
             des[ (int)e.getArg(0) ] = Reader[ (int)e.getArg(0) - 2 ].read();
           }

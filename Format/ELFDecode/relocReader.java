@@ -37,9 +37,15 @@ public class relocReader extends Data implements sec
 
       //Setup section node.
 
-      curSec.setArgs( new long[]{ 3, ref } ); des.add( rel ); ref += 1;
+      curSec.setUserObject( ((String)curSec.getUserObject()).replace(".h","") ); curSec.setArgs( new long[]{ 3, ref } ); des.add( rel ); ref += 1;
 
       //Read locations.
+
+      long type = 0, pos = 0;
+      
+      int sym = 0;
+      
+      sym_pos = new long[ sym_names.length ];
 
       for( int i2 = 0; i2 < end; i2++ )
       {
@@ -49,12 +55,14 @@ public class relocReader extends Data implements sec
         {
           if( isLittle )
           {
-            rel.LUINT64("Address"); rel.LUINT64("Type");
+            rel.LUINT64("Address"); pos = (long)rel.value;
+            rel.LUINT64("Type"); type = (long)rel.value; sym = (int)(type >> 32);
             if( addEnds ) { rel.LINT64("Addend"); }
           }
           else
           {
-            rel.UINT64("Address"); rel.UINT64("Type");
+            rel.UINT64("Address"); pos = (long)rel.value;
+            rel.UINT64("Type"); type = (long)rel.value; sym = (int)(type >> 32);
             if( addEnds ) { rel.INT64("Addend"); }
           }
         }
@@ -62,14 +70,32 @@ public class relocReader extends Data implements sec
         {
           if( isLittle )
           {
-            rel.LUINT32("Address"); rel.LUINT32("Type");
+            rel.LUINT32("Address"); pos = (int)rel.value;
+            rel.LUINT32("Type"); type = (int)rel.value; sym = (int)(type >> 8);
             if( addEnds ) { rel.INT32("Addend"); }
           }
           else
           {
-            rel.UINT32("Address"); rel.UINT32("Type");
+            rel.UINT32("Address"); pos = (int)rel.value;
+            rel.UINT32("Type"); type = (int)rel.value; sym = (int)(type >> 8);
             if( addEnds ) { rel.INT32("Addend"); }
           }
+        }
+
+        //Add symbol position in global pointer table.
+        //This allows us to map the dynamically loaded symbols.
+
+        if( is64Bit )
+        {
+          sym_pos[ sym ] = pos;
+
+          curSec.add( new JDNode( sym_names[ sym ] + ".h", new long[]{ -3, pos, 8 } ) );
+        }
+        else
+        {
+          sym_pos[ sym ] = pos;
+
+          curSec.add( new JDNode( sym_names[ sym ] + ".h", new long[]{ -3, pos, 4 } ) );
         }
       }
     }
@@ -91,7 +117,8 @@ public class relocReader extends Data implements sec
   {
     if( el < 0 )
     {
-      info("<html>All locations would be correct if the locations the ELF header specifies to put sections into RAM are not already used.</html>");
+      info("<html>All locations would be correct if the locations the ELF header specifies to put sections into RAM are not already used.<br /><br />" +
+      "All relocations generally adjust the locations in the global pointer table sections \".got\", and \".got.plt\".</html>");
     }
     else
     {
@@ -103,7 +130,8 @@ public class relocReader extends Data implements sec
   {
     if( el < 0 )
     {
-      info("<html>All locations would be correct if the locations the ELF header specifies to put sections into RAM are not already used.</html>");
+      info("<html>All locations would be correct if the locations the ELF header specifies to put sections into RAM are not already used.<br /><br />" +
+      "All relocations generally adjust the locations in the global pointer table sections \".got\", and \".got.plt\".</html>");
     }
     else
     {
