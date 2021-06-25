@@ -4,6 +4,12 @@ import RandomAccessFileV.*;
 
 public class X86 extends X86Types implements core.Core
 {
+  //Changes the address mapping type.
+
+  private static boolean AddressMode = false;
+
+  public void setAddressMode(boolean a) { AddressMode = a; }
+
   /*-------------------------------------------------------------------------------------------------------------------------
   When Bit Mode is 2 the disassembler will default to decoding 64 bit binary code possible settings are 0=16 bit, 1=32 bit, 2=64 bit.
   -------------------------------------------------------------------------------------------------------------------------*/
@@ -942,18 +948,35 @@ public class X86 extends X86Types implements core.Core
 
     if( Pointer > 0 && SegOverride.equals("[") )
     {
-      Size = BitMode == x86_64 ? 3 : 2;
-
-      for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
+      if( !AddressMode )
       {
-        if( ImmVal >= mapped_pos.get( i ) && ImmVal < mapped_pos.get( i + 1 ) )
-        {
-          Pointer = 0; Lookup = false; rel = false;
-          
-          return( mapped_loc.get( r + (int)( ( ImmVal - mapped_pos.get( i ) ) >> Size ) ) );
-        }
+        Size = BitMode == x86_64 ? 3 : 2;
 
-        r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> Size ) - 1;
+        for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
+        {
+          if( ImmVal >= mapped_pos.get( i ) && ImmVal < mapped_pos.get( i + 1 ) )
+          {
+            Pointer = 0; Lookup = false; rel = false;
+          
+            return( mapped_loc.get( r + (int)( ( ImmVal - mapped_pos.get( i ) ) >> Size ) ) );
+          }
+
+          r += ( ( ( mapped_pos.get( i + 1 ) - mapped_pos.get( i ) ) ) >> Size ) - 1;
+        }
+      }
+      else
+      {
+        for( int i = 0, r = 0; i < mapped_pos.size(); i += 2 )
+        {
+          if( ImmVal >= mapped_pos.get( i ) && ImmVal < mapped_pos.get( i + 1 ) )
+          {
+            Pointer = 0; Lookup = false; rel = false;
+          
+            return( mapped_loc.get( r ) );
+          }
+
+          r += 1;
+        }
       }
 
       //Add variable data location if not jump, or call.

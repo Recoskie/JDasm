@@ -8,6 +8,7 @@ public interface Core
 
   public java.util.LinkedList<String> mapped_loc = new java.util.LinkedList<String>();
   public java.util.LinkedList<Long> mapped_pos = new java.util.LinkedList<Long>();
+  public void setAddressMode(boolean a);
 
   //Used with data model for navigating code.
 

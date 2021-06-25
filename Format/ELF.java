@@ -9,6 +9,8 @@ import core.x86.*;
 
 public class ELF extends Data implements JDEventListener
 {
+  public static boolean init = false;
+
   //Descriptors.
 
   private Descriptor[][] des = new Descriptor[7][];
@@ -92,7 +94,7 @@ public class ELF extends Data implements JDEventListener
 
   public ELF()
   {
-    tree.setEventListener( this );
+    tree.setEventListener( this ); init = false;
 
     file.Events = false;
 
@@ -120,6 +122,8 @@ public class ELF extends Data implements JDEventListener
 
     for( int i = 0; i < sections.length; i++ ) { if ( sections[i].getChildCount() > 0 ) { root.add( sections[i] ); } }
 
+    core.mapped_pos.clear(); core.mapped_loc.clear();
+
     if( !Data.error )
     {
       //Load processor core type.
@@ -133,6 +137,8 @@ public class ELF extends Data implements JDEventListener
         core.setEvent( this::Dis ); coreLoaded = true;
       }
       else { coreLoaded = false; }
+
+      core.setAddressMode(true);
 
       //Machine code start pos.
 
@@ -163,6 +169,8 @@ public class ELF extends Data implements JDEventListener
       {
         if( coreLoaded )
         {
+          if( !init ) { open(new JDEvent(this, "", new long[]{3,0})); }
+
           core.locations.clear(); core.data_off.clear(); core.code.clear();
 
           core.locations.add( e.getArg(1) );
@@ -238,7 +246,7 @@ public class ELF extends Data implements JDEventListener
 
               if( e.getArg(0) == 3 && sections[4].getChildCount() > 0 && des[4] == null )
               {
-                des[4] = Reader[2].read(); tree.expandPath( new TreePath( ((JDNode)sections[4].getFirstChild()).getPath() ) );
+                des[4] = Reader[2].read(); tree.expandPath( new TreePath( ((JDNode)sections[4].getFirstChild()).getPath() ) ); init = true;
               }
             }
 

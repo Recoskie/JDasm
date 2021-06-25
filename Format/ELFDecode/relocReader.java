@@ -89,11 +89,15 @@ public class relocReader extends Data implements sec
         {
           sym_pos[ sym ] = pos;
 
+          core.mapped_pos.add(pos); core.mapped_pos.add(pos + 8); core.mapped_loc.add( sym_names[sym] );
+
           curSec.add( new JDNode( sym_names[ sym ] + ".h", new long[]{ -3, pos, 8 } ) );
         }
         else
         {
           sym_pos[ sym ] = pos;
+
+          core.mapped_pos.add(pos); core.mapped_pos.add(pos + 4); core.mapped_loc.add( sym_names[sym] );
 
           curSec.add( new JDNode( sym_names[ sym ] + ".h", new long[]{ -3, pos, 4 } ) );
         }

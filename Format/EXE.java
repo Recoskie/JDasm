@@ -141,6 +141,8 @@ public class EXE extends Data implements JDEventListener
       }
     }
 
+    core.setAddressMode(false); //Uses the address pointer array system. Faster lookup.
+
     if( !DOS )
     {
       Headers.add(new JDNode("PE Header.h", new long[]{ 1, 0 } ));
