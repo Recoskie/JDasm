@@ -310,7 +310,7 @@ public class Headers extends Data
 
         //Relocations.
 
-        else if( s.type == 4 || s.type == 9 ){ sections[4].add( new JDNode(Name.value + ".h", new long[]{ -2, s.offset, s.virtual, s.size } ) ); }
+        else if( s.type == 4 || s.type == 9 ){ sections[4].add( new JDNode(Name.value + ".h", s.type == 4 ? "Add" : "", new long[]{ 3, s.virtual, s.size } ) ); }
 
         //String table.
 

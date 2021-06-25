@@ -22,7 +22,7 @@ public class ELF extends Data implements JDEventListener
   private static final sec[] Reader = new sec[]
   {
     new libReader(),
-    null, //Relocations.
+    new relocReader(), //Relocations.
     new symReader(), //Symbol table Sections.
     new arrayReader(), //init-fini array reader.
     null, //Local thread storage.

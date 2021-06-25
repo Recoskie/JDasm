@@ -119,51 +119,51 @@ public class symReader extends Data implements sec
   {
     "<html>An Array consisting of a symbol type, name, Address, and size.</html>",
     "<html>The name location is added with the location to the string table. If the name location is 0 then the symbol has no name.</html>",
-    "<html>The value is split into two. The last 4 binary digits is what the symbol is used for.<br /><br />" +
+    "<html>The value is split into two. The last hex digits is what the symbol is used for.<br /><br />" +
     "<table border=\"1\">" +
-    "<tr><td>Value</td><td>Type</td></tr>" +
-    "<tr><td>xxxx0000</td><td>Symbol type is unspecified.</td></tr>" +
-    "<tr><td>xxxx0001</td><td>Symbol is data.</td></tr>" +
-    "<tr><td>xxxx0010</td><td>Symbol is a code (Function).</td></tr>" +
-    "<tr><td>xxxx0011</td><td>Symbol associated with a section.</td></tr>" +
-    "<tr><td>xxxx0100</td><td>Symbol's name is file name.</td></tr>" +
-    "<tr><td>xxxx0101</td><td>Symbol is a common data.</td></tr>" +
-    "<tr><td>xxxx0110</td><td>Symbol is thread local storage data.</td></tr>" +
-    "<tr><td>xxxx0111</td><td>Multi-type. May contain both code and data.</td></tr>" +
-    "<tr><td>xxxx1000</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>xxxx1001</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>xxxx1010 to xxxx1100</td><td>OS specific types.</td></tr>" +
-    "<tr><td>xxxx1010</td><td>Unique symbol.</td></tr>" +
-    "<tr><td>xxxx1011</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>xxxx1100</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>xxxx1101 to xxxx1111</td><td>Processor specific types.</td></tr>" +
-    "<tr><td>xxxx1101</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>xxxx1110</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>xxxx1111</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>Value (Hex)</td><td>Type</td></tr>" +
+    "<tr><td>x0</td><td>Symbol type is unspecified.</td></tr>" +
+    "<tr><td>x1</td><td>Symbol is data.</td></tr>" +
+    "<tr><td>x2</td><td>Symbol is a code (Function).</td></tr>" +
+    "<tr><td>x3</td><td>Symbol associated with a section.</td></tr>" +
+    "<tr><td>x4</td><td>Symbol's name is file name.</td></tr>" +
+    "<tr><td>x5</td><td>Symbol is a common data.</td></tr>" +
+    "<tr><td>x6</td><td>Symbol is thread local storage data.</td></tr>" +
+    "<tr><td>x7</td><td>Multi-type. May contain both code and data.</td></tr>" +
+    "<tr><td>x8</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>x9</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>xA to xC</td><td>OS specific types.</td></tr>" +
+    "<tr><td>xA</td><td>Unique symbol.</td></tr>" +
+    "<tr><td>xB</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>xC</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>xD to xF</td><td>Processor specific types.</td></tr>" +
+    "<tr><td>xD</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>xE</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>xF</td><td>Reserved for future use.</td></tr>" +
     "</table><br />" +
-    "The first 4 binary digits is what type of binding it uses.<br /><br />" +
+    "The first hex digits is what type of binding it uses.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Value</td><td>Type</td></tr>" +
-    "<tr><td>0000xxxx</td><td>Local symbol (used within function/block).</td></tr>" +
-    "<tr><td>0001xxxx</td><td>Global symbol (used from everywhere).</td></tr>" +
-    "<tr><td>0010xxxx</td><td>Weak symbol.</td></tr>" +
-    "<tr><td>0011xxxx</td><td>Multi-bound-type.</td></tr>" +
-    "<tr><td>0100xxxx</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>0101xxxx</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>0110xxxx</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>0111xxxx</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>1000xxxx</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>1001xxxx</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>1010xxxx to 1100xxxx</td><td>OS specific types.</td></tr>" +
-    "<tr><td>1010xxxx</td><td>Unique symbol.</td></tr>" +
-    "<tr><td>1011xxxx</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>1100xxxx</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>1101xxxx to 1111xxxx</td><td>Processor specific types.</td></tr>" +
-    "<tr><td>1101xxxx</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>1110xxxx</td><td>Reserved for future use.</td></tr>" +
-    "<tr><td>1111xxxx</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>0x</td><td>Local symbol (used within function/block).</td></tr>" +
+    "<tr><td>1x</td><td>Global symbol (used from everywhere).</td></tr>" +
+    "<tr><td>2x</td><td>Weak symbol.</td></tr>" +
+    "<tr><td>3x</td><td>Multi-bound-type.</td></tr>" +
+    "<tr><td>4x</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>5x</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>6x</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>7x</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>8x</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>9x</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>Ax to Cx</td><td>OS specific types.</td></tr>" +
+    "<tr><td>Ax</td><td>Unique symbol.</td></tr>" +
+    "<tr><td>Bx</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>Cx</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>Dx to Fx</td><td>Processor specific types.</td></tr>" +
+    "<tr><td>Dx</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>Ex</td><td>Reserved for future use.</td></tr>" +
+    "<tr><td>Fx</td><td>Reserved for future use.</td></tr>" +
     "</table></html>",
-    "<html>Usually the symbol visibility type is 0 meaning the symbol follows the Default symbol visibility rules.<br /><br /><table border=\"1\">" +
+    "<html>Usually the symbol visibility type is 0. Meaning the symbol follows the Default symbol visibility rules.<br /><br /><table border=\"1\">" +
     "<tr><td>Value</td><td>Type</td></tr>" +
     "<tr><td>0</td><td>Default symbol visibility rules.</td></tr>" +
     "<tr><td>1</td><td>Processor specific hidden.</td></tr>" +
