@@ -4,12 +4,6 @@ import RandomAccessFileV.*;
 
 public class X86 extends X86Types implements core.Core
 {
-  //Changes the address mapping type.
-
-  private static boolean AddressMode = false;
-
-  public void setAddressMode(boolean a) { AddressMode = a; }
-
   /*-------------------------------------------------------------------------------------------------------------------------
   When Bit Mode is 2 the disassembler will default to decoding 64 bit binary code possible settings are 0=16 bit, 1=32 bit, 2=64 bit.
   -------------------------------------------------------------------------------------------------------------------------*/
@@ -792,6 +786,12 @@ public class X86 extends X86Types implements core.Core
 
   private int Pointer = 0; //The size of the pointer Read by ModR/M.
   private boolean rel = false; //Restive positions such as loops and jumps.
+
+  //Changes the address mapping type.
+
+  private static boolean AddressMode = false;
+
+  public void setAddressMode(boolean a) { AddressMode = a; }
 
   /*-------------------------------------------------------------------------------------------------------------------------
   Navigate to a mapped location.

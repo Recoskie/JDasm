@@ -42,11 +42,11 @@ public class ELF extends Data implements JDEventListener
     //Code Sections.
     "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
     "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named section called \".init\".<br /><br />" +
-    "Also there may even be an \"init_array, or pre-init_array\" section. These sections are a set of addresses that locate to functions within the init section if needed.<br /><br />" +
-    "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.<br /><br />" +
+    "We do not have to call it a \".init\" section. As sections that have runnable processor instructions are defined by flag setting.<br /><br />" +
     "The \".fini\" section is the termination code that is called to exit the program.<br /><br />" +
-    "Also there may even be an \"fini_array\" section which points to addresses to call to stop threads, and the entire program.<br /><br />" +
-    "We do not have to call it a \".init\" section. As sections that have runnable processor instructions are defined by flag setting.</html>",
+    "The \".plt\", and \".plt.got\" section reads a location from the \".got\", or \".got.plt\" section which locates to dynamically loaded functions.<br /><br />" +
+    "You will see lots of jumps and calls to \".plt\" to call a method or function. The \".got\", or \".got.plt\" locations used by \".plt\", and \".plt.got\" are setup by the dynamic relocation, and symbol section.<br /><br />" +
+    "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.</html>",
     //Link libraries.
     "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
     "The \".dynamic\" section is usually run by the \"program header\" before the \"section header\" maps it as \".dynamic\".<br /><br />" +
@@ -56,12 +56,11 @@ public class ELF extends Data implements JDEventListener
     "The \"section header\" names is a string section type usually named \".shstrtab\".<br /><br />" +
     "The link library section usually uses a string table named \".dynstr\".</html>",
     //Relocation.
-    "<html>The symbol table tells us the name, and type of data, but some symbols have 0 size and location. Relocations tell us which symbol, and it's address that points to that data.<br /><br />" +
-    "The relocations usually locate to an array of pointers stored in the \".got\" section, or \".got.plt\".<br /><br />" +
-    "If the section can not be placed within it's defined address. The relocations are added by the distance away the data is put." +
-    "In the case of this disassembler. We need to read the symbols, and then map there address in the \".got\", and \".got.plt\" section.</html>",
-    //Debug information.
-    "<html>Defines methods in link library section, and defines code and variables in prgram to arrays in the sections or code that got compiled out.<br /><br />" +
+    "<html>The symbol table tells us the name, and type of data, but some symbols have 0 size, and location. Relocations tell us which symbol, and it's address that points to that data.<br /><br />" +
+    "The relocations usually locate to an array of locations stored in the \".got\", or \".got.plt\" sections.<br /><br />" +
+    "In the case of this disassembler. We need to read the symbols, and then map there address in the \".got\", and \".got.plt\" sections.</html>",
+    //Symbol information.
+    "<html>Defines methods in link library section, and variables names in program that got compiled out.<br /><br />" +
     "In some cases the symbols have no address, or size. Thus we have to read the relocation section. The relocation section tells us which symbol is which address.<br /><br />" +
     "The addresses the relocations locate to usually are sections named \".got\", and \".got.plt\". Some symbols might have a defined location, and size if they are not dynamically loaded.</html>",
     //Thread local storage.
@@ -72,7 +71,8 @@ public class ELF extends Data implements JDEventListener
     //Notes sections.
     "<html></html>",
     //Sections defined as data only.
-    "<html>Some sections are marked as data only. Such sections may be file data, or sections used by external tools.<br /><br />"+
+    "<html>Some sections are marked as data only. Such sections may be file data, or sections used by external tools.<br /><br />" +
+    "<html>Note that the global pointer table is usually used with the relocation addresses, for dynamically loaded libraries, and functions.<br /><br />" +
     "<table border=\"1\">" +
     "<tr><td>Section Name.</td><td>Use</td></tr>" +
     "<tr><td>.rodata</td><td>This section holds read-only data.</td></tr>" +
@@ -241,13 +241,13 @@ public class ELF extends Data implements JDEventListener
             if( ( e.getArg(0) == 4 || e.getArg(0) == 3 ) && sections[2].getChildCount() > 0 && des[2] == null )
             {
               des[2] = Reader[0].read(); tree.expandPath( new TreePath( ((JDNode)sections[2].getFirstChild()).getPath() ) );
+            }
 
-              //if relocation we must map symbols.
+            //if relocation we must map symbols.
 
-              if( e.getArg(0) == 3 && sections[4].getChildCount() > 0 && des[4] == null )
-              {
-                des[4] = Reader[2].read(); tree.expandPath( new TreePath( ((JDNode)sections[4].getFirstChild()).getPath() ) ); init = true;
-              }
+            if( e.getArg(0) == 3 && sections[4].getChildCount() > 0 && des[4] == null )
+            {
+              des[4] = Reader[2].read(); tree.expandPath( new TreePath( ((JDNode)sections[4].getFirstChild()).getPath() ) ); init = true;
             }
 
             //Read section user selected.
