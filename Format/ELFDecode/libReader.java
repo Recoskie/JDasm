@@ -131,10 +131,10 @@ public class libReader extends Data implements sec
 
         found = false;
 
-        SType = ( el.type == 6 ) ? 5 : -1;
+        SType = ( el.type == 6 ) ? 4 : -1;
         if( SType < 0 ) { SType = ( el.type == 12 || el.type == 13 ) ? 1 : -1; }
         if( SType < 0 ) { SType = el.type == 5 ? 3 : -1; }
-        if( SType < 0 ) { SType = (el.type == 7 || el.type == 17 || el.type == 23) ? 4 : -1; }
+        if( SType < 0 ) { SType = (el.type == 7 || el.type == 17 || el.type == 23) ? 5 : -1; }
         if( SType < 0 ) { SType = ( el.type == 25 || el.type == 26 || el.type == 32 ) ? 7 : -1; }
 
         if ( ( el.type >= 4 && el.type <= 7 ) || SType > 0 )

@@ -63,8 +63,8 @@ public class Data extends Window.Window
     new swingIO.tree.JDNode("Code Sections", 1), //Sections marked as runnable code.
     new swingIO.tree.JDNode("Link library Sections", 2), //Linked libraries method sections.
     new swingIO.tree.JDNode("String Table Sections", 3), //String table sections.
-    new swingIO.tree.JDNode("Relocation Sections", 4), //Relocations to be applied if program loads in different address.
-    new swingIO.tree.JDNode("Symbol Sections", 5), //Defines methods in link library section, and defines code and variables.
+    new swingIO.tree.JDNode("Symbol Sections", 4), //Defines methods in link library section, and defines code and variables.
+    new swingIO.tree.JDNode("Relocation Sections", 5), //Relocations to be applied if program loads in different address.
     new swingIO.tree.JDNode("Local thread storage Sections", 6), //The local thread storage section.
     new swingIO.tree.JDNode("Array Sections", 7), //Array of init, fini, pre-init.
     new swingIO.tree.JDNode("Notes Sections", 8), //The section notes sections.

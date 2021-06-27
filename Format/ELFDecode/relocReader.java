@@ -15,7 +15,7 @@ public class relocReader extends Data implements sec
     
     Descriptor rel;
 
-    JDNode sects = sections[4], curSec = null;
+    JDNode sects = sections[5], curSec = null;
 
     for( int i = 0, size = sects.getChildCount(); i < size; i++ )
     {
@@ -37,7 +37,7 @@ public class relocReader extends Data implements sec
 
       //Setup section node.
 
-      curSec.setUserObject( ((String)curSec.getUserObject()).replace(".h","") ); curSec.setArgs( new long[]{ 3, ref } ); des.add( rel ); ref += 1;
+      curSec.setUserObject( ((String)curSec.getUserObject()).replace(".h","") ); curSec.setArgs( new long[]{ 4, ref } ); des.add( rel ); ref += 1;
 
       //Read locations.
 
@@ -112,10 +112,15 @@ public class relocReader extends Data implements sec
   public static final String[] RelInfo = new String[]
   {
     "<html>An Array consisting of an address, and type, and optional Addend size.</html>",
-    "<html>Address that needs to be changed if section changes address.</html>",
-    "<html>The type of address.</html>",
+    "<html>Address to be set to link library location, or address needs be adjust relative to section position.<br /><br />" +
+    "See the relocation type for details.</html>", "",
     "<html>The Addend if any.</html>"
   };
+
+  public static final String relType64 = "<html>Type,  and symbol number.";
+  public static final String relType32 = "<html>Type,  and symbol number.";
+  public static final String rel8664 = "</html>"; //x86-64 bit relocations.
+  public static final String rel386 = "</html>"; //x86-32 but relocations.
   
   public void relaInfo( int el )
   {
@@ -126,7 +131,13 @@ public class relocReader extends Data implements sec
     }
     else
     {
-      el = el % 4; info( RelInfo[ el ] );
+      el = el % 4;
+      
+      if( el == 2 )
+      {
+        if( coreType == 62 ) { info( relType64 + rel8664 ); } else if( coreType == 3 ) { info( relType32 + rel386 ); }
+      }
+      else { info( RelInfo[ el ] ); }
     }
   }
 
@@ -139,7 +150,13 @@ public class relocReader extends Data implements sec
     }
     else
     {
-      el = el % 3; info( RelInfo[ el ] );
+      el = el % 3;
+
+      if( el == 2 )
+      {
+        if( coreType == 62 ) { info( relType64 + rel8664 ); } else if( coreType == 3 ) { info( relType32 + rel386 ); }
+      }
+      else { info( RelInfo[ el ] ); }
     }
   }
 }

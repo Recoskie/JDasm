@@ -24,8 +24,8 @@ public class ELF extends Data implements JDEventListener
   private static final sec[] Reader = new sec[]
   {
     new libReader(),
-    new relocReader(), //Relocations.
     new symReader(), //Symbol table Sections.
+    new relocReader(), //Relocations.
     new arrayReader(), //init-fini array reader.
     null, //Local thread storage.
   };
@@ -44,33 +44,29 @@ public class ELF extends Data implements JDEventListener
     "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named section called \".init\".<br /><br />" +
     "We do not have to call it a \".init\" section. As sections that have runnable processor instructions are defined by flag setting.<br /><br />" +
     "The \".fini\" section is the termination code that is called to exit the program. Note that \".fini\" has no program header entire, because prgram would exit before start.<br /><br /><hr /><br />" +
-    "The CPU instructions in sections usually named \".plt\", and \".plt.got\" reads a location, and calls a link library method.<br /><br />" +
-    "The link library section has a \"program entire\" which is loaded before the prgram starts. It specifies the link libraries that are needed.<br /><br />" +
-    "It also locates to a symbol list with the names of functions, and a relocation section specifying which symbol, and where to place it's address in sections \".got\", or \".got.plt\" (global pointer table).<br /><br />" +
-    "However, we can tell it to write the location to our loaded function, or method anywhere we like. As long as the locations we use in \".plt\", and \".plt.got\" match.<br /><br />" +
-    "Since everything is located by addresses in link library section, and by address in relocation, and the methods calls are hard coded. IT rally does not matter what the section names are, or where we place anything.<br /><br />" +
-    "You will see lots of jumps and calls to \".plt\", or \".plt.got\" which runs a small code to call a method, or function to where we defined the location to method.<br /><br /><hr /><br />" +
+    "The CPU instructions in sections usually named \".plt\", and \".plt.got\" reads a location in sections \".got\", or \".got.plt\" (global pointer table), and calls a link library method.<br /><br />" +
+    "To understand how the global pointer addresses are configured see the \"link library section\".<br /><br /><hr /><br />" +
     "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.</html>",
     //Link libraries.
     "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
     "The \".dynamic\" section is usually run by the \"program header\" before the \"section header\" maps it as \".dynamic\".<br /><br />" +
     "This section tells us which link libraries to load.<br /><br />The symbol section tells us which method names.<br /><br />The relocation sections tell us where to place the address of symbol names.<br /><br />" +
-    "This is why the symbol section, and relocation sections are located to by the link library section.</html>",
+    "The link library section locates to symbol section (mandatory), and relocation section (mandatory). You can look under the folder \"Setup data\", for details.</html>",
     //String tables.
     "<html>An string table is just a set of text with a 00 hex code for the end of the text.<br /><br />" +
     "The \"section header\" names is a string section type usually named \".shstrtab\".<br /><br />" +
     "The link library section usually uses a string table named \".dynstr\".</html>",
+    //Symbol information.
+    "<html>Defines methods in link library section, and also defines variables names, and functions within the program.<br /><br />" +
+    "In some cases the symbols have no address, or size. Thus we have to read the relocation section. The relocation section tells us which symbol is which address in (global pointer table).<br /><br />" +
+    "The addresses the relocations locate to usually are sections named \".got\", and \".got.plt\" (global pointer table). Some symbols might have a defined location, and size if they are not dynamically loaded.</html>",
     //Relocation.
     "<html>All locations would be correct if the locations the ELF header specifies to put sections into RAM are not already used.<br /><br />" +
     "Also relocations do more than just add difference in location to addresses. Some relocation types are used to set an address to a loaded link library/method.<br /><br />" +
-    "The symbol table tells us the name, and type of data, but some symbols have zero size, and location. Relocations tell us which symbol, and the address that needs to locate to the method.<br /><br />" +
+    "The symbol table tells us the name, and type of data, but some symbols have zero size, and zero location. Relocations tell us which symbol, and the address that needs to locate to the method.<br /><br />" +
     "The relocations usually locate to the sections named \".got\", or \".got.plt\" (global pointer table). You can use unique names if you like though.<br /><br />" +
     "In the case of this disassembler. We need to read the symbols, and then map there address given in the relocation section.<br /><br />" +
     "Don't forget that the machine code in the \".plt\", and  \".plt.got\" sections should read and jump to the locations.<br /><br /></html>",
-    //Symbol information.
-    "<html>Defines methods in link library section, and also defines variables names, functions in program.<br /><br />" +
-    "In some cases the symbols have no address, or size. Thus we have to read the relocation section. The relocation section tells us which symbol is which address in (global pointer table).<br /><br />" +
-    "The addresses the relocations locate to usually are sections named \".got\", and \".got.plt\" (global pointer table). Some symbols might have a defined location, and size if they are not dynamically loaded.</html>",
     //Thread local storage.
     "<html></html>",
     //The init, fini, pre-init array sections.
@@ -177,7 +173,7 @@ public class ELF extends Data implements JDEventListener
       {
         if( coreLoaded )
         {
-          if( !init ) { open(new JDEvent(this, "", new long[]{3,0})); }
+          if( !init ) { open(new JDEvent(this, "", new long[]{4,0})); }
 
           core.locations.clear(); core.data_off.clear(); core.code.clear();
 
@@ -246,16 +242,16 @@ public class ELF extends Data implements JDEventListener
             //WE can not read the dynamic symbol table if we do not read the link library section.
             //Before we read the relocations. We must also load the link library, and map the symbols.
 
-            if( ( e.getArg(0) == 4 || e.getArg(0) == 3 ) && sections[2].getChildCount() > 0 && des[2] == null )
+            if( ( e.getArg(0) == 3 || e.getArg(0) == 4 ) && sections[2].getChildCount() > 0 && des[2] == null )
             {
               des[2] = Reader[0].read(); tree.expandPath( new TreePath( ((JDNode)sections[2].getFirstChild()).getPath() ) );
             }
 
             //if relocation we must map symbols.
 
-            if( e.getArg(0) == 3 && sections[4].getChildCount() > 0 && des[4] == null )
+            if( e.getArg(0) == 4 && sections[3].getChildCount() > 0 && des[3] == null )
             {
-              des[4] = Reader[2].read(); tree.expandPath( new TreePath( ((JDNode)sections[4].getFirstChild()).getPath() ) ); init = true;
+              des[3] = Reader[1].read(); tree.expandPath( new TreePath( ((JDNode)sections[4].getFirstChild()).getPath() ) ); init = true;
             }
 
             //Read section user selected.

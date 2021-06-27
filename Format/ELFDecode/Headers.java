@@ -310,7 +310,7 @@ public class Headers extends Data
 
         //Relocations.
 
-        else if( s.type == 4 || s.type == 9 ){ sections[4].add( new JDNode(Name.value + ".h", s.type == 4 ? "Add" : "", new long[]{ 3, s.virtual, s.size } ) ); }
+        else if( s.type == 4 || s.type == 9 ){ sections[5].add( new JDNode(Name.value + ".h", s.type == 4 ? "Add" : "", new long[]{ 4, s.virtual, s.size } ) ); }
 
         //String table.
 
@@ -318,7 +318,7 @@ public class Headers extends Data
 
         //Symbol table.
 
-        else if( s.type == 2 || s.type == 11 ) { sections[5].add( new JDNode(Name.value + ".h", s.type == 11 ? "Lib" : "", new long[]{ 4, s.virtual, s.size } ) ); }
+        else if( s.type == 2 || s.type == 11 ) { sections[4].add( new JDNode(Name.value + ".h", s.type == 11 ? "Lib" : "", new long[]{ 3, s.virtual, s.size } ) ); }
 
         //If section is the init, fini, pre-init types.
 

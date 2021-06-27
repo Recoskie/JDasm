@@ -18,7 +18,7 @@ public class symReader extends Data implements sec
 
     //WE read all link library sections.
 
-    JDNode sects = sections[5], curSec = null, Func = new JDNode("Functions");
+    JDNode sects = sections[4], curSec = null, Func = new JDNode("Functions");
 
     for( int i = 0, size = sects.getChildCount(); i < size; i++ )
     {
@@ -40,7 +40,7 @@ public class symReader extends Data implements sec
 
       curSec.setUserObject( ((String)curSec.getUserObject()).replace(".h","") );
 
-      curSec.setArgs( new long[]{ 4, ref } ); sym.add( loc ); ref += 1;
+      curSec.setArgs( new long[]{ 3, ref } ); sym.add( loc ); ref += 1;
 
       //Read locations.
 
@@ -101,7 +101,7 @@ public class symReader extends Data implements sec
           if( ( type & 0xF ) == 2 ) { Func.add( new JDNode( name.value + " #" + i2 + ".h", new long[]{ 4, ref } ) ); }
           else
           {
-            curSec.add( new JDNode( name.value + " #" + i2 + ".h", new long[]{ 4, ref } ) );
+            curSec.add( new JDNode( name.value + " #" + i2 + ".h", new long[]{ 3, ref } ) );
           }
 
           sym_n.add((String)name.value);
