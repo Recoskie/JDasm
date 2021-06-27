@@ -46,9 +46,8 @@ public class ELF extends Data implements JDEventListener
     "The \".fini\" section is the termination code that is called to exit the program. Note that \".fini\" has no program header entire, because prgram would exit before start.<br /><br /><hr /><br />" +
     "The CPU instructions in sections usually named \".plt\", and \".plt.got\" reads a location, and calls a link library method.<br /><br />" +
     "The link library section has a \"program entire\" which is loaded before the prgram starts. It specifies the link libraries that are needed.<br /><br />" +
-    "It locates to a symbol list with the names of functions, and a relocation section specifying which symbol, and where to place it's address.<br /><br />" +
-    "The relocation section usually writes addresses in sections \".got\", or \".got.plt\" (global pointer table). However, we can tell it to write the location to our loaded function, or method anywhere we like.<br /><br />" +
-    "The CPU instructions in sections \".plt\", and \".plt.got\" reads the place that we put the location. Which usually is \".got\", or \".got.plt\" section. Which locates to dynamically loaded functions.<br /><br />" +
+    "It also locates to a symbol list with the names of functions, and a relocation section specifying which symbol, and where to place it's address in sections \".got\", or \".got.plt\" (global pointer table).<br /><br />" +
+    "However, we can tell it to write the location to our loaded function, or method anywhere we like. As long as the locations we use in \".plt\", and \".plt.got\" match.<br /><br />" +
     "Since everything is located by addresses in link library section, and by address in relocation, and the methods calls are hard coded. IT rally does not matter what the section names are, or where we place anything.<br /><br />" +
     "You will see lots of jumps and calls to \".plt\", or \".plt.got\" which runs a small code to call a method, or function to where we defined the location to method.<br /><br /><hr /><br />" +
     "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.</html>",
