@@ -183,9 +183,9 @@ public class symReader extends Data implements sec
   {
     if( el < 0 )
     {
-      info("<html>Defines methods in link library section, and variables names in program that got compiled out.<br /><br />" +
-      "In some cases the symbols have no address, or size. Thus we have to read the relocation section. The relocation section tells us which symbol is which address.<br /><br />" +
-      "The addresses the relocations locate to usually are sections named \".got\", and \".got.plt\". Some symbols might have a defined location, and size if they are not dynamically loaded.</html>");
+      info("<html>Defines methods in link library section, and also defines variables names, functions in program.<br /><br />" +
+      "In some cases the symbols have no address, or size. Thus we have to read the relocation section. The relocation section tells us which symbol is which address in (global pointer table).<br /><br />" +
+      "The addresses the relocations locate to usually are sections named \".got\", and \".got.plt\" (global pointer table). Some symbols might have a defined location, and size if they are not dynamically loaded.</html>");
     }
     else
     {

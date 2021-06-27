@@ -64,13 +64,13 @@ public class ELF extends Data implements JDEventListener
     "<html>All locations would be correct if the locations the ELF header specifies to put sections into RAM are not already used.<br /><br />" +
     "Also relocations do more than just add difference in location to addresses. Some relocation types are used to set an address to a loaded link library/method.<br /><br />" +
     "The symbol table tells us the name, and type of data, but some symbols have zero size, and location. Relocations tell us which symbol, and the address that needs to locate to the method.<br /><br />" +
-    "The relocations usually locate to the sections named \".got\", or \".got.plt\". You can use unique names if you like though.<br /><br />" +
+    "The relocations usually locate to the sections named \".got\", or \".got.plt\" (global pointer table). You can use unique names if you like though.<br /><br />" +
     "In the case of this disassembler. We need to read the symbols, and then map there address given in the relocation section.<br /><br />" +
     "Don't forget that the machine code in the \".plt\", and  \".plt.got\" sections should read and jump to the locations.<br /><br /></html>",
     //Symbol information.
-    "<html>Defines methods in link library section, and variables names, functions in program.<br /><br />" +
-    "In some cases the symbols have no address, or size. Thus we have to read the relocation section. The relocation section tells us which symbol is which address.<br /><br />" +
-    "The addresses the relocations locate to usually are sections named \".got\", and \".got.plt\". Some symbols might have a defined location, and size if they are not dynamically loaded.</html>",
+    "<html>Defines methods in link library section, and also defines variables names, functions in program.<br /><br />" +
+    "In some cases the symbols have no address, or size. Thus we have to read the relocation section. The relocation section tells us which symbol is which address in (global pointer table).<br /><br />" +
+    "The addresses the relocations locate to usually are sections named \".got\", and \".got.plt\" (global pointer table). Some symbols might have a defined location, and size if they are not dynamically loaded.</html>",
     //Thread local storage.
     "<html></html>",
     //The init, fini, pre-init array sections.
