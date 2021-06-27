@@ -397,8 +397,10 @@ public class libReader extends Data implements sec
   {
     info("<html>A link library section can locate to previously defined sections in the section headers at the start of the ELF file.<br /><br />" +
     "It can have the location to the start method, and end of program. This is because an link library may need to end your binary, or create a new instance depending on what it does.<br /><br />" +
-    "It can also define the relocation sections that are needed for the addresses within the section incase it can not be put at it's set base address defined in \"section header\".<br /><br />" +
-    "The size of the section type has a type number, and it's location has a type number. The 2 values after 2 types are used to define sections.<br /<br />" +
+    "It also defines the symbol, and relocation sections. The symbols are the method names, and the relocation section tells it which symbol is which address in the \".got.plt\", and \".plt\" sections.<br /><br />" +
+    "The values put in \".got\", and \".got.plt\" sections are the locations that the library functions are put. The code sections \".plt\", and \"plt.got\" read the values, and jump to the location defined.<br /><br />" +
+    "The location of each section has a type in the link library, and it's size has a type number. The 2 values after 2 types are used to define sections.<br /<br />" +
+    "Because, sections are located to. They can be given any name you like, but that is their standard section names.<br /><br />" +
     "You can chose to read the size, and locations your self by types. Thus navigate to the sections your self, however this section does this with the size/location types, for your convince.</html>");
   }
 }

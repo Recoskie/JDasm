@@ -122,7 +122,7 @@ public class relocReader extends Data implements sec
     if( el < 0 )
     {
       info("<html>All locations would be correct if the locations the ELF header specifies to put sections into RAM are not already used.<br /><br />" +
-      "All relocations generally adjust the locations in the global pointer table sections \".got\", and \".got.plt\".</html>");
+      "Also relocations setup the locations in the global pointer table sections \".got\", and \".got.plt\", for dynamically loaded methods.</html>");
     }
     else
     {
@@ -135,7 +135,7 @@ public class relocReader extends Data implements sec
     if( el < 0 )
     {
       info("<html>All locations would be correct if the locations the ELF header specifies to put sections into RAM are not already used.<br /><br />" +
-      "All relocations generally adjust the locations in the global pointer table sections \".got\", and \".got.plt\".</html>");
+      "Also relocations setup the locations in the global pointer table sections \".got\", and \".got.plt\", for dynamically loaded methods.</html>");
     }
     else
     {

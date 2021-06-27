@@ -40,12 +40,15 @@ public class ELF extends Data implements JDEventListener
     "The \"Section header\" gives every section of the program a name. It defines the rest of the program such as debugging information if any.<br /><br />" +
     "After the \"program header\" sections are executed, and loaded, and all \"section\" placed in memory. Then the programs start address is called.</html>",
     //Code Sections.
-    "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
+    "<html>Note that the \"program header entires\" are run before jumping the CPU to the start address of the program.<br /><br />" +
     "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named section called \".init\".<br /><br />" +
     "We do not have to call it a \".init\" section. As sections that have runnable processor instructions are defined by flag setting.<br /><br />" +
-    "The \".fini\" section is the termination code that is called to exit the program.<br /><br />" +
-    "The \".plt\", and \".plt.got\" section reads a location from the \".got\", or \".got.plt\" section which locates to dynamically loaded functions.<br /><br />" +
-    "You will see lots of jumps and calls to \".plt\" to call a method or function. The \".got\", or \".got.plt\" locations used by \".plt\", and \".plt.got\" are setup by the dynamic relocation, and symbol section.<br /><br />" +
+    "The \".fini\" section is the termination code that is called to exit the program. Note that \".fini\" has no program header entire, because if it did the prgram would exit before start.<br /><br /><hr /><br />" +
+    "The link library section has a \"program entire\" which is loaded before the prgram starts.<br /><br />" +
+    "It locates to a symbol list with the names of functions, and a relocation section specifying which symbol, and where to place it's address.<br /><br />" +
+    "The sections usually named \".plt\", and \".plt.got\" reads a location from the \".got\", or \".got.plt\" section which locates to dynamically loaded functions.<br /><br />" +
+    "Since everything is located to by addresses in link library section. IT rally does not matter what the section names are. However, if the section names are not tapered with, then they should be standard names.<br /><br />" +
+    "You will see lots of jumps and calls to \".plt\", or \".plt.got\" to call a method, or function. The \".got\", or \".got.plt\" locations used by \".plt\", and \".plt.got\" are setup by the dynamic relocation, and symbol section.<br /><br /><hr /><br />" +
     "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.</html>",
     //Link libraries.
     "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
@@ -56,11 +59,12 @@ public class ELF extends Data implements JDEventListener
     "The \"section header\" names is a string section type usually named \".shstrtab\".<br /><br />" +
     "The link library section usually uses a string table named \".dynstr\".</html>",
     //Relocation.
-    "<html>The symbol table tells us the name, and type of data, but some symbols have 0 size, and location. Relocations tell us which symbol, and it's address that points to that data.<br /><br />" +
-    "The relocations usually locate to an array of locations stored in the \".got\", or \".got.plt\" sections.<br /><br />" +
-    "In the case of this disassembler. We need to read the symbols, and then map there address in the \".got\", and \".got.plt\" sections.</html>",
+    "<html>The symbol table tells us the name, and type of data, but some symbols have zero size, and location. Relocations tell us which symbol, and it's address that needs to locate to the method.<br /><br />" +
+    "The relocations usually locate to the \".got\", or \".got.plt\" sections.<br /><br />" +
+    "In the case of this disassembler. We need to read the symbols, and then map there address in the \".got\", and \".got.plt\" sections.<br /><br />" +
+    "Since everything is located to by link library section. IT rally does not matter what the section names are. However, if the section names are not tapered with, then they should be standard names.</html>",
     //Symbol information.
-    "<html>Defines methods in link library section, and variables names in program that got compiled out.<br /><br />" +
+    "<html>Defines methods in link library section, and variables names, functions in program.<br /><br />" +
     "In some cases the symbols have no address, or size. Thus we have to read the relocation section. The relocation section tells us which symbol is which address.<br /><br />" +
     "The addresses the relocations locate to usually are sections named \".got\", and \".got.plt\". Some symbols might have a defined location, and size if they are not dynamically loaded.</html>",
     //Thread local storage.
