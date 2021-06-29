@@ -98,7 +98,7 @@ public class symReader extends Data implements sec
           t = file.getVirtualPointer();
           file.seekV( name_loc + strTable ); name = new Descriptor(file, true); name.String8("Symbol name.", (byte)0x00); sym.add( name );
           
-          if( ( type & 0xF ) == 2 ) { Func.add( new JDNode( name.value + " #" + i2 + ".h", new long[]{ 4, ref } ) ); }
+          if( ( type & 0xF ) == 2 ) { Func.add( new JDNode( name.value + " #" + i2 + ".h", new long[]{ 3, ref } ) ); }
           else
           {
             curSec.add( new JDNode( name.value + " #" + i2 + ".h", new long[]{ 3, ref } ) );

@@ -56,13 +56,13 @@ public class relocReader extends Data implements sec
           if( isLittle )
           {
             rel.LUINT64("Address"); pos = (long)rel.value;
-            rel.LUINT64("Type"); type = (long)rel.value; sym = (int)(type >> 32);
+            rel.LUINT64("Type"); type = (long)rel.value; sym = (int)(type >> 32); type = type & 0xFFFFFFFFl;
             if( addEnds ) { rel.LINT64("Addend"); }
           }
           else
           {
             rel.UINT64("Address"); pos = (long)rel.value;
-            rel.UINT64("Type"); type = (long)rel.value; sym = (int)(type >> 32);
+            rel.UINT64("Type"); type = (long)rel.value; sym = (int)(type >> 32); type = type & 0xFFFFFFFFl;
             if( addEnds ) { rel.INT64("Addend"); }
           }
         }
@@ -71,35 +71,53 @@ public class relocReader extends Data implements sec
           if( isLittle )
           {
             rel.LUINT32("Address"); pos = (int)rel.value;
-            rel.LUINT32("Type"); type = (int)rel.value; sym = (int)(type >> 8);
+            rel.LUINT32("Type"); type = (int)rel.value; sym = (int)(type >> 8); type = type & 0xFF;
             if( addEnds ) { rel.INT32("Addend"); }
           }
           else
           {
             rel.UINT32("Address"); pos = (int)rel.value;
-            rel.UINT32("Type"); type = (int)rel.value; sym = (int)(type >> 8);
+            rel.UINT32("Type"); type = (int)rel.value; sym = (int)(type >> 8); type = type & 0xFF;
             if( addEnds ) { rel.INT32("Addend"); }
           }
         }
 
         //Add symbol position in global pointer table.
-        //This allows us to map the dynamically loaded symbols.
+        //This allows us to map the dynamically loaded symbols, and other data.
 
-        if( is64Bit )
+        if( coreType == 62 ) //X86-64
         {
-          sym_pos[ sym ] = pos;
+          if ( type == 6 || type == 7 )
+          {
+            sym_pos[ sym ] = pos;
 
-          core.mapped_pos.add(pos); core.mapped_pos.add(pos + 8); core.mapped_loc.add( sym_names[sym] );
+            core.mapped_pos.add(pos); core.mapped_pos.add(pos + 8); core.mapped_loc.add( sym_names[sym] );
 
-          curSec.add( new JDNode( sym_names[ sym ] + ".h", new long[]{ -3, pos, 8 } ) );
+            curSec.add( new JDNode( sym_names[ sym ] + ".h", new long[]{ -3, pos, 8 } ) );
+          }
         }
+
+        else if( coreType == 3 ) //X86-32
+        {
+          if ( type == 6 || type == 7 )
+          {
+            sym_pos[ sym ] = pos;
+
+            core.mapped_pos.add(pos); core.mapped_pos.add(pos + 4); core.mapped_loc.add( sym_names[sym] );
+
+            curSec.add( new JDNode( sym_names[ sym ] + ".h", new long[]{ -3, pos, 4 } ) );
+          }
+        }
+
+        //Generically define the symbols, for other CPU types.
+
         else
         {
           sym_pos[ sym ] = pos;
 
-          core.mapped_pos.add(pos); core.mapped_pos.add(pos + 4); core.mapped_loc.add( sym_names[sym] );
+          //Note relocations can be different sizes other than the CPU bit size depending on what the relocation is calculation of.
 
-          curSec.add( new JDNode( sym_names[ sym ] + ".h", new long[]{ -3, pos, 4 } ) );
+          curSec.add( new JDNode( sym_names[ sym ] + ".h", new long[]{ -3, pos, is64Bit ? 8 : 4 } ) );
         }
       }
     }
@@ -111,16 +129,41 @@ public class relocReader extends Data implements sec
 
   public static final String[] RelInfo = new String[]
   {
-    "<html>An Array consisting of an address, and type, and optional Addend size.</html>",
+    "<html>An Array consisting of an address, symbol, and type of relocation, and optional Addend size.</html>",
     "<html>Address to be set to link library location, or address needs be adjust relative to section position.<br /><br />" +
     "See the relocation type for details.</html>", "",
     "<html>The Addend if any.</html>"
   };
 
-  public static final String relType64 = "<html>Type,  and symbol number.";
-  public static final String relType32 = "<html>Type,  and symbol number.";
-  public static final String rel8664 = "</html>"; //x86-64 bit relocations.
-  public static final String rel386 = "</html>"; //x86-32 but relocations.
+  public static final String relType64 = "<html>Each relocation type has a symbol number and type of relocation.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Value.</td><td>Decoding.</td></tr>" +
+  "<tr><td>00000009 00000007</td><td>Symbol = 9, Type = 7.</td></tr>" +
+  "<tr><td>00000002 00000006</td><td>Symbol = 2, Type = 6.</td></tr>" +
+  "</table><br />" +
+  "In hex the value is 16 digits long. The first 8 digits is the Symbol, and the last 8 digits is the Type.<br /><br />" +
+  "The symbol could be a name of a link library function, and the type could specify to place the address.<br /><br />" +
+  "Note that you will want to view these under the data inspector in hex.<br /><br /><hr /><br />";
+
+  public static final String relType32 = "<html>Each relocation type has a symbol number and type of relocation.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Value.</td><td>Decoding.</td></tr>" +
+  "<tr><td>000009 07</td><td>Symbol = 9, Type = 7.</td></tr>" +
+  "<tr><td>000002 06</td><td>Symbol = 2, Type = 6.</td></tr>" +
+  "</table><br />" +
+  "In hex the value is 8 digits long. The first 6 digits is the Symbol, and the last 8 digits is the Type.<br /><br />" +
+  "The symbol could be a name of a link library function, and the symbol type could specify to place the address.<br /><br />" +
+  "Take note that you will want to view these under the data inspector in hex.<br /><br /><hr /><br />";
+
+  public static final String rel8664 = "The tow most important types are 6, and 7. Type 7 tell the dynamic linker where to place an function call location.<br /><br />" +
+  "The address usually locates to sections called \".got.plt\", this allows us to map dynamically loaded function calls.<br /><br />" +
+  "Type 6 locates to section \".got\" which is used as a data location. Such as arrays and strings, and other things.<br /><br /><hr /><br />" +
+  "The machine code in section \".plt.got\" reads the values placed in sections \".got,plt\" then jumps CPU to function.</html>";
+
+  public static final String rel386 = "The tow most important types are 6, and 7. Type 7 tell the dynamic linker where to place an function call location.<br /><br />" +
+  "The address usually locates to sections called \".got.plt\", this allows us to map dynamically loaded function calls.<br /><br />" +
+  "Type 6 locates to section \".got\" which is used as a data location. Such as arrays and strings, and other things.<br /><br /><hr /><br />" +
+  "The machine code in section \".plt.got\" reads the values placed in sections \".got.plt\" then jumps CPU to function.</html>";
   
   public void relaInfo( int el )
   {
