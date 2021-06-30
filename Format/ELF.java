@@ -33,18 +33,18 @@ public class ELF extends Data implements JDEventListener
   public static final String[] SInfo = new String[]
   {
     //ELF headers.
-    "<html>An ELF application Has three headers.<br /><br />" +
-    "The ELF header defines the CPU type. The start address of the program after all the headers are read.<br /><br />" +
+    "<html>ELF application Has three headers.<br /><br />" +
+    "The ELF header defines the CPU type, and start address of the program after all the headers are read.<br /><br />" +
     "The ELF header defines the location to the \"Program Header\", and \"Section header\".<br /><br />" +
     "The \"program header\" defines the link libraries, and section that must be loaded, or run before calling the start address of the program.<br /><br />" +
     "The \"Section header\" gives every section of the program a name. It defines the rest of the program such as debugging information if any.<br /><br />" +
-    "After the \"program header\" sections are executed, and loaded, and all \"section\" placed in memory. Then the programs start address is called.</html>",
+    "After the \"program header\" sections are executed, and loaded, and all named \"sections\" placed in memory. Then the programs start address is called.</html>",
     //Code Sections.
     "<html>Note that the \"program header entires\" are run before jumping the CPU to the start address of the program.<br /><br />" +
     "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named section called \".init\".<br /><br />" +
     "We do not have to call it a \".init\" section. As sections that have runnable processor instructions are defined by flag setting.<br /><br />" +
     "The \".fini\" section is the termination code that is called to exit the program. Note that \".fini\" has no program header entire, because prgram would exit before start.<br /><br /><hr /><br />" +
-    "The CPU instructions in sections usually named \".plt\", and \".plt.got\" reads a location in sections \".got\", or \".got.plt\" (global pointer table), and calls a link library method.<br /><br />" +
+    "The CPU instructions in sections usually named \".plt\", and \".plt.got\" reads a location in named sections \".got\", or \".got.plt\" (global pointer table), and calls a link library method.<br /><br />" +
     "To understand how the global pointer addresses are configured see the \"link library section\".<br /><br /><hr /><br />" +
     "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.</html>",
     //Link libraries.
