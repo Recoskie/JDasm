@@ -49,8 +49,8 @@ public class ELF extends Data implements JDEventListener
     "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.</html>",
     //Link libraries.
     "<html>Note that the program header entires are run before jumping the CPU to the start address of the program.<br /><br />" +
-    "The \".dynamic\" section is usually run by the \"program header\" before the \"section header\" maps it as \".dynamic\".<br /><br />" +
-    "This section tells us which link libraries to load.<br /><br />The symbol section tells us which method names.<br /><br />The relocation sections tell us where to place the address of symbol names.<br /><br />" +
+    "The \".dynamic\" section is usually run by the \"program header\" before the \"section header\" maps it as \".dynamic\". This section tells us which link libraries to load.<br /><br />" +
+    "The symbol section tells us which method names. The relocation sections tell us where to place the address of symbol names.<br /><br />" +
     "The link library section locates to symbol section (mandatory), and relocation section (mandatory). You can look under the folder \"Setup data\", for details.</html>",
     //String tables.
     "<html>An string table is just a set of text with a 00 hex code for the end of the text.<br /><br />" +
@@ -58,7 +58,7 @@ public class ELF extends Data implements JDEventListener
     "The link library section usually uses a string table named \".dynstr\".</html>",
     //Symbol information.
     "<html>Defines methods in link library section, and also defines variables names, and functions within the program.<br /><br />" +
-    "In some cases the symbols have no address, or size. Thus we have to read the relocation section. The relocation section tells us which symbol is which address in (global pointer table).<br /><br />" +
+    "In some cases the symbols have no address, or size. Then we have to read the relocation section. The relocation section tells us which symbol is which address in (global pointer table).<br /><br />" +
     "The addresses the relocations locate to usually are sections named \".got\", and \".got.plt\" (global pointer table). Some symbols might have a defined location, and size if they are not dynamically loaded.</html>",
     //Relocation.
     "<html>All locations would be correct if the locations the ELF header specifies to put sections into RAM are not already used.<br /><br />" +
@@ -66,7 +66,7 @@ public class ELF extends Data implements JDEventListener
     "The symbol table tells us the name, and type of data, but some symbols have zero size, and zero location. Relocations tell us which symbol, and the address that needs to locate to the method.<br /><br />" +
     "The relocations usually locate to the sections named \".got\", or \".got.plt\" (global pointer table). You can use unique names if you like though.<br /><br />" +
     "In the case of this disassembler. We need to read the symbols, and then map there address given in the relocation section.<br /><br />" +
-    "Don't forget that the machine code in the \".plt\", and  \".plt.got\" sections should read and jump to the locations.<br /><br /></html>",
+    "Don't forget that the machine code instructions in the \".plt\", and \".plt.got\" sections should read and jump to the locations.<br /><br /></html>",
     //Thread local storage.
     "<html></html>",
     //The init, fini, pre-init array sections.
@@ -163,8 +163,15 @@ public class ELF extends Data implements JDEventListener
   {
     if( e.getArgs().length == 1 )
     {
-      if( expandOnce[ (int)e.getArg(0) ] ){ expandOnce[ (int)e.getArg(0) ] = false; tree.expandPath( tree.getLeadSelectionPath() ); }
-      info(SInfo[(int)e.getArg(0)]); ds.clear();
+      if( e.getArg(0) >= 0 )
+      {
+        if( expandOnce[ (int)e.getArg(0) ] ){ expandOnce[ (int)e.getArg(0) ] = false; tree.expandPath( tree.getLeadSelectionPath() ); }
+        info(SInfo[(int)e.getArg(0)]); ds.clear();
+      }
+      else
+      {
+        info("<html></html>"); ds.clear();
+      }
     }
 
     else if( e.getArg(0) < 0 )
@@ -276,7 +283,6 @@ public class ELF extends Data implements JDEventListener
 
       else { ds.setDescriptor( des[ (int)e.getArg(0) ][ (int)e.getArg(1) ] ); }
     }
-    else { info("<html></html>"); ds.clear(); }
   }
 
   public void noCore() { info("<html>The processor core engine is not supported.</html>"); }

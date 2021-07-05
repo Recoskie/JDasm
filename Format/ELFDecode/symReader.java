@@ -18,7 +18,7 @@ public class symReader extends Data implements sec
 
     //WE read all link library sections.
 
-    JDNode sects = sections[4], curSec = null, Func = new JDNode("Functions");
+    JDNode sects = sections[4], curSec = null, Func = new JDNode("Functions", -1);
 
     for( int i = 0, size = sects.getChildCount(); i < size; i++ )
     {
