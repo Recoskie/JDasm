@@ -482,7 +482,6 @@ The space bar is 20 hex. Without space as a code there is no space between words
 
 <br />
 
-<strong>
 When dividing a binary number by any base 2 to 36. Any remainder that is less than 10 is added to 30 hex. Which creates numbers 0 to 9 per place value.
 
 <br />
@@ -492,7 +491,6 @@ When remainders are higher than 10 we subtract 10, and add the extra to 60 hex f
 <br />
 
 This is how the <em>toString</em> method is implemented in all programming languages to convert any number to any number base 2 to 36.
-</strong>
 
 <br />
 
