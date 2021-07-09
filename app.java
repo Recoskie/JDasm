@@ -291,6 +291,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   public void Reset()
   {
+    tree.fireOpenEvent( new JDEvent( this, "", "", "UInit", 0 ) );
+
     tree.setRootVisible(false); tree.setShowsRootHandles(false);
 
     stree.setVisible(true); ds.setVisible(false); iData.setVisible(false);

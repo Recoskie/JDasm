@@ -179,13 +179,25 @@ public class EXE extends Data implements JDEventListener
     }
   }
 
+
+  public void Uninitialize()
+  {
+    des = new Descriptor[17][];
+
+    DataDir = null; DataDirUsed = null; DLL = null; FDLL = null; DLLName = null; DLLTable = null;
+
+    System.gc();
+  }
+
   //Change What To Display Based on what the user clicks on.
 
   public void open( JDEvent e )
   {
+    if( e.getID().equals("UInit") ) { Uninitialize(); }
+
     //Load a new section.
 
-    if( e.getArgs().length == 1 )
+    else if( e.getArgs().length == 1 )
     {
       int el = (int)e.getArg(0); info(SInfo[el]); el -= 2;
       

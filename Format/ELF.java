@@ -159,9 +159,32 @@ public class ELF extends Data implements JDEventListener
     else{ file.Events = true; }
   }
 
+  public void Uninitialize()
+  {
+    des = new Descriptor[7][]; st = null; sym_names = null; sym_pos = null;
+
+    sections = new swingIO.tree.JDNode[]
+    {
+      new swingIO.tree.JDNode("Headers", 0), //Headers.
+      new swingIO.tree.JDNode("Code Sections", 1), //Sections marked as runnable code.
+      new swingIO.tree.JDNode("Link library Sections", 2), //Linked libraries method sections.
+      new swingIO.tree.JDNode("String Table Sections", 3), //String table sections.
+      new swingIO.tree.JDNode("Symbol Sections", 4), //Defines methods in link library section, and defines code and variables.
+      new swingIO.tree.JDNode("Relocation Sections", 5), //Relocations to be applied if program loads in different address.
+      new swingIO.tree.JDNode("Local thread storage Sections", 6), //The local thread storage section.
+      new swingIO.tree.JDNode("Array Sections", 7), //Array of init, fini, pre-init.
+      new swingIO.tree.JDNode("Notes Sections", 8), //The section notes sections.
+      new swingIO.tree.JDNode("Other Sections", 9) //Sections that are marked as straight data with no type.
+    };
+
+    System.gc();
+  }
+
   public void open( JDEvent e )
   {
-    if( e.getArgs().length == 1 )
+    if( e.getID().equals("UInit") ) { Uninitialize(); }
+
+    else if( e.getArgs().length == 1 )
     {
       if( e.getArg(0) >= 0 )
       {
