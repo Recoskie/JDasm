@@ -38,7 +38,10 @@ public class ELF extends Data implements JDEventListener
     "The ELF header defines the location to the \"Program Header\", and \"Section header\".<br /><br />" +
     "The \"program header\" defines the link libraries, and section that must be loaded, or run before calling the start address of the program.<br /><br />" +
     "The \"Section header\" gives every section of the program a name. It defines the rest of the program such as debugging information if any.<br /><br />" +
-    "After the \"program header\" sections are executed, and loaded, and all named \"sections\" placed in memory. Then the programs start address is called.</html>",
+    "After the \"program header\" sections are executed, and loaded, and all named \"sections\" placed in memory. Then the programs start address is called.<br /><br /><hr /><br />" +
+    "The ELF binary format is used in PlayStation Portable, PlayStation Vita, PlayStation (console), PlayStation 2, PlayStation 3, PlayStation 4, PlayStation 5, GP2X, Dreamcast, Gamecube, Wii, Wii U.<br /><br />" +
+    "Each consol uses a unique signature code before the ELF, and location to the picture of the game then the main ELF. A small set of plugins may be added to read these headers that plug in with the ELF reader.<br /><br />" +
+    "The ELF format is also used in Android to compile java android apps, and is also used by all Linux/Unix operating systems.</html>",
     //Code Sections.
     "<html>Note that the \"program header entires\" are run before jumping the CPU to the start address of the program.<br /><br />" +
     "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named section called \".init\".<br /><br />" +

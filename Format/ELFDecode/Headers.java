@@ -461,7 +461,8 @@ public class Headers extends Data
   {
     if( el < 0 )
     {
-      info("<html>All Linux, and unix systems use ELF files, for dumping loading machine code programs in memory.</html>");
+      info("<html>The ELF header defines the CPU type, and start address of the program after all the headers are read.<br /><br />" +
+      "The ELF header defines the location to the \"Program Header\", and \"Section header\".</html>");
     }
     else
     {
