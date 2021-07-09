@@ -311,6 +311,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   public void open( JDEvent e )
   {
+    if( e.getID().equals("UInit") ) { return; }
+
     //Set the IO target.
 
     try
