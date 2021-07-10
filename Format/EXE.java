@@ -6,6 +6,7 @@ import swingIO.*;
 import swingIO.tree.*;
 import javax.swing.tree.*;
 import Format.EXEDecode.*;
+import core.Core;
 
 //Processor cores.
 
@@ -186,7 +187,7 @@ public class EXE extends Data implements JDEventListener
 
     DataDir = null; DataDirUsed = null; DLL = null; FDLL = null; DLLName = null; DLLTable = null;
 
-    System.gc();
+    core.mapped_loc.clear(); core.mapped_pos.clear();
   }
 
   //Change What To Display Based on what the user clicks on.

@@ -14,6 +14,10 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   private static boolean admin = false;
 
+  //Used to uninitialize the plugins when loading a new file.
+
+  private static boolean UInit = false;
+
   //Use the file signature codes instead of file extension.
 
   private byte Signature[][] = new byte[][]
@@ -291,7 +295,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   public void Reset()
   {
-    tree.fireOpenEvent( new JDEvent( this, "", "", "UInit", 0 ) );
+    if( UInit ) { tree.fireOpenEvent( new JDEvent( this, "", "", "UInit", 0 ) ); System.gc(); UInit = false; }
 
     tree.setRootVisible(false); tree.setShowsRootHandles(false);
 
@@ -311,7 +315,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   public void open( JDEvent e )
   {
-    if( e.getID().equals("UInit") ) { return; }
+    if( UInit ) { tree.fireOpenEvent( new JDEvent( this, "", "", "UInit", 0 ) ); System.gc(); UInit = false; }
 
     //Set the IO target.
 
@@ -371,7 +375,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
           if( E >= 0 ) { Class.forName(DecodeAPP_EX[E]).getConstructor().newInstance(); }
           else if( I >= 0 ) { Class.forName(DecodeAPP[I]).getConstructor().newInstance(); }
 
-          tree.singleClick = true;
+          UInit = true; tree.singleClick = true;
 
           stree.setVisible(true); ds.setVisible(true); iData.setVisible(true);
       
