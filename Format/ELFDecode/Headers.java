@@ -163,7 +163,7 @@ public class Headers extends Data
 
       //If section has runnable machine code instruction.
 
-      if( ( flags & 1 ) == 1 ){ sections[1].add( new JDNode("Program entire " + i + ".h", new long[]{ -1, virtual } ) ); }
+      if( ( flags & 1 ) == 1 ){ sections[1].add( new JDNode("Program entire " + i + ".h", new long[]{ -1, virtual, vlen } ) ); }
 
       //If section is data.
 
@@ -294,7 +294,7 @@ public class Headers extends Data
         
         //If section has runnable machine code instruction.
 
-        if( ( s.flags & 4 ) == 4 ){ sections[1].add( new JDNode( Name.value + ".h", new long[]{ -1, s.virtual } ) ); }
+        if( ( s.flags & 4 ) == 4 ){ sections[1].add( new JDNode( Name.value + ".h", new long[]{ -1, s.virtual, s.size } ) ); }
 
         //Program data.
 

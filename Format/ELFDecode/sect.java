@@ -1,3 +1,3 @@
 package Format.ELFDecode;
 
-public class sect { long virtual, offset, size, name, flags; int type; String Name = ""; }
+public class sect { public long virtual, offset, size, name, flags; public int type; public String Name = ""; }

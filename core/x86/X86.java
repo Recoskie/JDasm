@@ -1,6 +1,7 @@
 package core.x86;
 
 import RandomAccessFileV.*;
+import core.Core;
 
 public class X86 extends X86Types implements core.Core
 {
@@ -799,7 +800,7 @@ public class X86 extends X86Types implements core.Core
 
   public java.util.function.LongConsumer Event = this::stud;
 
-  public void stud( long loc ) {  }
+  public void stud( long loc ) { }
 
   public void disLoc( int loc ) { Event.accept( locations.get( loc ) ); }
 
@@ -2646,7 +2647,12 @@ public class X86 extends X86Types implements core.Core
     return( t );
   }
 
-  public String disASM_Code( long end ) throws java.io.IOException
+  public String disASM_Code( long size ) throws java.io.IOException
+  {
+    return( disASM_Code( size, false ) );
+  }
+
+  public String disASM_Code( long size, boolean crawl ) throws java.io.IOException
   {
     //Clear the location list.
 
@@ -2655,15 +2661,25 @@ public class X86 extends X86Types implements core.Core
     //Disassemble till return from application, or JUMP.
 
     Code_start = data.getVirtualPointer();
+    
+    if( size > 0x1000 ) { size = 0x1000; } size += Code_start;
 
-    while( !( Instruction.equals("RET") || Instruction.equals("JMP") ) && data.getVirtualPointer() < end )
+    if( crawl )
     {
-      t1 = posV(); t2 = disASM(); t += t1 + " " + t2 + "<br />";
+      while( !( Instruction.equals("RET") || Instruction.equals("JMP") ) && data.getVirtualPointer() < size )
+      {
+        t1 = posV(); t2 = disASM(); t += t1 + " " + t2 + "<br />";
+      }
+    }
+    else
+    {
+      while( data.getVirtualPointer() < size )
+      {
+        t1 = posV(); t2 = disASM(); t += t1 + " " + t2 + "<br />";
+      }
     }
 
-    Code_end = data.getVirtualPointer();
-
-    clean(Code_start, Code_end); reset();
+    Code_end = data.getVirtualPointer(); clean(Code_start, Code_end); reset();
 
     return( t );
   }

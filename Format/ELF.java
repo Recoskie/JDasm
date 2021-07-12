@@ -46,7 +46,7 @@ public class ELF extends Data implements JDEventListener
     "<html>Note that the \"program header entires\" are run before jumping the CPU to the start address of the program.<br /><br />" +
     "The \".init\" section is usually run by the \"program header\" before the \"section header\" maps it as a named section called \".init\".<br /><br />" +
     "We do not have to call it a \".init\" section. As sections that have runnable processor instructions are defined by flag setting.<br /><br />" +
-    "The \".fini\" section is the termination code that is called to exit the program. Note that \".fini\" has no program header entire, because prgram would exit before start.<br /><br /><hr /><br />" +
+    "The \".fini\" section is the termination code that is called to exit the program. Note that \".fini\" has no program header entire, because program would exit before start.<br /><br /><hr /><br />" +
     "The CPU instructions in sections usually named \".plt\", and \".plt.got\" reads a location in named sections \".got\", or \".got.plt\" (global pointer table), and calls a link library method.<br /><br />" +
     "To understand how the global pointer addresses are configured see the \"link library section\".<br /><br /><hr /><br />" +
     "The \".text\" section is usually the set program start address defined in the ELF header. Which is run after all headers are read.</html>",
@@ -149,7 +149,22 @@ public class ELF extends Data implements JDEventListener
 
       //Machine code start pos.
 
-      root.add( new JDNode( "Program Start (Machine code).h", new long[]{ -1, start } ) );
+      sect t; for( int l = st.length - 1; l > 0; l-- )
+      {
+        t = st[l]; if( start >= t.virtual && start < ( t.virtual + t.size ) )
+        {
+          int El = -1; for( int n = 0; n < sections[1].getChildCount(); n++ )
+          {
+            if( ((JDNode)sections[1].getChildAt(n)).getUserObject().toString().startsWith(t.Name) ){ El = n; break; }
+          }
+
+          if( t.virtual == start ) { root.add( new JDNode( "Program Start (Machine code).h", new long[]{ -4, 1, El } ) ); break; }
+          else
+          {
+            root.add( new JDNode( "Program Start (Machine code).h", new long[]{ -1, start, t.size } ) ); break;
+          }
+        }
+      }
 
       //Decode the setup headers.
     
@@ -212,7 +227,20 @@ public class ELF extends Data implements JDEventListener
 
           core.locations.add( e.getArg(1) );
 
-          core.disLoc(0); ds.setDescriptor( core );
+          if(e.getArgs().length > 2)
+          {
+            try
+            {
+              file.seekV(e.getArg(1)); info( core.disASM_Code(e.getArg(2), false) );
+            }
+            catch( Exception err ) { }
+          }
+          else
+          {
+            core.disLoc(0);
+          }
+
+          ds.setDescriptor( core );
         }
         else { try{ file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) ); } catch(Exception er) { } noCore(); }
       }

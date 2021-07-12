@@ -28,9 +28,10 @@ public interface Core
 
   public String disASM_Code() throws java.io.IOException;
 
-  //End position to stop disassembling code.
+  //Size of code to stop disassembling code.
 
-  public String disASM_Code(long end) throws java.io.IOException;
+  public String disASM_Code( long len ) throws java.io.IOException;
+  public String disASM_Code( long len, boolean crawl ) throws java.io.IOException;
 
   //Position operations. positions can change based on address modes.
 
