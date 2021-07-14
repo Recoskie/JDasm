@@ -12,9 +12,14 @@ public interface Core
 
   //Used with data model for navigating code.
 
-  public java.util.LinkedList<Long> locations = new java.util.LinkedList<Long>();
+  public java.util.LinkedList<Long> Crawl = new java.util.LinkedList<Long>();
+  public java.util.LinkedList<Long> Linear = new java.util.LinkedList<Long>();
   public java.util.LinkedList<Long> code = new java.util.LinkedList<Long>();
   public java.util.LinkedList<Long> data_off = new java.util.LinkedList<Long>();
+
+  //Clears the address locations.
+
+  public void clear();
 
   //The core type.
 
@@ -27,6 +32,10 @@ public interface Core
   //Disassemble Code. Build location list.
 
   public String disASM_Code() throws java.io.IOException;
+
+  //Get disassemble length, for linear disassembly.
+
+  public long codeSize();
 
   //Size of code to stop disassembling code.
 
@@ -55,9 +64,11 @@ public interface Core
 
   public void setSeg( short cs );
 
-  //reads location from list, and gives it to the set event handler.
+  /*reads location from list, and gives it to the set event handler.
+  There are tow list. One if for linear disassembly of sections.
+  The other is for offset locations. Which uses code crawling.*/
 
-  public void disLoc( int loc );
+  public void disLoc( long loc, boolean crawl );
 
   //Sets the location.
 
@@ -65,7 +76,7 @@ public interface Core
 
   //Lets us set the event that is triggered when disassembling a new location.
 
-  public void setEvent( java.util.function.LongConsumer e );
+  public void setEvent( java.util.function.BiConsumer<Long,Boolean> e );
 
   //Set the file target.
 

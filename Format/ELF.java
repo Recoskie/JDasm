@@ -129,8 +129,6 @@ public class ELF extends Data implements JDEventListener
 
     for( int i = 0; i < sections.length; i++ ) { if ( sections[i].getChildCount() > 0 ) { root.add( sections[i] ); } }
 
-    core.mapped_pos.clear(); core.mapped_loc.clear();
-
     if( !Data.error )
     {
       //Load processor core type.
@@ -161,7 +159,7 @@ public class ELF extends Data implements JDEventListener
           if( t.virtual == start ) { root.add( new JDNode( "Program Start (Machine code).h", new long[]{ -4, 1, El } ) ); break; }
           else
           {
-            root.add( new JDNode( "Program Start (Machine code).h", new long[]{ -1, start, t.size } ) ); break;
+            root.add( new JDNode( "Program Start (Machine code).h", new long[]{ -1, start, ( t.virtual + t.size ) - start } ) ); break;
           }
         }
       }
@@ -195,7 +193,7 @@ public class ELF extends Data implements JDEventListener
       new swingIO.tree.JDNode("Other Sections", 9) //Sections that are marked as straight data with no type.
     };
 
-    core.mapped_loc.clear(); core.mapped_pos.clear();
+    core.clear();
   }
 
   public void open( JDEvent e )
@@ -223,21 +221,19 @@ public class ELF extends Data implements JDEventListener
         {
           if( !init ) { open(new JDEvent(this, "", new long[]{4,0})); }
 
-          core.locations.clear(); core.data_off.clear(); core.code.clear();
-
-          core.locations.add( e.getArg(1) );
+          core.clear();
 
           if(e.getArgs().length > 2)
           {
             try
             {
-              file.seekV(e.getArg(1)); info( core.disASM_Code(e.getArg(2), false) );
+              core.Linear.add(e.getArg(1)); core.Linear.add(e.getArg(2)); core.disLoc(0, false);
             }
-            catch( Exception err ) { }
+            catch( Exception err ) { err.printStackTrace(); }
           }
           else
           {
-            core.disLoc(0);
+            core.Crawl.add(e.getArg(1)); core.disLoc(0, true);
           }
 
           ds.setDescriptor( core );

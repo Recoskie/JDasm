@@ -252,11 +252,9 @@ public class EXE extends Data implements JDEventListener
         {
           if( DosMode ) { core.setBit(X86.x86_16); } else { core.setBit( is64bit ? X86.x86_64 : X86.x86_32 ); }
 
-          core.locations.clear(); core.data_off.clear(); core.code.clear();
+          core.clear(); core.Crawl.add( e.getArg(1) );
 
-          core.locations.add( e.getArg(1) );
-
-          core.disLoc(0); ds.setDescriptor( core ); return;
+          core.disLoc(0, true); ds.setDescriptor( core ); return;
         }
         else { try{ file.seekV( e.getArg(1) ); Virtual.setSelected( e.getArg(1), e.getArg(1) ); } catch(Exception er) { } noCore(); }
       }
@@ -275,7 +273,7 @@ public class EXE extends Data implements JDEventListener
 
   //Disassembler.
 
-  public void Dis( long loc )
+  public void Dis( long loc, boolean crawl )
   {
     //If we are taking apart a Dos application.
 

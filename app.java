@@ -113,9 +113,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       disEnd = 512L; core.setBit(X86.x86_16); core.setEvent( this::Dis );
 
-      core.locations.clear(); core.data_off.clear(); core.code.clear();
-
-      core.locations.add( 0L ); Dis( core.locations.get(0) );
+      core.clear(); core.Crawl.add( 0L ); Dis( core.Crawl.get(0), true );
 
       tools.rowMaximize(0);
     }
@@ -381,7 +379,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
       
           Virtual.setVisible(true); Offset.setVisible(true); di.setVisible(true);
         }
-        catch(Exception er) { I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); }
+        catch(Exception er) { er.printStackTrace(); I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); }
       }
 
       //If it is not an recognized file, or file format reader failed. Open using data types, and hex editor.

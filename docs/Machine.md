@@ -177,7 +177,7 @@ So you can key in this entire binary code your self on a AMD, or Intel x86 core 
 
 <br />
 
-<strong>Or you can use an assembler program. Which a assembler program uses a x86 instruction map to generate the operation codes, for you.</strong>
+<strong>Or you can use an assembler program. Which an assembler program uses an x86 instruction map to generate the operation codes, for you.</strong>
 
 <h2>32 bit x86.</h2>
 

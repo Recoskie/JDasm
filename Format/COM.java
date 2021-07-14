@@ -46,15 +46,13 @@ public class COM extends Window.Window implements JDEventListener
     }
     else
     {
-      core.locations.clear(); core.data_off.clear(); core.code.clear();
-
-      core.locations.add( 0x0100L ); core.disLoc(0); ds.setDescriptor( core );
+      core.clear(); core.Crawl.add( 0x0100L ); core.disLoc(0, true); ds.setDescriptor( core );
     }
   }
 
   //Disassemble routine.
 
-  public void Dis( long loc )
+  public void Dis( int loc, boolean crawl )
   {
     try
     {

@@ -1,7 +1,6 @@
 package core.x86;
 
 import RandomAccessFileV.*;
-import core.Core;
 
 public class X86 extends X86Types implements core.Core
 {
@@ -798,15 +797,30 @@ public class X86 extends X86Types implements core.Core
   Navigate to a mapped location.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  public java.util.function.LongConsumer Event = this::stud;
+  public java.util.function.BiConsumer<Long,Boolean> Event = this::stud;
+  private long cSize = 0;
 
-  public void stud( long loc ) { }
+  public void stud( long loc, boolean crawl ) { }
 
-  public void disLoc( int loc ) { Event.accept( locations.get( loc ) ); }
+  public void disLoc( long loc, boolean crawl )
+  {
+    if( crawl )
+    {
+      Event.accept( Crawl.get( (int)loc ), crawl );
+    }
+    else
+    {
+      cSize = Linear.get( (int)( ( loc << 1 ) + 1 ) ); Event.accept( Linear.get( (int)loc << 1 ), crawl );
+    }
+  }
 
   public void setLoc( long loc ) throws java.io.IOException { data.seekV( loc ); }
 
-  public void setEvent( java.util.function.LongConsumer e ) { Event = e; }
+  public long codeSize(){ return( cSize ); }
+
+  public void setEvent( java.util.function.BiConsumer<Long,Boolean> e ) { Event = e; }
+
+  public void clear() { Crawl.clear(); Linear.clear(); code.clear(); data_off.clear(); }
 
   /*-------------------------------------------------------------------------------------------------------------------------
   When input type is value 0 decode the immediate input regularly to it's size setting for accumulator Arithmetic, and IO.
@@ -1005,12 +1019,12 @@ public class X86 extends X86Types implements core.Core
 
       int i;
 
-      for( i = 0; i < locations.size(); i++ )
+      for( i = 0; i < Crawl.size(); i++ )
       {
-        if( locations.get(i) == ImmVal ) { Lookup = false; rel = false; break; }
+        if( Crawl.get(i) == ImmVal ) { Lookup = false; rel = false; break; }
       }
 
-      if( i == locations.size() ) { locations.add( ImmVal ); }
+      if( i == Crawl.size() ) { Crawl.add( ImmVal ); }
     }
     
     Pointer = 0; Lookup = false; rel = false;
@@ -2662,7 +2676,7 @@ public class X86 extends X86Types implements core.Core
 
     Code_start = data.getVirtualPointer();
     
-    if( size > 0x1000 ) { size = 0x1000; } size += Code_start;
+    if( size > 0x500 ) { size = 0x500; } size += Code_start;
 
     if( crawl )
     {
@@ -2679,13 +2693,27 @@ public class X86 extends X86Types implements core.Core
       }
     }
 
-    Code_end = data.getVirtualPointer(); clean(Code_start, Code_end); reset();
+    Code_end = data.getVirtualPointer();
+    
+    if( !crawl )
+    {
+      size = Code_end - Code_start; size = codeSize() - size;
+
+      if( size > 0 )
+      {
+        Linear.set( Linear.size() - 1, Code_end - Code_start );
+
+        Linear.add(Code_end); Linear.add(size);
+      }
+    }
+    
+    clean(Code_start, Code_end); reset();
 
     return( t );
   }
 
   /*-------------------------------------------------------------------------------------------------------------------------
-  Cleans up the address maped locations.
+  Cleans up the address maped Crawl.
   -------------------------------------------------------------------------------------------------------------------------*/
 
   public void clean(long Code_start, long Code_end)
@@ -2711,13 +2739,13 @@ public class X86 extends X86Types implements core.Core
     {
       Code_start = code.get( i1 ); Code_end = code.get( i1 + 1 );
 
-      for( int i2 = 0; i2 < locations.size(); i2++ )
+      for( int i2 = 0; i2 < Crawl.size(); i2++ )
       {
-        n1 = locations.get( i2 );
+        n1 = Crawl.get( i2 );
         
         if( n1 > Code_start && n1 < Code_end )
         {
-          locations.remove( i2 ); i2-=1;
+          Crawl.remove( i2 ); i2-=1;
 
           //We should be making a list of locations that match other blocks of code.
         }

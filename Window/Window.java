@@ -245,15 +245,20 @@ public class Window
 
   //Core default Disassemble routine.
 
-  public void Dis( long loc )
+  private String d = "";
+  private long floc = 0;
+
+  public void Dis( long loc, boolean crawl )
   {
     try
     {
-      file.seekV( loc );
+      file.seekV( loc ); floc = file.getFilePointer();
     
-      long floc = file.getFilePointer();
-    
-      String d = disEnd != null ? core.disASM_Code( disEnd ) : core.disASM_Code();
+      if( disEnd != null ) { d = core.disASM_Code( disEnd ); }
+      else
+      {
+        d = core.disASM_Code( core.codeSize(), crawl );
+      }
     
       info( "<html>" + d + "</html>" );
     
