@@ -23,7 +23,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   private byte Signature[][] = new byte[][]
   {
     new byte[] { 0x4D, 0x5A }, //Microsoft binaries.
-    new byte[] { 0x7F, 0x45, 0x4C, 0x46 } //Linux/UNIX binaries.
+    new byte[] { 0x7F, 0x45, 0x4C, 0x46 }, //Linux/UNIX binaries.
+    new byte[] { 0x42, 0x4D } //Bit map pictures.
   };
 
   //Buffer should be set to the length of the largest signature sequence.
@@ -32,7 +33,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   //The file to load. To begin decoding file types.
 
-  private String DecodeAPP[] = new String[]{ "Format.EXE", "Format.ELF" };
+  private String DecodeAPP[] = new String[]{ "Format.EXE", "Format.ELF", "Format.BMP" };
 
   //By file extension.
 
@@ -154,7 +155,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
       }
     }
 
-    //Copy sleeted bytes in editor.
+    //Copy selected bytes in editor.
 
     else if( e.getActionCommand().startsWith("CP") )
     {
@@ -304,7 +305,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
     if( bdBar.getMenuCount() > 2 ) { bdBar.remove(BootSector); }
 
-    core.setEvent( this::Dis ); disEnd = null;
+    if( core != null ) { core.setEvent( this::Dis ); } disEnd = null;
   }
 
   /*************************************************************************************

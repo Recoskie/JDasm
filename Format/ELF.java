@@ -9,7 +9,7 @@ import core.x86.*;
 
 public class ELF extends Data implements JDEventListener
 {
-  public static boolean init = false;
+  private static boolean init = false;
 
   //Descriptors.
 

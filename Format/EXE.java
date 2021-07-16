@@ -6,7 +6,6 @@ import swingIO.*;
 import swingIO.tree.*;
 import javax.swing.tree.*;
 import Format.EXEDecode.*;
-import core.Core;
 
 //Processor cores.
 
