@@ -7,7 +7,7 @@ image:
 
 <h1>Machine code Introduction.</h1>
 
-In the <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html">basics document</a> we discussed the basic primitive data types that processors can work with, and do operations with.
+In the <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">basics document</a> we discussed the basic primitive data types that processors can work with, and do operations with.
 
 <br />
 
@@ -15,11 +15,11 @@ In this document we will discuss basic machine code, and what we actually mean b
 
 <br />
 
-When you compare a x86 core from the 80's like the 16 bit Intel 8086 to a modern AMD ryzen. The first thought that runs through peoples heads is that they run completely different machine code.
+When you compare a x86 core from the 80's like the 16 bit Intel 8086 to a modern AMD ryzen. The first thought that will most likely will run through your heads is that they run completely different machine code.
 
 <br />
 
-Well modern x86 can still run 16 bit 8086 machine code in 16 bit mode. This is called the processor <strong>instruction set architecture</strong>.
+Actually modern x86 can run 16 bit 8086 machine code in 16 bit mode. This is called the processor <strong>instruction set architecture</strong>.
 
 <br />
 
@@ -39,7 +39,7 @@ The binary encoded instructions the processor understand as a particular command
 
 <br />
 
-However the internal design of the circuits may change, but the binary encoding, for each instruction does not change.
+However, the internal design of the circuits may change, but the binary encoding, for each instruction does not change.
 
 <br />
 
@@ -696,4 +696,4 @@ No matter how good of a detection model we make though. It is not full proof to 
 
 <br />
 
-This is why detection software has to be update constantly. As it is not hard to make stuff pass through the scanner undetected.
+This is why detection software has to be updated constantly. As it is not hard to make stuff pass through the scanner undetected.

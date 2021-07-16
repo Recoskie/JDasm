@@ -274,11 +274,11 @@ Using two symbols vs ten symbols does not change how a number counts to next pla
 
 <br />
 
-You can make any number system you like using any grouping of numbers you like see <a href="https://www.mathsisfun.com/base-conversion-method.html">Base conversion.</a>
+You can make any number system you like using any grouping of numbers you like see <a href="https://www.mathsisfun.com/base-conversion-method.html" target="_blank">Base conversion.</a>
 
 <br />
 
-It just is that using two symbols as off, and on, for a transistor makes it easy to implement in a digital system. See <a href="https://www.cs.nmsu.edu/~hdp/cs273/notes/binary.html">binary, and radix.</a>
+It just is that using two symbols as off, and on, for a transistor makes it easy to implement in a digital system. See <a href="https://www.cs.nmsu.edu/~hdp/cs273/notes/binary.html" target="_blank">binary, and radix.</a>
 
 <h2>Negative, and positive numbers.</h2>
 
@@ -344,7 +344,7 @@ As there is no such thing as a singed add, or subtract in any CPU. As it is only
 
 <br />
 
-<a href="http://www.play-hookey.com/digital/combinational/binary_subtraction.html">Play hooky digital. Singed add, and subtract.</a>
+<a href="http://www.play-hookey.com/digital/combinational/binary_subtraction.html" target="_blank">Play hooky digital. Singed add, and subtract.</a>
 
 <h2 style="clear:left;">Floating point numbers.</h2>
 
@@ -368,7 +368,7 @@ Thus a double precision number gets it's name from being twice the size of a flo
 
 <br />
 
-These numbers are added the same as regular numbers. With the integer part adjusted by the exponent position. It is A Standard <a href="https://docs.microsoft.com/en-us/cpp/build/ieee-floating-point-representation?view=msvc-160">IEEE type</a>.
+These numbers are added the same as regular numbers. With the integer part adjusted by the exponent position. It is A Standard <a href="https://docs.microsoft.com/en-us/cpp/build/ieee-floating-point-representation?view=msvc-160" target="_blank">IEEE type</a>.
 
 <br />
 
@@ -416,7 +416,7 @@ As 0.1 is the same as one divided by two = 0.5. Thus adding 0.5 twice is the sam
 
 <br />
 
-The following <a href="https://andybargh.com/binary-fractions/">Link</a>. Will go in more depth, for you if you like.
+The following <a href="https://andybargh.com/binary-fractions/" target="_blank">Link</a>. Will go in more depth, for you if you like.
 
 <h2>Text data.</h2>
 
@@ -522,7 +522,7 @@ Also UTF16 can also end with UTF16-LE, or UTF16-BE which is little, or big endia
 
 <br />
 
-Also you can read over <a href="https://unicode.org/standard/principles.html#:~:text=The%20Unicode%20Standard%20is%20the,International%20Standard%20ISO%2FIEC%2010646.">The Unicode Standard: A Technical Introduction</a>.
+Also you can read over <a href="https://unicode.org/standard/principles.html#:~:text=The%20Unicode%20Standard%20is%20the,International%20Standard%20ISO%2FIEC%2010646." target="_blank">The Unicode Standard: A Technical Introduction</a>.
 
 <br />
 
@@ -696,7 +696,7 @@ The x86 processor has a address system built in to Handel reading elements one a
 
 <br />
 
-<a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400">Scale index base.</a>
+<a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400" target="_blank">Scale index base.</a>
 
 <br />
 
@@ -704,7 +704,7 @@ The scale is how much index is multiplied by. A byte is the next address from th
 
 <br />
 
-Thus an array of double words meaning two words is 4 bytes. means index has a scale of 4. And an array of qword means tow double words put together per array index. Meaning scale takes on the index times 8.
+Thus an array of double words meaning two words is 4 bytes. means index has a scale of 4. An array of qword means tow double words put together per array index. Meaning scale takes on the index times 8.
 
 <br />
 
@@ -712,7 +712,7 @@ ARM cores do not have a fancy addressing system built in. It takes two ARM proce
 
 <br />
 
-Thus programming languages are built on primitives, and arrays of type primitives in aligned memory.
+Thus programming languages are built on primitives, and arrays of primitives types in aligned memory. You will learn more about this in the "Code" document.
 
 <br />
 
@@ -743,7 +743,7 @@ Programming languages all use the same primitive data types.
 
 <br />
 
-The primitive data types are the same. As the CPU is what processes them, not the programming language. Thus the arithmetic units in CPU processors are the same. As positional arithmetic never changes format. Even if you switch processor architecture. Also text data is also standardized.
+The primitive data types are the same. As the CPU/ALU is what processes them, not the programming language. Thus the arithmetic units in CPU processors are the same. As positional arithmetic never changes format. Even if you switch processor type. Also text data is also standardized.
 
 <br />
 
@@ -767,11 +767,11 @@ Processors today even have built in number base conversion to characters, and ba
 
 <br />
 
-Even Arrays are read the same across systems. However x86 cores are excellent with reading matrices, and arrays, because of the address system.
+Even Arrays are read the same across systems. However, x86 cores are excellent with reading matrices, and arrays, because of the address system.
 
 <br />
 
-<strong>The most we can do is encrypt a entire file. Then decrypt the file to bring it back to the raw standard formats. To have some level of security.</strong>
+<strong>The most we can do is encrypt an entire file. Then decrypt the file to bring it back to the raw standard formats. To have some level of security.</strong>
 
 <br />
 
@@ -779,45 +779,53 @@ Binary files are basic structures built on primitive data types. The only thing 
 
 <br />
 
-Some old video games on playstaion will read a single byte. Then divide it. Using CPU bitwise arithmetic. Thus allows the read byte to be split into sections. Such byte values are called packed bytes in binary file documentation.
+Some old video games on playstaion will read a single byte. Then divide it using CPU bitwise arithmetic. Thus allows the read byte to be split into sections. Such byte values are called packed bytes in binary file documentation.
 
 <br />
 
-It is rare for files to use this unless it is a old file format where memory was a scares thing.
+It is rare, for files to use this unless it is a old file format where memory was a scares thing. In which every developer did their best to get a single byte to represent as much as they could.
 
 <br />
 
-When memory was a scares thing everyone did their best to get a single byte to represent as much as they could.
+Today such things do not matter anymore. Plus it takes more CPU power to read such bytes, and divided them up. Everything in today's binary formats are in bytes, words, dwords, and qwords.
 
 <br />
 
-Today such things do not matter anymore. Plus it takes more CPU power to read such bytes, and divided them up. So everything in today's binary formats are in bytes, words, dwords, and qwords.
+<h1 id="Hfiles">Binary files, and some Other types of data.</h1>
+
+All file formats have what you call headers. Which are bytes that are read in series at the start of the file. They can be lengths byte 1, word 2, dword 4, or qword 8.
 
 <br />
 
-<h1 id="Hfiles">Other types of data.</h1>
-
-I have explained every type of primitive data type. And how they are read. And to how compiled code deals with arrays, and structures, and data types in code.
+An header usually has a signature which should always be the same byte values. If the bytes do not match then the file type we are reading is most likely corrupted.
 
 <br />
 
-However there are still a few types of data that are stored in binary files that are given to external hardware devices.
+An header can specify width, height, of say a picture, and various things after the file signature.
 
 <br />
 
-Pictures can store pairs of three bytes in Red, Green, Blue per pixel in a array. Thus after index exceeds width it moves to the next line of the picture. Till picture height.
+Also there are still a few different types of data that are stored in binary files that are given to external hardware devices that are also standardized.
 
 <br />
 
-All the other features of bit maps are never used. When saved to disk they are red, green, blue per pixel.
+Pictures can store pairs of three bytes in Red, Green, Blue per pixel in an array. Thus after index exceeds width it moves to the next line of the picture. Till picture height.
 
 <br />
 
-As such is how a bit map picture works and is read <a href="https://en.wikipedia.org/wiki/BMP_file_format#:~:text=The%20BMP%20file%20format%2C%20also,and%20OS%2F2%20operating%20systems">Bit Map picture format.</a>
+As such is how a bit map picture works and is read <a href="https://en.wikipedia.org/wiki/BMP_file_format#:~:text=The%20BMP%20file%20format%2C%20also,and%20OS%2F2%20operating%20systems" target="_blank">Bit Map picture format.</a>
 
 <br />
 
-All file formats have what you call headers. Which are bytes that are read in series. That can be lengths byte 1, word 2, dword 4, or qword 8. That specify width, height, and various things.
+I use to actually write bit maps pictures one byte at a time in an hex editor. It is the equivalent of doing pixel art. Also is good practice.
+
+<br />
+
+When you click save, and see your picture load in a picture program. That is the moment it is magical. Considering you just wrote the picture in 1's, and 0's.
+
+<br />
+
+Also colors of light add together, so it is not hard to visualize the added color in your head. You may want to learn what <a href="https://en.wikipedia.org/wiki/Additive_color" target="_blank">additive colors</a> of light are, and practice making red, green, blue values a little.
 
 <h2>Video memory.</h2>
 
@@ -825,7 +833,7 @@ A bitmap closely resembles video memory. Which video memory is how graphics is d
 
 <br />
 
-Video memory is not set up by the operating system. It is set up by the BIOS which is built into the motherboard. Thus video memory follows the same video modes and standard of a bit map.
+Video memory is not set up by the operating system. It is set up by the BIOS (Boot integrated operating system) which is built into all system motherboards. Thus video memory follows the same video modes and standard of a bit map.
 
 <br />
 
@@ -833,7 +841,7 @@ The CPU then can do any graphics function you like on any display, or monitor wi
 
 <br />
 
-Graphics cards have methods that can be called that run graphics methods. This frees up the CPU, because the graphics card then does the graphics.
+Graphics cards have methods that can be called that run graphics methods. Such as filling in a rectangle of pixels, or calculating 3D angels. This frees up the CPU, because the graphics card then does the graphics.
 
 <br />
 
@@ -841,11 +849,11 @@ In actuality you can build an operating system that only does software rendered 
 
 <br />
 
-However it is recommended to add Hardware accelerated graphics through a GPU by implementing the method calls that the GPU supports.
+However, it is recommended to add Hardware accelerated graphics through a GPU by implementing the method calls that the GPU supports.
 
 <h2>Audio format.</h2>
 
-Audio is also another concept.
+Audio is also another concept standard concept. It can be a bit confusing at first, but is simple how it works. It also does not change between systems much like video memory.
 
 <br />
 
@@ -861,7 +869,11 @@ Where dword is 32 binary digits giving a range of control 2^32-1. The value is t
 
 <br />
 
-The values reflect the time of each recorded vibration at which position the magnet was in the microphone. The speed at which each value is given is called the sample rate.
+The easiest way to think about audio is that sound is movement (vibration). Thus it is best to describe how it is recorded and played back.
+
+<br />
+
+The values reflect the time of each recorded position the magnet was in the microphone. Allowing us to capture in time the movement, and vibration of sound. The speed at which each value is recorded is called the sample rate.
 
 <br />
 
@@ -873,7 +885,11 @@ Thus generally this is how audio is given as audio stream at system level. Simil
 
 <h2>Closing.</h2>
 
-Also we can create our own stream samples using basic sin(x) at different speeds of vibration, and decay rate calculations to make synthesized sounds.
+Some of the basic things we can computationally do with the standard hardware formats.
+
+<br />
+
+We can create our own stream samples using basic sin(x) at different speeds of vibration, and decay rate calculations to make synthesized sounds.
 
 <br />
 
@@ -881,7 +897,7 @@ We can also do graphics using sin, and cos to do rotation around x, y, z vertice
 
 <br />
 
-Another file that is fun to read byte by byte. Is GIF pictures. <a href="http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html">W3 GIF picture format.</a>
+Another file that is fun to read byte by byte. Is GIF pictures. <a href="http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html" target="_blank">W3 GIF picture format.</a>
 
 <br />
 
