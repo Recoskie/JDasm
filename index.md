@@ -45,11 +45,11 @@ You can also read disk drives sector by sector (one binary digit at a time from 
 
 This application currently supports Microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx, .com, DOS, MS-DOS.
 
-Also supports Unix/Linux binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod, .so
+Supports Unix/Linux binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod, .so
 
-Also supports .efi boot binaries, and boot sector disassembly.
+Supports .efi boot binaries, and boot sector disassembly.
 
-This project is meant to support many different binary file formats, and application formats, and DOS.
+Also supports analyzing, and editing BIT Map pictures.
 
 If you wish to contribute a Format. Then put it under the format folder.
 
@@ -106,8 +106,6 @@ I plan on creating a ARM core disassembler as well, for mobile devices.
 # Planed tools.
 
 - [ ] Mach-o, for MacOSX reader.
-
-- [ ] Bitmap reader, and editor.
 
 - [ ] ARM core, for mobile systems.
 
