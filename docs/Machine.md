@@ -684,7 +684,7 @@ Each time the encryption key changes it then has to decrypt, and re-encrypt the 
 
 <br />
 
-IT works good when security is a must. However it is slow, and is not practical.
+IT works good when security is a must. However, it is slow, and is not practical.
 
 <br />
 

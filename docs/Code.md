@@ -31,7 +31,7 @@ The CPU is meant to directly run the program instructions without recompiling th
 
 <br />
 
-The systems are originally designed to target x86 cores.
+The systems have originally designed to target x86 cores.
 
 <br />
 
@@ -103,7 +103,7 @@ Also everything is in bytes. Thus numbers are in different word sizes using byte
 
 <br />
 
-You can learn about them following: <a href="https://recoskie.github.io/JFH-Disassembly/docs/Basics.html#dTypes">link</a>.
+You can learn about them following: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html#dTypes">link</a>.
 
 <br />
 
@@ -117,7 +117,7 @@ The processor should be able to process the standard primitive data types.
 
 <h1>Translating to code.</h1>
 
-The steps you put into code are the same septs wrote out in machine code. It just is a little harder to follow.
+The steps you put into code are similar septs wrote out in machine code. It just is a little harder to follow.
 
 <br />
 
@@ -177,7 +177,7 @@ These outputs are saved into a flag register from the arithmetic circuit per eve
 
 <br />
 
-A simple ALU design is that of the 74181 which started the design of single chip CPU's. Following: <a href="https://en.wikipedia.org/wiki/74181">link</a>.
+A simple ALU design is that of the 74181 which started the design of single chip CPU's. Following: <a href="https://en.wikipedia.org/wiki/74181" target="_blank">link</a>.
 
 <br />
 
@@ -189,11 +189,11 @@ Thus you need to know the right values to set the S inputs to generate the right
 
 <br />
 
-The pin that is A = B is the zero flag from the 74181, and P is parity meaning output is odd or even.
+The pin that is "A = B" is the zero flag from the 74181, and P is parity meaning output is odd or even.
 
 <br />
 
-We also have carry as a pin output. The sing is just a straight connection from the last output. Modern ALU's are 8 in size today. Thus are grouped together in word sizes.
+We also have carry as a pin output. The sing is just a straight connection from the last binary digit output. Modern ALU's are 8 in size today. Thus are grouped together in word sizes.
 
 <br />
 
@@ -375,7 +375,7 @@ RET is short for return back. Which RET is basically a read, and jump.
 
 CALL/RET uses a register called the stack pointer as the location to write, and read the value.
 
-<br /> 
+<br />
 
 If you change the value of the stack pointer register then use RET. We may not return back to the right location.
 
@@ -485,7 +485,7 @@ However, they are rarely ever used. The regular CALL instruction is preferred ov
 
 <br />
 
-You can still look at the map of INT codes: <a href="https://en.wikipedia.org/wiki/DOS_API">DOS API INT Setup vector</a>.
+You can still look at the map of INT codes: <a href="https://en.wikipedia.org/wiki/DOS_API" target="_blank">DOS API INT Setup vector</a>.
 
 <br />
 
@@ -493,7 +493,23 @@ Windows Vista, and earlier still supported the full DOS API. Windows 10 still ha
 
 <br />
 
-Even though modern operating systems still load some interrupt methods in. It is a thing of the past.
+I used to write small binaries in pure binary with an hex editor. Such as print a small message using "int 21". This was also good practice.
+
+<br />
+
+At the time windows would still load ".com" files into memory, and jump the CPU to them in 16 bit mode. A COM file had no header, and it is directly run as CPU instructions.
+
+<br />
+
+To run a COM file now. You need to used dos box. Which dos box simulates the "int" function calls.
+
+<br />
+
+Even though you need dos box. It is still a good practice in learning to write pure binary applications in x86 core code without any coding tools.
+
+<br />
+
+Modern operating systems still load some interrupt methods in. It is a thing of the past though as the regular call instruction is proffered.
 
 <h1 id="loops">Loop, and repeat.</h1>
 
@@ -778,7 +794,7 @@ We also generally do not want to make a custom data structure if we do not need 
 
 <br />
 
-This completes the complete introduction to the x86 <a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400">Scale index base</a> system.
+This completes the complete introduction to the x86 <a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400" target="_blank">Scale index base</a> system.
 
 <br />
 
@@ -922,7 +938,7 @@ A programing language is more, or less just a style of syntax you like. Thus it 
 
 <br />
 
-Also you may enjoy the following on Obfuscated code: <a href="https://www.usenix.org/legacy/publications/library/proceedings/sec04/tech/full_papers/kruegel/kruegel_html/disassemble.html">Link</a>. Although you will encounter very few binaries that use the tricks discussed in this document today.
+Also you may enjoy the following on Obfuscated code: <a href="https://www.usenix.org/legacy/publications/library/proceedings/sec04/tech/full_papers/kruegel/kruegel_html/disassemble.html" target="_blank">Link</a>. Although you will encounter very few binaries that use the tricks discussed in this document today.
 
 <br />
 
