@@ -499,8 +499,6 @@ I used to write binaries in pure binary code with an hex editor. Such as print a
 
 I also did simple graphics in video memory, for fun if I got really board. Bellow I will show a sample COM file.
 
-<br />
-
 ~~~
 B4 09 BA 08 01 CD 21 C3 48 65 6C 6C 6F 20 57 6F 72 6C 64 24
 ~~~
