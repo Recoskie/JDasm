@@ -62,7 +62,7 @@ public class BMP extends Window.Window implements JDEventListener
 
       if( dib_size > 0 )
       {
-        dib_header.LUINT16("Horizontal and Vertical units resolutions"); dib_size -= 2;
+        dib_header.LUINT16("Horizontal and Vertical unit resolution"); dib_size -= 2;
         dib_header.LUINT16("Padding"); dib_size -= 2;
         dib_header.LUINT16("Pixel order"); dib_size -= 2;
         dib_header.LUINT16("Halftoning algorithm"); dib_size -= 2;
@@ -85,9 +85,9 @@ public class BMP extends Window.Window implements JDEventListener
 
     lines = new Descriptor[height];
     
-    JDNode data = new JDNode("Picture Data",2);
+    JDNode data = new JDNode( "Picture Data", 2 );
     
-    for( int i = 0; i < height; i++ ) { data.add( new JDNode( "line #" + i + ".h", ( i + 3 ) ) ); }
+    for( int i = 1; i <= height; i++ ) { data.add( new JDNode( "line #" + i + ".h", ( i + 2 ) ) ); }
 
     root.add( data ); Virtual.setVisible(false); tools.update();
 
@@ -108,7 +108,16 @@ public class BMP extends Window.Window implements JDEventListener
 
     else if ( (int)e.getArg(0) < 2 ) { ds.setDescriptor(headers[(int)e.getArg(0)]); }
 
-    else if( e.getArg(0) == 2 ) { info("The color data that creates the picture."); ds.clear(); }
+    else if( e.getArg(0) == 2 )
+    {
+      tree.expandPath( tree.getLeadSelectionPath() );
+
+      try { file.seek( colorData ); } catch( Exception er ) { }
+
+      Offset.setSelected( colorData, colorData + (int)( ( width * height ) * pixel_size ) - 1 );
+
+      info("The color data that creates the picture."); ds.clear();
+    }
     
     //Read an line from the picture.
     
@@ -122,7 +131,7 @@ public class BMP extends Window.Window implements JDEventListener
         {
           file.seek( colorData + (int)(line * pixel_size * width) ); Descriptor pixels = new Descriptor(file);
 
-          for( int i = 0; i < width; i++ ) { pixels.Other("pixel color #" + i + "",(int)pixel_size); }
+          for( int i = 1; i <= width; i++ ) { pixels.Other("pixel color #" + i + "",(int)pixel_size); }
 
           lines[line] = pixels;
         }

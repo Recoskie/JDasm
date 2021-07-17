@@ -493,23 +493,59 @@ Windows Vista, and earlier still supported the full DOS API. Windows 10 still ha
 
 <br />
 
-I used to write small binaries in pure binary with an hex editor. Such as print a small message using "int 21". This was also good practice.
+I used to write binaries in pure binary code with an hex editor. Such as print a small message using "int 21". This was also good practice.
 
 <br />
 
-At the time windows would still load ".com" files into memory, and jump the CPU to them in 16 bit mode. A COM file had no header, and it is directly run as CPU instructions.
+I also did simple graphics in video memory, for fun if I got really board. Bellow I will show a sample COM file.
 
 <br />
 
-To run a COM file now. You need to used dos box. Which dos box simulates the "int" function calls.
+~~~
+B4 09 BA 08 01 CD 21 C3 48 65 6C 6C 6F 20 57 6F 72 6C 64 24
+~~~
+
+You can can start applying your skills here to read it. You already know basic x86 instructions B0 to B7 are 8 bit MOV operations. Thus instruction B8 to BF are 16 bit MOV.
 
 <br />
 
-Even though you need dos box. It is still a good practice in learning to write pure binary applications in x86 core code without any coding tools.
+Just looking at this COM code you can see MOV operation "B4" using register 4. Setting the register AH to 09.
 
 <br />
 
-Modern operating systems still load some interrupt methods in. It is a thing of the past though as the regular call instruction is proffered.
+You then can see BA which is register DX. The tow bytes 08 01 are read in little indian byte order as value 01 08.
+
+<br />
+
+We then see instruction CD which is the interrupt instruction code. We then see the number 21 after it which is interrupt 21.
+
+<br />
+
+Lastly C3 is the return code. This returns back to the operating system after the code is run.
+
+<br />
+
+Thus if AH is 09, and we use interrupt 21. The value in DX is used as the address to our text based message.
+
+<br />
+
+Thus COM files start at 0x100 so the value in DX is 0x108. So if you count 8 bytes from the start of the code you will find the position to your message.
+
+<br />
+
+Which is 48 65 6C 6C 6F 20 57 6F 72 6C 64 24 in UTF8 text standard this is "Hello World$". The dollar sing marks the end of the text for int 21 with ah 09.
+
+<br />
+
+A COM file had no header, or setup information. A COM is directly run as CPU instructions in 16 bit mode. After windows vista MS removed all the required interrupt functions. This made the COM files unrunnable.
+
+<br />
+
+To run a COM file after windows vista. You need to used dos box. Which dos box simulates the "int" function calls.
+
+<br />
+
+It is still a good practice in learning to write pure binary applications in x86 core code without any coding tools.
 
 <h1 id="loops">Loop, and repeat.</h1>
 
