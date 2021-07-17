@@ -493,11 +493,15 @@ Windows Vista, and earlier still supported the full DOS API. Windows 10 still ha
 
 <br />
 
-I used to write binaries in pure binary code with an hex editor. Such as print a small message using "int 21". This was also good practice.
+I used to write binaries in pure binary code with an hex editor. Such as print a small message using "int 21".
 
 <br />
 
-I also did simple graphics in video memory, for fun if I got really board. Bellow I will show a sample COM file.
+I also did simple graphics in video memory, for fun if I got really board. This was also good practice. 
+
+<br />
+
+Bellow I will show a sample COM file.
 
 ~~~
 B4 09 BA 08 01 CD 21 C3 48 65 6C 6C 6F 20 57 6F 72 6C 64 24
@@ -507,31 +511,31 @@ You can can start applying your skills here to read it. You already know basic x
 
 <br />
 
-Just looking at this COM code you can see MOV operation "B4" using register 4. Setting the register AH to 09.
+Just looking at this COM code. You can see MOV operation "B4" using register 4. Setting the register AH to 09.
 
 <br />
 
-You then can see BA which is register DX. The tow bytes 08 01 are read in little indian byte order as value 01 08.
+You then can see "BA" which is 16 bit register DX. The tow bytes 08 01 are read in little indian byte order as value 01 08.
 
 <br />
 
-We then see instruction CD which is the interrupt instruction code. We then see the number 21 after it which is interrupt 21.
+We then see instruction "CD" which is the interrupt instruction code. We then see the number 21 after it which is interrupt 21.
 
 <br />
 
-Lastly C3 is the return code. This returns back to the operating system after the code is run.
+Lastly "C3" is the return code. This returns back to the operating system after the code is run.
 
 <br />
 
-Thus if AH is 09, and we use interrupt 21. The value in DX is used as the address to our text based message.
+Thus if AH is 09, and we use interrupt 21. Then the value in DX is used as the address to our text based message.
 
 <br />
 
-Thus COM files start at 0x100 so the value in DX is 0x108. So if you count 8 bytes from the start of the code you will find the position to your message.
+All COM files start at 0x100, so the value in DX is 0x108. So if you count 8 bytes from the start of the code you will find the position to your message.
 
 <br />
 
-Which is 48 65 6C 6C 6F 20 57 6F 72 6C 64 24 in UTF8 text standard this is "Hello World$". The dollar sing marks the end of the text for int 21 with ah 09.
+Which is 48 65 6C 6C 6F 20 57 6F 72 6C 64 24. In UTF8 text standard this is "Hello World$". The dollar sing marks the end of the text, for int 21 with AH 09.
 
 <br />
 
@@ -543,7 +547,7 @@ To run a COM file after windows vista. You need to used dos box. Which dos box s
 
 <br />
 
-It is still a good practice in learning to write pure binary applications in x86 core code without any coding tools.
+It is still good practice in learning to write pure binary applications in x86 core code without any coding tools.
 
 <h1 id="loops">Loop, and repeat.</h1>
 
