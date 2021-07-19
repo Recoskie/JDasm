@@ -15,19 +15,19 @@ In this document, we will discuss basic machine code and what we mean by system 
 
 <br />
 
-When comparing an x86 core from the '80s like the 16 bit Intel 8086 to a modern AMD ryzen. The first thought that will most likely run through your heads is that they run entirely different machine code.
+When comparing an x86 core from the '80s like the 16 bit Intel 8086 to a modern AMD ryzen, the first thought that will most likely run through your heads is that they run entirely different machine code, but it is not true.
 
 <br />
 
-Actually modern x86 can run 16 bit 8086 machine code in 16 bit mode. This is called the processor <strong>instruction set architecture</strong>.
+Modern x86 can run 16 bit 8086 machine code in 16-bit mode, and the instructions only switch to 16 bit but do not change encoding. This is called the processor <strong>instruction set architecture</strong>.
 
 <br />
 
-Even though it is an AMD core, it still runs the same x86 machine code as an Intel x86. As x86 is the <strong>instruction set architecture</strong>.
+Even though it is an AMD core, it still runs the same x86 machine code as an Intel x86.
 
 <br />
 
-A processor that is architecture x86. This means it runs x86 machine code natively without translation. This means binary software wrote in the '80s still runs on the most modern x86 core made by any company.
+A processor that is <strong>architecture x86</strong> means it runs x86 machine code natively without translation. This means binary software wrote in the '80s still runs on any modern x86 core made by any company.
 
 <br />
 
@@ -65,7 +65,7 @@ For now, let's start with a few sample codes.
 
 <br />
 
-A processor has variables called registers. Which operations are completed with. In this example, we use the ADD operation code 02.
+A processor has variables called registers which operations are completed with. In this example, we use the ADD operation code 02.
 
 <br />
 
@@ -181,7 +181,7 @@ So you can key in this entire binary code yourself on an AMD or Intel x86 core i
 
 <h2>32 bit x86.</h2>
 
-With the introduction of 32 bit. The 16-bit operations are made 32 bit's long. Thus two-byte add also became 4 byte add. The 8-bit operations remain 8 bit's in length.
+With the introduction of 32 bit, the 16-bit operations are made 32 bit's long. Thus two-byte add also became 4 byte add. The 8-bit operations remain 8 bit's in length.
 
 <br />
 
@@ -209,11 +209,11 @@ This allowed 16 bit 8086 to be directly run as it would on a 16-bit core. Plus w
 
 <h2>64 bit x86.</h2>
 
-With the introduction of 64 bit by AMD. All instructions stayed 32 bit. So using 66 before a 32-bit operation allowed the operation to go 16 bit.
+With the introduction of 64 bit by AMD, all instructions stayed 32 bit. So using 66 before a 32-bit operation allowed the operation to go 16 bit.
 
 <br />  
 
-Thus a new code was added that could only be used in 64-bit mode. The REX prefix uses operation codes 40 to 4F.
+A new code was added that could only be used in 64-bit mode. The REX prefix uses operation codes 40 to 4F.
 
 <br />
 
@@ -229,7 +229,7 @@ Meaning 32-bit machine code has full backward compatibility without any software
 
 <br />
 
-Thus Intel uses AMD's 64-bit REX prefix as it is a good system. Plus does not affect compatibility to original 16 bit 8086 instruction to 32 bit to 64.
+Thus Intel uses AMD's 64-bit REX prefix as it is a good system. It does not affect compatibility to the original 16 bit 8086 instruction to 32 bit.
 
 <br />
 
@@ -253,7 +253,7 @@ Instead, code 0F read the next byte as a new operation code. Giving a new set of
 
 <br />
 
-This was also done with two-byte instructions 0F 38 and 0F 3A. Which allowed for two more sets of 0 to 255 instruction codes. Which are called three-byte opcode maps.
+This was also done with two-byte instructions 0F 38 and 0F 3A. So codes 38 and 3A extend to two more sets of 0 to 255 instruction codes under the tow byte map, which are called three-byte opcode maps.
 
 <h2>Adding operation codes to x86.</h2>
 
@@ -264,8 +264,7 @@ Intel and AMD used prefix operations to add additional settings that expanded x8
 And to not break compatibility with operating systems that are compiled in x86 machine code. Such as DOS, Windows, UNIX, MAC OS X x86, and even Linux x86. 
 
 <br />
-
-Which is how machine code is supposed to work. <strong>As an x86 is an instruction set architecture.</strong> Every operation code must use a unique operation code, for each operation.
+This is how machine code is supposed to work. <strong>As an x86 is an instruction set architecture.</strong> Every operation code must use a unique operation code, for each operation.
 
 <br />
 
@@ -372,8 +371,8 @@ This is still the 16 bit ADD operation 03 in 8086.
 
 <br />
 
-However, in 64-bit mode. It is 32 in length by default. The register that is used as the memory location becomes 64 in length.<br />
-In 32 bit code, or 32-bit mode. The register RDI in the address would be EDI as 32 in length.
+However, in 64-bit mode, it is 32 in length by default. The register that is used as the memory location becomes 64 in length.<br />
+In 32 bit code or 32-bit mode, the register RDI in the address would be EDI as 32 in length.
 
 <br />
 
@@ -560,7 +559,7 @@ Even the FPU uses the same instruction format. The only thing changing is the re
 
 <br />
 
-My advice to you. Is to test the encodings yourself and to learn from the Intel document.
+My advice to you is to test the encodings yourself and to learn from the Intel document.
 
 <br />
 
@@ -596,7 +595,7 @@ Apple does not like people building emulators. So they made it that the binary i
 
 <br />
 
-Nothing is stopping anyone from looking at any part of the IOS system. Thus decoding any part to what it does. Suppose you wish to spend the time to disassemble ARM core codes from the ARM code map or use an ARM disassembler.
+Nothing is stopping anyone from looking at any part of the IOS system. You can decode any part to what it does in IOS. Suppose you wish to spend the time to disassemble ARM core codes from the ARM code map or use an ARM disassembler.
 
 <br />
 
@@ -652,7 +651,7 @@ Thus the same is true for operating systems. As you must pick an architecture la
 
 <h1>Self modifying code.</h1>
 
-It turns out we can write self-modifying code once you understand the basics of a processor architecture. You can then write byte sequences out in memory and run them directly.
+It turns out we can write self-modifying code once you understand the basics of processor architecture. You can then write byte sequences out in memory and run them directly.
 
 <br />
 
@@ -692,7 +691,7 @@ Also, the following document, <a href="https://scholarworks.sjsu.edu/cgi/viewcon
 
 <br />
 
-No matter how good of a detection model we make, though. It is not full proof to those that design the code to not be detected.
+No matter how good of a detection model we make, it is not full proof to those that design the code to not be detected.
 
 <br />
 

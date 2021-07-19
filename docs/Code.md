@@ -91,7 +91,7 @@ There is also self-modifying code that can make modifications to itself to save 
 
 <h1>Data types.</h1>
 
-The basic arithmetic types such as Integers numbers, floating-point, text data. Do not change between CPU architecture types.
+The basic arithmetic types such as Integers numbers, floating-point, text data, do not change between CPU architecture types.
 
 <br />
 
@@ -121,7 +121,7 @@ The steps you put into code are similar septs in machine code. It just is a litt
 
 <br />
 
-What will change is you will see it moves a number into a register and adds it with the value. Writes it back to memory at the location of your variable.
+What will change is you will see it moves a number into a register and adds it with the value, writes it back to memory at the location of your variable.
 
 <br />
 
@@ -141,7 +141,7 @@ You also have to pick a language syntax that you are comfortable with. Such as <
 
 <br />
 
-As you define what the steps are doing. It does not matter which language you target to write the steps back out in.
+As you define what the steps are doing, it does not matter which language you target to write the steps back out in.
 
 <br />
 
@@ -213,7 +213,7 @@ This means both values are the same such as 7489328 - 7489328 = 0, which sets ze
 
 <br />
 
-If the subtracted value is smaller, then the last binary digit would be borrowed causing the last binary digit to be set.
+If the subtracted value is smaller, then the last binary digit would be borrowed, causing the last binary digit to be set.
 
 <br />
 
@@ -241,7 +241,7 @@ Otherwise, the instructions after the jump will run.
 
 <br />
 
-On an ARM core. All instructions have a condition code. This means the instruction might not run relative to the arithmetic results of the past instruction.
+On an ARM core, all instructions have a condition code. This means the instruction might not run relative to the arithmetic results of the past instruction.
 
 <br />
 
@@ -313,15 +313,11 @@ This allows x86 cores to do fast multiply or divide. Also made 32/64 bit multipl
 
 <br />
 
-As we can make the circuit smaller. We can include a full 32/64 div/mul in one clock cycle.
+As we can make the circuit smaller, we can include a full 32/64 div/mul in one clock cycle.
 
 <br />
 
-Because of the control unit, we can also choose the carry flag to be given into the carry input. This creates instruction add and carry, and subtract and barrow (carry flag).
-
-<br />
-
-Which allows us to add or subtract numbers as large as we want.
+Because of the control unit, we can also choose the carry flag to be given into the carry input. This creates instruction add and carry, and subtract and barrow (carry flag), which allows us to add or subtract numbers as large as we want.
 
 <br />
 
@@ -393,11 +389,11 @@ The operation POP puts a value from the stack pointer location into a register.
 
 <br />
 
-AS you write bytes at the location of the stack pointer register using PUSH. The stack pointer is subtracted by the bytes you write.
+AS you write bytes at the location of the stack pointer register using PUSH, the stack pointer is subtracted by the bytes you write.
 
 <br />
 
-AS you read bytes at the location of the stack pointer register using POP. The stack pointer is added by the bytes you read.
+AS you read bytes at the location of the stack pointer register using POP, the stack pointer is added by the bytes you read.
 
 <br />
 
@@ -725,7 +721,7 @@ Because we have to write out each location, RBX will be set. Thus it must line u
 
 <br />
 
-However, in a programing language. The coding tool will line up the linear space for your array. Also, the more dimensions you add to your array slower your code may become.
+In a programing language, the coding tool will line up the linear space for your array. Also, the more dimensions you add to your array the slower your code may become.
 
 <br />
 
@@ -795,7 +791,7 @@ MOV R10,QWORD PTR[RBX + 2]
 
 <br />
 
-This time the third dimension points to our data structure location. Which consists of three-byte values that go in order the way they are defined.
+This time the third dimension points to our data structure location, which consists of three-byte values that go in order the way they are defined.
 
 <br />
 
@@ -1004,7 +1000,7 @@ Even the entire windows operating system is built-in C/C++ as well now.
 
 <br />
 
-Writing better, faster code. Starts with how you simplify and organize the methods and how efficient your data types and steps of your code is.
+Writing better and faster code starts with how you simplify and organize the methods and how efficient your data types and steps of your code are.
 
 <br />
 

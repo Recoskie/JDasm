@@ -26,7 +26,7 @@ This is called a hex editor. It lets you read what the raw binary data is in fil
 
 <br />
 
-However, in order to use it properly. You need to understand how the information is displayed.
+However, to use it properly, you need to understand how the information is displayed.
 
 <br />
 
@@ -166,7 +166,7 @@ Data types are limited and are the same across all systems. Even different syste
 
 <br />
 
-The processor must be able to do arithmetic and operations with the standard primitive data types in order to work with file formats.
+The processor must be able to do arithmetic operations with the standard primitive data types to work with file formats.
 
 <br />
 
@@ -202,7 +202,7 @@ Today when we read these sizes. Then wish to do arithmetic with different read l
 
 <br />
 
-In disassembly, the original names stay intact between basic CPU operations, like add, multiply, or divide.
+The original names stay intact in disassembly between basic CPU operations, like add, multiply, or divide.
 
 <br />
 
@@ -214,7 +214,7 @@ A byte is still a byte of memory no matter what the system architecture is. The 
 
 <br />
 
-The processor must be able to do arithmetic and operations with the standard primitive data types. In order to work with file formats. Which are the building blocks for all format types.
+The processor must be able to do arithmetic and operations with the standard primitive data types. In order to work with file formats. The standard data types are the building blocks for all format types.
 
 <br />
 
@@ -226,15 +226,15 @@ Let's say we read a DWORD (four bytes), from memory that are 11, 22, 33, 44 in h
 
 <br />
 
-In a system that reads bytes in little-endian byte order: Bytes are read in reverse order = 44, 33, 22, 11.
+In a processor that reads bytes in little-endian byte order: Bytes are read in reverse order = 44, 33, 22, 11.
 
 <br />
 
-In a processor that reads bytes in big-endian order = 11, 22, 33, 44.
+In a processor that reads bytes in big-endian byte order: Bytes are read in order = 11, 22, 33, 44.
 
 <br />
 
-Big-endian is not used much, if at all anymore. Thus systems that are big-endian switch the byte order using arithmetic operations to maintain compatibility.
+Big-endian is not used much, if at all, in many systems. Thus, big-endian systems switch the byte order using arithmetic operations to maintain compatibility with the majority of file formats.
 
 <br />
 
@@ -308,7 +308,7 @@ Adding 3 + 8 = 11
 
 <br />
 
-As one can see. The singed value for 11 is -5. The singed value for 8 is -8. The singed value for 3 is 3.
+As one can see, the singed value for 11 is -5. The singed value for 8 is -8. The singed value for 3 is 3.
 
 <br />
 
@@ -336,7 +336,7 @@ In reality, your source code can have singed numbers, but by disassembling its m
 
 <br />
 
-As there is no such thing as a singed add or subtract in any CPU. As it is only displayed graphically differently by value.
+As there is no such thing as a singed add or subtract in any CPU. Singed numbers are only displayed graphically differently by value.
 
 <br />
 
@@ -352,7 +352,7 @@ You lose some binary combinations because the positional number for the exponent
 
 <br />
 
-The decimal point can be placed anywhere in your integer number. Allowing fractional arithmetic.
+The decimal point can be placed anywhere in your integer number, allowing fractional arithmetic.
 
 <br />
 
@@ -360,7 +360,7 @@ This is also a primitive data type that is the same across all processor cores a
 
 <br />
 
-Thus a double-precision number gets its name from being twice the size of a float number as a QWORD. Giving you a larger integer and bigger exponent section.
+Thus a double-precision number gets its name from being twice the size of a float number as a QWORD, giving you a larger integer and bigger exponent section.
 
 <br />
 
@@ -384,7 +384,7 @@ Many call the integer part a fraction part. However, it does not reflect how a f
 
 <br />
 
-As it uses regular ADD in the CPU, which is used, for integers, not floating-point numbers. Which is how it is implemented if there is no native float add in the CPU.
+Float numbers use regular ADD in the CPU, which is used, for integers, not floating-point numbers. This is how it is implemented if there is no native float add in the CPU. I will demonstrate how we add float numbers.
 
 <br />
 
@@ -392,7 +392,11 @@ A float number with a value of 0.1000000000000000000000000.
 
 <br />
 
-Is the same as adding 1+1=10 in binary. Adding in the decimal point, it becomes 0.1+0.1=1.0 in binary.
+Is the same as adding 1+1=10 in binary.
+
+<br />
+
+Adding in the decimal point, it becomes 0.1+0.1=1.0 in binary.
 
 <br />
 
@@ -408,7 +412,7 @@ Adding in the decimal point means you can have values that are a division of 2 r
 
 <br />
 
-As 0.1 is the same as one divided by two = 0.5. Thus adding 0.5 twice is the same as adding 0.1+0.1=1.0.
+As 0.1 is the same as one divided by two = 0.5. Thus adding 0.5 twice is the same as adding 0.1+0.1=1.0 as binary.
 
 <br />
 
@@ -478,7 +482,7 @@ The space bar is 20 hex. Without space as a code, there is no space between word
 
 <br />
 
-When dividing a binary number by any base 2 to 36. Any remainder that is less than 10 is added to 30 hex, which creates numbers 0 to 9 per place value.
+When dividing a binary number by any base 2 to 36, any remainder that is less than 10 is added to 30 hex, which creates numbers 0 to 9 per place value.
 
 <br />
 
@@ -526,7 +530,7 @@ Thus UTF8 is just the smaller version of the standard text format. The original 
 
 <h1 style="clear:left;">Fast binary conversion.</h1>
 
-Any number base that is a multiple of 2. Such as base 4, base 8 (Octal), base 16 (hexadecimal), base 32. Can be directly translated to and from binary.
+Any number base that is a multiple of 2, such as base 4, base 8 (Octal), base 16 (hexadecimal), base 32, can be directly translated to and from binary.
 
 <br />
 
@@ -581,7 +585,7 @@ Hex=(1),(4),(5),(5),(2),(A),(9),(4),(A)
 
 <br />
 
-By matching each 4 digit combination in place value to each hex digit in 0 to 15 (which is quickly done in one's head).
+By matching each 4 binary digit combination in place value to each hex digit in 0 to 15, alows us to quickly change back and forth between binary or hex in one's head.
 
 <br />
 
@@ -767,7 +771,7 @@ Even Arrays are read the same across systems. However, x86 cores are excellent w
 
 <br />
 
-<strong>The most we can do is encrypt an entire file. Then decrypt the file to bring it back to the raw standard formats. To have some level of security.</strong>
+<strong>The most we can do is encrypt an entire file. Then decrypt the file to bring it back to the raw standard formats, to have some level of security.</strong>
 
 <br />
 
@@ -779,7 +783,7 @@ Some old video games on PlayStation will read a single byte. Then divide it usin
 
 <br />
 
-It is rare for files to use this unless it is an old file format where memory was a scares thing. In which every developer did their best to get a single byte to represent as much as they could.
+It is rare for files to use this unless it is an old file format where memory was a scares thing. Every developer did their best to get a single byte to represent as much as they could.
 
 <br />
 
