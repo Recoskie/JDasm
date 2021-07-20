@@ -52,7 +52,7 @@ public class COM extends Window.Window implements JDEventListener
 
   //Disassemble routine.
 
-  public void Dis( int loc, boolean crawl )
+  public void Dis( long loc, boolean crawl )
   {
     try
     {
