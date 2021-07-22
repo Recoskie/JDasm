@@ -10,10 +10,18 @@ public class BMP extends Window.Window implements JDEventListener
   private int width = 0, height = 0;
   private float pixel_size = 0f;
   private int colorData = 0;
+  private int compressMode = 0;
+  private boolean runLen = false;
+  private boolean colorTable = false;
+
+  //If we are using run length compression we have to read each line. As the line length may not all be the same.
+
+  private long linePos = 0;
+  private int curLine = -1;
 
   //Descriptors.
 
-  private Descriptor[] headers = new Descriptor[2];
+  private Descriptor[] headers = new Descriptor[3];
 
   //Number of lines are not known till the headers are read.
 
@@ -37,7 +45,7 @@ public class BMP extends Window.Window implements JDEventListener
     bmp_header.LUINT32("Size of picture in bytes.");
     bmp_header.LUINT16("Reserved");
     bmp_header.LUINT16("Reserved");
-    bmp_header.LUINT32("Pixel colors location"); colorData = (int)bmp_header.value;
+    bmp_header.LUINT32("Pixel colors location"); colorData = (int)bmp_header.value; linePos = colorData;
 
     //Read DIB header.
 
@@ -53,7 +61,10 @@ public class BMP extends Window.Window implements JDEventListener
     {
       dib_header.LUINT16("The number of color planes"); dib_size -= 2;
       dib_header.LUINT16("The number of bits per pixel"); pixel_size = ((short)dib_header.value)/8f; dib_size -= 2;
-      dib_header.LUINT32("The compression method being used"); dib_size -= 4;
+      dib_header.LUINT32("The compression method being used"); compressMode = (int)dib_header.value; dib_size -= 4;
+
+      runLen = compressMode == 1 || compressMode == 2 || compressMode == 12 || compressMode == 13;
+
       dib_header.LUINT32("The size of the image"); dib_size -= 4;
       dib_header.LUINT32("Horizontal resolution"); dib_size -= 4;
       dib_header.LUINT32("Vertical resolution"); dib_size -= 4;
@@ -80,14 +91,28 @@ public class BMP extends Window.Window implements JDEventListener
     }
 
     headers[1] = dib_header;
+
+    //If the DIB header does not end at the start of the image color data.
+    //Then the image uses a list of colors per pixel.
+
+    if( colorTable = file.getFilePointer() < colorData )
+    {
+      root.add( new JDNode("Color table.h", 2) );
+
+      Descriptor colors = new Descriptor( file ); headers[2] = colors; colors.setEvent( this::ColorTableInfo );
+
+      int len = (int)(colorData - file.getFilePointer()) / 3;
+
+      for( int i = 0; i < len; i++ ) { colors.Other("RGB color #" + i + "", 3); }
+    }
     
     //Setup the lines.
 
     lines = new Descriptor[height];
     
-    JDNode data = new JDNode( "Picture Data", 2 );
+    JDNode data = new JDNode( "Picture Data", 3 );
     
-    for( int i = 1; i <= height; i++ ) { data.add( new JDNode( "line #" + i + ".h", ( i + 2 ) ) ); }
+    for( int i = 1; i <= height; i++ ) { data.add( new JDNode( "line #" + i + ".h", ( i + 3 ) ) ); }
 
     root.add( data ); Virtual.setVisible(false); tools.update();
 
@@ -106,39 +131,133 @@ public class BMP extends Window.Window implements JDEventListener
   {
     if( e.getID().equals("UInit") ) { Uninitialize(); }
 
-    else if ( (int)e.getArg(0) < 2 ) { ds.setDescriptor(headers[(int)e.getArg(0)]); }
+    else if ( (int)e.getArg(0) < 3 )
+    {
+      ds.setDescriptor(headers[(int)e.getArg(0)]);
 
-    else if( e.getArg(0) == 2 )
+      if( e.getArg(0) == 2 ) { info("The color table stores RGB colors only. Each color is addressable by number of bit's per pixel value."); }
+    }
+
+    else if( e.getArg(0) == 3 )
     {
       tree.expandPath( tree.getLeadSelectionPath() );
 
-      try { file.seek( colorData ); } catch( Exception er ) { }
+      try
+      {
+        if( runLen )
+        {
+          file.seek( colorData ); Offset.setSelected( colorData, file.length() - 1 );
+        }
+        else
+        {
+          file.seek( colorData ); Offset.setSelected( colorData, colorData + (int)( ( width * height ) * pixel_size ) - 1 );
+        }
+      } catch( Exception er ) { }
 
-      Offset.setSelected( colorData, colorData + (int)( ( width * height ) * pixel_size ) - 1 );
-
-      info("The color data that creates the picture. Most bit maps are RED, Green, Blue color per pixel."); ds.clear();
+      info("The color array that creates the picture. Most bit maps are RED, Green, Blue color per 24-bit/pixel.<br /><br />" +
+      "In some cases when there is a color table then the value is used for which color in the color table to use."); ds.clear();
     }
-    
+
     //Read an line from the picture.
     
     else
     {
-      int line = (int)e.getArg(0) - 3;
+      int line = (int)e.getArg(0) - 4;
 
-      if( lines[line] == null )
+      //If we are using run length compression.
+
+      if( runLen )
       {
-        try
+        //Each line must be read one at a time till line position.
+
+        boolean end = false;
+        int rl = 0;
+        long t = 0;
+
+        while( curLine < line )
         {
-          file.seek( colorData + (int)(line * pixel_size * width) ); Descriptor pixels = new Descriptor(file);
+          try
+          {
+            file.seek( linePos ); Descriptor pixels = new Descriptor(file); pixels.setEvent( this::PixInfo );
 
-          for( int i = 1; i <= width; i++ ) { pixels.Other("pixel color #" + i + "",(int)pixel_size); }
+            end = false; while( !end )
+            {
+              t = file.getFilePointer(); rl = file.readByte(); file.seek(t);
 
-          lines[line] = pixels;
+              if( rl != 0 ) { pixels.UINT8("Color Run Length"); pixels.Other("pixel color", (int)pixel_size); }
+              
+              //Run lengths of 0 are used as commands.
+
+              else
+              {
+                pixels.UINT8("Command"); t = file.getFilePointer(); rl = file.readByte(); file.seek(t);
+
+                if( rl == 0 )
+                {
+                  pixels.Other("End of line.",1);
+
+                  curLine += 1; linePos = file.getFilePointer();
+                    
+                  lines[curLine] = pixels; end = true;
+                }
+                else if( rl == 1 )
+                {
+                  pixels.Other("End of Bit map.",1);
+
+                  curLine += 1; linePos = file.getFilePointer();
+                    
+                  lines[curLine] = pixels; end = true;
+                }
+                else if( rl == 2 )
+                {
+                  pixels.Other("Move Position",1); pixels.UINT8("Move to the right");
+
+                  //It is possible to skip lines using a delta position.
+
+                  pixels.UINT8("Move Down lines");
+                  
+                  if( Byte.compareUnsigned((byte)pixels.value, (byte)0) > 0 )
+                  {
+                    curLine += 1; linePos = file.getFilePointer();
+                    
+                    lines[curLine] = pixels; curLine += ((byte)pixels.value) & 0xFF;
+                    
+                    end = true;
+                  }
+                }
+                else
+                {
+                  pixels.UINT8("Number of Pixel colors");
+                  for( int i = rl & 0xFF; i > 0; i-- ) { pixels.Other("pixel color", (int)pixel_size); }
+                }
+              }
+            }
+          }
+          catch( Exception er ) { curLine += 1; er.printStackTrace(); } 
         }
-        catch( Exception er ) { }
+
+        if( lines[line] != null ) { ds.setDescriptor(lines[line]); } else { info("<html>This line was skipped.</html>"); ds.clear(); }
       }
+
+      //Else line width are all the same.
+      
+      else
+      {
+        if( lines[line] == null )
+        {
+          try
+          {
+            file.seek( colorData + (int)(line * pixel_size * width) ); Descriptor pixels = new Descriptor(file); pixels.setEvent( this::PixInfo );
+
+            for( int i = 1; i <= width; i++ ) { pixels.Other("pixel color #" + i + "",(int)pixel_size); }
+
+            lines[line] = pixels;
+          }
+          catch( Exception er ) { }
+        }
         
-      ds.setDescriptor(lines[line]);
+        ds.setDescriptor(lines[line]);
+      }
     }
   }
 
@@ -203,7 +322,6 @@ public class BMP extends Window.Window implements JDEventListener
     "<html>An enumerated value indicating a halftoning algorithm that should be used when rendering the image.</html>",
     "<html>Halftoning parameter 1 (offset 64) is the percentage of error damping. 100 indicates no damping. 0 indicates that errors are not diffused.</html>",
     "<html>Halftoning parameters 1 and 2 (offsets 64 and 68, respectively) represent the X and Y dimensions, in pixels, respectively, of the halftoning pattern used.</html>",
-    "<html>Halftoning parameters 1 and 2 (offsets 64 and 68, respectively) represent the X and Y dimensions, in pixels, respectively, of the halftoning pattern used.</html>",
     "<html>An enumerated value indicating the color encoding for each entry in the color table. The only defined value is 0, indicating RGB.</html>",
     "<html>An application-defined identifier. Not used for image rendering.</html>",
     "<html>Unknown settings.</html>"
@@ -221,5 +339,41 @@ public class BMP extends Window.Window implements JDEventListener
     {
       info( DIBInfo[ el ] );
     }
+  }
+
+  //bit/pixel color information.
+
+  public void PixInfo( int el )
+  {
+    //Check if there is a color table.
+
+    if( colorTable )
+    {
+      info( "<html>The color value is a color number to use from the color table. The color table can only store Red, Green, Blue, colors.</html>" );
+    }
+    
+    //Otherwise we have three different color types.
+    
+    else if( pixel_size == 2 )
+    {
+      info( "<html>The 16 bit number is divided up into Red 5-bit, Green 6-bit, Blue 5-bit. The colors Red, and Blue have a range of 0 to 31, and green has a range of 0, or 63.</html>" );
+    }
+
+    else if( pixel_size == 3 )
+    {
+      info( "<html>The 24 bit number is divided up into bits of 8, for Red, Green, Blue color. Each color has a shade range of 0 to 255.</html>" );
+    }
+
+    else if( pixel_size == 4 )
+    {
+      info( "<html>The 32 bit number is divided up into bits of 8, for Alpha, Red, Green, Blue color. Each color has a shade range of 0 to 255.</html>" );
+    }
+  }
+
+  //bit/pixel color information.
+
+  public void ColorTableInfo( int el )
+  {
+    info( "<html>The 24 bit number is divided up into bits of 8, for Red, Green, Blue color. Each color has a shade range of 0 to 255.</html>" );
   }
 }
