@@ -170,6 +170,8 @@ public class BMP extends Window.Window implements JDEventListener
       {
         //Each line must be read one at a time till line position.
 
+        file.Events = false;
+
         boolean end = false;
         int rl = 0;
         long t = 0;
@@ -184,7 +186,7 @@ public class BMP extends Window.Window implements JDEventListener
             {
               t = file.getFilePointer(); rl = file.readByte(); file.seek(t);
 
-              if( rl != 0 ) { pixels.UINT8("Color Run Length"); pixels.Other("pixel color", (int)pixel_size); }
+              if( rl != 0 ) { pixels.UINT8("Color Run Length"); pixels.Other("pixel color", (int)( pixel_size + 0.5 )); }
               
               //Run lengths of 0 are used as commands.
 
@@ -194,7 +196,7 @@ public class BMP extends Window.Window implements JDEventListener
 
                 if( rl == 0 )
                 {
-                  pixels.Other("End of line.",1);
+                  pixels.Other("End of line",1);
 
                   curLine += 1; linePos = file.getFilePointer();
                     
@@ -202,7 +204,7 @@ public class BMP extends Window.Window implements JDEventListener
                 }
                 else if( rl == 1 )
                 {
-                  pixels.Other("End of Bit map.",1);
+                  pixels.Other("End of Bit map",1);
 
                   curLine += 1; linePos = file.getFilePointer();
                     
@@ -227,14 +229,23 @@ public class BMP extends Window.Window implements JDEventListener
                 }
                 else
                 {
-                  pixels.UINT8("Number of Pixel colors");
-                  for( int i = rl & 0xFF; i > 0; i-- ) { pixels.Other("pixel color", (int)pixel_size); }
+                  pixels.UINT8("Number of Pixel colors"); int i = rl & 0xFF;
+
+                  if( pixel_size == 0.5 ){ i /= 2; } //4-bit color.
+
+                  boolean pad = i % 2 == 1; //Must be aligned by 16 bits.
+
+                  for( ; i > 0; i-- ) { pixels.Other("pixel color", (int)( pixel_size + 0.5 )); }
+
+                  if( pad ){ pixels.Other("Padding", 1); }
                 }
               }
             }
           }
           catch( Exception er ) { curLine += 1; er.printStackTrace(); } 
         }
+
+        file.Events = true;
 
         if( lines[line] != null ) { ds.setDescriptor(lines[line]); } else { info("<html>This line was skipped.</html>"); ds.clear(); }
       }
@@ -245,6 +256,8 @@ public class BMP extends Window.Window implements JDEventListener
       {
         if( lines[line] == null )
         {
+          file.Events = false;
+
           try
           {
             file.seek( colorData + (int)(line * pixel_size * width) ); Descriptor pixels = new Descriptor(file); pixels.setEvent( this::PixInfo );
@@ -254,6 +267,8 @@ public class BMP extends Window.Window implements JDEventListener
             lines[line] = pixels;
           }
           catch( Exception er ) { }
+
+          file.Events = true;
         }
         
         ds.setDescriptor(lines[line]);
