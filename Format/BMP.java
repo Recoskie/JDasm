@@ -352,7 +352,7 @@ public class BMP extends Window.Window implements JDEventListener
     "<tr><td>0</td><td>No Compression. Regular Red, Green, Blue per 24-bit/pixel.</td></tr>" +
     "<tr><td>1</td><td>Run-length encoding 8-bit/pixel bitmaps.</td></tr>" +
     "<tr><td>2</td><td>Run-length encoding 4-bit/pixel bitmaps.</td></tr>" +
-    "<tr><td>3</td><td>No Compression. Uses Red, Green, Blue, Alpha per 32-bit/pixel.</td></tr>" +
+    "<tr><td>3</td><td>No Compression. Picture uses no color table. The specified number of bits for RED, Green, Blue, Alpha is used from the DIB header.</td></tr>" +
     "<tr><td>4</td><td>Specifies that the image is compressed using the JPEG file Interchange Format. JPEG compression trades off compression against loss; it can achieve a compression ratio of 20:1 with little noticeable loss.</td></tr>" +
     "<tr><td>5</td><td>Specifies that the image is compressed using the PNG file Interchange Format.</td></tr>" +
     "</table></html>",
@@ -419,7 +419,7 @@ public class BMP extends Window.Window implements JDEventListener
 
     //Check if the picture uses an specialized color type mask.
 
-    else if( colorMask )
+    else if( colorMask && compressMode == 3 )
     {
       info( "<html>The DIB header specifies the number of bit's to use for each RGB color.<br /><br />" +
       "Goto the DIB header, and click on Red Color Bits, and the other colors for a detailed description.</html>" );
@@ -434,7 +434,7 @@ public class BMP extends Window.Window implements JDEventListener
 
     else if( pixel_size == 4 )
     {
-      info( "<html>The 32 bit number is divided up into bits of 8, for Alpha, Red, Green, Blue color. Each color has a shade range of 0 to 255.</html>" );
+      info( "<html>The 4 bytes are Red, Green, Blue, Alpha color. Each color has a shade range of 0 to 255.</html>" );
     }
   }
 
