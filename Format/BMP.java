@@ -14,7 +14,7 @@ public class BMP extends Window.Window implements JDEventListener
   private boolean runLen = false;
   private boolean colorTable = false;
   private boolean colorMask = false;
-  private boolean TopToBottom = false;
+  private boolean topToBottom = false;
 
   //If we are using run length compression we have to read each line. As the line length may not all be the same.
 
@@ -68,7 +68,7 @@ public class BMP extends Window.Window implements JDEventListener
       dib_header.LINT32("Height in pixels"); height = (int)dib_header.value; dib_size -= 4;
     }
 
-    if( height < 0 ) { height = -height; TopToBottom = true; }
+    if( height < 0 ) { height = -height; topToBottom = true; }
     
     dib_header.LUINT16("The number of color planes"); dib_size -= 2;
     dib_header.LUINT16("The number of bits per pixel"); pixel_size = ((short)dib_header.value)/8f; dib_size -= 2;
@@ -127,9 +127,9 @@ public class BMP extends Window.Window implements JDEventListener
 
       Descriptor colors = new Descriptor( file ); headers[2] = colors; colors.setEvent( this::ColorTableInfo );
 
-      int len = (int)(colorData - file.getFilePointer()) / 3;
+      int len = (int)(colorData - file.getFilePointer()) / 4;
 
-      for( int i = 0; i < len; i++ ) { colors.Other("RGB color #" + i + "", 3); }
+      for( int i = 0; i < len; i++ ) { colors.Other("RGB color #" + i + "", 4); }
     }
     
     //Setup the lines.
@@ -138,7 +138,7 @@ public class BMP extends Window.Window implements JDEventListener
     
     JDNode data = new JDNode( "Picture Data", 3 );
     
-    if( TopToBottom )
+    if( topToBottom )
     {
       for( int i = 1, ln = 4; i <= height; i++ ) { data.add( new JDNode( "line #" + i + ".h", ln++ ) ); }
     }
@@ -315,8 +315,8 @@ public class BMP extends Window.Window implements JDEventListener
   {
     "<html>The BMP header must start with BM = 42, 4D.<br /><br />If it does not pass the signature test then the picture is corrupted.</html>",
     "<html>This is the size of the bitmap file.</html>",
-    "<html>Value depends on the application that creates the image, if created manually can be 0.</html>",
-    "<html>Value depends on the application that creates the image, if created manually can be 0.</html>",
+    "<html>Reserved, for future use. Should always be set 0.</html>",
+    "<html>Reserved, for future use. Should always be set 0.</html>",
     "<html>This is the location to the pixel color data.<br /><br />" +
     "The DIB header specifies the number of bits each pixel is. The default is generally Red, Green, Blue per 24-bits/pixel.<br /><br />" +
     "It is also important to check if the picture uses compassion setting other than 0 in DIB header, for if it uses subtractive colors instead of reg, green blue, or each color starts with a byte specifying a run length using run length compression.</html>"
@@ -357,10 +357,11 @@ public class BMP extends Window.Window implements JDEventListener
     "<tr><td>5</td><td>Specifies that the image is compressed using the PNG file Interchange Format.</td></tr>" +
     "</table></html>",
     "<html>This is the size of the bitmap without the headers; a dummy 0 can be given for regular Red, Green, Blue per 24-bit/pixel bitmaps.</html>",
-    "<html>The horizontal resolution of the image. (pixel per metre, signed integer).</html>",
-    "<html>The vertical resolution of the image. (pixel per metre, signed integer).</html>",
-    "<html>The number of color indexes in the color table that are actually used by the bitmap, or 0 to default to 2^n.</html>",
-    "<html>The number of color that need to be read in color table, for displaying the bitmap. If this value is zero, all colors are read from start to end of color table.</html>",
+    "<html>The horizontal resolution, in pixels-per-meter, of the target device for the bitmap.</html>",
+    "<html>The vertical resolution, in pixels-per-meter, of the target device for the bitmap.</html>",
+    "<html>The number of colors in the color table that are actually used by the bitmap, or 0 to default to all colors.</html>",
+    "<html>The minium number of colors that need to be read in from the start of the color table, for displaying the bitmap.<br /><br />" +
+    "If this value is zero, all colors are read from start to end of color table.</html>",
     "<html>Specifies bits used, for red color value. Typically this is set 00 00 FF 00.<br /><br />" +
     "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of 00 00 FF 00 is 00 00 FF.<br /><br >" +
     "The bytes are then flipped in little-endian byte order as FF 00 00 meaning the first byte is 0 to 255 Red.<br /><br /><hr /><br />" +
@@ -382,9 +383,9 @@ public class BMP extends Window.Window implements JDEventListener
     "This is useful for 16 bit's per color with no color table. As we can make Red, green, and blue 5 bits each leaving us one bit for visible, or invisible pixels.</html>",
     "<html>Color space type.</html>",
     "<html>Color Space endpoints.</html>",
-    "<html>Red Gamma.</html>",
-    "<html>Green Gamma.</html>",
-    "<html>Blue Gamma.</html>",
+    "<html>Toned response curve for red. The first 16 bits are the unsigned integer value. The last 16 bits is the value after the decimal point.</html>",
+    "<html>Toned response curve for green. The first 16 bits are the unsigned integer value. The last 16 bits is the value after the decimal point.</html>",
+    "<html>Toned response curve for blue. The first 16 bits are the unsigned integer value. The last 16 bits is the value after the decimal point.</html>",
     "<html>Rendering intent.</html>",
     "<html>Offset to the start of the profile data.</html>",
     "<html>Size, in bytes, of embedded profile data.</html>",
@@ -441,6 +442,6 @@ public class BMP extends Window.Window implements JDEventListener
 
   public void ColorTableInfo( int el )
   {
-    info( "<html>The 24 bit number is divided up into bits of 8, for Red, Green, Blue color. Each color has a shade range of 0 to 255.</html>" );
+    info( "<html>The first three bytes are Red, Green, Blue color. The last byte is reserved, for future use.</html>" );
   }
 }
