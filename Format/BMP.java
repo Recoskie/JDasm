@@ -13,6 +13,8 @@ public class BMP extends Window.Window implements JDEventListener
   private int compressMode = 0;
   private boolean runLen = false;
   private boolean colorTable = false;
+  private boolean colorMask = false;
+  private boolean TopToBottom = false;
 
   //If we are using run length compression we have to read each line. As the line length may not all be the same.
 
@@ -54,13 +56,25 @@ public class BMP extends Window.Window implements JDEventListener
     JDNode DHeader = new JDNode("DIB Header.h", 1); root.add( DHeader );
 
     dib_header.LUINT32("Size of DIB header"); int dib_size = (int)dib_header.value; dib_size -= 4;
-    dib_header.LUINT32("Width in pixels"); width = (int)dib_header.value; dib_size -= 4;
-    dib_header.LUINT32("Height in pixels"); height = (int)dib_header.value; dib_size -= 4;
-    
-    if( dib_size > 4 )
+
+    if( dib_size == 8 )
     {
-      dib_header.LUINT16("The number of color planes"); dib_size -= 2;
-      dib_header.LUINT16("The number of bits per pixel"); pixel_size = ((short)dib_header.value)/8f; dib_size -= 2;
+      dib_header.LUINT16("Width in pixels"); width = (int)dib_header.value; dib_size -= 2;
+      dib_header.LINT16("Height in pixels"); height = (int)dib_header.value; dib_size -= 2;
+    }
+    else
+    {
+      dib_header.LUINT32("Width in pixels"); width = (int)dib_header.value; dib_size -= 4;
+      dib_header.LINT32("Height in pixels"); height = (int)dib_header.value; dib_size -= 4;
+    }
+
+    if( height < 0 ) { height = -height; TopToBottom = true; }
+    
+    dib_header.LUINT16("The number of color planes"); dib_size -= 2;
+    dib_header.LUINT16("The number of bits per pixel"); pixel_size = ((short)dib_header.value)/8f; dib_size -= 2;
+
+    if( dib_size > 0 )
+    {
       dib_header.LUINT32("The compression method being used"); compressMode = (int)dib_header.value; dib_size -= 4;
 
       runLen = compressMode == 1 || compressMode == 2 || compressMode == 12 || compressMode == 13;
@@ -70,25 +84,37 @@ public class BMP extends Window.Window implements JDEventListener
       dib_header.LUINT32("Vertical resolution"); dib_size -= 4;
       dib_header.LUINT32("The number of colors in the picture"); dib_size -= 4;
       dib_header.LUINT32("The number of important colors used"); dib_size -= 4;
+    }
 
-      if( dib_size > 0 )
-      {
-        dib_header.LUINT16("Horizontal and Vertical unit resolution"); dib_size -= 2;
-        dib_header.LUINT16("Padding"); dib_size -= 2;
-        dib_header.LUINT16("Pixel order"); dib_size -= 2;
-        dib_header.LUINT16("Halftoning algorithm"); dib_size -= 2;
-        dib_header.LUINT32("Halftoning parameter 1"); dib_size -= 4;
-        dib_header.LUINT32("Halftoning parameter 2"); dib_size -= 4;
-        dib_header.LUINT32("Color table encoding"); dib_size -= 4;
-        dib_header.LUINT32("Application defined identifier"); dib_size -= 4;
-      }
-      
-      if( dib_size > 0 ) { dib_header.Other("Other Data", dib_size ); }
-    }
-    else if( dib_size > 0 )
+    if( dib_size > 0 )
     {
-      dib_header.Other("Other Data", dib_size );
+      dib_header.UINT32("Red Color Bits"); dib_size -= 4;
+      dib_header.UINT32("Green Color Bits"); dib_size -= 4;
+      dib_header.UINT32("Blue Color Bits"); dib_size -= 4;
+      dib_header.UINT32("Alpha Color Bits"); dib_size -= 4;
+      colorMask = true;
     }
+
+    if( dib_size > 0 )
+    {
+      dib_header.LUINT32("Color space type"); dib_size -= 4;
+
+      dib_header.Other("Color End points", 36); dib_size -= 36;
+
+      dib_header.LUINT32("Red Gamma"); dib_size -= 4;
+      dib_header.LUINT32("Green Gamma"); dib_size -= 4;
+      dib_header.LUINT32("Blue Gamma"); dib_size -= 4;
+    }
+
+    if( dib_size > 0 )
+    {
+      dib_header.LUINT32("Intent"); dib_size -= 4;
+      dib_header.LUINT32("Profile Data Offset"); dib_size -= 4;
+      dib_header.LUINT32("Profile Size"); dib_size -= 4;
+      dib_header.LUINT32("Reserved"); dib_size -= 4;
+    }
+      
+    if( dib_size > 0 ) { dib_header.Other("Other Data", dib_size ); }
 
     headers[1] = dib_header;
 
@@ -112,7 +138,14 @@ public class BMP extends Window.Window implements JDEventListener
     
     JDNode data = new JDNode( "Picture Data", 3 );
     
-    for( int i = 1; i <= height; i++ ) { data.add( new JDNode( "line #" + i + ".h", ( i + 3 ) ) ); }
+    if( TopToBottom )
+    {
+      for( int i = 1, ln = 4; i <= height; i++ ) { data.add( new JDNode( "line #" + i + ".h", ln++ ) ); }
+    }
+    else
+    {
+      for( int i = height, ln = 4; i > 0; i-- ) { data.add( new JDNode( "line #" + i + ".h", ln++ ) ); }
+    }
 
     root.add( data ); Virtual.setVisible(false); tools.update();
 
@@ -308,7 +341,8 @@ public class BMP extends Window.Window implements JDEventListener
   {
     "<html>The length of the DIB header. The DIB has optional settings and is variable in length.</html>",
     "<html>The bitmap width in pixels. It is used to know the end of each line in the color data.</html>",
-    "<html>The bitmap height in pixels. It is used to know where the end of the color data is.</html>",
+    "<html>The bitmap height in pixels. It is used to know where the end of the color data is.<br /><br />" +
+    "If height is negative, then the picture lines go top to bottom. If height is positive, then the picture lines go bottom to top.</html>",
     "<html>The number of color planes. Number of BMP pictures in file. Never used. It should always be set 1.</html>",
     "<html>The number of bits per pixel, which is the color depth of the image. Typical values are 1, 4, 8, 16, 24 and 32.<br /><br />" +
     "The most typical bit depth used is 24. Meaning each color is Red, Green, Blue per pixel.</html>",
@@ -319,27 +353,42 @@ public class BMP extends Window.Window implements JDEventListener
     "<tr><td>1</td><td>Run-length encoding 8-bit/pixel bitmaps.</td></tr>" +
     "<tr><td>2</td><td>Run-length encoding 4-bit/pixel bitmaps.</td></tr>" +
     "<tr><td>3</td><td>No Compression. Uses Red, Green, Blue, Alpha per 32-bit/pixel.</td></tr>" +
-    "<tr><td>4</td><td>The image is a JPEG image.</td></tr>" +
-    "<tr><td>5</td><td>The image is a PNG image.</td></tr>" +
-    "<tr><td>11</td><td>No compression. Uses CMYK Subtractive colors.</td></tr>" +
-    "<tr><td>12</td><td>Run-length encoding. Uses CMYK Subtractive colors per 8-bit/pixel.</td></tr>" +
-    "<tr><td>13</td><td>Run-length encoding. Uses CMYK Subtractive colors per 4-bit/pixel.</td></tr>" +
+    "<tr><td>4</td><td>Specifies that the image is compressed using the JPEG file Interchange Format. JPEG compression trades off compression against loss; it can achieve a compression ratio of 20:1 with little noticeable loss.</td></tr>" +
+    "<tr><td>5</td><td>Specifies that the image is compressed using the PNG file Interchange Format.</td></tr>" +
     "</table></html>",
     "<html>This is the size of the bitmap without the headers; a dummy 0 can be given for regular Red, Green, Blue per 24-bit/pixel bitmaps.</html>",
     "<html>The horizontal resolution of the image. (pixel per metre, signed integer).</html>",
     "<html>The vertical resolution of the image. (pixel per metre, signed integer).</html>",
-    "<html>The number of colors in the color palette, or 0 to default to 2^n.</html>",
-    "<html>The number of important colors used, or 0 when every color is important; generally ignored.</html>",
-    "<html>An enumerated value specifying the units for the horizontal and vertical resolutions (offsets 38 and 42). The only defined value is 0, meaning pixels per metre.</html>",
-    "<html>Padding is ignored and should be zero.</html>",
-    "<html>An enumerated value indicating the direction in which the bits fill the bitmap. The only defined value is 0, meaning the origin is the lower-left corner. Bits fill from left-to-right, then bottom-to-top.<br /><br />" +
-    "Note that Windows bitmaps (which don't include this field) can also specify an upper-left origin (bits fill from left-to-right, then top-to-bottom) by using a negative value for the image height</html>",
-    "<html>An enumerated value indicating a halftoning algorithm that should be used when rendering the image.</html>",
-    "<html>Halftoning parameter 1 (offset 64) is the percentage of error damping. 100 indicates no damping. 0 indicates that errors are not diffused.</html>",
-    "<html>Halftoning parameters 1 and 2 (offsets 64 and 68, respectively) represent the X and Y dimensions, in pixels, respectively, of the halftoning pattern used.</html>",
-    "<html>An enumerated value indicating the color encoding for each entry in the color table. The only defined value is 0, indicating RGB.</html>",
-    "<html>An application-defined identifier. Not used for image rendering.</html>",
-    "<html>Unknown settings.</html>"
+    "<html>The number of color indexes in the color table that are actually used by the bitmap, or 0 to default to 2^n.</html>",
+    "<html>The number of color that need to be read in color table, for displaying the bitmap. If this value is zero, all colors are read from start to end of color table.</html>",
+    "<html>Specifies bits used, for red color value. Typically this is set 00 00 FF 00.<br /><br />" +
+    "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of 00 00 FF 00 is 00 00 FF.<br /><br >" +
+    "The bytes are then flipped in little-endian byte order as FF 00 00 meaning the first byte is 0 to 255 Red.<br /><br /><hr /><br />" +
+    "This is useful for 16 bit's per color with no color table. As we can specify 00 F8 00 00 making Red 5 bit's big.<br /><br />" +
+    "The first 16 bits of 00 F8 00 00 is 00 F8. In little-endian byte order it is F8 00 = 11111 00000000000 binary. Making the first 5 binary digits 0 to 15 red color value.</html>",
+    "<html>Specifies bits used, for green color value. Typically this is set 00 FF 00 00.<br /><br />" +
+    "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of 00 00 FF 00 is 00 00 FF.<br /><br >" +
+    "The bytes are then flipped in little-endian byte order as 00 FF 00 meaning the second byte is 0 to 255 green.<br /><br /><hr /><br />" +
+    "This is useful for 16 bit's per color with no color table. As we can specify E0 07 00 00 making green 6 bit's big.<br /><br />" +
+    "The first 16 bits of E0 07 00 00 is E0 07. In little-endian byte order it is 07 E0 = 00000 11111 00000 binary. Making the mid 6 binary digits 0 to 31 green color value.</html>",
+    "<html>Specifies bits used, for green color value. Typically this is set FF 00 00 00.<br /><br />" +
+    "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of FF 00 00 00 is FF 00 00.<br /><br >" +
+    "The bytes are then flipped in little-endian byte order as 00 00 FF meaning the last byte is 0 to 255 blue.<br /><br /><hr /><br />" +
+    "This is useful for 16 bit's per color with no color table. As we can specify 1F 00 00 00 making blue 5 bit's big.<br /><br />" +
+    "The first 16 bits of 1F 00 00 00 is 1F 00. In little-endian byte order it is 00 1F = 0000000000 11111 binary. Making the last 5 binary digits 0 to 15 blue color value.</html>",
+    "<html>Specifies bits used, for transparent (alpha) color value. Typically this is set 00 00 00 FF hex meaning 0 to 255 byte.<br /><br />" +
+    "If the number of bits we are using for each pixel color is 32, We then read the first 32 bits of FF 00 00 00 is FF 00 00 00.<br /><br >" +
+    "The bytes are then flipped in little-endian byte order as 00 00 00 FF meaning the last byte is 0 to 255 Alpha, for RGBA color.<br /><br /><hr /><br />" +
+    "This is useful for 16 bit's per color with no color table. As we can make Red, green, and blue 5 bits each leaving us one bit for visible, or invisible pixels.</html>",
+    "<html>Color space type.</html>",
+    "<html>Color Space endpoints.</html>",
+    "<html>Red Gamma.</html>",
+    "<html>Green Gamma.</html>",
+    "<html>Blue Gamma.</html>",
+    "<html>Rendering intent.</html>",
+    "<html>Offset to the start of the profile data.</html>",
+    "<html>Size, in bytes, of embedded profile data.</html>",
+    "<html>This member has been reserved. Its value should be set to zero.</html>"
   };
 
   public void DIBInfo( int el )
@@ -366,13 +415,16 @@ public class BMP extends Window.Window implements JDEventListener
     {
       info( "<html>The color value is a color number to use from the color table. The color table can only store Red, Green, Blue, colors.</html>" );
     }
-    
-    //Otherwise we have three different color types.
-    
-    else if( pixel_size == 2 )
+
+    //Check if the picture uses an specialized color type mask.
+
+    else if( colorMask )
     {
-      info( "<html>The 16 bit number is divided up into Red 5-bit, Green 6-bit, Blue 5-bit. The colors Red, and Blue have a range of 0 to 31, and green has a range of 0, or 63.</html>" );
+      info( "<html>The DIB header specifies the number of bit's to use for each RGB color.<br /><br />" +
+      "Goto the DIB header, and click on Red Color Bits, and the other colors for a detailed description.</html>" );
     }
+    
+    //Otherwise we have a few different default graphics color types.
 
     else if( pixel_size == 3 )
     {
