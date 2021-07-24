@@ -13,7 +13,6 @@ public class BMP extends Window.Window implements JDEventListener
   private int compressMode = 0;
   private boolean runLen = false;
   private boolean colorTable = false;
-  private boolean colorMask = false;
   private boolean topToBottom = false;
 
   //If we are using run length compression we have to read each line. As the line length may not all be the same.
@@ -92,7 +91,6 @@ public class BMP extends Window.Window implements JDEventListener
       dib_header.UINT32("Green Color Bits"); dib_size -= 4;
       dib_header.UINT32("Blue Color Bits"); dib_size -= 4;
       dib_header.UINT32("Alpha Color Bits"); dib_size -= 4;
-      colorMask = true;
     }
 
     if( dib_size > 0 )
@@ -168,7 +166,7 @@ public class BMP extends Window.Window implements JDEventListener
     {
       ds.setDescriptor(headers[(int)e.getArg(0)]);
 
-      if( e.getArg(0) == 2 ) { info("The color table stores RGB colors only. Each color is addressable by number of bit's per pixel value."); }
+      if( e.getArg(0) == 2 ) { info( "<html>The color table stores standard RGB colors only. Each color is addressable by number of bit's per pixel value.</html>" ); }
     }
 
     else if( e.getArg(0) == 3 )
@@ -187,8 +185,7 @@ public class BMP extends Window.Window implements JDEventListener
         }
       } catch( Exception er ) { }
 
-      info("The color array that creates the picture. Most bit maps are RED, Green, Blue color per 24-bit/pixel.<br /><br />" +
-      "In some cases when there is a color table then the value is used for which color in the color table to use."); ds.clear();
+      info( "<html>The color array creates the picture one line at a time per pixel.<br /><br />" + pixelArray + "</html>" ); ds.clear();
     }
 
     //Read an line from the picture.
@@ -317,10 +314,33 @@ public class BMP extends Window.Window implements JDEventListener
     "<html>This is the size of the bitmap file.</html>",
     "<html>Reserved, for future use. Should always be set 0.</html>",
     "<html>Reserved, for future use. Should always be set 0.</html>",
-    "<html>This is the location to the pixel color data.<br /><br />" +
-    "The DIB header specifies the number of bits each pixel is. The default is generally Red, Green, Blue per 24-bits/pixel.<br /><br />" +
-    "It is also important to check if the picture uses compassion setting other than 0 in DIB header, for if it uses subtractive colors instead of reg, green blue, or each color starts with a byte specifying a run length using run length compression.</html>"
+    "<html>This is the location to the pixel color data.</html>"
   };
+
+  //Bitmap color basics.
+
+  public static final String pixelArray = "The DIB header specifies the number of bits each pixel color is. The default is generally standard Red, Green, Blue = 24-bits/per pixel (Compression mode 0).<br /><br />" +
+  "It is also important to check the compassion setting in the DIB header, for if it uses a set number of bits for Red, green, blue (Compression mode 3).<br /><br /><hr /><br />" +
+  "If a color table is present, then The default is standard Red, Green, Blue 24-bits/per pixel, and also, Compression mode 3 is ignored and acts as Compression mode 0.<br /><br />" +
+  "Each color in the color table is 32 bit's long and uses the three first bytes as standard Reg, green, blue color.<br /><br />" +
+  "The number of bits we are using for each color is read as a number for which color we wish to use from the color table for a pixel color.";
+
+  //Run length compression explained.
+
+  public static final String runLength = "Bit map uses run-length compression. It can only be used with a standard RGB color table and 4, or 8 bits per pixel.<br /><br />" +
+  "Compression mode 1 uses 8 bits per pixel with a color table. The first byte is how many times the color is used in a row along the line, then the next byte is which color from the color table.<br /><br />" +
+  "Compression mode 2 uses 4 bits per pixel with a color table. The first byte is how many times the color is used in a row along the line, then the next byte is tow colors from the color table.<br /><br />" +
+  "The 4-bit version alternates between the two colors unless you set both 4 bits in the byte to the same color.<br /><br /><hr /><br />" +
+  "Any run length that is 0 in size uses the next byte as a command.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Code</td><td>Use</td></tr>" +
+  "<tr><td>00</td><td>End of line.</td></tr>" +
+  "<tr><td>01</td><td>End of bitmap.</td></tr>" +
+  "<tr><td>02</td><td>The next byte is read as the number of lines to skip, and the next byte is read for the starting position on that new line.</td></tr>" +
+  "</table><br />" +
+  "Command 02 assumes that the same colors of the current line continue for the number of lines skipped.<br /><br />" +
+  "Any Command higher than 02 is used as the number of pixel colors to read.<br /><br />" +
+  "In 4 bits per pixel, we divide this number by 2 as each byte is two colors. Also, if the last color that is read is not an even position, it is padded with an extra byte.";
 
   public void BMPInfo( int el )
   {
@@ -356,7 +376,7 @@ public class BMP extends Window.Window implements JDEventListener
     "<tr><td>4</td><td>Specifies that the image is compressed using the JPEG file Interchange Format. JPEG compression trades off compression against loss; it can achieve a compression ratio of 20:1 with little noticeable loss.</td></tr>" +
     "<tr><td>5</td><td>Specifies that the image is compressed using the PNG file Interchange Format.</td></tr>" +
     "</table></html>",
-    "<html>This is the size of the bitmap without the headers; a dummy 0 can be given for regular Red, Green, Blue per 24-bit/pixel bitmaps.</html>",
+    "<html>This is the size of the bitmap without the headers.</html>",
     "<html>The horizontal resolution, in pixels-per-meter, of the target device for the bitmap.</html>",
     "<html>The vertical resolution, in pixels-per-meter, of the target device for the bitmap.</html>",
     "<html>The number of colors in the color table that are actually used by the bitmap, or 0 to default to all colors.</html>",
@@ -397,8 +417,7 @@ public class BMP extends Window.Window implements JDEventListener
     if( el < 0 )
     {
       info( "<html>The first value read is the DIB header size.<br /><br />" +
-      "The DIB header can end at width and height, or be longer in size and use more settings and properties that are read in series.<br /><br />" +
-      "The settings go in order, and ends at size of the DIB header.</html>" );
+      "The DIB header can end at width and height settings, or can be made longer in size to use more settings and properties that are read in series.</html>" );
     }
     else
     {
@@ -410,31 +429,39 @@ public class BMP extends Window.Window implements JDEventListener
 
   public void PixInfo( int el )
   {
+    //Check if bit map is using run length compression.
+
+    if( runLen ) { info( runLength ); }
+
     //Check if there is a color table.
 
-    if( colorTable )
+    else if( colorTable )
     {
-      info( "<html>The color value is a color number to use from the color table. The color table can only store Red, Green, Blue, colors.</html>" );
+      info( "<html>The color value is a color number to use from the color table. The color table can only store standard Red, Green, Blue, colors.</html>" );
     }
 
     //Check if the picture uses an specialized color type mask.
 
-    else if( colorMask && compressMode == 3 )
+    else if( compressMode == 3 )
     {
-      info( "<html>The DIB header specifies the number of bit's to use for each RGB color.<br /><br />" +
-      "Goto the DIB header, and click on Red Color Bits, and the other colors for a detailed description.</html>" );
+      info( "<html>The DIB header specifies the number of bits to use for each RGB color.<br /><br />" +
+      "Goto the DIB header, and click on Red Color bits and the other colors for a detailed description.<br /><br /><hr /><br />" +
+      "Note that the bytes are in little-endian order, meaning an 11-bit pixel color E0 07 is actually 07 E0 in reverse byte order.<br /><br />" +
+      "Lastly, the first 11 bits of 07E0 in binary is 00000111111. This is important to read the correct bits that are set for each color in the DIB header.</html>" );
     }
     
     //Otherwise we have a few different default graphics color types.
 
     else if( pixel_size == 3 )
     {
-      info( "<html>The 24 bit number is divided up into bits of 8, for Red, Green, Blue color. Each color has a shade range of 0 to 255.</html>" );
+      info( "<html>The 3 bytes are standard Red, Green, Blue color. Each color has a shade range of 0 to 255.<br /><br />" +
+      "Note that the bytes are in little-endian order, meaning blue ends up being the first byte in reverse byte order then green and red.</html>" );
     }
 
     else if( pixel_size == 4 )
     {
-      info( "<html>The 4 bytes are Red, Green, Blue, Alpha color. Each color has a shade range of 0 to 255.</html>" );
+      info( "<html>The 4 bytes are standard Red, Green, Blue, Alpha color. Each color has a shade range of 0 to 255.<br /><br />" +
+      "Note the bytes are in little-endian order, meaning blue ends up being the first byte in reverse byte order then green, red, and finally Alpha.</html>" );
     }
   }
 
@@ -442,6 +469,7 @@ public class BMP extends Window.Window implements JDEventListener
 
   public void ColorTableInfo( int el )
   {
-    info( "<html>The first three bytes are Red, Green, Blue color. The last byte is reserved, for future use.</html>" );
+    info( "<html>The 3 bytes are standard Red, Green, Blue color. Each color has a shade range of 0 to 255. The last byte is reserved, for future use.<br /><br />" +
+    "The bytes are in little-endian byte order, meaning blue ends up being the first byte in reverse byte order then green, and red.</html>" );
   }
 }
