@@ -38,83 +38,83 @@ public class BMP extends Window.Window implements JDEventListener
 
     //Begin reading the BMP header.
 
-    Descriptor bmp_header = new Descriptor( file ); headers[0] = bmp_header; bmp_header.setEvent( this::BMPInfo );
+    Descriptor bmpHeader = new Descriptor( file ); headers[0] = bmpHeader; bmpHeader.setEvent( this::BMPInfo );
 
     JDNode BHeader = new JDNode("BMP Header.h", 0); root.add( BHeader );
 
-    bmp_header.String8("Signature", 2);
-    bmp_header.LUINT32("Size of picture in bytes.");
-    bmp_header.LUINT16("Reserved");
-    bmp_header.LUINT16("Reserved");
-    bmp_header.LUINT32("Pixel colors location"); colorData = (int)bmp_header.value; linePos = colorData;
+    bmpHeader.String8("Signature", 2);
+    bmpHeader.LUINT32("Size of picture in bytes.");
+    bmpHeader.LUINT16("Reserved");
+    bmpHeader.LUINT16("Reserved");
+    bmpHeader.LUINT32("Pixel colors location"); colorData = (int)bmpHeader.value; linePos = colorData;
 
     //Read DIB header.
 
-    Descriptor dib_header = new Descriptor( file ); headers[1] = dib_header; dib_header.setEvent( this::DIBInfo );
+    Descriptor dibHeader = new Descriptor( file ); headers[1] = dibHeader; dibHeader.setEvent( this::DIBInfo );
 
     JDNode DHeader = new JDNode("DIB Header.h", 1); root.add( DHeader );
 
-    dib_header.LUINT32("Size of DIB header"); int dib_size = (int)dib_header.value; dib_size -= 4;
+    dibHeader.LUINT32("Size of DIB header"); int dibSize = (int)dibHeader.value; dibSize -= 4;
 
-    if( dib_size == 8 )
+    if( dibSize == 8 )
     {
-      dib_header.LUINT16("Width in pixels"); width = (int)dib_header.value; dib_size -= 2;
-      dib_header.LINT16("Height in pixels"); height = (int)dib_header.value; dib_size -= 2;
+      dibHeader.LUINT16("Width in pixels"); width = (int)dibHeader.value; dibSize -= 2;
+      dibHeader.LINT16("Height in pixels"); height = (int)dibHeader.value; dibSize -= 2;
     }
     else
     {
-      dib_header.LUINT32("Width in pixels"); width = (int)dib_header.value; dib_size -= 4;
-      dib_header.LINT32("Height in pixels"); height = (int)dib_header.value; dib_size -= 4;
+      dibHeader.LUINT32("Width in pixels"); width = (int)dibHeader.value; dibSize -= 4;
+      dibHeader.LINT32("Height in pixels"); height = (int)dibHeader.value; dibSize -= 4;
     }
 
     if( height < 0 ) { height = -height; topToBottom = true; }
     
-    dib_header.LUINT16("The number of color planes"); dib_size -= 2;
-    dib_header.LUINT16("The number of bits per pixel"); pixel_size = ((short)dib_header.value)/8f; dib_size -= 2;
+    dibHeader.LUINT16("The number of color planes"); dibSize -= 2;
+    dibHeader.LUINT16("The number of bits per pixel"); pixel_size = ((short)dibHeader.value)/8f; dibSize -= 2;
 
-    if( dib_size > 0 )
+    if( dibSize > 0 )
     {
-      dib_header.LUINT32("The compression method being used"); compressMode = (int)dib_header.value; dib_size -= 4;
+      dibHeader.LUINT32("The compression method being used"); compressMode = (int)dibHeader.value; dibSize -= 4;
 
       runLen = compressMode == 1 || compressMode == 2 || compressMode == 12 || compressMode == 13;
 
-      dib_header.LUINT32("The size of the image"); dib_size -= 4;
-      dib_header.LUINT32("Horizontal resolution"); dib_size -= 4;
-      dib_header.LUINT32("Vertical resolution"); dib_size -= 4;
-      dib_header.LUINT32("The number of colors in the picture"); dib_size -= 4;
-      dib_header.LUINT32("The number of important colors used"); dib_size -= 4;
+      dibHeader.LUINT32("The size of the image"); dibSize -= 4;
+      dibHeader.LUINT32("Horizontal resolution"); dibSize -= 4;
+      dibHeader.LUINT32("Vertical resolution"); dibSize -= 4;
+      dibHeader.LUINT32("The number of colors in the picture"); dibSize -= 4;
+      dibHeader.LUINT32("The number of important colors used"); dibSize -= 4;
     }
 
-    if( dib_size > 0 )
+    if( dibSize > 0 )
     {
-      dib_header.UINT32("Red Color Bits"); dib_size -= 4;
-      dib_header.UINT32("Green Color Bits"); dib_size -= 4;
-      dib_header.UINT32("Blue Color Bits"); dib_size -= 4;
-      dib_header.UINT32("Alpha Color Bits"); dib_size -= 4;
+      dibHeader.UINT32("Red Color Bits"); dibSize -= 4;
+      dibHeader.UINT32("Green Color Bits"); dibSize -= 4;
+      dibHeader.UINT32("Blue Color Bits"); dibSize -= 4;
+      dibHeader.UINT32("Alpha Color Bits"); dibSize -= 4;
     }
 
-    if( dib_size > 0 )
+    if( dibSize > 0 )
     {
-      dib_header.LUINT32("Color space type"); dib_size -= 4;
+      dibHeader.LUINT32("Color space type"); dibSize -= 4;
 
-      dib_header.Other("Color End points", 36); dib_size -= 36;
+      dibHeader.Other("Color End points", 36); dibSize -= 36;
 
-      dib_header.LUINT32("Red Gamma"); dib_size -= 4;
-      dib_header.LUINT32("Green Gamma"); dib_size -= 4;
-      dib_header.LUINT32("Blue Gamma"); dib_size -= 4;
+      dibHeader.LUINT32("Red Gamma"); dibSize -= 4;
+      dibHeader.LUINT32("Green Gamma"); dibSize -= 4;
+      dibHeader.LUINT32("Blue Gamma"); dibSize -= 4;
     }
 
-    if( dib_size > 0 )
+    if( dibSize > 0 )
     {
-      dib_header.LUINT32("Intent"); dib_size -= 4;
-      dib_header.LUINT32("Profile Data Offset"); dib_size -= 4;
-      dib_header.LUINT32("Profile Size"); dib_size -= 4;
-      dib_header.LUINT32("Reserved"); dib_size -= 4;
+      dibHeader.LUINT32("Intent"); dibSize -= 4;
+      dibHeader.LUINT32("Profile Data Offset"); dibSize -= 4;
+      dibHeader.LUINT32("Profile Size"); dibSize -= 4;
+      dibHeader.LUINT32("Reserved"); dibSize -= 4;
     }
       
-    if( dib_size > 0 ) { dib_header.Other("Other Data", dib_size ); }
+    if( dibSize > 0 ) { dibHeader.Other("Other Data", dibSize ); }
 
-    headers[1] = dib_header;
+    headers[1] = dibHeader;
 
     //If the DIB header does not end at the start of the image color data.
     //Then the image uses a list of colors per pixel.
@@ -202,9 +202,9 @@ public class BMP extends Window.Window implements JDEventListener
 
         file.Events = false;
 
-        boolean end = false;
-        int rl = 0;
-        long t = 0;
+        boolean end = false; //End of line command.
+        int rl = 0; //Used to check if run length 0 before adding data descriptor description.
+        long t = 0; //Temporary position.
 
         while( curLine < line )
         {
@@ -276,8 +276,6 @@ public class BMP extends Window.Window implements JDEventListener
         }
 
         file.Events = true;
-
-        if( lines[line] != null ) { ds.setDescriptor(lines[line]); } else { info("<html>This line was skipped.</html>"); ds.clear(); }
       }
 
       //Else line width are all the same.
@@ -300,9 +298,11 @@ public class BMP extends Window.Window implements JDEventListener
 
           file.Events = true;
         }
-        
-        ds.setDescriptor(lines[line]);
       }
+
+      //Display the read line.
+
+      if( lines[line] != null ) { ds.setDescriptor(lines[line]); } else { info("<html>This line was skipped.</html>"); ds.clear(); }
     }
   }
 
@@ -365,7 +365,7 @@ public class BMP extends Window.Window implements JDEventListener
     "If height is negative, then the picture lines go top to bottom. If height is positive, then the picture lines go bottom to top.</html>",
     "<html>The number of color planes. Number of BMP pictures in file. Never used. It should always be set 1.</html>",
     "<html>The number of bits per pixel, which is the color depth of the image. Typical values are 1, 4, 8, 16, 24 and 32.<br /><br />" +
-    "The most typical bit depth used is 24. Meaning each color is Red, Green, Blue per pixel.</html>",
+    "The most typical bit depth used is 24. Meaning each color is standard Red, Green, Blue per pixel.</html>",
     "<html>the compression method being used.<br /><br >" +
     "<table border=\"1\">" +
     "<tr><td>Value</td><td>Compression method.</td></tr>" +
