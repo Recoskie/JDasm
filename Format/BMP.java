@@ -290,14 +290,19 @@ public class BMP extends Window.Window implements JDEventListener
           {
             file.seek( colorData + (int)(line * pixel_size * width) ); Descriptor pixels = new Descriptor(file); pixels.setEvent( this::PixInfo );
 
-            for( int i = 1; i <= width; i++ ) { pixels.Other("pixel color #" + i + "",(int)pixel_size); }
+            int closestByte = (int)Math.ceil(pixel_size), pxInByte = (int)( 1 / ( pixel_size - Math.floor(pixel_size) ) );
+
+            for( int i = 1; i <= width; i += pxInByte )
+            {
+              pixels.Other( "pixel color #" + i + "", closestByte );
+            }
 
             lines[line] = pixels;
           }
           catch( Exception er ) { }
-
-          file.Events = true;
         }
+
+        file.Events = true;
       }
 
       //Display the read line.
@@ -375,27 +380,29 @@ public class BMP extends Window.Window implements JDEventListener
     "<tr><td>3</td><td>No Compression. Picture uses no color table. The specified number of bits for RED, Green, Blue, Alpha is used from the DIB header.</td></tr>" +
     "<tr><td>4</td><td>Specifies that the image is compressed using the JPEG file Interchange Format. JPEG compression trades off compression against loss; it can achieve a compression ratio of 20:1 with little noticeable loss.</td></tr>" +
     "<tr><td>5</td><td>Specifies that the image is compressed using the PNG file Interchange Format.</td></tr>" +
-    "</table></html>",
+    "</table><br />" +
+    "In the case of compression mode 3, which lets you use nonstandard bit ranges for each color, we have to divide standard red, green, blue 0 to 255 up by the number of selectable color values using the number of bits we have chosen.<br /><br />" +
+    "This is if you wish to display such a bitmap properly using graphics/video memory.</html>",
     "<html>This is the size of the bitmap without the headers.</html>",
     "<html>The horizontal resolution, in pixels-per-meter, of the target device for the bitmap.</html>",
     "<html>The vertical resolution, in pixels-per-meter, of the target device for the bitmap.</html>",
     "<html>The number of colors in the color table that are actually used by the bitmap, or 0 to default to all colors.</html>",
     "<html>The minium number of colors that need to be read in from the start of the color table, for displaying the bitmap.<br /><br />" +
     "If this value is zero, all colors are read from start to end of color table.</html>",
-    "<html>Specifies bits used, for red color value. Typically this is set 00 00 FF 00.<br /><br />" +
+    "<html>Specifies bits used for red color value. Typically this is set 00 00 FF 00.<br /><br />" +
     "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of 00 00 FF 00 is 00 00 FF.<br /><br >" +
-    "The bytes are then flipped in little-endian byte order as FF 00 00 meaning the first byte is 0 to 255 Red.<br /><br /><hr /><br />" +
-    "This is useful for 16 bit's per color with no color table. As we can specify 00 F8 00 00 making Red 5 bit's big.<br /><br />" +
-    "The first 16 bits of 00 F8 00 00 is 00 F8. In little-endian byte order it is F8 00 = 11111 00000000000 binary. Making the first 5 binary digits 0 to 15 red color value.</html>",
-    "<html>Specifies bits used, for green color value. Typically this is set 00 FF 00 00.<br /><br />" +
-    "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of 00 00 FF 00 is 00 00 FF.<br /><br >" +
-    "The bytes are then flipped in little-endian byte order as 00 FF 00 meaning the second byte is 0 to 255 green.<br /><br /><hr /><br />" +
-    "This is useful for 16 bit's per color with no color table. As we can specify E0 07 00 00 making green 6 bit's big.<br /><br />" +
+    "The bytes are then flipped in little-endian byte order as FF 00 00, meaning the first byte is 0 to 255 Red.<br /><br /><hr /><br />" +
+    "This is useful for 16 bits per color with no color table. As we can specify, 00 F8 00 00 making Red 5 bit's big.<br /><br />" +
+    "The first 16 bits of 00 F8 00 00 is 00 F8. In little-endian byte order it is F8 00 = 11111 00000000000 binary. Making the first 5 binary digits the 0 to 15 red color value.</html>",
+    "<html>Specifies bits used for green color value. Typically this is set 00 FF 00 00.<br /><br />" +
+    "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of 00 FF 00 00 is 00 FF 00.<br /><br >" +
+    "The bytes are then flipped in little-endian byte order as 00 FF 00, meaning the second byte is 0 to 255 green.<br /><br /><hr /><br />" +
+    "This is useful for 16 bits per color with no color table. As we can specify E0 07 00 00 making green 6 bit's big.<br /><br />" +
     "The first 16 bits of E0 07 00 00 is E0 07. In little-endian byte order it is 07 E0 = 00000 11111 00000 binary. Making the mid 6 binary digits 0 to 31 green color value.</html>",
-    "<html>Specifies bits used, for green color value. Typically this is set FF 00 00 00.<br /><br />" +
+    "<html>Specifies bits used for green color value. Typically this is set FF 00 00 00.<br /><br />" +
     "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of FF 00 00 00 is FF 00 00.<br /><br >" +
     "The bytes are then flipped in little-endian byte order as 00 00 FF meaning the last byte is 0 to 255 blue.<br /><br /><hr /><br />" +
-    "This is useful for 16 bit's per color with no color table. As we can specify 1F 00 00 00 making blue 5 bit's big.<br /><br />" +
+    "This is useful for 16 bits per color with no color table. As we can specify 1F 00 00 00 makings blue 5 bit's big.<br /><br />" +
     "The first 16 bits of 1F 00 00 00 is 1F 00. In little-endian byte order it is 00 1F = 0000000000 11111 binary. Making the last 5 binary digits 0 to 15 blue color value.</html>",
     "<html>Specifies bits used, for transparent (alpha) color value. Typically this is set 00 00 00 FF hex meaning 0 to 255 byte.<br /><br />" +
     "If the number of bits we are using for each pixel color is 32, We then read the first 32 bits of FF 00 00 00 is FF 00 00 00.<br /><br >" +
@@ -437,7 +444,28 @@ public class BMP extends Window.Window implements JDEventListener
 
     else if( colorTable )
     {
-      info( "<html>The color value is a color number to use from the color table. The color table can only store standard Red, Green, Blue, colors.</html>" );
+      //Pixel sizes smaller than a byte.
+
+      if( pixel_size == 0.125 )
+      {
+        info( "<html>Each byte is 8 pixel colors. A binary digit of 0 is color number 0 from the color table. A binary digit of 1 is color number 1 from the color table.<br /><br />" +
+        "The color table can only store standard Red, Green, Blue colors.</html>" );
+      }
+
+      //Pixel sizes smaller than a byte.
+
+      else if( pixel_size == 0.5 )
+      {
+        info( "<html>Each byte is 2 pixel colors. The first hex digit is the first 0 to 15 color, and the last hex digit is 0 to 15 color.<br /><br />" +
+        "The color table can only store standard Red, Green, Blue colors.</html>" );
+      }
+
+      //The other common sizes are a multiple of byte.
+
+      else
+      {
+        info( "<html>The color value is a color number to use from the color table. The color table can only store standard Red, Green, Blue, colors.</html>" );
+      }
     }
 
     //Check if the picture uses an specialized color type mask.
@@ -447,7 +475,9 @@ public class BMP extends Window.Window implements JDEventListener
       info( "<html>The DIB header specifies the number of bits to use for each RGB color.<br /><br />" +
       "Goto the DIB header, and click on Red Color bits and the other colors for a detailed description.<br /><br /><hr /><br />" +
       "Note that the bytes are in little-endian order, meaning an 11-bit pixel color E0 07 is actually 07 E0 in reverse byte order.<br /><br />" +
-      "Lastly, the first 11 bits of 07E0 in binary is 00000111111. This is important to read the correct bits that are set for each color in the DIB header.</html>" );
+      "Lastly, the first 11 bits of 07E0 in binary is 00000111111. This is important to read the correct bits that are set for each color in the DIB header.<br /><br /><hr /><br />" +
+      "To display bitmap images that use nonstandard bit ranges for each color, we have to divide standard red, green, blue 0 to 255 up by the number of selectable color values using the number of bits we have chosen.<br /><br />" +
+      "This is if you wish to display such a bitmap properly using graphics/video memory.</html>" );
     }
     
     //Otherwise we have a few different default graphics color types.
