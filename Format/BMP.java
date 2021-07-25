@@ -330,6 +330,13 @@ public class BMP extends Window.Window implements JDEventListener
   "Each color in the color table is 32 bit's long and uses the three first bytes as standard Reg, green, blue color.<br /><br />" +
   "The number of bits we are using for each color is read as a number for which color we wish to use from the color table for a pixel color.";
 
+  //Color masking info.
+
+  public static final String colorMask = "If there is a standard RGB color table, then compression mode 3 is ignored, and number of bits for each color is ignored in the DIB header.<br /><br />" +
+  "If there is no standard RGB color table and compression mode is 3, then Compression mode 3 lets you use nonstandard ranges for each color.<br /><br />" +
+  "The number of bits chosen for red, green, blue in the DIB header is used as a percentage out of 255. In the case of 4-bit red 0 to 15 value. Red 15 is 255, and Red 8 is 136.<br /><br />" +
+  "This is if you wish to display such a bitmap properly using graphics/video memory.";
+
   //Run length compression explained.
 
   public static final String runLength = "Bit map uses run-length compression. It can only be used with a standard RGB color table and 4, or 8 bits per pixel.<br /><br />" +
@@ -380,9 +387,7 @@ public class BMP extends Window.Window implements JDEventListener
     "<tr><td>3</td><td>No Compression. Picture uses no color table. The specified number of bits for RED, Green, Blue, Alpha is used from the DIB header.</td></tr>" +
     "<tr><td>4</td><td>Specifies that the image is compressed using the JPEG file Interchange Format. JPEG compression trades off compression against loss; it can achieve a compression ratio of 20:1 with little noticeable loss.</td></tr>" +
     "<tr><td>5</td><td>Specifies that the image is compressed using the PNG file Interchange Format.</td></tr>" +
-    "</table><br />" +
-    "In the case of compression mode 3, which lets you use nonstandard bit ranges for each color, we have to divide standard red, green, blue 0 to 255 up by the number of selectable color values using the number of bits we have chosen.<br /><br />" +
-    "This is if you wish to display such a bitmap properly using graphics/video memory.</html>",
+    "</table><br />" + colorMask,
     "<html>This is the size of the bitmap without the headers.</html>",
     "<html>The horizontal resolution, in pixels-per-meter, of the target device for the bitmap.</html>",
     "<html>The vertical resolution, in pixels-per-meter, of the target device for the bitmap.</html>",
@@ -393,21 +398,21 @@ public class BMP extends Window.Window implements JDEventListener
     "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of 00 00 FF 00 is 00 00 FF.<br /><br >" +
     "The bytes are then flipped in little-endian byte order as FF 00 00, meaning the first byte is 0 to 255 Red.<br /><br /><hr /><br />" +
     "This is useful for 16 bits per color with no color table. As we can specify, 00 F8 00 00 making Red 5 bit's big.<br /><br />" +
-    "The first 16 bits of 00 F8 00 00 is 00 F8. In little-endian byte order it is F8 00 = 11111 00000000000 binary. Making the first 5 binary digits the 0 to 15 red color value.</html>",
+    "The first 16 bits of 00 F8 00 00 is 00 F8. In little-endian byte order it is F8 00 = 11111 00000000000 binary. Making the first 5 binary digits the 0 to 15 red color value.<br /><br /><hr /><br />" + colorMask + "</html>",
     "<html>Specifies bits used for green color value. Typically this is set 00 FF 00 00.<br /><br />" +
     "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of 00 FF 00 00 is 00 FF 00.<br /><br >" +
     "The bytes are then flipped in little-endian byte order as 00 FF 00, meaning the second byte is 0 to 255 green.<br /><br /><hr /><br />" +
     "This is useful for 16 bits per color with no color table. As we can specify E0 07 00 00 making green 6 bit's big.<br /><br />" +
-    "The first 16 bits of E0 07 00 00 is E0 07. In little-endian byte order it is 07 E0 = 00000 11111 00000 binary. Making the mid 6 binary digits 0 to 31 green color value.</html>",
+    "The first 16 bits of E0 07 00 00 is E0 07. In little-endian byte order it is 07 E0 = 00000 11111 00000 binary. Making the mid 6 binary digits 0 to 31 green color value.<br /><br /><hr /><br />" + colorMask + "</html>",
     "<html>Specifies bits used for green color value. Typically this is set FF 00 00 00.<br /><br />" +
     "If the number of bits we are using for each pixel color is 24, We then read the first 24 bits of FF 00 00 00 is FF 00 00.<br /><br >" +
     "The bytes are then flipped in little-endian byte order as 00 00 FF meaning the last byte is 0 to 255 blue.<br /><br /><hr /><br />" +
     "This is useful for 16 bits per color with no color table. As we can specify 1F 00 00 00 makings blue 5 bit's big.<br /><br />" +
-    "The first 16 bits of 1F 00 00 00 is 1F 00. In little-endian byte order it is 00 1F = 0000000000 11111 binary. Making the last 5 binary digits 0 to 15 blue color value.</html>",
+    "The first 16 bits of 1F 00 00 00 is 1F 00. In little-endian byte order it is 00 1F = 0000000000 11111 binary. Making the last 5 binary digits 0 to 15 blue color value.<br /><br /><hr /><br />" + colorMask + "</html>",
     "<html>Specifies bits used, for transparent (alpha) color value. Typically this is set 00 00 00 FF hex meaning 0 to 255 byte.<br /><br />" +
     "If the number of bits we are using for each pixel color is 32, We then read the first 32 bits of FF 00 00 00 is FF 00 00 00.<br /><br >" +
     "The bytes are then flipped in little-endian byte order as 00 00 00 FF meaning the last byte is 0 to 255 Alpha, for RGBA color.<br /><br /><hr /><br />" +
-    "This is useful for 16 bit's per color with no color table. As we can make Red, green, and blue 5 bits each leaving us one bit for visible, or invisible pixels.</html>",
+    "This is useful for 16 bit's per color with no color table. As we can make Red, green, and blue 5 bits each leaving us one bit for visible, or invisible pixels.<br /><br /><hr /><br />" + colorMask + "</html>",
     "<html>Color space type.</html>",
     "<html>Color Space endpoints.</html>",
     "<html>Toned response curve for red. The first 16 bits are the unsigned integer value. The last 16 bits is the value after the decimal point.</html>",
