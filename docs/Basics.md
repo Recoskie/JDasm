@@ -791,7 +791,7 @@ Today such things do not matter anymore. Plus, it takes more CPU power to read s
 
 <br />
 
-<h1 id="Hfiles">Binary files, and some Other types of data.</h1>
+<h1 id="Hfiles">Binary files, and default hardware data types.</h1>
 
 All file formats have what you call headers, which are bytes that are read in series at the start of the file. They can be lengths byte 1, word 2, dword 4, or qword 8.
 
