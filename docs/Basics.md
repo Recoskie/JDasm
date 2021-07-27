@@ -865,7 +865,11 @@ The header defines the speed at each integer is given to the PCM (Pulse-code mod
 
 <br />
 
-An integer that is a dword is 32 binary digits giving a range of control 2^32-1. The value is the point to move the magnet in the speaker.
+We would also call this 10 hertz. We use metric to represent larger number like 1 kilo hertz would mean 1000 points a second.
+
+<br />
+
+An integer that is a dword is 32 binary digits gives a range of control 2^32-1. The value is the point to move the magnet in the speaker.
 
 <br />
 
@@ -877,25 +881,45 @@ The values reflect the time of each recorded position the magnet was in a microp
 
 <br />
 
-The speed at which each value is recorded is called the sample rate. Which is how many points we are recording in one second.
+The speed at which each value is recorded is called the sample rate in hertz. Which is how many points we are recording in one second.
 
 <br />
 
-The faster the sample rate. Then the more precise the audio reproduction is. Also, The bigger of an integer number we use, the more precise each point is for the position of the magnet in the speaker coil.
+The faster the sample rate, then the more precise the audio reproduction is. Also, The bigger of an integer number we use, the more precise each point is for the position of the magnet in the speaker coil.
 
 <br />
 
-This is how uncompressed audio works across systems. Thus generally, this is how audio is given as an audio stream at the system level. Similar to how Video memory works.
+Now lets say we wish to output two different audio signals to two different speakers. We specify to the PCM that we are using 2 audio channels.
 
 <br />
 
-In order for audio files to be playable, they must convert to the standard audio stream format. The same applies to pictures when we write them in video memory.
+Now normally a sample rate of 10 means 10 points per second. However, this time the PCM will read two points at a time. This means we need 20 points, for 10 points per second using 2 audio channels set in the PCM.
 
 <br />
 
-A bitmap is a lossless format as the colors are stored as they are in graphics. The audio file format type that stores uncompressed audio as it is at hardware level is called a wave audio file.
+There is no limit on how many audio channels you can have, but remember that when you generate an audio stream with two channels that every second point is the second audio channel.
+
+<br />
+
+This is how uncompressed audio works across all systems. Thus generally, this is how audio is given as an audio stream at system level. Similar to how Video memory works.
+
+<br />
+
+In order for audio files to be playable, they must convert to the standard PCM audio stream format. Then we set number of channels and sample rate.
+
+<br />
+
+The wave audio format does not have to convert format as it is wrote in raw PCM audio data format. The wave audio header specifies the points per second and number of bits for each point.
+
+<br />
+
+You can learn more about digital audio and the wave audio format viable <a href="http://www.topherlee.com/software/pcm-tut-wavformat.html">link</a>.
 
 <h2>Closing.</h2>
+
+Both wave audio files, and bitmaps require very little effort to play/display, or to create/modify. As they are stored in standard hardware format for both audio, or graphics.
+
+<br />
 
 Some of the basic things we can computationally do with the standard hardware formats graphics/audio.
 
