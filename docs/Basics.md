@@ -861,7 +861,7 @@ An audio file can consist of sizes byte 1, word 2, dword 4, qword 8 array.
 
 <br />
 
-The header defines the speed each integer is given to the PCM (Pulse-code modulation) device per second. A sample rate of 10 means 10 points per second.
+The header defines the speed at each integer is given to the PCM (Pulse-code modulation) device per second. A sample rate of 10 means 10 points per second.
 
 <br />
 
@@ -873,19 +873,27 @@ The easiest way to think about audio is that sound is movement (vibration). Thus
 
 <br />
 
-The values reflect the time of each recorded position the magnet was in a microphone. Allowing us to capture in time the movement and vibration of sound. The speed at which each value is recorded is called the sample rate.
+The values reflect the time of each recorded position the magnet was in a microphone. Allowing us to capture in time the movement and vibration of sound.
 
 <br />
 
-The faster the sample rate. Then the more precise the audio reproduction is. Anyway, this is how uncompressed audio works. Also, a bitmap is a lossless format as the colors are stored as they are in graphics.
+The speed at which each value is recorded is called the sample rate. Which is how many points we are recording in one second.
 
 <br />
 
-Thus generally, this is how audio is given as an audio stream at the system level. Similar to how Video memory works.
+The faster the sample rate. Then the more precise the audio reproduction is. Also, The bigger of an integer number we use, the more precise each point is for the position of the magnet in the speaker coil.
 
 <br />
 
-The audio format file type that stores uncompressed audio as it is at hardware level is called a wave audio file.
+This is how uncompressed audio works across systems. Thus generally, this is how audio is given as an audio stream at the system level. Similar to how Video memory works.
+
+<br />
+
+In order for audio files to be playable, they must convert to the standard audio stream format. The same applies to pictures when we write them in video memory.
+
+<br />
+
+A bitmap is a lossless format as the colors are stored as they are in graphics. The audio file format type that stores uncompressed audio as it is at hardware level is called a wave audio file.
 
 <h2>Closing.</h2>
 
