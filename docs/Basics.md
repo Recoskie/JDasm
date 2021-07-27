@@ -865,11 +865,11 @@ The header defines the speed at each integer is given to the PCM (Pulse-code mod
 
 <br />
 
-We would also call this 10 hertz. We use metric to represent larger number like 1 kilo hertz would mean 1000 points a second.
+We would also call this 10 hertz. We use metric to represent larger numbers like 1 kilo hertz would mean 1000 points a second.
 
 <br />
 
-An integer that is a dword is 32 binary digits gives a range of control 2^32-1. The value is the point to move the magnet in the speaker.
+An integer that is a dword (32 binary digits) gives a range of control 2^32-1. The value is the point to move the magnet in the speaker.
 
 <br />
 
@@ -905,7 +905,7 @@ This is how uncompressed audio works across all systems. Thus generally, this is
 
 <br />
 
-In order for audio files to be playable, they must convert to the standard PCM audio stream format. Then we set number of channels and sample rate.
+In order for audio files to be playable, they must convert to the standard PCM audio stream format. Then we set number of channels and sample rate in the PCM.
 
 <br />
 
