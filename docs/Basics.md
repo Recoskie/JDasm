@@ -829,7 +829,7 @@ Also, colors of light add together, so it is not hard to visualize the added col
 
 <h2>Video memory.</h2>
 
-A bitmap closely resembles video memory, which video memory is how graphics are done without a graphics card. The CPU writes red, green, blue values per pixel to the very last pixel of the display's resolution.
+A bitmap closely resembles video memory, which video memory is how graphics is done without a graphics card. The CPU writes red, green, blue values per pixel to the very last pixel of the display's resolution.
 
 <br />
 
@@ -849,11 +849,11 @@ In actuality, you can build an operating system that only does software-rendered
 
 <br />
 
-However, it is recommended to add Hardware accelerated graphics through a GPU by implementing the method calls that the GPU supports.
+However, it is recommended to add Hardware accelerated graphics through a GPU by implementing basic method calls on the GPU.
 
 <h2>Audio format.</h2>
 
-Audio is also another standard concept. It can be a bit confusing at first. It also does not change between systems much, just like video memory.
+Audio is also another standard format. It can be a bit confusing at first. It also does not change between systems, just like video memory.
 
 <br />
 
@@ -861,11 +861,11 @@ An audio file can consist of sizes byte 1, word 2, dword 4, qword 8 array.
 
 <br />
 
-The header defines the speed each integer is given to the PCM (Pulse-code modulation) device.
+The header defines the speed each integer is given to the PCM (Pulse-code modulation) device per second. A sample rate of 10 means 10 points per second.
 
 <br />
 
-Where dword is 32 binary digits giving a range of control 2^32-1, the value is the current that is given to the coil controlling the magnet to move further in or out by value.
+An integer that is a dword is 32 binary digits giving a range of control 2^32-1. The value is the point to move the magnet in the speaker.
 
 <br />
 
@@ -873,7 +873,7 @@ The easiest way to think about audio is that sound is movement (vibration). Thus
 
 <br />
 
-The values reflect the time of each recorded position the magnet was in the microphone. Allowing us to capture in time the movement and vibration of sound. The speed at which each value is recorded is called the sample rate.
+The values reflect the time of each recorded position the magnet was in a microphone. Allowing us to capture in time the movement and vibration of sound. The speed at which each value is recorded is called the sample rate.
 
 <br />
 
@@ -883,9 +883,13 @@ The faster the sample rate. Then the more precise the audio reproduction is. Any
 
 Thus generally, this is how audio is given as an audio stream at the system level. Similar to how Video memory works.
 
+<br />
+
+The audio format file type that stores uncompressed audio as it is at hardware level is called a wave audio file.
+
 <h2>Closing.</h2>
 
-Some of the basic things we can computationally do with the standard hardware formats.
+Some of the basic things we can computationally do with the standard hardware formats graphics/audio.
 
 <br />
 
@@ -901,7 +905,7 @@ Another file that is fun to read byte by byte. Is GIF pictures. <a href="http://
 
 <br />
 
-GIF picture stores which colors are used in the picture into an array. The array is then indexed by the color data section.
+GIF pictures store which colors are used in the picture into an array. The array is then indexed by the color data section.
 
 <br />
 

@@ -480,7 +480,7 @@ public class BMP extends Window.Window implements JDEventListener
       info( "<html>The DIB header specifies the number of bits to use for each RGB color.<br /><br />" +
       "Goto the DIB header, and click on Red Color bits and the other colors for a detailed description.<br /><br /><hr /><br />" +
       "Note that the bytes are in little-endian order, meaning an 11-bit pixel color E0 07 is actually 07 E0 in reverse byte order.<br /><br />" +
-      "Lastly, the first 11 bits of 07E0 in binary is 00000111111. This is important to read the correct bits that are set for each color in the DIB header.<br /><br /><hr /><br />" +
+      "Lastly, the first 16 bits of 07E0 in binary is 0000011111100000. This is important to read the correct bits that are set for each color in the DIB header.<br /><br /><hr /><br />" +
       "To display bitmap images that use nonstandard bit ranges for each color, we have to divide standard red, green, blue 0 to 255 up by the number of selectable color values using the number of bits we have chosen.<br /><br />" +
       "This is if you wish to display such a bitmap properly using graphics/video memory.</html>" );
     }
