@@ -119,7 +119,7 @@ public class WAV extends Window.Window implements JDEventListener
 
         try
         {
-          file.seek( samplePos ); Descriptor s = new Descriptor( file ); samples[(int)e.getArg(0) - 2] = s;
+          file.seek( samplePos ); Descriptor s = new Descriptor( file ); samples[(int)e.getArg(0) - 2] = s; s.setEvent( this::SampleInfo );
       
           for( int i = 0; i < sampleRate; i++ )
           {
@@ -147,22 +147,34 @@ public class WAV extends Window.Window implements JDEventListener
   {
     "<html>The WAV/RIFF header must start with RIFF = 52, 49, 46, 46.<br /><br />If it does not pass the signature test then the audio file is corrupted.</html>",
     "<html>File Size.</html>",
-    "<html>Wave signature. The RIFF header does supports other audio formats. Since this is an wave audio file it should always be wave signature.</html>",
+    "<html>The RIFF header does supports other audio formats.<br /><br />" +
+    "Since this is an wave audio file it should always be WAVE = 57, 41, 56, 45 signature.</html>",
     "<html>Marks the end of the file format type info.</html>",
     "<html>This is the length of the file format info.<br /><br />This is everything that came before \"fmt \", which marks the end of the file format type info.</html>",
-    "<html>Type of format (1 is PCM). This should not be set anything other than PCM.<br /><br />" +
-    "What is funny is that this is the only type setting. PCM is the standard way of playing audio on all digital devices.</html>",
-    "<html>Number of Channels. This is the number of audio outputs, for example stereo audio, or headphones use two audio channels for both the right and left ear.</html>",
-    "<html>This is the number of outputs that is given to each audio chanel per second.<br /><br />" +
+    "<html>This should always be set 1 meaning PCM audio format.<br /><br />" +
+    "PCM is the standard way of playing audio on all digital devices.</html>",
+    "<html>This is the number of audio outputs. Stereo audio, or headphones uses two audio channels for both the right, and left ear.</html>",
+    "<html>This is the number of outputs that is given to each audio channel per second.<br /><br />" +
     "The Common values are 44100 (CD), 48000 (DAT).<br /><br />" +
-    "Sample Rate = Number of Samples per second, or Hertz.</html>",
+    "Sample Rate = Number of Samples per second, or Hertz.<br /><br />" +
+    "A certain amount of points are needed in one second to be able to produce high frequency sounds per point in one second.<br /><br />" +
+    "You can set this to whatever you like, but you may loose the ability to produce certain sounds with a limited point space per second.</html>",
     "<html>This is the total size of one sample in one second.<br /><br />" +
-    "It is calculated as follows (SampleRate * BitsPerSample * Channels) / 8.</html>",
+    "It is calculated as follows (SampleRate * BitsPerSample * Channels) / 8.<br /><br />" +
+    "Bits per sample is generally in sizes 8, 16, 24, 32. In which 8 bit audio would be 8 bits per sample.<br /><br />" +
+    "Sample rate is how many points we are giving to each speaker channel per second.<br /><br />" +
+    "In the case of 8 bits PCM audio signal with 2 channels. Every two 8-bit points is read for channel 1, then channel 2.<br /><br />" +
+    "So number of sample points in one second is multiplied by number of channels and number of bits, for each sample point, then divided by 8 for actual size in bytes.</html>",
     "<html>This is the size of one sample point to all speaker channels." +
-    "It is calculated as follows (BitsPerSample * Channels) / 8.</html>",
-    "<html>The number of bits used as a value for each sample point.</html>",
+    "It is calculated as follows (BitsPerSample * Channels) / 8.<br /><br />" +
+    "Bits per sample is generally in sizes 8, 16, 24, 32. In which 8 bit audio would be 8 bits per sample point.<br /><br />" +
+    "In the case of a 8-bit audio signal with 2 channels. Every two 8-bit points is read for channel 1, then channel 2.<br /><br />" +
+    "Number of channels and number of bits are multiplied to find the size for one compete output to all speaker channels, then divided by 8 for actual size in bytes." +
+    "We can multiply this value by sample rate to find the size of each PCM sample in one second.</html>",
+    "<html>The number of bits used as a value for each sample point.<br /><br />" +
+    "Bits per sample is generally in sizes 8, 16, 24, 32. In which 8 bit audio would be 8 bits per sample point.</html>",
     "<html>Contains additional information about the track, comments, or artist.</html>",
-    "<html>Audio Data start signature.</html>",
+    "<html>Raw Hardware codded PCM Audio Data start signature.</html>",
     "<html>Size of Raw Audio Data.</html>"
   };
 
@@ -176,5 +188,11 @@ public class WAV extends Window.Window implements JDEventListener
     {
       info( WAVInfo[ ( el >= 11 && !opInfo ) ? el + 1 : el ] );
     }
+  }
+
+  public void SampleInfo( int el )
+  {
+    info("<html>This is an raw Audio sample given to the PCM device.<br /><br />"+
+    "We usually draw all these points on a graph, for each speaker channel.</html>");
   }
 }

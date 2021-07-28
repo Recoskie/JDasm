@@ -861,15 +861,15 @@ An audio file can consist of sizes byte 1, word 2, dword 4, qword 8 array.
 
 <br />
 
+An integer that is a dword (32 binary digits) gives a range of control 2^32-1. The value is the point to move the magnet in the speaker. We call this an sample.
+
+<br />
+
 The header defines the speed at each integer is given to the PCM (Pulse-code modulation) device per second. A sample rate of 10 means 10 points per second.
 
 <br />
 
 We would also call this 10 hertz. We use metric to represent larger numbers like 1 kilo hertz would mean 1000 points a second.
-
-<br />
-
-An integer that is a dword (32 binary digits) gives a range of control 2^32-1. The value is the point to move the magnet in the speaker.
 
 <br />
 
@@ -881,7 +881,7 @@ The values reflect the time of each recorded position the magnet was in a microp
 
 <br />
 
-The speed at which each value is recorded is called the sample rate in hertz. Which is how many points we are recording in one second.
+The speed at which each value is recorded is called the sample rate in hertz. Which is how many sample points we are recording in one second.
 
 <br />
 
@@ -897,7 +897,7 @@ Now normally a sample rate of 10 means 10 points per second. However, this time 
 
 <br />
 
-There is no limit on how many audio channels you can have, but remember that when you generate an audio stream with two channels that every second point is the second audio channel.
+There is no limit on how many audio channels you can have, and how high in quality you can go, but remember that when you generate an audio stream with two channels that every second point is the second audio channel. Also, with three audio channels every third point is the third audio channel and so on.
 
 <br />
 
@@ -905,7 +905,7 @@ This is how uncompressed audio works across all systems. Thus generally, this is
 
 <br />
 
-In order for audio files to be playable, they must convert to the standard PCM audio stream format. Then we set number of channels and sample rate in the PCM.
+In order for audio files to be playable, they must convert to the standard PCM audio. Then we set number of channels and sample rate, and sample integer size in the PCM.
 
 <br />
 
