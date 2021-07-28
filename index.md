@@ -49,9 +49,13 @@ Supports Unix/Linux binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod
 
 Supports .efi boot binaries and boot sector disassembly.
 
+## Picture formats.
+
 It also supports analyzing and editing BIT Map pictures.
 
-If you wish to contribute a Format. Then put it under the format folder.
+## Audio formats.
+
+It also supports analyzing and editing wave Audio files.
 
 # x86 Boot sectors.
 
