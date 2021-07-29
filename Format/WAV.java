@@ -16,6 +16,7 @@ public class WAV extends Window.Window implements JDEventListener
   private int sampleRate = 0;
   private int bitPerSample = 0;
   private int sampleSize = 0;
+  private int reData = 0;
   private int samplePoint = 0;
   private int dataSize = 0;
   private long dataPos = 0;
@@ -65,7 +66,7 @@ public class WAV extends Window.Window implements JDEventListener
     if( found )
     {
       wavHeader.Other("Data Signature", 4 );
-      wavHeader.LUINT32("Data Size"); dataSize = (int)wavHeader.value;
+      wavHeader.LUINT32("Data Size"); dataSize = (int)wavHeader.value; reData = dataSize % sampleSize;
 
       dataPos = file.getFilePointer();
 
@@ -73,11 +74,15 @@ public class WAV extends Window.Window implements JDEventListener
 
       JDNode Samples = new JDNode("Sample Array", 1);
 
-      int e = dataSize / sampleSize; samples = new Descriptor[e];
+      int e = dataSize / sampleSize; samples = new Descriptor[ reData != 0 ? e + 1 : e ];
       
       for( int i = 1; i <= e; i++ ) { Samples.add( new JDNode( "Sample sec #" + i + ".h", ( i + 1 ) ) ); }
 
-      root.add( Samples );
+      //Check if there is a remainder.
+
+      if( reData != 0 ) { Samples.add( new JDNode( "Sample sec #" + ( e + ( reData / (float)sampleSize ) ) + ".h", ( e + 2 ) ) ); }
+
+      root.add( Samples ); reData = reData == 0 ? sampleSize : reData;
     }
 
     //Decode the setup headers.
@@ -120,8 +125,10 @@ public class WAV extends Window.Window implements JDEventListener
         try
         {
           file.seek( samplePos ); Descriptor s = new Descriptor( file ); samples[(int)e.getArg(0) - 2] = s; s.setEvent( this::SampleInfo );
+
+          int size = samples.length == (int)e.getArg(0) - 1 ? reData / samplePoint : sampleRate; //The last sample is not always a full second.
       
-          for( int i = 0; i < sampleRate; i++ )
+          for( int i = 0; i < size; i++ )
           {
             for( int c = 1; c <= channels; c++ )
             {
@@ -165,12 +172,12 @@ public class WAV extends Window.Window implements JDEventListener
     "Sample rate is how many points we are giving to each speaker channel per second.<br /><br />" +
     "In the case of 8 bits PCM audio signal with 2 channels. Every two 8-bit points is read for channel 1, then channel 2.<br /><br />" +
     "So number of sample points in one second is multiplied by number of channels and number of bits, for each sample point, then divided by 8 for actual size in bytes.</html>",
-    "<html>This is the size of one sample point to all speaker channels." +
+    "<html>This is the number of bytes it takes to send one sample point to each speaker channel." +
     "It is calculated as follows (BitsPerSample * Channels) / 8.<br /><br />" +
     "Bits per sample is generally in sizes 8, 16, 24, 32. In which 8 bit audio would be 8 bits per sample point.<br /><br />" +
     "In the case of a 8-bit audio signal with 2 channels. Every two 8-bit points is read for channel 1, then channel 2.<br /><br />" +
     "Number of channels and number of bits are multiplied to find the size for one compete output to all speaker channels, then divided by 8 for actual size in bytes." +
-    "We can multiply this value by sample rate to find the size of each PCM sample in one second.</html>",
+    "This can be multiplied by sample rate to find the size of each PCM sample in one second.</html>",
     "<html>The number of bits used as a value for each sample point.<br /><br />" +
     "Bits per sample is generally in sizes 8, 16, 24, 32. In which 8 bit audio would be 8 bits per sample point.</html>",
     "<html>Contains additional information about the track, comments, or artist.</html>",
@@ -192,7 +199,7 @@ public class WAV extends Window.Window implements JDEventListener
 
   public void SampleInfo( int el )
   {
-    info("<html>This is an raw Audio sample given to the PCM device.<br /><br />"+
+    info("<html>This is the raw Audio data given to the PCM device.<br /><br />" +
     "We usually draw all these points on a graph, for each speaker channel.</html>");
   }
 }

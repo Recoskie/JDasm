@@ -897,7 +897,7 @@ Now normally a sample rate of 10 means 10 points per second. However, this time 
 
 <br />
 
-There is no limit on how many audio channels you can have, and how high in quality you can go, but remember that when you generate an audio stream with two channels that every second point is the second audio channel. Also, with three audio channels every third point is the third audio channel and so on.
+There is no limit on how many audio channels you can have, and how high in quality you can go, but remember that when you generate an audio stream with two channels that every second point is the second audio channel. Also, with three audio channels, then every third point is the third audio channel and so on.
 
 <br />
 
