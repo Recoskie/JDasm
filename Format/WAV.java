@@ -53,18 +53,23 @@ public class WAV extends Window.Window implements JDEventListener
     wavHeader.LUINT16("Bit per Sample"); bitPerSample = (short)wavHeader.value;
 
     long t = file.getFilePointer();
-    int data = 0;
-    boolean found = false;
 
-    for( ; data < 512; data++ )
+    //Check for a RIFF list specifying information about the track, comments, artists, and other.
+
+    file.read(4); if( file.toLInt() == 1414744396 )
     {
-      file.seek( t + data ); file.read(4); if( file.toLInt() == 1635017060 ) { data = (int)file.getFilePointer() - 4; found = true; break; }
+      opInfo = true; file.read(4); file.seek(t);
+
+      wavHeader.Other("Other data", file.toLInt() + 8 );
     }
 
-    file.seek( t ); if( found && data-t > 0 ) { opInfo = true; wavHeader.Other("Other data", (int)(data-t) ); }
+    //Check for data signature.
 
-    if( found )
+    t = file.getFilePointer(); file.read(4);
+
+    if( file.toLInt() == 1635017060 )
     {
+      file.seek( t );
       wavHeader.Other("Data Signature", 4 );
       wavHeader.LUINT32("Data Size"); dataSize = (int)wavHeader.value; reData = dataSize % sampleSize;
 
