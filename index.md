@@ -51,11 +51,11 @@ Supports .efi boot binaries and boot sector disassembly.
 
 ## Picture formats.
 
-It also supports analyzing and editing BIT Map pictures.
+Supports analyzing and editing BIT Map pictures.
 
 ## Audio formats.
 
-It also supports analyzing and editing wave Audio files.
+Supports analyzing and editing wave Audio files.
 
 # x86 Boot sectors.
 
