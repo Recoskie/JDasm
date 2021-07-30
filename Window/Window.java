@@ -254,7 +254,7 @@ public class Window
     {
       file.seekV( loc ); floc = file.getFilePointer();
     
-      if( disEnd != null ) { d = core.disASM_Code( disEnd ); }
+      if( disEnd != null ) { d = core.disASM_Code( disEnd, true ); }
       else
       {
         d = core.disASM_Code( core.codeSize(), crawl );
