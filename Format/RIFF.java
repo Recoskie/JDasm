@@ -162,7 +162,7 @@ public class RIFF extends Data implements JDEventListener
   {
     "<html>The RIFF header supports many video/audio formats.<br /><br />If it does not pass the signature test then the video/audio file is corrupted.</html>",
     "<html>The file size needs to be known, so that we know when we have reached the end of the file.<br /><br />" +
-    "The RIFF format is divided into parts using a 4 byte (character) name, and size of preceding data.<nr /><br />" +
+    "The RIFF format is divided into parts using a 4 byte (character) name, and size of preceding data.<br /><br />" +
     "We need to know when we reached the end of the file otherwise we will be reding undefined sections after the files end.</html>",
     "<html>This identifies the file format type. It determine how the named chunks of data are read.</html>"
   };
@@ -171,7 +171,7 @@ public class RIFF extends Data implements JDEventListener
   {
     if( el < 0 )
     {
-      info("<html>The RIFF header supports many video/audio formats. The first RIFF tag specifies the format type.</html>");
+      info("<html>The RIFF header supports many video/audio formats. The RIFF header specifies the format type.</html>");
     }
     else
     {
