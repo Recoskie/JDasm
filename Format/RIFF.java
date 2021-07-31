@@ -53,8 +53,8 @@ public class RIFF extends Data implements JDEventListener
 
       //This is the sub structure that is used for all data tags. 
 
-      Data.String8("Data type", 4); type = (String)Data.value;
-      Data.LUINT32("Data size"); tagSize = ((int)Data.value) & 0xFFFFFFFFl;
+      Data.String8("Section name", 4); type = (String)Data.value;
+      Data.LUINT32("Section size"); tagSize = ((int)Data.value) & 0xFFFFFFFFl;
 
       tagSize += tagSize % 2; //Note every tag must land on an even address position.
 
