@@ -18,7 +18,7 @@ public class RIFF extends Data implements JDEventListener
   //These are pre defined to speed up reading the RIFF sections tags.
 
   private String type = "";
-  private RSection format;
+  private RSection format = new NULL();
   private long tagSize = 0;
   private Descriptor Data;
   private JDNode list1, list2, temp;
@@ -100,7 +100,7 @@ public class RIFF extends Data implements JDEventListener
 
   public void open( JDEvent e )
   {
-    if( e.getID().equals("UInit") ) { Uninitialize(); }
+    if( e.getID().equals("UInit") ) { format.open( e ); Uninitialize(); }
 
     //If the event type is "R", then the event is sent to the RIFF format plugin.
 
