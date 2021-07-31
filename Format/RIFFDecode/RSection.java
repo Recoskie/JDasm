@@ -1,7 +1,7 @@
 package Format.RIFFDecode;
 
-//A riff file is made up of data sections.
-//This allows us to define the data sections by format type.
+//A riff file is made up of data sections. The main RIFF header block specifies the file format.
+//This allows us to define the data sections by loaded plugin format type.
 
 public interface RSection
 {

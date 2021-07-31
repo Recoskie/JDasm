@@ -1,6 +1,6 @@
 package Format.RIFFDecode;
 
-//This is for RIFF file formats that do not yet have an reader plugin.
+//This is for RIFF file formats that do not yet have a reader plugin.
 
 public class NULL implements RSection
 {

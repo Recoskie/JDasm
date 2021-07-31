@@ -39,11 +39,11 @@ public class RIFF extends Data implements JDEventListener
     RiffHeader.LUINT32("File size"); fileSize = ((int)RiffHeader.value) & 0xFFFFFFFFl;
     RiffHeader.String8("File type", 4); type = (String)RiffHeader.value;
 
+    root.add( new JDNode("RIFF Header.h", ref++) );
+
     //The wave audio plugin defines the data sections of an wave audio file.
     
     if( type.equals("WAVE") ) { format = new WAV(); }
-
-    root.add( new JDNode("RIFF Header.h", ref++) );
 
     //The data sub blocks.
 
