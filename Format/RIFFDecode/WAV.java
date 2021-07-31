@@ -1,15 +1,10 @@
-package Format;
+package Format.RIFFDecode;
 
 import swingIO.*;
 import swingIO.tree.*;
-import javax.swing.tree.*;
 
-public class WAV extends Window.Window implements JDEventListener
+public class WAV extends Data implements RSection
 {
-  //Descriptors.
-
-  private Descriptor[] headers = new Descriptor[1];
-
   //Basic wave audio data info.
 
   private int channels = 0;
@@ -20,104 +15,68 @@ public class WAV extends Window.Window implements JDEventListener
   private int samplePoint = 0;
   private int dataSize = 0;
   private long dataPos = 0;
-  private boolean opInfo = false;
 
-  //Number of samples/sec are not known till the headers are read.
+  //Number of samples/sec are not known till the format header is read.
 
   private Descriptor[] samples;
 
-  public WAV() throws java.io.IOException
+  //The RIFF data sections are supplied here.
+
+  public boolean section( String name, int size, JDNode node ) throws java.io.IOException
   {
-    //Setup.
+    //This is the WAVE format section. It stores the information about the raw audio data.
 
-    tree.setEventListener( this ); file.Events = false;
-
-    ((DefaultTreeModel)tree.getModel()).setRoot(null); tree.setRootVisible(true); tree.setShowsRootHandles(true); JDNode root = new JDNode( fc.getFileName() + ( fc.getFileName().indexOf(".") > 0 ? "" : ".wav" ), -1 );
-
-    //Begin reading the BMP header.
-
-    Descriptor wavHeader = new Descriptor( file ); headers[0] = wavHeader; wavHeader.setEvent( this::WAVInfo );
-
-    JDNode BHeader = new JDNode("WAV Header.h", 0); root.add( BHeader );
-
-    wavHeader.String8("Signature", 4);
-    wavHeader.LUINT32("File size");
-    wavHeader.String8("Signature", 4);
-    wavHeader.String8("End", 4);
-    wavHeader.LUINT32("File Format header size");
-    wavHeader.LUINT16("Type");
-    wavHeader.LUINT16("Audio channels"); channels = (short)wavHeader.value;
-    wavHeader.LUINT32("Sample rate"); sampleRate = (int)wavHeader.value;
-    wavHeader.LUINT32("1-sec Sample size"); sampleSize = (int)wavHeader.value;
-    wavHeader.LUINT16("Sample Point size"); samplePoint = (short)wavHeader.value;
-    wavHeader.LUINT16("Bit per Sample"); bitPerSample = (short)wavHeader.value;
-
-    long t = file.getFilePointer();
-
-    //Check for a RIFF list specifying information about the track, comments, artists, and other.
-
-    file.read(4); if( file.toLInt() == 1414744396 )
+    if( name.equals("fmt ") )
     {
-      opInfo = true; file.read(4); file.seek(t);
+      Descriptor wavHeader = new Descriptor( file ); des.add( wavHeader ); wavHeader.setEvent( this::WAVInfo );
 
-      wavHeader.Other("Other data", file.toLInt() + 8 );
+      node.add( new JDNode( "WAV Header.h", ref++ ) );
+
+      wavHeader.LUINT16("Type");
+      wavHeader.LUINT16("Audio channels"); channels = (short)wavHeader.value;
+      wavHeader.LUINT32("Sample rate"); sampleRate = (int)wavHeader.value;
+      wavHeader.LUINT32("1-sec Sample size"); sampleSize = (int)wavHeader.value;
+      wavHeader.LUINT16("Sample Point size"); samplePoint = (short)wavHeader.value;
+      wavHeader.LUINT16("Bit per Sample"); bitPerSample = (short)wavHeader.value;
+
+      return( true );
     }
 
-    //Check for data signature.
+    //This is the raw audio data section.
 
-    t = file.getFilePointer(); file.read(4);
-
-    if( file.toLInt() == 1635017060 )
+    else if( name.equals("data") )
     {
-      file.seek( t );
-      wavHeader.Other("Data Signature", 4 );
-      wavHeader.LUINT32("Data Size"); dataSize = (int)wavHeader.value; reData = dataSize % sampleSize;
-
-      dataPos = file.getFilePointer();
+      dataPos = file.getFilePointer(); dataSize = size;
 
       //setup number of samples if the data signature was found.
 
-      JDNode Samples = new JDNode("Sample Array", 1);
-
       int e = dataSize / sampleSize; samples = new Descriptor[ reData != 0 ? e + 1 : e ];
+            
+      for( int i = 1; i <= e; i++ ) { node.add( new JDNode( "Sample sec #" + i + ".h", "R", ( i - 1 ) ) ); }
       
-      for( int i = 1; i <= e; i++ ) { Samples.add( new JDNode( "Sample sec #" + i + ".h", ( i + 1 ) ) ); }
-
       //Check if there is a remainder.
+      
+      if( reData != 0 ) { node.add( new JDNode( "Sample sec #" + ( e + ( reData / (float)sampleSize ) ) + ".h", "R", ( e + 1 ) ) ); }
+      
+      reData = reData == 0 ? sampleSize : reData;
 
-      if( reData != 0 ) { Samples.add( new JDNode( "Sample sec #" + ( e + ( reData / (float)sampleSize ) ) + ".h", ( e + 2 ) ) ); }
+      //goto end of data section.
 
-      root.add( Samples ); reData = reData == 0 ? sampleSize : reData;
+      file.seek( file.getFilePointer() + size ); return( true );
     }
-
-    //Decode the setup headers.
     
-    ((DefaultTreeModel)tree.getModel()).setRoot(root); file.Events = true;
-
-    //Set the default node.
-
-    tree.setSelectionPath( new TreePath( BHeader.getPath() ) ); open( new JDEvent( this, "", 0 ) );
+    return( false );
   }
 
-  public void Uninitialize() { headers = new Descriptor[1]; samples = null; }
+  public void Uninitialize() { samples = null; }
 
   public void open( JDEvent e )
   {
     if( e.getID().equals("UInit") ) { Uninitialize(); }
 
-    else if( e.getArg(0) < 1 )
-    {
-      ds.setDescriptor(headers[(int)e.getArg(0)]);
-    }
-    else if( e.getArg(0) == 1 )
-    {
-      tree.expandPath( tree.getLeadSelectionPath() );
-
-      info("<html>Contains the raw PCM audio data.</html>"); ds.clear();
-    }
     else
     {
-      int readSample = (int)e.getArg(0) - 2;
+      int readSample = (int)e.getArg(0);
 
       if( samples[ readSample ] == null )
       {
@@ -129,7 +88,7 @@ public class WAV extends Window.Window implements JDEventListener
 
         try
         {
-          file.seek( samplePos ); Descriptor s = new Descriptor( file ); samples[(int)e.getArg(0) - 2] = s; s.setEvent( this::SampleInfo );
+          file.seek( samplePos ); Descriptor s = new Descriptor( file ); samples[readSample] = s; s.setEvent( this::SampleInfo );
 
           int size = samples.length == (int)e.getArg(0) - 1 ? reData / samplePoint : sampleRate; //The last sample is not always a full second.
       
@@ -157,12 +116,6 @@ public class WAV extends Window.Window implements JDEventListener
 
   public static final String[] WAVInfo = new String[]
   {
-    "<html>The RIFF header does support other audio formats.<br /><br />If it does not pass the signature test then the audio file is corrupted.</html>",
-    "<html>File Size.</html>",
-    "<html>The RIFF header does supports other audio formats.<br /><br />" +
-    "Since this is a wave audio file it should always be WAVE = 57, 41, 56, 45 signature.</html>",
-    "<html>Marks the end of the file format type info.</html>",
-    "<html>This is the length of the file format info.<br /><br />This is everything that came before \"fmt \", which marks the end of the RIFF file format type info.</html>",
     "<html>This should always be set 1 meaning PCM audio format.<br /><br />" +
     "PCM is the standard way of playing audio on all digital devices.</html>",
     "<html>This is the number of audio outputs. Stereo audio or headphones uses two audio channels for both the right and left ear.</html>",
@@ -185,7 +138,6 @@ public class WAV extends Window.Window implements JDEventListener
     "This can be multiplied by the sample rate to find the size of each PCM sample in one second.</html>",
     "<html>The number of bits is used as a value for each sample point.<br /><br />" +
     "Bits per sample are generally in sizes 8, 16, 24, 32. In which 8-bit audio would be 8 bits per sample point.</html>",
-    "<html>Contains additional information about the track, comments, or artist.</html>",
     "<html>Raw Hardware codded PCM Audio Data start signature.</html>",
     "<html>Size of Raw Audio Data.</html>"
   };
@@ -198,7 +150,7 @@ public class WAV extends Window.Window implements JDEventListener
     }
     else
     {
-      info( WAVInfo[ ( el >= 11 && !opInfo ) ? el + 1 : el ] );
+      info( WAVInfo[ el ] );
     }
   }
 
