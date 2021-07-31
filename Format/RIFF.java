@@ -94,6 +94,10 @@ public class RIFF extends Data implements JDEventListener
     //Decode the setup headers.
     
     ((DefaultTreeModel)tree.getModel()).setRoot(root); file.Events = true;
+
+    //Set the first node.
+
+    tree.setSelectionPath( new TreePath( root.getFirstLeaf().getPath() ) ); open( new JDEvent( this, "", 0 ) );
   }
 
   public void Uninitialize() { headers = null; }
