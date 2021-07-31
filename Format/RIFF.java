@@ -162,8 +162,9 @@ public class RIFF extends Data implements JDEventListener
   {
     "<html>The RIFF header supports many video/audio formats.<br /><br />If it does not pass the signature test then the video/audio file is corrupted.</html>",
     "<html>The file size needs to be known, so that we know when we have reached the end of the file.<br /><br />" +
-    "The RIFF format is divided into chunks by a ID code and size. We need to know when we reached the end of the file.</html>",
-    "<html>This identifies the file format type. It determine how some of the RIFF header data chunks are read.</html>"
+    "The RIFF format is divided into parts using a 4 byte (character) name, and size of preceding data.<nr /><br />" +
+    "We need to know when we reached the end of the file otherwise we will be reding undefined sections after the files end.</html>",
+    "<html>This identifies the file format type. It determine how the named chunks of data are read.</html>"
   };
 
   public void RIFFInfo( int el )
@@ -182,9 +183,11 @@ public class RIFF extends Data implements JDEventListener
 
   public static final String[] CKInfo = new String[]
   {
-    "<html>AFter each section is a 4 byte name specifying the type of data.</html>",
-    "<html>Section size. After section size is another section type unless it is a list type.</html>",
-    "<html>List type. We could easily skip over the list using the LIST section size. A list is made up of section names and size as well.</html>"
+    "<html>After the 4 byte (character) name is the size of the data for this named section.</html>",
+    "<html>After section size is another 4 byte (character) section name unless it is a list type.</html>",
+    "<html>We could easily skip over the list using the LIST section size.<br /><br />" +
+    "If we chose to ignore the list section size, then the next 4 bytes is the list type.<br /><br />" +
+    "A list is made up of section names and size as well after the 4 byte list type.</html>"
   };
 
   public void CKInfo( int el )
