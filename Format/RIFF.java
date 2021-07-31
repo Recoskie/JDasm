@@ -89,7 +89,7 @@ public class RIFF extends Data implements JDEventListener
       }
     }
 
-    headers = des.toArray( new Descriptor[ des.size() ] ); des.clear();
+    headers = des.toArray( new Descriptor[ des.size() ] ); des.clear(); ref = 0;
 
     //Decode the setup headers.
     
