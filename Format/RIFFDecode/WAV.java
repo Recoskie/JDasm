@@ -46,7 +46,7 @@ public class WAV extends Data implements RSection
 
     else if( name.equals("data") )
     {
-      dataPos = file.getFilePointer(); dataSize = size;
+      dataPos = file.getFilePointer(); dataSize = size; reData = dataSize % sampleSize;
 
       //setup number of samples if the data signature was found.
 
@@ -56,9 +56,7 @@ public class WAV extends Data implements RSection
       
       //Check if there is a remainder.
       
-      if( reData != 0 ) { node.add( new JDNode( "Sample sec #" + ( e + ( reData / (float)sampleSize ) ) + ".h", "R", ( e + 1 ) ) ); }
-      
-      reData = reData == 0 ? sampleSize : reData;
+      if( reData != 0 ) { node.add( new JDNode( "Sample sec #" + ( e + ( reData / (float)sampleSize ) ) + ".h", "R", e ) ); }
 
       //goto end of data section.
 
@@ -90,7 +88,7 @@ public class WAV extends Data implements RSection
         {
           file.seek( samplePos ); Descriptor s = new Descriptor( file ); samples[readSample] = s; s.setEvent( this::SampleInfo );
 
-          int size = samples.length == (int)e.getArg(0) - 1 ? reData / samplePoint : sampleRate; //The last sample is not always a full second.
+          int size = samples.length == (int)e.getArg(0) + 1 ? reData / samplePoint : sampleRate; //The last sample is not always a full second.
       
           for( int i = 0; i < size; i++ )
           {
