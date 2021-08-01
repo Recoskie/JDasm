@@ -69,24 +69,17 @@ public class RIFF extends Data implements JDEventListener
 
       if( type.equals("ds64") )
       {
-        temp = new JDNode( type, ref++ );
+        temp = new JDNode( type, ref++ ); temp.add( new JDNode( "Section Sizes.h", ref++ ) ); root.add(temp);
 
         Descriptor D64 = new Descriptor( file ); des.add( D64 );
 
-        temp.add( new JDNode( "Section Sizes.h", ref++ ) );
+        int re = (int)tagSize & 7; size64 = new long[(int)tagSize / 8];
 
-        root.add(temp);
-
-        size64 = new long[(int)tagSize / 8]; int re = (int)tagSize & 7;
-
-        for( int i = 0; i < size64.length; i++ )
-        {
-          D64.LUINT64("Section 64 size"); size64[i] = (long)D64.value;
-        }
+        for( int i = 0; i < size64.length; i++ ) { D64.LUINT64("Section size 64"); size64[i] = (long)D64.value; }
 
         if( re != 0 ) { D64.Other( "Padding", re ); }
 
-        //If file size is max 32 bit integer, then the first section 64 size is file size.
+        //If the file size is max 32 bit integer, then the first 64-bit size is the file size.
 
         if( fileSize == 4294967295l ) { fileSize = size64[index64++]; }
       }

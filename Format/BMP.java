@@ -292,6 +292,8 @@ public class BMP extends Window.Window implements JDEventListener
 
             int closestByte = (int)Math.ceil(pixel_size), pxInByte = (int)( 1 / ( pixel_size - Math.floor(pixel_size) ) );
 
+            if( pxInByte == 2147483647 ){ pxInByte = 1; } //Note 1/0 = max positive.
+
             for( int i = 1; i <= width; i += pxInByte )
             {
               pixels.Other( "pixel color #" + i + "", closestByte );
