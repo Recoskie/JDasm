@@ -15,9 +15,15 @@ public class RIFF extends Data implements JDEventListener
 
   private String type = "";
   private RSection format = new NULL();
-  private int tagSize = 0;
+  private long tagSize = 0;
   private Descriptor Data;
   private JDNode list1, list2, temp;
+
+  //A list of 64 bit numbers are used in the RF64 format.
+  //Any 32 bit value that is -1 is an 64 bit value.
+
+  private long[] size64;
+  private int index64 = 0;
 
   public RIFF() throws java.io.IOException
   {
@@ -33,11 +39,12 @@ public class RIFF extends Data implements JDEventListener
 
     RiffHeader.String8("Signature", 4);
     RiffHeader.LUINT32("File size"); fileSize = ((int)RiffHeader.value) & 0xFFFFFFFFl;
+    
     RiffHeader.String8("File type", 4); type = (String)RiffHeader.value;
 
     root.add( new JDNode("RIFF Header.h", ref++) );
 
-    //The wave audio plugin defines the data sections of an wave audio file.
+    //The wave audio plugin defines the data sections of a wave audio file.
     
     if( type.equals("WAVE") ) { format = new WAV(); }
 
@@ -50,13 +57,43 @@ public class RIFF extends Data implements JDEventListener
       //This is the sub structure that is used for all data tags. 
 
       Data.String8("Section name", 4); type = (String)Data.value;
-      Data.LUINT32("Section size"); tagSize = (int)Data.value;
+      Data.LUINT32("Section size"); tagSize = ((int)Data.value) & 0xFFFFFFFFl;
 
-      tagSize += tagSize & 1; //Note every tag must land on an even address position.
+      //A maxed out 32 bit section size is set to the next 64 bit section size.
+
+      if( tagSize == 4294967295l ){ tagSize = size64[index64++]; }
+
+      tagSize += tagSize & 1; //Note every tag must land on a even address position.
+
+      //Specifies the 64 bit size of sections that are -1 size 32 bits.
+
+      if( type.equals("ds64") )
+      {
+        temp = new JDNode( type, ref++ );
+
+        Descriptor D64 = new Descriptor( file ); des.add( D64 );
+
+        temp.add( new JDNode( "Section Sizes.h", ref++ ) );
+
+        root.add(temp);
+
+        size64 = new long[(int)tagSize / 8]; int re = (int)tagSize & 7;
+
+        for( int i = 0; i < size64.length; i++ )
+        {
+          D64.LUINT64("Section 64 size"); size64[i] = (long)D64.value;
+        }
+
+        if( re != 0 ) { D64.Other( "Padding", re ); }
+
+        //If file size is max 32 bit integer, then the first section 64 size is file size.
+
+        if( fileSize == 4294967295l ) { fileSize = size64[index64++]; }
+      }
 
       //list sub data blocks.
 
-      if( type.equals("LIST") )
+      else if( type.equals("LIST") )
       {
         Data.String8("List type", 4); tagSize -= 4;
 
@@ -72,8 +109,10 @@ public class RIFF extends Data implements JDEventListener
 
         //Check if this block is important to the loaded RIFF format plugin.
         
-        if( !format.section(type, (int)tagSize, temp) )
+        if( !format.section(type, tagSize, temp) )
         {
+          tagSize = tagSize < 0 ? (int)(fileSize - file.getFilePointer()) : tagSize;
+
           //Otherwise define the nodes data.
 
           temp.add( new JDNode( "Section Data.h", new long[]{ -2, file.getFilePointer(), file.getFilePointer() + tagSize - 1 } ) );
@@ -85,8 +124,6 @@ public class RIFF extends Data implements JDEventListener
       }
     }
 
-    ref = 0;
-
     //Decode the setup headers.
     
     ((DefaultTreeModel)tree.getModel()).setRoot(root); file.Events = true;
@@ -96,7 +133,7 @@ public class RIFF extends Data implements JDEventListener
     tree.setSelectionPath( new TreePath( root.getFirstLeaf().getPath() ) ); open( new JDEvent( this, "", 0 ) );
   }
 
-  public void Uninitialize() { des.clear(); }
+  public void Uninitialize() { ref = 0; des.clear(); }
 
   public void open( JDEvent e )
   {

@@ -5,7 +5,7 @@ package Format.RIFFDecode;
 
 public interface RSection
 {
-  public boolean section( String name, int size, swingIO.tree.JDNode node ) throws java.io.IOException;
+  public boolean section( String name, long size, swingIO.tree.JDNode node ) throws java.io.IOException;
 
   public void open( swingIO.tree.JDEvent e );
 }

@@ -13,7 +13,7 @@ public class WAV extends Data implements RSection
   private int sampleSize = 0;
   private int reData = 0;
   private int samplePoint = 0;
-  private int dataSize = 0;
+  private long dataSize = 0;
   private long dataPos = 0;
 
   //Number of samples/sec are not known till the format header is read.
@@ -22,7 +22,7 @@ public class WAV extends Data implements RSection
 
   //The RIFF data sections are supplied here.
 
-  public boolean section( String name, int size, JDNode node ) throws java.io.IOException
+  public boolean section( String name, long size, JDNode node ) throws java.io.IOException
   {
     //This is the WAVE format section. It stores the information about the raw audio data.
 
@@ -46,11 +46,11 @@ public class WAV extends Data implements RSection
 
     else if( name.equals("data") )
     {
-      dataPos = file.getFilePointer(); dataSize = size; reData = dataSize % sampleSize;
+      dataPos = file.getFilePointer(); dataSize = size; reData = (int)(dataSize % sampleSize);
 
       //setup number of samples if the data signature was found.
 
-      int e = dataSize / sampleSize; samples = new Descriptor[ reData != 0 ? e + 1 : e ];
+      int e = (int)(dataSize / sampleSize); samples = new Descriptor[ reData != 0 ? e + 1 : e ];
             
       for( int i = 1; i <= e; i++ ) { node.add( new JDNode( "Sample sec #" + i + ".h", "R", ( i - 1 ) ) ); }
       
