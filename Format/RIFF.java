@@ -7,10 +7,6 @@ import Format.RIFFDecode.*;
 
 public class RIFF extends Data implements JDEventListener
 {
-  //Descriptors.
-
-  private Descriptor[] headers;
-
   //The file size is used to know which is the last riff tag element.
 
   private long fileSize = 0;
@@ -19,7 +15,7 @@ public class RIFF extends Data implements JDEventListener
 
   private String type = "";
   private RSection format = new NULL();
-  private long tagSize = 0;
+  private int tagSize = 0;
   private Descriptor Data;
   private JDNode list1, list2, temp;
 
@@ -54,9 +50,9 @@ public class RIFF extends Data implements JDEventListener
       //This is the sub structure that is used for all data tags. 
 
       Data.String8("Section name", 4); type = (String)Data.value;
-      Data.LUINT32("Section size"); tagSize = ((int)Data.value) & 0xFFFFFFFFl;
+      Data.LUINT32("Section size"); tagSize = (int)Data.value;
 
-      tagSize += tagSize % 2; //Note every tag must land on an even address position.
+      tagSize += tagSize & 1; //Note every tag must land on an even address position.
 
       //list sub data blocks.
 
@@ -89,7 +85,7 @@ public class RIFF extends Data implements JDEventListener
       }
     }
 
-    headers = des.toArray( new Descriptor[ des.size() ] ); des.clear(); ref = 0;
+    ref = 0;
 
     //Decode the setup headers.
     
@@ -100,7 +96,7 @@ public class RIFF extends Data implements JDEventListener
     tree.setSelectionPath( new TreePath( root.getFirstLeaf().getPath() ) ); open( new JDEvent( this, "", 0 ) );
   }
 
-  public void Uninitialize() { headers = null; }
+  public void Uninitialize() { des.clear(); }
 
   public void open( JDEvent e )
   {
@@ -116,7 +112,7 @@ public class RIFF extends Data implements JDEventListener
     {
       tree.expandPath( tree.getLeadSelectionPath() );
 
-      ds.setDescriptor( headers[ (int)e.getArg(0) ] );
+      ds.setDescriptor( des.get( (int)e.getArg(0) ) );
     }
 
     //the data of a particular tag.
@@ -131,9 +127,9 @@ public class RIFF extends Data implements JDEventListener
       Data = new Descriptor( file ); des.add(Data);
 
       Data.String8("Data type", 4); type = (String)Data.value;
-      Data.LUINT32("Data size"); tagSize = ((int)Data.value) & 0xFFFFFFFFl;
+      Data.LUINT32("Data size"); tagSize = (int)Data.value;
 
-      tagSize += tagSize % 2; //Note every tag must land on an even address position.
+      tagSize += tagSize & 1; //Note every tag must land on an even address position.
 
       temp = new JDNode( type, ref++ );
 
