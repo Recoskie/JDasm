@@ -9,6 +9,7 @@ public class BMP extends Window.Window implements JDEventListener
   private JDNode root;
   private int width = 0, height = 0;
   private float pixel_size = 0f;
+  private int padding = 0;
   private int colorData = 0;
   private int compressMode = 0;
   private boolean runLen = false;
@@ -71,6 +72,8 @@ public class BMP extends Window.Window implements JDEventListener
     
     dibHeader.LUINT16("The number of color planes"); dibSize -= 2;
     dibHeader.LUINT16("The number of bits per pixel"); pixel_size = ((short)dibHeader.value)/8f; dibSize -= 2;
+
+    padding = (int)( width * pixel_size ) & 3;
 
     if( dibSize > 0 )
     {
@@ -288,7 +291,7 @@ public class BMP extends Window.Window implements JDEventListener
 
           try
           {
-            file.seek( colorData + (int)(line * pixel_size * width) ); Descriptor pixels = new Descriptor(file); pixels.setEvent( this::PixInfo );
+            file.seek( colorData + (int)(line * ( pixel_size * width + padding ) ) ); Descriptor pixels = new Descriptor(file); pixels.setEvent( this::PixInfo );
 
             int closestByte = (int)Math.ceil(pixel_size), pxInByte = (int)( 1 / ( pixel_size - Math.floor(pixel_size) ) );
 
@@ -298,6 +301,8 @@ public class BMP extends Window.Window implements JDEventListener
             {
               pixels.Other( "pixel color #" + i + "", closestByte );
             }
+
+            if( padding != 0 ) { pixels.Other( "Padding", padding ); }
 
             lines[line] = pixels;
           }
