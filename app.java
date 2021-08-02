@@ -25,6 +25,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     new byte[] { 0x4D, 0x5A }, //Microsoft binaries.
     new byte[] { 0x7F, 0x45, 0x4C, 0x46 }, //Linux/UNIX binaries.
     new byte[] { 0x42, 0x4D }, //Bit map pictures.
+    new byte[] { -1, -40 }, //JPEG picture.
     new byte[] { 0x52, 0x49, 0x46, 0x46 }, //Multimedia RIFF file.
     new byte[] { 0x52, 0x46, 0x36, 0x34 } //Multimedia RIFF/64 file.
   };
@@ -35,7 +36,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   //The file to load. To begin decoding file types.
 
-  private String DecodeAPP[] = new String[]{ "Format.EXE", "Format.ELF", "Format.BMP", "Format.RIFF", "Format.RIFF" };
+  private String DecodeAPP[] = new String[]{ "Format.EXE", "Format.ELF", "Format.BMP", "Format.JPEG", "Format.RIFF", "Format.RIFF" };
 
   //By file extension.
 
