@@ -933,6 +933,10 @@ We do not have to write the PCM data to an wave audio file to play standard PCM 
 
 <br />
 
+Any developer that has built a keyboard application, for android, console, or PC should already know what uncompressed audio looks like and how to play it.
+
+<br />
+
 We can also do graphics using sin and cos to do rotation around x, y, z vertices to make 3D models. It does help to store small pictures containing colors to draw between vertices to make textured models.
 
 <br />
