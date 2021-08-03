@@ -39,6 +39,8 @@ public class WAV extends Data implements RSection
       wavHeader.LUINT16("Sample Point size"); samplePoint = (short)wavHeader.value;
       wavHeader.LUINT16("Bit per Sample"); bitPerSample = (short)wavHeader.value;
 
+      if( size - 16 > 0 ){ wavHeader.Other( "Extended data", (int)(size - 16) ); }
+
       return( true );
     }
 
@@ -136,8 +138,7 @@ public class WAV extends Data implements RSection
     "This can be multiplied by the sample rate to find the size of each PCM sample in one second.</html>",
     "<html>The number of bits is used as a value for each sample point.<br /><br />" +
     "Bits per sample are generally in sizes 8, 16, 24, 32. In which 8-bit audio would be 8 bits per sample point.</html>",
-    "<html>Raw Hardware codded PCM Audio Data start signature.</html>",
-    "<html>Size of Raw Audio Data.</html>"
+    "<html>Extended format information.</html>"
   };
 
   public void WAVInfo( int el )

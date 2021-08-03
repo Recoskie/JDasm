@@ -69,7 +69,7 @@ public class JPEG extends Window.Window implements JDEventListener
     tree.setSelectionPath( new TreePath( h.getPath() ) ); open( new JDEvent( this, "", 0 ) );
   }
 
-  private boolean decodeMarker( int type, int size, JDNode marker )
+  private boolean decodeMarker( int type, int size, JDNode marker ) throws java.io.IOException
   {
     if( type == 0xC0 )
     {
@@ -89,7 +89,31 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else if( ( type & 0xF0 ) == 0xE0 )
     {
-      marker.add( new JDNode("Application (specific).h", ref++) );
+      JDNode n = new JDNode("Application (specific)", ref++);
+
+      marker.add( n );
+
+      Descriptor m = new Descriptor(file); des.add(m);
+
+      m.String8("Type", (byte)0x00); String Type = (String)m.value;
+
+      if( Type.equals("JFIF") )
+      {
+        m.UINT8("Major version");
+        m.UINT8("Minor version");
+        m.UINT8("Density");
+        m.UINT16("Horizontal pixel Density");
+        m.UINT16("Vertical pixel Density");
+        m.UINT8("Horizontal pixel count");
+        m.UINT8("Vertical pixel count");
+
+        if( size - 14 > 0 ) { m.Other("Other Data", size - 14 ); }
+      }
+      else { m.Other("Marker Data", size - Type.length() - 1 ); }
+
+      n.add( new JDNode(Type + ".h", ref++) );
+
+      return(true);
     }
     else if( type == 0xFE )
     {
