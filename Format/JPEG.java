@@ -26,7 +26,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     JDNode h = new JDNode("JPEG Data", ref++); root.add( h );
 
-    jpg.Other("Signature", 2);
+    jpg.Other("Start of image", 2);
 
     //Read the jpeg markers. All markers start with a 0xFF = -1 code.
 
@@ -48,12 +48,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
       //Decode the marker if it is a known type.
 
-      if( !decodeMarker( type, size, h ) )
-      {
-        //Define the markers data if it is not a known maker type.
-
-        marker.Other("Maker Data", size);
-      }
+      if( !decodeMarker( type, size, h ) ) { marker.Other("Maker Data", size); }
 
       //Read the next byte to check if there is another marker.
 
@@ -73,11 +68,19 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     if( type == 0xC0 )
     {
-      marker.add( new JDNode("Start Of Frame.h", ref++) );
+      marker.add( new JDNode("Start Of Frame (baseline DCT).h", ref++) );
+    }
+    else if( type == 0xC2 )
+    {
+      marker.add( new JDNode("Start Of Frame (progressive DCT).h", ref++) );
     }
     else if( type == 0xC4 )
     {
-      marker.add( new JDNode("Define Huffman Tables.h", ref++) );
+      marker.add( new JDNode("Huffman Table.h", ref++) );
+    }
+    else if( ( type & 0xF8 ) == 0xD0 )
+    {
+      marker.add( new JDNode("Restart.h", ref++) );
     }
     else if( type == 0xDA )
     {
@@ -85,11 +88,11 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else if( type == 0xDB )
     {
-      marker.add( new JDNode("Define Quantization Tables.h", ref++) );
+      marker.add( new JDNode("Quantization Table.h", ref++) );
     }
     else if( ( type & 0xF0 ) == 0xE0 )
     {
-      JDNode n = new JDNode("Application (specific)", ref++);
+      JDNode n = new JDNode("Application (info)", ref++);
 
       marker.add( n );
 
@@ -107,7 +110,10 @@ public class JPEG extends Window.Window implements JDEventListener
         m.UINT8("Horizontal pixel count");
         m.UINT8("Vertical pixel count");
 
-        if( size - 14 > 0 ) { m.Other("Other Data", size - 14 ); }
+        if( size - 14 > 0 )
+        {
+          m.Other("Other Data", size - 14 );
+        }
       }
       else { m.Other("Marker Data", size - Type.length() - 1 ); }
 
@@ -117,7 +123,17 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else if( type == 0xFE )
     {
-      marker.add( new JDNode("Comment.h", ref++) );
+      JDNode n = new JDNode("Comment", ref++);
+
+      marker.add( n );
+
+      Descriptor m = new Descriptor(file); des.add(m);
+
+      m.String8("Comment Text", size);
+
+      n.add( new JDNode("Text.h", ref++) );
+
+      return( true );
     }
     else
     {
