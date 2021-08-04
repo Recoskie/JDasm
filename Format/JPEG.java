@@ -78,7 +78,42 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else if( type == 0xC4 )
     {
-      marker.add( new JDNode("Huffman Table.h", ref++) );
+      markerData.UINT8("Table Number");
+
+      JDNode n = new JDNode("Huffman Table #" + (((byte)markerData.value) & 0xFF) + "", ref++); marker.add( n );
+
+      //Begin reading the JPEG signatures/markers.
+
+      int Sum = 0;
+
+      while( size > 0 )
+      {
+        for( int i = 1; i <= 2; i++ )
+        {
+          Descriptor Huff = new Descriptor(file); des.add(Huff);
+
+          JDNode HRow = new JDNode("Row #" + i + ".h", ref++); n.add( HRow );
+
+          for( int i2 = 1; i2 <= 8; i2++ ) { Huff.UINT8("EL #" + i2 + ""); Sum += ((byte)Huff.value) & 0xFF; }
+        }
+
+        Descriptor Huff = new Descriptor(file); des.add(Huff);
+
+        JDNode HRow = new JDNode("Data.h", ref++); n.add( HRow );
+
+        Huff.Other("Huffman Data", Sum);
+
+        //The tables can be grouped toghter under one marker.
+
+        size -= 17 + Sum; Sum = 0; if( size > 0 )
+        {
+          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Table Number");
+
+          n = new JDNode("Huffman Table #" + (((byte)nTable.value) & 0xFF) + "", ref++); marker.add( n );
+        }
+      }
+
+      return( true );
     }
     else if( ( type & 0xF8 ) == 0xD0 )
     {
