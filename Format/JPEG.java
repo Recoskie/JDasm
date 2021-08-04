@@ -11,6 +11,8 @@ public class JPEG extends Window.Window implements JDEventListener
   private int ref = 0;
 
   private JDNode root;
+
+  private Descriptor markerData;
   
   public JPEG() throws java.io.IOException
   {
@@ -40,15 +42,15 @@ public class JPEG extends Window.Window implements JDEventListener
 
     while( nx == -1 )
     {
-      Descriptor marker = new Descriptor(file); des.add(marker);
+      markerData = new Descriptor(file); des.add(markerData);
   
-      marker.UINT8("Maker Code");
-      marker.UINT8("Marker type"); type = ((byte)marker.value) & 0xFF;
-      marker.UINT16("Maker size"); size = (short)marker.value - 2;
+      markerData.UINT8("Maker Code");
+      markerData.UINT8("Marker type"); type = ((byte)markerData.value) & 0xFF;
+      markerData.UINT16("Maker size"); size = (short)markerData.value - 2;
 
       //Decode the marker if it is a known type.
 
-      if( !decodeMarker( type, size, h ) ) { marker.Other("Maker Data", size); }
+      if( !decodeMarker( type, size, h ) ) { markerData.Other("Maker Data", size); }
 
       //Read the next byte to check if there is another marker.
 
@@ -88,7 +90,34 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else if( type == 0xDB )
     {
-      marker.add( new JDNode("Quantization Table.h", ref++) );
+      markerData.UINT8("Table Number");
+
+      JDNode n = new JDNode("Quantization Table #" + (((byte)markerData.value) & 0xFF) + "", ref++); marker.add( n );
+
+      //Begin reading the JPEG signatures/markers.
+
+      while( size > 64 )
+      {
+        for( int i = 1; i <= 8; i++ )
+        {
+          Descriptor QMat = new Descriptor(file); des.add(QMat);
+
+          JDNode matRow = new JDNode("Row #" + i + ".h", ref++); n.add( matRow );
+
+          for( int i2 = 1; i2 <= 8; i2++ ) { QMat.UINT8("EL #" + i2 + ""); }
+        }
+
+        //The tables can be grouped toghter under one marker.
+
+        size -= 65; if( size > 64 )
+        {
+          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Table Number");
+
+          n = new JDNode("Quantization Table #" + (((byte)nTable.value) & 0xFF) + "", ref++); marker.add( n );
+        }
+      }
+
+      return( true );
     }
     else if( ( type & 0xF0 ) == 0xE0 )
     {
