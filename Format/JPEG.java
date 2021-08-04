@@ -26,7 +26,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     ((DefaultTreeModel)tree.getModel()).setRoot(null); tree.setRootVisible(true); tree.setShowsRootHandles(true); root = new JDNode( fc.getFileName(), -1 );
     
-    //Begin reading the JPEG signatures/markers.
+    //Set -1 incase invailed JPEG with no start of image marker.
 
     JDNode h = new JDNode("JPEG Data", -1);
 
@@ -34,7 +34,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     int nx = 0, size = 0, type = 0;
 
-    //Set nx to the marker code if there is an marker.
+    //Set nx to the first byte which should be a marker code (start of image).
 
     long t = file.getFilePointer(); file.read(1); nx = file.toByte(); file.seek(t);
 
@@ -58,7 +58,7 @@ public class JPEG extends Window.Window implements JDEventListener
           h.add( new JDNode("Restart.h", ref++) );
         }
 
-        //Start of image.
+        //Set Start of image as read.
 
         else if( type == 0xD8 )
         {
@@ -114,7 +114,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
       JDNode n = new JDNode("Huffman Table #" + (((byte)markerData.value) & 0xFF) + "", ref++); marker.add( n );
 
-      //Begin reading the JPEG signatures/markers.
+      //Begin reading Huffman Tables.
 
       int Sum = 0;
 
@@ -157,7 +157,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
       JDNode n = new JDNode("Quantization Table #" + (((byte)markerData.value) & 0xFF) + "", ref++); marker.add( n );
 
-      //Begin reading the JPEG signatures/markers.
+      //Begin reading Quantization Tables.
 
       while( size > 64 )
       {
