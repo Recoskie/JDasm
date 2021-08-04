@@ -13,6 +13,10 @@ public class JPEG extends Window.Window implements JDEventListener
   private JDNode root;
 
   private Descriptor markerData;
+
+  //Picture dimensions.
+
+  private int width = 0, height = 0;
   
   public JPEG() throws java.io.IOException
   {
@@ -24,11 +28,7 @@ public class JPEG extends Window.Window implements JDEventListener
     
     //Begin reading the JPEG signatures/markers.
 
-    Descriptor jpg = new Descriptor(file); des.add(jpg);
-
-    JDNode h = new JDNode("JPEG Data", ref++); root.add( h );
-
-    jpg.Other("Start of image", 2);
+    JDNode h = new JDNode("JPEG Data", -1);
 
     //Read the jpeg markers. All markers start with a 0xFF = -1 code.
 
@@ -46,11 +46,43 @@ public class JPEG extends Window.Window implements JDEventListener
   
       markerData.UINT8("Maker Code");
       markerData.UINT8("Marker type"); type = ((byte)markerData.value) & 0xFF;
-      markerData.UINT16("Maker size"); size = (short)markerData.value - 2;
 
-      //Decode the marker if it is a known type.
+      //Markers betwean 0xD0 to 0xD9 have no size.
 
-      if( !decodeMarker( type, size, h ) ) { markerData.Other("Maker Data", size); }
+      if( type >= 0xD0 && type <= 0xD9 )
+      {
+        //Restart marker
+
+        if( ( type & 0xF8 ) == 0xD0 )
+        {
+          h.add( new JDNode("Restart.h", ref++) );
+        }
+
+        //Start of image.
+
+        else if( type == 0xD8 )
+        {
+          h = new JDNode("JPEG Data", ref++); root.add( h );
+        }
+
+        //End of image
+
+        else if( type == 0xD9 )
+        {
+
+        }
+      }
+
+      //Decode maker data types.
+
+      else
+      {
+        markerData.UINT16("Maker size"); size = (short)markerData.value - 2;
+
+        //Decode the marker if it is a known type.
+
+        if( !decodeMarker( type, size, h ) ) { markerData.Other("Maker Data", size); }
+      }
 
       //Read the next byte to check if there is another marker.
 
@@ -114,10 +146,6 @@ public class JPEG extends Window.Window implements JDEventListener
       }
 
       return( true );
-    }
-    else if( ( type & 0xF8 ) == 0xD0 )
-    {
-      marker.add( new JDNode("Restart.h", ref++) );
     }
     else if( type == 0xDA )
     {
