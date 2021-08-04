@@ -68,12 +68,10 @@ public class BMP extends Window.Window implements JDEventListener
       dibHeader.LINT32("Height in pixels"); height = (int)dibHeader.value; dibSize -= 4;
     }
 
-    if( height < 0 ) { height = -height; topToBottom = true; }
+    if( height < 0 ) { height = -height; topToBottom = true; } padding = width & 3;
     
     dibHeader.LUINT16("The number of color planes"); dibSize -= 2;
     dibHeader.LUINT16("The number of bits per pixel"); pixel_size = ((short)dibHeader.value)/8f; dibSize -= 2;
-
-    padding = (int)( width * pixel_size ) & 3;
 
     if( dibSize > 0 )
     {
