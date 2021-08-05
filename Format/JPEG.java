@@ -100,13 +100,57 @@ public class JPEG extends Window.Window implements JDEventListener
 
   private boolean decodeMarker( int type, int size, JDNode marker ) throws java.io.IOException
   {
-    if( type == 0xC0 )
+    if( ( type & 0xFC ) == 0xC0 )
     {
-      marker.add( new JDNode("Start Of Frame (baseline DCT).h", ref++) );
-    }
-    else if( type == 0xC2 )
-    {
-      marker.add( new JDNode("Start Of Frame (progressive DCT).h", ref++) );
+      JDNode n;
+      
+      //Non-Deferential Huffman coded pictures.
+
+      if( type == 0xC0 ) { n = new JDNode("Start Of Frame (baseline DCT)", ref++); }      
+      else if( type == 0xC1 ) { n = new JDNode("Start Of Frame (Extended Sequential DCT)", ref++); }
+      else if( type == 0xC2 ) { n = new JDNode("Start Of Frame (progressive DCT)", ref++); }
+      else if( type == 0xC3 ) { n = new JDNode("Start Of Frame (Lossless Sequential)", ref++); }
+
+      //Huffman Deferential codded pictures.
+      
+      else if( type == 0xC5 ) { n = new JDNode("Start Of Frame (Differential sequential DCT)", ref++); }
+      else if( type == 0xC6 ) { n = new JDNode("Start Of Frame (Differential progressive DCT)", ref++); }
+      else if( type == 0xC7 ) { n = new JDNode("Start Of Frame (Differential Lossless)", ref++); }
+
+      //Non-Deferential Arithmetic codded pictures.
+
+      else if( type == 0xC9 ) { n = new JDNode("Start Of Frame (Extended Sequential DCT)", ref++); }
+      else if( type == 0xCA ) { n = new JDNode("Start Of Frame (Progressive DCT)", ref++); }
+      else if( type == 0xCB ) { n = new JDNode("Start Of Frame (Lossless Sequential)", ref++); }
+
+      //Deferential Arithmetic codded pictures.
+
+      else if( type == 0xCC ) { n = new JDNode("Start Of Frame (Differential sequential DCT)", ref++); }
+      else if( type == 0xCD ) { n = new JDNode("Start Of Frame (Differential progressive DCT)", ref++); }
+      else { n = new JDNode("Start Of Frame (Differential Lossless)", ref++); }
+      
+      marker.add( n );
+
+      Descriptor image = new Descriptor(file); des.add(image);
+      n.add( new JDNode("Image Information.h", ref++) );
+
+      image.UINT8("Sample Precision");
+      image.UINT16("Picture Height"); width = ((short)image.value) & 0xFFFF;
+      image.UINT16("Picture Width"); height = ((short)image.value) & 0xFFFF;
+
+      image.UINT8("Number of Components in Picture"); int Nf = ((byte)image.value) & 0xFF;
+
+      for( int i = 1; i <= Nf; i++ )
+      {
+        Descriptor imageComp = new Descriptor(file); des.add(imageComp);
+        n.add( new JDNode("Image Component" + i + ".h", ref++) );
+        
+        imageComp.UINT8("Component Indemnifier");
+        imageComp.UINT8("Vertical/Horizontal Sampling factor");
+        imageComp.UINT8("Quantization table Number");
+      }
+
+      return(true);
     }
     else if( type == 0xC4 )
     {
