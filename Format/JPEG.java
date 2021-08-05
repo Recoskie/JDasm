@@ -26,7 +26,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     ((DefaultTreeModel)tree.getModel()).setRoot(null); tree.setRootVisible(true); tree.setShowsRootHandles(true); root = new JDNode( fc.getFileName(), -1 );
     
-    //Set -1 incase invailed JPEG with no start of image marker.
+    //Set -1 incase invalid JPEG with no start of image marker.
 
     JDNode h = new JDNode("JPEG Data", -1);
 
@@ -100,7 +100,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
   private boolean decodeMarker( int type, int size, JDNode marker ) throws java.io.IOException
   {
-    if( ( type & 0xFC ) == 0xC0 )
+    if( ( type & 0xF0 ) == 0xC0 && !( type == 0xC4 || type == 0xC8 || type == 0xCC ) )
     {
       JDNode n;
       
@@ -125,8 +125,8 @@ public class JPEG extends Window.Window implements JDEventListener
 
       //Deferential Arithmetic codded pictures.
 
-      else if( type == 0xCC ) { n = new JDNode("Start Of Frame (Differential sequential DCT)", ref++); }
-      else if( type == 0xCD ) { n = new JDNode("Start Of Frame (Differential progressive DCT)", ref++); }
+      else if( type == 0xCD ) { n = new JDNode("Start Of Frame (Differential sequential DCT)", ref++); }
+      else if( type == 0xCE ) { n = new JDNode("Start Of Frame (Differential progressive DCT)", ref++); }
       else { n = new JDNode("Start Of Frame (Differential Lossless)", ref++); }
       
       marker.add( n );
@@ -154,9 +154,11 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else if( type == 0xC4 )
     {
-      markerData.UINT8("Table Number");
+      markerData.UINT8("Class/Table Number");
 
-      JDNode n = new JDNode("Huffman Table #" + (((byte)markerData.value) & 0xFF) + "", ref++); marker.add( n );
+      int classType = (((byte)markerData.value) & 0xF0) >> 4;
+
+      JDNode n = new JDNode("Huffman Table #" + (((byte)markerData.value) & 0x0F) + " (Class = " + classType + ")", ref++); marker.add( n );
 
       //Begin reading Huffman Tables.
 
@@ -179,13 +181,15 @@ public class JPEG extends Window.Window implements JDEventListener
 
         Huff.Other("Huffman Data", Sum);
 
-        //The tables can be grouped toghter under one marker.
+        //The tables can be grouped together under one marker.
 
         size -= 17 + Sum; Sum = 0; if( size > 0 )
         {
-          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Table Number");
+          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number");
 
-          n = new JDNode("Huffman Table #" + (((byte)nTable.value) & 0xFF) + "", ref++); marker.add( n );
+          classType = (((byte)nTable.value) & 0xF0) >> 4;
+
+          n = new JDNode("Huffman Table #" + (((byte)nTable.value) & 0x0F) + " (Class = " + classType + ")", ref++); marker.add( n );
         }
       }
 
@@ -197,9 +201,11 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else if( type == 0xDB )
     {
-      markerData.UINT8("Table Number");
+      markerData.UINT8("Precision/Table Number");
 
-      JDNode n = new JDNode("Quantization Table #" + (((byte)markerData.value) & 0xFF) + "", ref++); marker.add( n );
+      int Precision = (((byte)markerData.value) & 0xF0) >> 4;
+
+      JDNode n = new JDNode("Quantization Table #" + (((byte)markerData.value) & 0x0F) + " (" + ( Precision == 0 ? "8 Bit" : "16 bit" ) + ")", ref++); marker.add( n );
 
       //Begin reading Quantization Tables.
 
@@ -211,16 +217,25 @@ public class JPEG extends Window.Window implements JDEventListener
 
           JDNode matRow = new JDNode("Row #" + i + ".h", ref++); n.add( matRow );
 
-          for( int i2 = 1; i2 <= 8; i2++ ) { QMat.UINT8("EL #" + i2 + ""); }
+          if( Precision == 0 )
+          {
+            for( int i2 = 1; i2 <= 8; i2++ ) { QMat.UINT8("EL #" + i2 + ""); }
+          }
+          else
+          {
+            for( int i2 = 1; i2 <= 8; i2++ ) { QMat.UINT16("EL #" + i2 + ""); }
+          }
         }
 
-        //The tables can be grouped toghter under one marker.
+        //The tables can be grouped together under one marker.
 
         size -= 65; if( size > 64 )
         {
-          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Table Number");
+          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number");
 
-          n = new JDNode("Quantization Table #" + (((byte)nTable.value) & 0xFF) + "", ref++); marker.add( n );
+          Precision = (((byte)nTable.value) & 0xF0) >> 4;
+
+          n = new JDNode("Quantization Table #" + (((byte)nTable.value) & 0x0F) + " (" + ( Precision == 0 ? "8 Bit" : "16 bit" ) + ")", ref++); marker.add( n );
         }
       }
 
