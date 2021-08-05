@@ -62,9 +62,29 @@ Supports .efi boot binaries and boot sector disassembly.
 
 Supports analyzing and editing BIT Map pictures.
 
+Supports analyzing and editing JPEG pictures.
+
+Supports analyzing and editing WebP pictures.
+
+Supports analyzing and editing CDR pictures.
+
+Supports analyzing and editing ANI (Animated cursors).
+
+Supports analyzing and editing PAL (Color Palette).
+
 ## Audio formats.
 
 Supports analyzing and editing wave Audio files.
+
+Supports analyzing and editing RMI Audio files.
+
+Supports analyzing and editing DLS Audio files.
+
+Supports analyzing and editing XMA Audio files.
+
+## Video formats.
+
+Supports analyzing and editing AVI video files.
 
 ## Contributing a file format.
 
