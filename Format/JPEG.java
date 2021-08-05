@@ -166,18 +166,15 @@ public class JPEG extends Window.Window implements JDEventListener
 
       while( size > 0 )
       {
-        for( int i = 1; i <= 2; i++ )
-        {
-          Descriptor Huff = new Descriptor(file); des.add(Huff);
-
-          JDNode HRow = new JDNode("Row #" + i + ".h", ref++); n.add( HRow );
-
-          for( int i2 = 1; i2 <= 8; i2++ ) { Huff.UINT8("EL #" + i2 + ""); Sum += ((byte)Huff.value) & 0xFF; }
-        }
-
         Descriptor Huff = new Descriptor(file); des.add(Huff);
 
-        JDNode HRow = new JDNode("Data.h", ref++); n.add( HRow );
+        JDNode HRow = new JDNode("Huffman codes.h", ref++); n.add( HRow );
+
+        for( int i = 1; i <= 16; i++ ) { Huff.UINT8("EL #" + i + ""); Sum += ((byte)Huff.value) & 0xFF; }
+
+        Huff = new Descriptor(file); des.add(Huff);
+
+        HRow = new JDNode("Data.h", ref++); n.add( HRow );
 
         Huff.Other("Huffman Data", Sum);
 
@@ -229,7 +226,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
         //The tables can be grouped together under one marker.
 
-        size -= 65; if( size > 64 )
+        size -= Precision == 0 ? 65 : 129; if( ( Precision == 0 && size > 64 ) || ( Precision == 1 && size > 128 ) )
         {
           Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number");
 
