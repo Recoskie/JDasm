@@ -95,7 +95,7 @@ public class JPEG extends Window.Window implements JDEventListener
         if( file.toShort() == (short)0xFF00 || file.toShort() == -1 ){ nx = 0; } //This is a bad marker.
       }
 
-      if( skip > 0 ) { h.add( new JDNode("Data.h", new long[]{ -2, file.getFilePointer() - skip, file.getFilePointer() - 1 } ) ); }
+      if( skip > 0 ) { h.add( new JDNode("Image Data.h", new long[]{ -2, file.getFilePointer() - skip, file.getFilePointer() - 1 } ) ); }
     }
 
     //Setup headers.
