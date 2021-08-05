@@ -14,6 +14,8 @@ public class JPEG extends Window.Window implements JDEventListener
 
   private Descriptor markerData;
 
+  private long EOI = 0;
+
   //Picture dimensions.
 
   private int width = 0, height = 0;
@@ -22,7 +24,7 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     //Setup.
 
-    tree.setEventListener( this ); file.Events = false;
+    tree.setEventListener( this ); file.Events = false; EOI = file.length() - 2;
 
     ((DefaultTreeModel)tree.getModel()).setRoot(null); tree.setRootVisible(true); tree.setShowsRootHandles(true); root = new JDNode( fc.getFileName(), -1 );
     
@@ -47,7 +49,7 @@ public class JPEG extends Window.Window implements JDEventListener
       markerData.UINT8("Maker Code");
       markerData.UINT8("Marker type"); type = ((byte)markerData.value) & 0xFF;
 
-      //Markers betwean 0xD0 to 0xD9 have no size.
+      //Markers between 0xD0 to 0xD9 have no size.
 
       if( type >= 0xD0 && type <= 0xD9 )
       {
@@ -67,10 +69,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
         //End of image
 
-        else if( type == 0xD9 )
-        {
-
-        }
+        else if( type == 0xD9 ) { h.add( new JDNode("End of Image.h", ref++) ); }
       }
 
       //Decode maker data types.
@@ -87,6 +86,10 @@ public class JPEG extends Window.Window implements JDEventListener
       //Read the next byte to check if there is another marker.
 
       t = file.getFilePointer(); file.read(1); nx = file.toByte(); file.seek(t);
+
+      //If no more JPEG makers, then goto EOI.
+
+      if( nx != -1 && t < EOI ) { h.add( new JDNode("Image Data.h", new long[]{ -2, t, EOI - 1 } ) ); file.seek( EOI ); nx = -1; }
     }
 
     //Setup headers.
@@ -103,7 +106,7 @@ public class JPEG extends Window.Window implements JDEventListener
     if( ( type & 0xF0 ) == 0xC0 && !( type == 0xC4 || type == 0xC8 || type == 0xCC ) )
     {
       JDNode n;
-      
+       
       //Non-Deferential Huffman coded pictures.
 
       if( type == 0xC0 ) { n = new JDNode("Start Of Frame (baseline DCT)", ref++); }      
@@ -194,7 +197,29 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else if( type == 0xDA )
     {
-      marker.add( new JDNode("Start Of Scan.h", ref++) );
+      JDNode n = new JDNode("Start Of Scan", ref++); marker.add( n );
+
+      markerData.UINT8("Number of Components"); int Ns = ((byte)markerData.value) & 0xFF;
+
+      for( int c = 1; c <= Ns; c++ )
+      {
+        Descriptor Scan = new Descriptor(file); des.add(Scan);
+
+        JDNode comp = new JDNode("Component #" + c + ".h", ref++); n.add( comp );
+
+        Scan.UINT8("Scan component");
+        Scan.UINT8("Entropy Table");
+      }
+
+      Descriptor info = new Descriptor(file); des.add(info);
+
+      JDNode end = new JDNode("Scan info.h", ref++); n.add( end );
+
+      info.UINT8("Start of Spectral");
+      info.UINT8("End of Spectral");
+      info.UINT8("ah/al");
+
+      return( true );
     }
     else if( type == 0xDB )
     {
@@ -206,7 +231,9 @@ public class JPEG extends Window.Window implements JDEventListener
 
       //Begin reading Quantization Tables.
 
-      while( size > 64 )
+      int eSize = Precision == 0 ? 65 : 129;
+
+      while( size >= eSize )
       {
         for( int i = 1; i <= 8; i++ )
         {
@@ -226,11 +253,11 @@ public class JPEG extends Window.Window implements JDEventListener
 
         //The tables can be grouped together under one marker.
 
-        size -= Precision == 0 ? 65 : 129; if( ( Precision == 0 && size > 64 ) || ( Precision == 1 && size > 128 ) )
+        size -= eSize; if( size >= eSize )
         {
           Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number");
 
-          Precision = (((byte)nTable.value) & 0xF0) >> 4;
+          Precision = (((byte)nTable.value) & 0xF0) >> 4; eSize = Precision == 0 ? 65 : 129;
 
           n = new JDNode("Quantization Table #" + (((byte)nTable.value) & 0x0F) + " (" + ( Precision == 0 ? "8 Bit" : "16 bit" ) + ")", ref++); marker.add( n );
         }
@@ -303,9 +330,6 @@ public class JPEG extends Window.Window implements JDEventListener
 
       ds.setDescriptor(des.get((int)e.getArg(0)));
     }
-    else
-    {
-
-    }
+    else if( e.getArg(0) == -2 ) { Offset.setSelected( e.getArg(1), e.getArg(2) ); }
   }
 }
