@@ -13,6 +13,7 @@ public class JPEG extends Window.Window implements JDEventListener
   private Descriptor markerData;
 
   private long EOI = 0;
+  private int skip = 0;
 
   //Picture dimensions.
 
@@ -49,7 +50,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
       //Markers between 0xD0 to 0xD9 have no size.
 
-      if( type >= 0xD0 && type <= 0xD9 )
+      if( type >= 0xD0 && type <= 0xD9 || type <= 0x01 )
       {
         //Restart marker
 
@@ -74,7 +75,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
       else
       {
-        markerData.UINT16("Maker size"); size = (short)markerData.value - 2;
+        markerData.UINT16("Maker size"); size = ( ((short)markerData.value) & 0xFFFF ) - 2;
 
         //Decode the marker if it is a known type.
 
@@ -83,11 +84,18 @@ public class JPEG extends Window.Window implements JDEventListener
 
       //Read the next byte to check if there is another marker.
 
-      t = file.getFilePointer(); file.read(1); nx = file.toByte(); file.seek(t);
+      skip = 0; t = file.getFilePointer(); file.read(2); nx = file.toByte(); file.seek(t);
 
-      //If no more JPEG makers, then goto EOI.
+      if( file.toShort() == (short)0xFF00 ){ nx = 0; } //This is a bad marker.
 
-      if( nx != -1 && t < EOI ) { h.add( new JDNode("Image Data.h", new long[]{ -2, t, EOI - 1 } ) ); file.seek( EOI ); nx = -1; }
+      while( nx != -1 && t < EOI )
+      {
+        skip += 1; file.skipBytes(1); t = file.getFilePointer(); file.read(2); nx = file.toByte(); file.seek(t);
+
+        if( file.toShort() == (short)0xFF00 || file.toShort() == -1 ){ nx = 0; } //This is a bad marker.
+      }
+
+      if( skip > 0 ) { h.add( new JDNode("Data.h", new long[]{ -2, file.getFilePointer() - skip, file.getFilePointer() - 1 } ) ); }
     }
 
     //Setup headers.
@@ -98,6 +106,8 @@ public class JPEG extends Window.Window implements JDEventListener
 
     tree.setSelectionPath( new TreePath( h.getPath() ) ); open( new JDEvent( this, "", 0 ) );
   }
+
+  //All of this moves into sub functions when user clicks on a maker.
 
   private boolean decodeMarker( int type, int size, JDNode marker ) throws java.io.IOException
   {
@@ -328,6 +338,9 @@ public class JPEG extends Window.Window implements JDEventListener
 
       ds.setDescriptor(des.get((int)e.getArg(0)));
     }
+
+    //Highlight data.
+
     else if( e.getArg(0) == -2 )
     {
       try { file.seek( e.getArg(1) ); } catch( Exception er ) { }
