@@ -7,11 +7,9 @@ import javax.swing.tree.*;
 public class JPEG extends Window.Window implements JDEventListener
 {
   private java.util.LinkedList<Descriptor> des = new java.util.LinkedList<Descriptor>();
-
   private int ref = 0;
 
   private JDNode root;
-
   private Descriptor markerData;
 
   private long EOI = 0;
@@ -330,6 +328,11 @@ public class JPEG extends Window.Window implements JDEventListener
 
       ds.setDescriptor(des.get((int)e.getArg(0)));
     }
-    else if( e.getArg(0) == -2 ) { Offset.setSelected( e.getArg(1), e.getArg(2) ); }
+    else if( e.getArg(0) == -2 )
+    {
+      try { file.seek( e.getArg(1) ); } catch( Exception er ) { }
+      
+      Offset.setSelected( e.getArg(1), e.getArg(2) );
+    }
   }
 }
