@@ -33,7 +33,7 @@ We generally define these binary types as variables when writing software or doi
 
 Does not matter what CPU you use as all arithmetic types are the same across all cores. Otherwise, we would have a hard time processing file formats.
 
-The tools are explained in help and documentation. Plus, both audio and graphics use a standard format as well. All of this is put in detail, as well as machine code and compilation of software.
+The tools are explained in help and documentation. Plus, both audio and graphics use a standard format as well. Which is nice to learn if you are into writing an operating system. All of this is put in detail, as well as machine code and compilation of software.
 
 J-Disassembly can visually take binary software apart to allow you to create source code.
 
