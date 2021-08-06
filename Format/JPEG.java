@@ -15,6 +15,8 @@ public class JPEG extends Window.Window implements JDEventListener
   private long EOI = 0;
   private int skip = 0;
 
+  private static final String pad = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
   //Picture dimensions.
 
   private int width = 0, height = 0;
@@ -114,219 +116,62 @@ public class JPEG extends Window.Window implements JDEventListener
 
   private boolean decodeMarker( int type, int size, JDNode marker ) throws java.io.IOException
   {
+    JDNode n;
+
     if( ( type & 0xF0 ) == 0xC0 && !( type == 0xC4 || type == 0xC8 || type == 0xCC ) )
     {
-      JDNode n;
-       
-      //Non-Deferential Huffman coded pictures.
+      //Non-Deferential Huffman coded pictures
 
-      if( type == 0xC0 ) { n = new JDNode("Start Of Frame (baseline DCT)", ref++); }      
-      else if( type == 0xC1 ) { n = new JDNode("Start Of Frame (Extended Sequential DCT)", ref++); }
-      else if( type == 0xC2 ) { n = new JDNode("Start Of Frame (progressive DCT)", ref++); }
-      else if( type == 0xC3 ) { n = new JDNode("Start Of Frame (Lossless Sequential)", ref++); }
+      if( type == 0xC0 ) { n = new JDNode("Start Of Frame (baseline DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
+      else if( type == 0xC1 ) { n = new JDNode("Start Of Frame (Extended Sequential DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 }); }
+      else if( type == 0xC2 ) { n = new JDNode("Start Of Frame (progressive DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
+      else if( type == 0xC3 ) { n = new JDNode("Start Of Frame (Lossless Sequential)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
 
       //Huffman Deferential codded pictures.
       
-      else if( type == 0xC5 ) { n = new JDNode("Start Of Frame (Differential sequential DCT)", ref++); }
-      else if( type == 0xC6 ) { n = new JDNode("Start Of Frame (Differential progressive DCT)", ref++); }
-      else if( type == 0xC7 ) { n = new JDNode("Start Of Frame (Differential Lossless)", ref++); }
+      else if( type == 0xC5 ) { n = new JDNode("Start Of Frame (Differential sequential DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
+      else if( type == 0xC6 ) { n = new JDNode("Start Of Frame (Differential progressive DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
+      else if( type == 0xC7 ) { n = new JDNode("Start Of Frame (Differential Lossless)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
 
       //Non-Deferential Arithmetic codded pictures.
 
-      else if( type == 0xC9 ) { n = new JDNode("Start Of Frame (Extended Sequential DCT)", ref++); }
-      else if( type == 0xCA ) { n = new JDNode("Start Of Frame (Progressive DCT)", ref++); }
-      else if( type == 0xCB ) { n = new JDNode("Start Of Frame (Lossless Sequential)", ref++); }
+      else if( type == 0xC9 ) { n = new JDNode("Start Of Frame (Extended Sequential DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
+      else if( type == 0xCA ) { n = new JDNode("Start Of Frame (Progressive DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
+      else if( type == 0xCB ) { n = new JDNode("Start Of Frame (Lossless Sequential)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
 
       //Deferential Arithmetic codded pictures.
 
-      else if( type == 0xCD ) { n = new JDNode("Start Of Frame (Differential sequential DCT)", ref++); }
-      else if( type == 0xCE ) { n = new JDNode("Start Of Frame (Differential progressive DCT)", ref++); }
-      else { n = new JDNode("Start Of Frame (Differential Lossless)", ref++); }
-      
-      marker.add( n );
-
-      Descriptor image = new Descriptor(file); des.add(image);
-      n.add( new JDNode("Image Information.h", ref++) );
-
-      image.UINT8("Sample Precision");
-      image.UINT16("Picture Height"); width = ((short)image.value) & 0xFFFF;
-      image.UINT16("Picture Width"); height = ((short)image.value) & 0xFFFF;
-
-      image.UINT8("Number of Components in Picture"); int Nf = ((byte)image.value) & 0xFF;
-
-      for( int i = 1; i <= Nf; i++ )
-      {
-        Descriptor imageComp = new Descriptor(file); des.add(imageComp);
-        n.add( new JDNode("Image Component" + i + ".h", ref++) );
-        
-        imageComp.UINT8("Component Indemnifier");
-        imageComp.UINT8("Vertical/Horizontal Sampling factor");
-        imageComp.UINT8("Quantization table Number");
-      }
-
-      return(true);
+      else if( type == 0xCD ) { n = new JDNode("Start Of Frame (Differential sequential DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
+      else if( type == 0xCE ) { n = new JDNode("Start Of Frame (Differential progressive DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
+      else { n = new JDNode("Start Of Frame (Differential Lossless)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
     }
     else if( type == 0xC4 )
     {
-      markerData.UINT8("Class/Table Number");
-
-      int classType = (((byte)markerData.value) & 0xF0) >> 4;
-
-      JDNode n = new JDNode("Huffman Table #" + (((byte)markerData.value) & 0x0F) + " (Class = " + classType + ")", ref++); marker.add( n );
-
-      //Begin reading Huffman Tables.
-
-      int Sum = 0;
-
-      while( size > 0 )
-      {
-        Descriptor Huff = new Descriptor(file); des.add(Huff);
-
-        JDNode HRow = new JDNode("Huffman codes.h", ref++); n.add( HRow );
-
-        for( int i = 1; i <= 16; i++ ) { Huff.UINT8("EL #" + i + ""); Sum += ((byte)Huff.value) & 0xFF; }
-
-        Huff = new Descriptor(file); des.add(Huff);
-
-        HRow = new JDNode("Data.h", ref++); n.add( HRow );
-
-        Huff.Other("Huffman Data", Sum);
-
-        //The tables can be grouped together under one marker.
-
-        size -= 17 + Sum; Sum = 0; if( size > 0 )
-        {
-          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number");
-
-          classType = (((byte)nTable.value) & 0xF0) >> 4;
-
-          n = new JDNode("Huffman Table #" + (((byte)nTable.value) & 0x0F) + " (Class = " + classType + ")", ref++); marker.add( n );
-        }
-      }
-
-      return( true );
+      n = new JDNode("Huffman Table", new long[]{ ref++, file.getFilePointer(), size, 1 } );
     }
     else if( type == 0xDA )
     {
-      JDNode n = new JDNode("Start Of Scan", ref++); marker.add( n );
-
-      markerData.UINT8("Number of Components"); int Ns = ((byte)markerData.value) & 0xFF;
-
-      for( int c = 1; c <= Ns; c++ )
-      {
-        Descriptor Scan = new Descriptor(file); des.add(Scan);
-
-        JDNode comp = new JDNode("Component #" + c + ".h", ref++); n.add( comp );
-
-        Scan.UINT8("Scan component");
-        Scan.UINT8("Entropy Table");
-      }
-
-      Descriptor info = new Descriptor(file); des.add(info);
-
-      JDNode end = new JDNode("Scan info.h", ref++); n.add( end );
-
-      info.UINT8("Start of Spectral");
-      info.UINT8("End of Spectral");
-      info.UINT8("ah/al");
-
-      return( true );
+      n = new JDNode("Start Of Scan", new long[]{ ref++, file.getFilePointer(), size, 2 } );
     }
     else if( type == 0xDB )
     {
-      markerData.UINT8("Precision/Table Number");
-
-      int Precision = (((byte)markerData.value) & 0xF0) >> 4;
-
-      JDNode n = new JDNode("Quantization Table #" + (((byte)markerData.value) & 0x0F) + " (" + ( Precision == 0 ? "8 Bit" : "16 bit" ) + ")", ref++); marker.add( n );
-
-      //Begin reading Quantization Tables.
-
-      int eSize = Precision == 0 ? 65 : 129;
-
-      while( size >= eSize )
-      {
-        for( int i = 1; i <= 8; i++ )
-        {
-          Descriptor QMat = new Descriptor(file); des.add(QMat);
-
-          JDNode matRow = new JDNode("Row #" + i + ".h", ref++); n.add( matRow );
-
-          if( Precision == 0 )
-          {
-            for( int i2 = 1; i2 <= 8; i2++ ) { QMat.UINT8("EL #" + i2 + ""); }
-          }
-          else
-          {
-            for( int i2 = 1; i2 <= 8; i2++ ) { QMat.UINT16("EL #" + i2 + ""); }
-          }
-        }
-
-        //The tables can be grouped together under one marker.
-
-        size -= eSize; if( size >= eSize )
-        {
-          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number");
-
-          Precision = (((byte)nTable.value) & 0xF0) >> 4; eSize = Precision == 0 ? 65 : 129;
-
-          n = new JDNode("Quantization Table #" + (((byte)nTable.value) & 0x0F) + " (" + ( Precision == 0 ? "8 Bit" : "16 bit" ) + ")", ref++); marker.add( n );
-        }
-      }
-
-      return( true );
+      n = new JDNode("Quantization Table", new long[]{ ref++, file.getFilePointer(), size, 3 } );
+    }
+    else if( type == 0xDD )
+    {
+      n = new JDNode("Restart", new long[]{ ref++, file.getFilePointer(), size, 4 } );
     }
     else if( ( type & 0xF0 ) == 0xE0 )
     {
-      JDNode n = new JDNode("Application (info)", ref++);
-
-      marker.add( n );
-
-      Descriptor m = new Descriptor(file); des.add(m);
-
-      m.String8("Type", (byte)0x00); String Type = (String)m.value;
-
-      if( Type.equals("JFIF") )
-      {
-        m.UINT8("Major version");
-        m.UINT8("Minor version");
-        m.UINT8("Density");
-        m.UINT16("Horizontal pixel Density");
-        m.UINT16("Vertical pixel Density");
-        m.UINT8("Horizontal pixel count");
-        m.UINT8("Vertical pixel count");
-
-        if( size - 14 > 0 )
-        {
-          m.Other("Other Data", size - 14 );
-        }
-      }
-      else { m.Other("Marker Data", size - Type.length() - 1 ); }
-
-      n.add( new JDNode(Type + ".h", ref++) );
-
-      return(true);
+      n = new JDNode("Application (info)", new long[]{ ref++, file.getFilePointer(), size, 5 } );
     }
     else if( type == 0xFE )
     {
-      JDNode n = new JDNode("Comment", ref++);
-
-      marker.add( n );
-
-      Descriptor m = new Descriptor(file); des.add(m);
-
-      m.String8("Comment Text", size);
-
-      n.add( new JDNode("Text.h", ref++) );
-
-      return( true );
+      n = new JDNode("Comment", new long[]{ ref++, file.getFilePointer(), size, 6 } );
     }
-    else
-    {
-      marker.add( new JDNode("Marker.h", ref++) );
-    }
+    else { n = new JDNode("Maker.h", ref++ ); return( false ); }
 
-    return( false );
+    n.add( new JDNode(pad) ); marker.add( n ); file.skipBytes(size); return( true );
   }
 
   public void Uninitialize() { des.clear(); ref = 0; }
@@ -348,7 +193,199 @@ public class JPEG extends Window.Window implements JDEventListener
     {
       try { file.seek( e.getArg(1) ); } catch( Exception er ) { }
       
-      Offset.setSelected( e.getArg(1), e.getArg(2) );
+      Offset.setSelected( e.getArg(1), e.getArg(2) ); ds.clear();
+    }
+
+    //Read an marker.
+
+    if( e.getArgs().length == 4 )
+    {
+      JDNode root = (JDNode)tree.getLastSelectedPathComponent(), node = (JDNode)root.getFirstChild();
+
+      DefaultTreeModel model = ((DefaultTreeModel)tree.getModel());
+
+      int size = (int)e.getArg(2), type = (int)e.getArg(3);
+
+      file.Events = false; 
+      
+      try
+      {
+        file.seek( e.getArg(1) );
+
+        if( type == 0 )
+        {
+          Descriptor image = new Descriptor(file); des.add(image);
+
+          node.setUserObject("Image Information"); node.setArgs( new long[]{ ref++ } );
+    
+          image.UINT8("Sample Precision");
+          image.UINT16("Picture Height"); width = ((short)image.value) & 0xFFFF;
+          image.UINT16("Picture Width"); height = ((short)image.value) & 0xFFFF;
+    
+          image.UINT8("Number of Components in Picture"); int Nf = ((byte)image.value) & 0xFF;
+    
+          for( int i = 1; i <= Nf; i++ )
+          {
+            Descriptor imageComp = new Descriptor(file); des.add(imageComp);
+            
+            node.add( new JDNode("Image Component" + i + ".h", ref++) );
+            
+            imageComp.UINT8("Component Indemnifier");
+            imageComp.UINT8("Vertical/Horizontal Sampling factor");
+            imageComp.UINT8("Quantization table Number");
+          }
+
+          ((DefaultTreeModel)tree.getModel()).nodeChanged( (JDNode)tree.getLastSelectedPathComponent() );
+        }
+        else if( type == 1 )
+        {
+          //Begin reading Huffman Tables.
+
+          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number");
+
+          int classType = (((byte)nTable.value) & 0xF0) >> 4;
+
+          node.setUserObject("Huffman Table #" + (((byte)nTable.value) & 0x0F) + " (Class = " + classType + ")"); node.setArgs( new long[]{ ref++ } );
+
+          int Sum = 0;
+
+          while( size > 0 )
+          {
+            Descriptor Huff = new Descriptor(file); des.add(Huff);
+
+            JDNode HRow = new JDNode("Huffman codes.h", ref++); node.add( HRow );
+
+            for( int i = 1; i <= 16; i++ ) { Huff.UINT8("EL #" + i + ""); Sum += ((byte)Huff.value) & 0xFF; }
+
+            Huff = new Descriptor(file); des.add(Huff);
+
+            HRow = new JDNode("Data.h", ref++); node.add( HRow );
+
+            Huff.Other("Huffman Data", Sum);
+
+            //The tables can be grouped together under one marker.
+
+            size -= 17 + Sum; Sum = 0; if( size > 0 )
+            {
+              nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number");
+
+              classType = (((byte)nTable.value) & 0xF0) >> 4;
+
+              node = new JDNode("Huffman Table #" + (((byte)nTable.value) & 0x0F) + " (Class = " + classType + ")", ref++);
+
+              model.insertNodeInto(node, root, root.getChildCount());
+            }
+          }
+        }
+        else if( type == 2 )
+        {
+          node.setUserObject("Components.h"); node.setArgs( new long[]{ ref++ } );
+
+          Descriptor Scan = new Descriptor(file); des.add(Scan);
+
+          Scan.UINT8("Number of Components"); int Ns = ((byte)Scan.value) & 0xFF;
+
+          for( int c = 1; c <= Ns; c++ )
+          {
+            Scan.Array("Component #" + c + "", 2);
+            Scan.UINT8("Scan component");
+            Scan.UINT8("Entropy Table");
+          }
+    
+          Descriptor info = new Descriptor(file); des.add(info);
+    
+          model.insertNodeInto(new JDNode("Scan info.h", ref++), root, root.getChildCount());
+    
+          info.UINT8("Start of Spectral");
+          info.UINT8("End of Spectral");
+          info.UINT8("ah/al");
+        }
+        else if( type == 3 )
+        {
+          //Begin reading Quantization Tables.
+
+          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number");
+
+          int Precision = (((byte)nTable.value) & 0xF0) >> 4;
+
+          node.setUserObject("Quantization Table #" + (((byte)nTable.value) & 0x0F) + " (" + ( Precision == 0 ? "8 Bit" : "16 bit" ) + ")"); node.setArgs( new long[]{ ref++ } );
+
+          int eSize = Precision == 0 ? 65 : 129;
+
+          while( size >= eSize )
+          {
+            for( int i = 1; i <= 8; i++ )
+            {
+              Descriptor QMat = new Descriptor(file); des.add(QMat);
+    
+              JDNode matRow = new JDNode("Row #" + i + ".h", ref++); node.add( matRow );
+    
+              if( Precision == 0 )
+              {
+                for( int i2 = 1; i2 <= 8; i2++ ) { QMat.UINT8("EL #" + i2 + ""); }
+              }
+              else
+              {
+                for( int i2 = 1; i2 <= 8; i2++ ) { QMat.UINT16("EL #" + i2 + ""); }
+              }
+            }
+
+            //The tables can be grouped together under one marker.
+
+            size -= eSize; if( size >= eSize )
+            {
+              nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number");
+
+              Precision = (((byte)nTable.value) & 0xF0) >> 4; eSize = Precision == 0 ? 65 : 129;
+
+              node = new JDNode("Quantization Table #" + (((byte)nTable.value) & 0x0F) + " (" + ( Precision == 0 ? "8 Bit" : "16 bit" ) + ")", ref++);
+
+              model.insertNodeInto(node, root, root.getChildCount());
+            }
+          }
+        }
+        else if( type == 4 )
+        {
+          Descriptor r = new Descriptor(file); des.add(r); r.UINT16("Restart interval");
+
+          node.setUserObject("Restart interval.h"); node.setArgs( new long[]{ ref++ } );
+        }
+        else if( type == 5 )
+        {
+          Descriptor m = new Descriptor(file); des.add(m);
+
+          m.String8("Type", (byte)0x00); String Type = (String)m.value;
+
+          node.setUserObject( Type + ".h" ); node.setArgs(new long[]{ ref++ });
+
+          if( Type.equals("JFIF") )
+          {
+            m.UINT8("Major version");
+            m.UINT8("Minor version");
+            m.UINT8("Density");
+            m.UINT16("Horizontal pixel Density");
+            m.UINT16("Vertical pixel Density");
+            m.UINT8("Horizontal pixel count");
+            m.UINT8("Vertical pixel count");
+
+            if( size - 14 > 0 )
+            {
+              m.Other("Other Data", size - 14 );
+            }
+          }
+        }
+        else if( type == 6 )
+        {
+          Descriptor text = new Descriptor(file); des.add(text); text.String8("Comment", size);
+
+          node.setUserObject("Text.h"); node.setArgs( new long[]{ ref++ } );
+        }
+
+        root.setArgs( new long[]{ root.getArg(0) } );
+      }
+      catch( Exception er ) { er.printStackTrace(); }
+
+      file.Events = true;
     }
   }
 }
