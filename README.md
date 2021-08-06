@@ -30,23 +30,27 @@ J-Disassembly.
   </tr>
 </table>
 
-J-Disassembly is designed to be user-friendly. For both professional and absolute beginners.
+J-Disassembly makes binary files and machine code visual and also, easy to understand and modify in raw binary form.
 
-This tool makes binary files and formats visual and also easy to understand and modify.
+It is designed for anyone as an easy way to learn how binary files are read. In which a processor processes standard binary types.
 
-It is designed for anyone new learning how binary files are read or for professional use.
+We generally define these binary types as variables when writing software or doing any Arithmetic.
 
-The tools are explained in help and documentation.
+Does not matter what CPU you use as all arithmetic types are the same across all cores. Otherwise, we would have a hard time processing file formats.
+
+The tools are explained in help and documentation. Plus, both audio and graphics use a standard format as well. All of this is put in detail, as well as machine code and compilation of software. 
 
 ------------------------------------------------------------
 
-J-Disassembly can visually take binary software apart to create source code. No matter what operating system you are on or CPU.
+J-Disassembly can visually take binary software apart to allow you to create source code.
 
-J-Disassembly also visualizes binary data and file types. Showing you what every binary digit read is used for.
+J-Disassembly also visualizes binary data and file types. Showing you what every binary digit read is actually used for.
 
 This tool is also a hex editor and data forensics tool for binary files that is fun, visual, easy to use, and understand.
 
 You can also read disk drives sector by sector (one binary digit at a time from start to end).
+
+The application is designed, for anyone, or for professional use.
 
 ------------------------------------------------------------
 Supported formats.
