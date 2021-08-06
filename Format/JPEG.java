@@ -51,7 +51,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
       if( MCode == -1 && (type > 0x01 && type != 0xFF) )
       {
-        if( skip > 0 ) { h.add( new JDNode("Image Data.h", new long[]{ -2, pos - skip, pos - 3 } ) ); skip = 0; }
+        if( skip > 0 ) { h.add( new JDNode("Image Data.h", new long[]{ -2, pos - skip, pos - 1 } ) ); skip = 0; }
 
         file.seek( pos ); //Seek the actual position.
 
