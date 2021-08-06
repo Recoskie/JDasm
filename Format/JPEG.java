@@ -23,7 +23,7 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     //Setup.
 
-    tree.setEventListener( this ); file.Events = false; EOI = file.length() - 2;
+    tree.setEventListener( this ); file.Events = false; EOI = file.length();
 
     ((DefaultTreeModel)tree.getModel()).setRoot(null); tree.setRootVisible(true); tree.setShowsRootHandles(true); root = new JDNode( fc.getFileName(), -1 );
     
@@ -33,69 +33,66 @@ public class JPEG extends Window.Window implements JDEventListener
 
     //Read the jpeg markers. All markers start with a 0xFF = -1 code.
 
-    int nx = 0, size = 0, type = 0;
+    int MCode = 0, size = 0, type = 0;
 
     //Set nx to the first byte which should be a marker code (start of image).
 
-    long t = file.getFilePointer(); file.read(1); nx = file.toByte(); file.seek(t);
+    long t = 0;
 
     //Read all the markers and define the data of known marker types.
 
-    while( nx == -1 )
+    while( t < EOI )
     {
-      markerData = new Descriptor(file); des.add(markerData);
+      t = file.getFilePointer(); file.read(2); MCode = file.toByte(); type = file.toByte(1) & 0xFF; file.seek(t);
+
+      //These are not markers.
+
+      if( MCode == -1 && (type > 0x01 && type != 0xFF) )
+      {
+        markerData = new Descriptor(file); des.add(markerData);
   
-      markerData.UINT8("Maker Code");
-      markerData.UINT8("Marker type"); type = ((byte)markerData.value) & 0xFF;
+        markerData.UINT8("Maker Code"); markerData.UINT8("Marker type");
 
-      //Markers between 0xD0 to 0xD9 have no size.
+        if( skip > 0 ) { h.add( new JDNode("Image Data.h", new long[]{ -2, file.getFilePointer() - skip, file.getFilePointer() - 1 } ) ); skip = 0; }
 
-      if( type >= 0xD0 && type <= 0xD9 || type <= 0x01 )
-      {
-        //Restart marker
+        //Markers between 0xD0 to 0xD9 have no size.
 
-        if( ( type & 0xF8 ) == 0xD0 )
+        if( type >= 0xD0 && type <= 0xD9 )
         {
-          h.add( new JDNode("Restart.h", ref++) );
+          //Restart marker
+
+          if( ( type & 0xF8 ) == 0xD0 )
+          {
+            h.add( new JDNode("Restart.h", ref++) );
+          }
+
+          //Set Start of image as read.
+
+          else if( type == 0xD8 )
+          {
+            h = new JDNode("JPEG Data", ref++); root.add( h );
+          }
+
+          //End of image
+
+          else if( type == 0xD9 ) { h.add( new JDNode("End of Image.h", ref++) ); }
         }
 
-        //Set Start of image as read.
+        //Decode maker data types.
 
-        else if( type == 0xD8 )
+        else
         {
-          h = new JDNode("JPEG Data", ref++); root.add( h );
+          markerData.UINT16("Maker size"); size = ( ((short)markerData.value) & 0xFFFF ) - 2;
+
+          //Decode the marker if it is a known type.
+
+          if( !decodeMarker( type, size, h ) ) { markerData.Other("Maker Data", size); }
         }
-
-        //End of image
-
-        else if( type == 0xD9 ) { h.add( new JDNode("End of Image.h", ref++) ); }
       }
 
-      //Decode maker data types.
+      //Start of scan data.
 
-      else
-      {
-        markerData.UINT16("Maker size"); size = ( ((short)markerData.value) & 0xFFFF ) - 2;
-
-        //Decode the marker if it is a known type.
-
-        if( !decodeMarker( type, size, h ) ) { markerData.Other("Maker Data", size); }
-      }
-
-      //Read the next byte to check if there is another marker.
-
-      skip = 0; t = file.getFilePointer(); file.read(2); nx = file.toByte(); file.seek(t);
-
-      if( file.toShort() == (short)0xFF00 ){ nx = 0; } //This is a bad marker.
-
-      while( nx != -1 && t < EOI )
-      {
-        skip += 1; file.skipBytes(1); t = file.getFilePointer(); file.read(2); nx = file.toByte(); file.seek(t);
-
-        if( file.toShort() == (short)0xFF00 || file.toShort() == -1 ){ nx = 0; } //This is a bad marker.
-      }
-
-      if( skip > 0 ) { h.add( new JDNode("Image Data.h", new long[]{ -2, file.getFilePointer() - skip, file.getFilePointer() - 1 } ) ); }
+      else { skip += type == 0xFF ? 1 : 2; file.skipBytes( type == 0xFF ? 1 : 2 ); }
     }
 
     //Setup headers.
