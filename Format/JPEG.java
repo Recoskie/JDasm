@@ -35,25 +35,29 @@ public class JPEG extends Window.Window implements JDEventListener
 
     int MCode = 0, size = 0, type = 0;
 
-    //Set nx to the first byte which should be a marker code (start of image).
+    //Read image data in 1k buffer.
 
-    long t = 0;
+    long pos = -1; int buf = 1024; byte[] b = new byte[buf];
 
     //Read all the markers and define the data of known marker types.
 
-    while( t < EOI )
+    while( pos < EOI )
     {
-      t = file.getFilePointer(); file.read(2); MCode = file.toByte(); type = file.toByte(1) & 0xFF; file.seek(t);
+      if( buf > 1022 ) { pos += 1; buf = 0; file.read(b); }
+
+      MCode = b[buf]; type = b[buf + 1] & 0xFF;
 
       //These are not markers.
 
       if( MCode == -1 && (type > 0x01 && type != 0xFF) )
       {
+        if( skip > 0 ) { h.add( new JDNode("Image Data.h", new long[]{ -2, pos - skip, pos - 3 } ) ); skip = 0; }
+
+        file.seek( pos ); //Seek the actual position.
+
         markerData = new Descriptor(file); des.add(markerData);
   
         markerData.UINT8("Maker Code"); markerData.UINT8("Marker type");
-
-        if( skip > 0 ) { h.add( new JDNode("Image Data.h", new long[]{ -2, file.getFilePointer() - skip, file.getFilePointer() - 1 } ) ); skip = 0; }
 
         //Markers between 0xD0 to 0xD9 have no size.
 
@@ -88,11 +92,13 @@ public class JPEG extends Window.Window implements JDEventListener
 
           if( !decodeMarker( type, size, h ) ) { markerData.Other("Maker Data", size); }
         }
+
+        pos = file.getVirtualPointer(); buf = 0; file.read(b);
       }
 
       //Start of scan data.
 
-      else { skip += type == 0xFF ? 1 : 2; file.skipBytes( type == 0xFF ? 1 : 2 ); }
+      else { skip += 1; buf += 1; pos += 1; }
     }
 
     //Setup headers.
