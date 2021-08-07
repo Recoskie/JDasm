@@ -13,7 +13,6 @@ public class JPEG extends Window.Window implements JDEventListener
   private Descriptor markerData;
 
   private long EOI = 0;
-  private int skip = 0;
 
   private static final String pad = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
@@ -39,23 +38,28 @@ public class JPEG extends Window.Window implements JDEventListener
 
     //Read image data in 1k buffer.
 
-    long pos = -1; int buf = 1024; byte[] b = new byte[buf];
+    long pos = 0, markerPos = 0; int buf = 0; byte[] b = new byte[1024]; file.read(b);
 
     //Read all the markers and define the data of known marker types.
 
     while( pos < EOI )
     {
-      if( buf > 1022 ) { pos += 1; buf = 0; file.read(b); }
+      if( buf > 1022 )
+      {
+        pos = buf + pos; buf = 0;
+        
+        file.seek(pos); file.read(b);
+      }
 
       MCode = b[buf]; type = b[buf + 1] & 0xFF;
 
-      //These are not markers.
+      //Check if it is a valid maker.
 
       if( MCode == -1 && (type > 0x01 && type != 0xFF) )
       {
-        if( skip > 0 ) { h.add( new JDNode("Image Data.h", new long[]{ -2, pos - skip, pos - 1 } ) ); skip = 0; }
+        if( pos + buf != markerPos ) { h.add( new JDNode("Image Data.h", new long[]{ -2, markerPos, ( pos + buf ) - 1 } ) ); }
 
-        file.seek( pos ); //Seek the actual position.
+        markerPos = pos + buf; file.seek( markerPos ); //Seek the actual position.
 
         markerData = new Descriptor(file); des.add(markerData);
   
@@ -82,25 +86,23 @@ public class JPEG extends Window.Window implements JDEventListener
           //End of image
 
           else if( type == 0xD9 ) { h.add( new JDNode("End of Image.h", ref++) ); }
+
+          markerPos += 2; buf += 2;
         }
 
         //Decode maker data types.
 
         else
         {
-          markerData.UINT16("Maker size"); size = ( ((short)markerData.value) & 0xFFFF ) - 2;
+          markerData.UINT16("Maker size"); size = ( ((short)markerData.value) & 0xFFFF ) - 2; if( size <= 0 ){ size = 1; }
 
           //Decode the marker if it is a known type.
 
           if( !decodeMarker( type, size, h ) ) { markerData.Other("Maker Data", size); }
+
+          markerPos += size + 4; buf += size + 4;
         }
-
-        pos = file.getVirtualPointer(); buf = 0; file.read(b);
-      }
-
-      //Start of scan data.
-
-      else { skip += 1; buf += 1; pos += 1; }
+      } else { buf += type != 0xFF ? 2 : 1; }
     }
 
     //Setup headers.
@@ -171,7 +173,7 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else { n = new JDNode("Maker.h", ref++ ); return( false ); }
 
-    n.add( new JDNode(pad) ); marker.add( n ); file.skipBytes(size); return( true );
+    n.add( new JDNode(pad) ); marker.add( n ); return( true );
   }
 
   public void Uninitialize() { des.clear(); ref = 0; }
