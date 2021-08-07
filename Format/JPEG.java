@@ -42,13 +42,15 @@ public class JPEG extends Window.Window implements JDEventListener
 
     //Read all the markers and define the data of known marker types.
 
-    while( pos < EOI )
+    while( ( pos + buf ) < EOI )
     {
       if( buf > 1022 )
       {
         pos = buf + pos; buf = 0;
         
-        file.seek(pos); file.read(b);
+        if( buf != 1024 ) { file.seek(pos); }
+        
+        file.read(b);
       }
 
       MCode = b[buf]; type = b[buf + 1] & 0xFF;
@@ -85,7 +87,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           //End of image
 
-          else if( type == 0xD9 ) { h.add( new JDNode("End of Image.h", ref++) ); }
+          else if( type == 0xD9 ) { h.add( new JDNode("End of Image.h", ref++) ); break; }
 
           markerPos += 2; buf += 2;
         }
@@ -100,7 +102,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           if( !decodeMarker( type, size, h ) ) { markerData.Other("Maker Data", size); }
 
-          markerPos += size + 4; buf += size + 4;
+          markerPos += size + 4; buf += size + 4; file.skipBytes(size);
         }
       } else { buf += type != 0xFF ? 2 : 1; }
     }
