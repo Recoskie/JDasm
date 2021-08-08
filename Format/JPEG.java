@@ -36,19 +36,19 @@ public class JPEG extends Window.Window implements JDEventListener
 
     int MCode = 0, size = 0, type = 0;
 
-    //Read image data in 1k buffer.
+    //Read image data in 4k buffer.
 
-    long pos = 0, markerPos = 0; int buf = 0; byte[] b = new byte[1024]; file.read(b);
+    long pos = 0, markerPos = 0; int buf = 0; byte[] b = new byte[4096]; file.read(b);
 
     //Read all the markers and define the data of known marker types.
 
     while( ( pos + buf ) < EOI )
     {
-      if( buf > 1022 )
+      if( buf > 4094 )
       {
         pos = buf + pos; buf = 0;
         
-        if( buf != 1024 ) { file.seek(pos); }
+        if( buf != 4096 ) { file.seek(pos); }
         
         file.read(b);
       }
@@ -75,7 +75,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           if( ( type & 0xF8 ) == 0xD0 )
           {
-            h.add( new JDNode("Restart.h", ref++) );
+            h.add( new JDNode("Restart #" + ( type & 0x0F ) + ".h", ref++) );
           }
 
           //Set Start of image as read.
@@ -96,7 +96,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
         else
         {
-          markerData.UINT16("Maker size"); size = ( ((short)markerData.value) & 0xFFFF ) - 2; if( size <= 0 ){ size = 1; }
+          markerData.UINT16("Maker size"); size = ( ((short)markerData.value) & 0xFFFF ) - 2;
 
           //Decode the marker if it is a known type.
 
