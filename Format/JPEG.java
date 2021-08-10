@@ -2,6 +2,8 @@ package Format;
 
 import swingIO.*;
 import swingIO.tree.*;
+
+import javax.swing.plaf.basic.BasicSliderUI.ComponentHandler;
 import javax.swing.tree.*;
 
 public class JPEG extends Window.Window implements JDEventListener
@@ -199,7 +201,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
       if( ((JDNode)tree.getLastSelectedPathComponent()).toString().equals("Image Data.h") )
       {
-        info("<html>This is the image color data. You can modify this to whatever you like.</html>");
+        info("<html>This is the image color data. You can modify this to whatever you like.</html>"); ds.clear();
       }
       
       Offset.setSelected( e.getArg(1), e.getArg(2) );
@@ -235,7 +237,7 @@ public class JPEG extends Window.Window implements JDEventListener
     
           for( int i = 1; i <= Nf; i++ )
           {
-            Descriptor imageComp = new Descriptor(file); des.add(imageComp);
+            Descriptor imageComp = new Descriptor(file); des.add(imageComp); imageComp.setEvent( this::ComponentInfo );
             
             node.add( new JDNode("Image Component" + i + ".h", ref++) );
             
@@ -466,6 +468,25 @@ public class JPEG extends Window.Window implements JDEventListener
     "<html>Extended JFIF picture information.</html>"
   };
 
+  public static final String[] StartOfFrame = new String[]
+  {
+    "<html>This should always be 8 by 8 sample size.</html>",
+    "<html>Picture Height in pixels.</html>",
+    "<html>Picture Width in pixels.</html>",
+    "<html>Number of component's. Usually 3, for Red, Green, and Blue.<br /><br />" +
+    "Each component uses an 8 by 8 quantization table. You can change the table numbers if you like." +
+    "You can also modify the 8 by 8 matrix if you like.</html>"
+  };
+
+  public static final String[] DefineComponents = new String[]
+  {
+    "<html>This is the assigned component number. Each \"start of scan\" marker uses the component number.<br /><br />" +
+    "You can switch component numbers if you like. You can set component 1 to 2, and component 2 to 1.</html>",
+    "<html>The first hex digit is Vertical 0 to 15, and the last hex digit is 0 to 15 horizontal.</html>",
+    "<html>This is the quantization matrix that will be used with this component number.<br /><br />" +
+    "You can modify the quantization matrix this component uses, or set it to a different one defined in this image.</html>"
+  };
+
   public void MInfo( int el )
   {
     if( el < 0 ) { info("<html>Every marker must start with FF hex, and must not have a maker type with FF hex.</html>"); }
@@ -501,6 +522,22 @@ public class JPEG extends Window.Window implements JDEventListener
       "The frame also usually specifies 3 image components, Red, green, and blue.<br /><br />" +
       "The image components specify a quantization table number to use. An 8 by 8 matrix is shaded and blended together with three image components using the image data and quantization matrix in 8 by 8 pixel squares.<br /><br />" +
       "This allows JPEG pictures to be much smaller in size, but can only approximate the color in each 8x8.");
+    }
+    else
+    {
+      info( StartOfFrame[el] );
+    }
+  }
+
+  public void ComponentInfo( int el )
+  {
+    if( el < 0 )
+    {
+      info("Defines the image components which are used by each start of scan maker preceding the image data.");
+    }
+    else
+    {
+      info( DefineComponents[el] );
     }
   }
 }
