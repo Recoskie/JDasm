@@ -63,7 +63,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
         markerPos = pos + buf; file.seek( markerPos ); //Seek the actual position.
 
-        markerData = new Descriptor(file); des.add(markerData);
+        markerData = new Descriptor(file); des.add(markerData); markerData.setEvent( this::MInfo );
   
         markerData.UINT8("Maker Code"); markerData.UINT8("Marker type");
 
@@ -196,8 +196,13 @@ public class JPEG extends Window.Window implements JDEventListener
     else if( e.getArg(0) == -2 )
     {
       try { file.seek( e.getArg(1) ); } catch( Exception er ) { }
+
+      if( ((JDNode)tree.getLastSelectedPathComponent()).toString().equals("Image Data.h") )
+      {
+        info("<html>This is the image color data. You can modify this to whatever you like.</html>");
+      }
       
-      Offset.setSelected( e.getArg(1), e.getArg(2) ); ds.clear();
+      Offset.setSelected( e.getArg(1), e.getArg(2) );
     }
 
     //Read an marker.
@@ -218,7 +223,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
         if( type == 0 )
         {
-          Descriptor image = new Descriptor(file); des.add(image);
+          Descriptor image = new Descriptor(file); des.add(image); image.setEvent( this::StartOfFrame );
 
           node.setUserObject("Image Information"); node.setArgs( new long[]{ ref++ } );
     
@@ -364,6 +369,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           if( Type.equals("JFIF") )
           {
+            m.setEvent( this::JFIFInfo );
             m.UINT8("Major version");
             m.UINT8("Minor version");
             m.UINT8("Density");
@@ -377,6 +383,7 @@ public class JPEG extends Window.Window implements JDEventListener
               m.Other("Other Data", size - 14 );
             }
           }
+          else { m.setEvent( this::AppInfo ); }
         }
         else if( type == 6 )
         {
@@ -390,6 +397,110 @@ public class JPEG extends Window.Window implements JDEventListener
       catch( Exception er ) { er.printStackTrace(); }
 
       file.Events = true;
+    }
+  }
+
+  private static String markerTypes = "<table border='1'>" +
+  "<tr><td>Type</td><td>Format</td><td>Marker Defines.</td></tr>" +
+  "<tr><td>192</td><td>Start of Frame</td><td>Image data is Baseline DCT.</td></tr>" +
+  "<tr><td>193</td><td>Start of Frame</td><td>Image data is Extended Sequential DCT.</td></tr>" +
+  "<tr><td>194</td><td>Start of Frame</td><td>Image data is Progressive DCT.</td></tr>" +
+  "<tr><td>195</td><td>Start of Frame</td><td>Image data is Lossless (sequential).</td></tr>" +
+  "<tr><td>196</td><td>Define Huffman Table</td><td></td></tr>" +
+  "<tr><td>197</td><td>Start of Frame</td><td>Image data is Differential sequential DCT.</td></tr>" +
+  "<tr><td>198</td><td>Start of Frame</td><td>Image data is Differential progressive DCT.</td></tr>" +
+  "<tr><td>199</td><td>Start of Frame</td><td>Image data is Differential lossless (sequential).</td></tr>" +
+  "<tr><td>201</td><td>Start of Frame</td><td>Image data is Extended sequential DCT, Arithmetic coding.</td></tr>" +
+  "<tr><td>202</td><td>Start of Frame</td><td>Image data is Progressive DCT, Arithmetic coding.</td></tr>" +
+  "<tr><td>203</td><td>Start of Frame</td><td>Image data is Lossless (sequential), Arithmetic coding.</td></tr>" +
+  "<tr><td>204</td><td>Define Arithmetic Coding</td><td></td></tr>" +
+  "<tr><td>205</td><td>Start of Frame</td><td>Image data is Differential sequential DCT, Arithmetic coding.</td></tr>" +
+  "<tr><td>206</td><td>Start of Frame</td><td>Image data is Differential progressive DCT, Arithmetic coding.</td></tr>" +
+  "<tr><td>207</td><td>Start of Frame</td><td>Image data is Differential lossless (sequential), Arithmetic coding.</td></tr>" +
+  "<tr><td>208 to 215</td><td>Restart Marker</td><td>Restart Markers 0 to 7.</td></tr>" +
+  "<tr><td>216</td><td>Start of Image</td><td>Image must start with this marker.</td></tr>" +
+  "<tr><td>217</td><td>End of Image</td><td>Image must end with this marker.</td></tr>" +
+  "<tr><td>218</td><td>Start of Scan</td><td></td></tr>" +
+  "<tr><td>219</td><td>Define Quantization Table</td><td></td></tr>" +
+  "<tr><td>220</td><td>Define Number of Lines</td><td>(Not common)</td></tr>" +
+  "<tr><td>221</td><td>Define Restart Interval</td><td></td></tr>" +
+  "<tr><td>222</td><td>Define Hierarchical Progression</td><td>(Not common)</td></tr>" +
+  "<tr><td>223</td><td>Expand Reference Component</td><td>(Not common)</td></tr>" +
+  "<tr><td>224 to 239</td><td>App Marker</td><td>Picture Application info only 0 to 15.</td></tr>" +
+  "<tr><td>254</td><td></td><td>Textural based comment.</td></tr>" +
+  "</table>";
+
+  public static final String[] markers = new String[]
+  {
+    "<html>This Must always be 255.</html>",
+    "<html>The marker type must not be 255, 0, or 1.<br /><br />" +
+    "Marker types 208 to 223 do not have a variable size number after marker type.<br /><br /><hr /><br />" +
+    "All JPEG pictures start with a start of image marker type = 216. The maker does not contain a size after it as it is in the maker range 208 to 223.<br /><br />" +
+    "Lastly \"Start of frame\" defines the picture width and height. There is a lot of \"start of frame\" makers, but they are all read in the same format.<br /><br />" +
+    "Because of the \"Start of frame\" marker we have to define a marker format column, and an extended description of what the maker implies the image data is by type.<br /><br />" +
+    markerTypes + "</html>",
+    "<html>This is the size of the marker. The two bytes that are read for the size are included as part of the marker size.<br /><br />Markers types 208 to 223 do not have a size.</html>",
+    "<html>Unknown marker data. This happens when it is an unknown maker type.</html>",
+  };
+
+  public static final String[] AppInfo = new String[]
+  {
+    "<html>Each application marker has a 00 byte terminated text string. This is earthier the application name, or URL.<br /><br />" +
+    "The application markers define information specific to the application used to create, or make the JPEG.<br /><br />" +
+    "The information defined in these markers are not necessary to draw the picture.</html>",
+    "<html>This is the application specific data.</html>"
+  };
+
+  public static final String[] JFIFInfo = new String[]
+  {
+    "<html>Each application marker has a 00 byte terminated text string. This is the JFIF header.</html>",
+    "<html>This is the major version.<br /><br />" +
+    "If major version is 7, and minor version is 2 we when up with version number 7.2v.</html>",
+    "<html>This is the major version.<br /><br />" +
+    "If major version is 7, and minor version is 2 we when up with version number 7.2v.</html>",
+    "<html>Image density.</html>",
+    "<html>Horizontal pixel Density.</html>",
+    "<html>Vertical pixel Density.</html>",
+    "<html>Horizontal pixel count.</html>",
+    "<html>Vertical pixel count.</html>",
+    "<html>Extended JFIF picture information.</html>"
+  };
+
+  public void MInfo( int el )
+  {
+    if( el < 0 ) { info("<html>Every marker must start with FF hex, and must not have a maker type with FF hex.</html>"); }
+    else
+    {
+      info( markers[el] );
+    }
+  }
+
+  public void JFIFInfo( int el )
+  {
+    if( el < 0 ) { info("<html>Picture application only information.</html>"); }
+    else
+    {
+      info( JFIFInfo[el] );
+    }
+  }
+
+  public void AppInfo( int el )
+  {
+    if( el < 0 ) { info("<html>Picture application only information.</html>"); }
+    else
+    {
+      info( AppInfo[el] );
+    }
+  }
+
+  public void StartOfFrame( int el )
+  {
+    if( el < 0 )
+    {
+      info("The start of frame defines the width and height of the JPEG picture.<br /><br />" +
+      "The frame also usually specifies 3 image components, Red, green, and blue.<br /><br />" +
+      "The image components specify a quantization table number to use. An 8 by 8 matrix is shaded and blended together with three image components using the image data and quantization matrix in 8 by 8 pixel squares.<br /><br />" +
+      "This allows JPEG pictures to be much smaller in size, but can only approximate the color in each 8x8.");
     }
   }
 }
