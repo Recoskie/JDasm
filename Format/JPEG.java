@@ -2,8 +2,6 @@ package Format;
 
 import swingIO.*;
 import swingIO.tree.*;
-
-import javax.swing.plaf.basic.BasicSliderUI.ComponentHandler;
 import javax.swing.tree.*;
 
 public class JPEG extends Window.Window implements JDEventListener
@@ -385,7 +383,7 @@ public class JPEG extends Window.Window implements JDEventListener
               m.Other("Other Data", size - 14 );
             }
           }
-          else { m.setEvent( this::AppInfo ); }
+          else { m.Other("Application Data", size - Type.length() - 1 ); m.setEvent( this::AppInfo ); }
         }
         else if( type == 6 )
         {
