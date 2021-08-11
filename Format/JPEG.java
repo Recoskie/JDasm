@@ -432,13 +432,14 @@ public class JPEG extends Window.Window implements JDEventListener
   "<tr><td>254</td><td></td><td>Textural based comment.</td></tr>" +
   "</table>";
 
-  public static String markerRule = "Marker codes do not have to start one after another. Invalid makers are skipped.";
+  public static String markerRule = "Every marker must start with 255, and must not have a maker type with 255, 0, or 1.<br /><br />" +
+  "Marker codes do not have to start one after another. Invalid makers are skipped.";
 
   public static final String[] markers = new String[]
   {
-    "<html>This Must always be 255. " + markerRule + "</html>",
-    "<html>The marker type must not be 255, 0, or 1. " + markerRule + "<br /><br />" +
-    "Marker types 208 to 223 do not have a variable size number after marker type.<br /><br /><hr /><br />" +
+    "<html>This Must always be 255.</html>",
+    "<html>" + markerRule + "<br /><br />" +
+    "Marker types 208 to 223 do not have a marker size number after marker type.<br /><br /><hr /><br />" +
     "All JPEG pictures start with a start of image marker type = 216. The maker does not contain a size after it as it is in the maker range 208 to 223.<br /><br />" +
     "Lastly \"Start of frame\" defines the picture width and height. There is a lot of \"start of frame\" makers, but they are all read in the same format.<br /><br />" +
     "Because of the \"Start of frame\" marker we have to define a marker format column, and an extended description of what the maker implies the image data is by type.<br /><br />" +
@@ -491,7 +492,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
   public void MInfo( int el )
   {
-    if( el < 0 ) { info("<html>Every marker must start with FF hex, and must not have a maker type with FF hex, 00, or 01.<br /><br />" + markerRule + "</html>"); }
+    if( el < 0 ) { info("<html>" + markerRule + "</html>"); }
     else
     {
       info( markers[el] );
