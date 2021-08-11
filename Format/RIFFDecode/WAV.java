@@ -20,14 +20,20 @@ public class WAV extends Data implements RSection
 
   private Descriptor[] samples;
 
+  //The format header must be read.
+
+  public boolean init( String tag ) { return( tag.equals("fmt ") ); }
+
   //The RIFF data sections are supplied here.
 
-  public boolean section( String name, long size, JDNode node ) throws java.io.IOException
+  public void section( String name, long size, JDNode node ) throws java.io.IOException
   {
     //This is the WAVE format section. It stores the information about the raw audio data.
 
     if( name.equals("fmt ") )
     {
+      node.removeAllChildren();
+
       Descriptor wavHeader = new Descriptor( file ); des.add( wavHeader ); wavHeader.setEvent( this::WAVInfo );
 
       node.add( new JDNode( "WAV Header.h", ref++ ) );
@@ -40,14 +46,14 @@ public class WAV extends Data implements RSection
       wavHeader.LUINT16("Bit per Sample"); bitPerSample = (short)wavHeader.value;
 
       if( size - 16 > 0 ){ wavHeader.Other( "Extended data", (int)(size - 16) ); }
-
-      return( true );
     }
 
     //This is the raw audio data section.
 
     else if( name.equals("data") )
     {
+      node.removeAllChildren();
+
       dataPos = file.getFilePointer(); dataSize = size; reData = (int)(dataSize % sampleSize);
 
       //setup number of samples if the data signature was found.
@@ -59,13 +65,7 @@ public class WAV extends Data implements RSection
       //Check if there is a remainder.
       
       if( reData != 0 ) { node.add( new JDNode( "Sample sec #" + ( e + ( reData / (float)sampleSize ) ) + ".h", "R", e ) ); }
-
-      //goto end of data section.
-
-      file.seek( file.getFilePointer() + size ); return( true );
     }
-    
-    return( false );
   }
 
   public void Uninitialize() { samples = null; }

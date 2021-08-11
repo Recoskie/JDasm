@@ -4,9 +4,14 @@ package Format.RIFFDecode;
 
 public class NULL implements RSection
 {
-  public boolean section( String name, long size, swingIO.tree.JDNode node ) throws java.io.IOException
+  public boolean init( String s )
   {
     return( false );
+  }
+
+  public void section( String name, long size, swingIO.tree.JDNode node ) throws java.io.IOException
+  {
+
   }
 
   public void open( swingIO.tree.JDEvent e )

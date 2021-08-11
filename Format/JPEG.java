@@ -431,7 +431,7 @@ public class JPEG extends Window.Window implements JDEventListener
   "</table>";
 
   public static String markerRule = "Every marker must start with 255, and must not have a maker type with 255, 0, or 1.<br /><br />" +
-  "Marker codes do not have to start one after another. Invalid makers are skipped.";
+  "Marker codes do not have to start one after another. Invalid makers are skipped as padding is allowed.";
 
   public static final String[] markers = new String[]
   {

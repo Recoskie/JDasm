@@ -17,7 +17,7 @@ public class RIFF extends Data implements JDEventListener
   private RSection format = new NULL();
   private long tagSize = 0;
   private Descriptor Data;
-  private JDNode list1, list2, temp;
+  private JDNode temp;
 
   //A list of 64 bit numbers are used in the RF64 format.
   //Any 32 bit value that is -1 is an 64 bit value.
@@ -81,7 +81,7 @@ public class RIFF extends Data implements JDEventListener
 
         //If the file size is max 32 bit integer, then the first 64-bit size is the file size.
 
-        if( fileSize == 4294967295l ) { fileSize = size64[index64++]; }
+        if( fileSize == 4294967295l ) { fileSize = size64[index64++]; } tagSize = 0;
       }
 
       //list sub data blocks.
@@ -90,31 +90,40 @@ public class RIFF extends Data implements JDEventListener
       {
         Data.String8("List type", 4); tagSize -= 4;
 
-        list1 = new JDNode( type, ref++ );
+        temp = new JDNode( type + "(" + Data.value + ")", new long[]{ ref++, 0 } );
 
-        list( file.getFilePointer() + tagSize, list1 );
+        temp.add( new JDNode( "Section Data.h", new long[]{ -2, file.getFilePointer(), file.getFilePointer() + tagSize } ) );
 
-        root.add(list1);
+        root.add(temp);
+
+        if( format.init( type ) )
+        {
+          long t = file.getFilePointer();
+          
+          tree.setSelectionPath( new TreePath( temp ) ); open( new JDEvent(this, "", new long[]{ 0, 0 } ) ); file.Events = false;
+
+          file.seek( t );
+        }
       }
       else
       {
-        temp = new JDNode( type, ref++ ); root.add( temp );
+        temp = new JDNode( type, new long[]{ ref++, 1 } );
 
-        //Check if this block is important to the loaded RIFF format plugin.
+        temp.add( new JDNode( "Section Data.h", new long[]{ -2, file.getFilePointer(), file.getFilePointer() + tagSize } ) );
         
-        if( !format.section(type, tagSize, temp) )
+        root.add( temp );
+        
+        if( format.init( type ) )
         {
-          tagSize = tagSize < 0 ? (int)(fileSize - file.getFilePointer()) : tagSize;
+          long t = file.getFilePointer();
+          
+          tree.setSelectionPath( new TreePath( temp ) ); open( new JDEvent(this, "", new long[]{ 0, 1 } ) ); file.Events = false;
 
-          //Otherwise define the nodes data.
-
-          temp.add( new JDNode( "Section Data.h", new long[]{ -2, file.getFilePointer(), file.getFilePointer() + tagSize - 1 } ) );
-
-          //Move to next data tag.
-
-          file.seek( file.getFilePointer() + tagSize );
+          file.seek( t );
         }
       }
+
+      file.seek(file.getFilePointer() + tagSize);
     }
 
     //Decode the setup headers.
@@ -136,53 +145,89 @@ public class RIFF extends Data implements JDEventListener
 
     else if( e.getID().equals("R") ) { format.open(e); }
 
-    //The tag headers.
-
-    else if( e.getArg(0) >= 0 )
+    else
     {
-      tree.expandPath( tree.getLeadSelectionPath() );
+      //Read a RIFF tag
 
-      ds.setDescriptor( des.get( (int)e.getArg(0) ) );
-    }
-
-    //the data of a particular tag.
-
-    else if( e.getArg(0) == -2 ) { try { file.seek( e.getArg(1) ); } catch( Exception er ) { } Offset.setSelected( e.getArg(1), e.getArg(2) ); ds.clear(); }
-  }
-
-  private void list(long end, JDNode List) throws java.io.IOException
-  {
-    while( file.getFilePointer() < end )
-    {
-      Data = new Descriptor( file ); des.add(Data);
-
-      Data.String8("Data type", 4); type = (String)Data.value;
-      Data.LUINT32("Data size"); tagSize = (int)Data.value;
-
-      tagSize += tagSize & 1; //Note every tag must land on an even address position.
-
-      temp = new JDNode( type, ref++ );
-
-      if( type.equals("LIST") )
+      if( e.getArgs().length == 2 )
       {
-        Data.String8("List type", 4); tagSize -= 4;
+        JDNode root = (JDNode)tree.getLastSelectedPathComponent(), node = (JDNode)root.getFirstChild();
 
-        des.add(Data);
+        file.Events = false;
 
-        list2 = new JDNode( type, ref++ ); temp.add( list2 ); 
+        try
+        {
+          //A singular tag.
 
-        list( file.getFilePointer() + tagSize, list2 );
+          if( e.getArg(1) == 1 )
+          {
+            //Check if this block is important to the loaded RIFF format plugin.
 
-        List.add(list2);
-      }
-      else
-      {
-        temp.add( new JDNode( "Section Data.h", new long[]{ -2, file.getFilePointer(), file.getFilePointer() + tagSize - 1 } ) );
+            file.seek( node.getArg(1) ); format.section(root.toString(), node.getArg(2) - node.getArg(1), root);
+          }
+
+          //A list of tags.
+
+          else
+          {
+            file.seek( node.getArg(1) ); long end = node.getArg(2); root.removeAllChildren();
+
+            //The data sub blocks.
+
+            while( file.getFilePointer() < end )
+            {
+              Data = new Descriptor( file ); des.add(Data); Data.setEvent( this::CKInfo );
+
+              //This is the sub structure that is used for all data tags. 
+
+              Data.String8("Section name", 4); type = (String)Data.value;
+              Data.LUINT32("Section size"); tagSize = ((int)Data.value) & 0xFFFFFFFFl;
+
+              tagSize += tagSize & 1; //Note every tag must land on a even address position.
+
+              //list sub data blocks.
+
+              if( type.equals("LIST") )
+              {
+                Data.String8("List type", 4); tagSize -= 4;
+
+                temp = new JDNode( type + "(" + Data.value + ")", new long[]{ ref++, 0 } );
+
+                temp.add( new JDNode( "Section Data.h", new long[]{ -2, file.getFilePointer(), file.getFilePointer() + tagSize } ) );
+
+                root.add(temp);
+              }
+              else
+              {
+                temp = new JDNode( type, new long[]{ ref++, 1 } );
+
+                temp.add( new JDNode( "Section Data.h", new long[]{ -2, file.getFilePointer(), file.getFilePointer() + tagSize } ) );
         
-        List.add(temp);
+                root.add( temp );
+              }
 
-        file.seek( file.getFilePointer() + tagSize );
+              file.seek(file.getFilePointer() + tagSize);
+            }
+          }
+        } catch( Exception er ){ er.printStackTrace(); }
+
+        file.Events = true;
+
+        root.setArgs( new long[]{ root.getArg(0) } );
       }
+
+      //The tag headers.
+
+      if( e.getArg(0) >= 0 )
+      {
+        tree.expandPath( tree.getLeadSelectionPath() );
+
+        ds.setDescriptor( des.get( (int)e.getArg(0) ) );
+      }
+
+      //the data of a particular tag.
+
+      else if( e.getArg(0) == -2 ) { try { file.seek( e.getArg(1) ); } catch( Exception er ) { } Offset.setSelected( e.getArg(1), e.getArg(2) - 1 ); ds.clear(); }
     }
   }
 
