@@ -432,10 +432,12 @@ public class JPEG extends Window.Window implements JDEventListener
   "<tr><td>254</td><td></td><td>Textural based comment.</td></tr>" +
   "</table>";
 
+  public static String markerRule = "Marker codes do not have to start one after another. Invalid makers are skipped.";
+
   public static final String[] markers = new String[]
   {
-    "<html>This Must always be 255.</html>",
-    "<html>The marker type must not be 255, 0, or 1.<br /><br />" +
+    "<html>This Must always be 255. " + markerRule + "</html>",
+    "<html>The marker type must not be 255, 0, or 1. " + markerRule + "<br /><br />" +
     "Marker types 208 to 223 do not have a variable size number after marker type.<br /><br /><hr /><br />" +
     "All JPEG pictures start with a start of image marker type = 216. The maker does not contain a size after it as it is in the maker range 208 to 223.<br /><br />" +
     "Lastly \"Start of frame\" defines the picture width and height. There is a lot of \"start of frame\" makers, but they are all read in the same format.<br /><br />" +
@@ -474,8 +476,8 @@ public class JPEG extends Window.Window implements JDEventListener
     "<html>Picture Height in pixels.</html>",
     "<html>Picture Width in pixels.</html>",
     "<html>Number of component's. Usually 3, for Red, Green, and Blue.<br /><br />" +
-    "Each component uses an 8 by 8 quantization table. You can change the table numbers if you like." +
-    "You can also modify the 8 by 8 matrix if you like.</html>"
+    "Each component uses an 8 by 8 quantization table. You can change the table number each component uses if you like." +
+    "You can also modify the 8 by 8 quantization matrix an component number uses if you like.</html>"
   };
 
   public static final String[] DefineComponents = new String[]
@@ -489,7 +491,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
   public void MInfo( int el )
   {
-    if( el < 0 ) { info("<html>Every marker must start with FF hex, and must not have a maker type with FF hex.</html>"); }
+    if( el < 0 ) { info("<html>Every marker must start with FF hex, and must not have a maker type with FF hex, 00, or 01.<br /><br />" + markerRule + "</html>"); }
     else
     {
       info( markers[el] );
