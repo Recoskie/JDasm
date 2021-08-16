@@ -15,14 +15,15 @@ public class RIFF extends Data implements JDEventListener
 
   private String type = "";
   private RSection format = new NULL();
-  private long tagSize = 0;
   private Descriptor Data;
   private JDNode temp;
+  private static boolean init = false;
 
   //A list of 64 bit numbers are used in the RF64 format.
   //Any 32 bit value that is -1 is an 64 bit value.
 
   private long[] size64;
+  private long tagSize = 0;
   private int index64 = 0;
 
   public RIFF() throws java.io.IOException
@@ -47,6 +48,7 @@ public class RIFF extends Data implements JDEventListener
     //The wave audio plugin defines the data sections of a wave audio file.
     
     if( type.equals("WAVE") ) { format = new WAV(); }
+    if( type.equals("AVI ") ) { format = new AVI(); }
 
     //The data sub blocks.
 
@@ -94,15 +96,15 @@ public class RIFF extends Data implements JDEventListener
 
         temp.add( new JDNode( "Section Data.h", new long[]{ -2, file.getFilePointer(), file.getFilePointer() + tagSize } ) );
 
-        root.add(temp);
+        root.add( temp );
 
-        if( format.init( type ) )
+        if( format.init( type + Data.value ) )
         {
-          long t = file.getFilePointer();
+          long t = file.getFilePointer(), ts = tagSize;
           
           tree.setSelectionPath( new TreePath( temp ) ); open( new JDEvent(this, "", new long[]{ 0, 0 } ) ); file.Events = false;
 
-          file.seek( t );
+          file.seek( t ); tagSize = ts;
         }
       }
       else
@@ -115,11 +117,11 @@ public class RIFF extends Data implements JDEventListener
         
         if( format.init( type ) )
         {
-          long t = file.getFilePointer();
+          long t = file.getFilePointer(), ts = tagSize;
           
           tree.setSelectionPath( new TreePath( temp ) ); open( new JDEvent(this, "", new long[]{ 0, 1 } ) ); file.Events = false;
 
-          file.seek( t );
+          file.seek( t ); tagSize = ts;
         }
       }
 
@@ -133,9 +135,11 @@ public class RIFF extends Data implements JDEventListener
     //Set the first node.
 
     tree.setSelectionPath( new TreePath( root.getFirstLeaf().getPath() ) ); open( new JDEvent( this, "", 0 ) );
+
+    init = true;
   }
 
-  public void Uninitialize() { ref = 0; des.clear(); }
+  public void Uninitialize() { ref = 0; init = false; des.clear(); }
 
   public void open( JDEvent e )
   {
@@ -196,6 +200,15 @@ public class RIFF extends Data implements JDEventListener
                 temp.add( new JDNode( "Section Data.h", new long[]{ -2, file.getFilePointer(), file.getFilePointer() + tagSize } ) );
 
                 root.add(temp);
+
+                if( !init && format.init( type + Data.value ) )
+                {
+                  long t = file.getFilePointer(), ts = tagSize;
+                  
+                  tree.setSelectionPath( new TreePath( temp ) ); open( new JDEvent(this, "", new long[]{ 0, 0 } ) ); file.Events = false;
+        
+                  file.seek( t ); tagSize = ts;
+                }
               }
               else
               {
@@ -203,7 +216,16 @@ public class RIFF extends Data implements JDEventListener
 
                 temp.add( new JDNode( "Section Data.h", new long[]{ -2, file.getFilePointer(), file.getFilePointer() + tagSize } ) );
         
-                root.add( temp );
+                root.add(temp);
+
+                if( !init && format.init( type ) )
+                {
+                  long t = file.getFilePointer(), ts = tagSize;
+                  
+                  tree.setSelectionPath( new TreePath( temp ) ); open( new JDEvent(this, "", new long[]{ 0, 1 } ) ); file.Events = false;
+        
+                  file.seek( t ); tagSize = ts;
+                }
               }
 
               file.seek(file.getFilePointer() + tagSize);
@@ -227,7 +249,7 @@ public class RIFF extends Data implements JDEventListener
 
       //the data of a particular tag.
 
-      else if( e.getArg(0) == -2 ) { try { file.seek( e.getArg(1) ); } catch( Exception er ) { } Offset.setSelected( e.getArg(1), e.getArg(2) - 1 ); ds.clear(); }
+      else if( e.getArg(0) == -2 ) { try { file.seek( e.getArg(1) ); } catch( Exception er ) { } Offset.setSelected( e.getArg(1), e.getArg(2) - 1 ); ds.clear(); info("<html></html>"); }
     }
   }
 
