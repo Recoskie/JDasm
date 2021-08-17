@@ -16,11 +16,6 @@ public class AVI extends Data implements RSection
 
   private int streamFormat = 0;
 
-  //Audio Peramitiers.
-
-  //Video Peramiters.
-
-
   //Load all of the format headers on init. The precising foumart header is defined by the stream format header.
 
   public boolean init( String tag ) { return( tag.equals("LISThdrl") || tag.equals("LISTstrl") || tag.equals("avih") || tag.equals("strh") || tag.equals("strf") || tag.equals("strd") || tag.equals("strn") ); }
@@ -160,7 +155,7 @@ public class AVI extends Data implements RSection
   {
     "<html>Specifies the number of microseconds between frames.<br /><br />This value indicates the overall timing for the file.</html>",
     "<html>Specifies the approximate maximum data rate of the file.<br /><br />" +
-    "This value indicates the number of bytes per second the system must handle to present an AVI sequence as specified by the other parameters contained in the main header and stream header chunks.</html>",
+    "This value indicates the number of bytes per second the system must handle to present an AVI sequence as specified by the other parameters contained in the main avi header and stream headers.</html>",
     "<html>Specifies the alignment for data, in bytes. Pad the data to multiples of this value.</html>",
     "<html>Contains a bit combination of zero or more of the following flags:<br /><br />" +
     "<table border=\"1\">" +
@@ -179,7 +174,7 @@ public class AVI extends Data implements RSection
     "<html>Specifies the initial frame for interleaved files. Non interleaved files should specify zero.<br /><br />" +
     "If you are creating interleaved files, specify the number of frames in the file prior to the initial frame of the AVI sequence in this member.<br /><br />" +
     "To give the audio driver enough audio to work with, the audio data in an interleaved file must be skewed from the video data.<br /><br />" +
-    "Typically, the audio data should be moved forward enough frames to allow approximately 0.75 seconds of audio data to be preloaded. Also set the same value for the Initial Frames member of the stream header.</html>",
+    "Typically, the audio data should be moved forward enough frames to allow approximately 0.75 seconds of audio data to be preloaded. Also set the same value for the Initial Frames member in the stream header.</html>",
     "<html>Specifies the number of streams in the file. For example, a file with audio and video has two streams.</html>",
     "<html>Specifies the suggested buffer size for reading the file. Generally, this size should be large enough to contain the largest chunk in the file.<br /><br />" +
     "If set to zero, or if it is too small, the playback software will have to reallocate memory during playback, which will reduce performance.<br /><br />" +
@@ -200,7 +195,13 @@ public class AVI extends Data implements RSection
     "<tr><td>txts</td><td>Text (Subtitles).</td></tr></html>",
     "<html>Optionally, contains a four letter code that identifies a specific data handler.<br /><br />" +
     "The data handler is the preferred handler for the stream. For audio and video streams, this specifies the codec for decoding the stream.</html>",
-    "<html>Contains any flags for the data stream. The bits in the high-order word of these flags are specific to the type of data contained in the stream. The following standard flags are defined.</html>",
+    "<html>Contains a bit combination of zero or more of the following flags:<br /><br />" +
+    "<table border=\"1\">" +
+    "<tr><td>Bit</td><td>Description</td></tr>" +
+    "<tr><td>00000000000000000000000000000001</td><td>Indicates this stream should not be enabled by default.</td></tr>" +
+    "<tr><td>00000000000000010000000000000000</td><td>Indicates this video stream contains palette changes.<br /><br />" +
+    "This flag warns the playback software that it will need to animate the palette.</td></tr>" +
+    "</table></html>",
     "<html>Specifies priority of a stream type. For example, in a file with multiple audio streams, the one with the highest priority might be the default stream.</html>",
     "<html>Language.</html>",
     "<html>Specifies the initial frame for interleaved files. Non interleaved files should specify zero.<br /><br />" +
