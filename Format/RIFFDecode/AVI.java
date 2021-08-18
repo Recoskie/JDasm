@@ -48,7 +48,9 @@ public class AVI extends Data implements RSection
       if( size > 3 ) { aviHeader.LUINT32("Reserved"); size -= 4; }
       if( size > 3 ) { aviHeader.LUINT32("Reserved"); size -= 4; }
       if( size > 3 ) { aviHeader.LUINT32("Reserved"); size -= 4; }
-      if( size > 0 ){ aviHeader.Other( "Extended data", (int)size ); }
+      if( size > 0 ) { aviHeader.Other( "Extended data", (int)size ); }
+
+      initPaths.add( 0, new javax.swing.tree.TreePath( node.getFirstLeaf().getPath() ) );
     }
 
     //The AVI stream header.
@@ -91,7 +93,9 @@ public class AVI extends Data implements RSection
       if( size > 1 ) { aviHeader.LUINT16("Top"); size -= 2; }
       if( size > 1 ) { aviHeader.LUINT16("Right"); size -= 2; }
       if( size > 1 ) { aviHeader.LUINT16("Bottom"); size -= 2; }
-      if( size > 0 ){ aviHeader.Other( "Extended data", (int)size ); }
+      if( size > 0 ) { aviHeader.Other( "Extended data", (int)size ); }
+
+      initPaths.add( new javax.swing.tree.TreePath( node.getPath() ) );
     }
 
     //The AVI stream format header.
@@ -137,6 +141,8 @@ public class AVI extends Data implements RSection
         if( size > 1 ) { aviHeader.LUINT16("Size"); size -= 2; }
         if( size > 0 ){ aviHeader.Other( "Extended data", (int)size ); }
       }
+
+      initPaths.add( new javax.swing.tree.TreePath( node.getPath() ) );
     }
   }
 

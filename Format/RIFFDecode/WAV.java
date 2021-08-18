@@ -46,6 +46,8 @@ public class WAV extends Data implements RSection
       wavHeader.LUINT16("Bit per Sample"); bitPerSample = (short)wavHeader.value;
 
       if( size - 16 > 0 ){ wavHeader.Other( "Extended data", (int)(size - 16) ); }
+
+      initPaths.add( 0, new javax.swing.tree.TreePath( node.getFirstLeaf().getPath() ) );
     }
 
     //This is the raw audio data section.
