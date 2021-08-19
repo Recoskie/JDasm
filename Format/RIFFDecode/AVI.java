@@ -144,6 +144,24 @@ public class AVI extends Data implements RSection
 
       initPaths.add( new javax.swing.tree.TreePath( node.getPath() ) );
     }
+
+    else if( name.equals("idx1") )
+    {
+      node.removeAllChildren();
+        
+      Descriptor aviHeader = new Descriptor( file ); des.add( aviHeader ); aviHeader.setEvent( this::IndexInfo );
+
+      for( int i = (int)(size / 16); i > 0; i-- )
+      {
+        aviHeader.Array("Stream Index", 16);
+        aviHeader.String8("Name", 4);
+        aviHeader.LUINT32("Flags");
+        aviHeader.LUINT32("Offset");
+        aviHeader.LUINT32("Size");
+      }
+
+      node.add( new JDNode( "Stream Indexes.h", ref++ ) );
+    }
   }
 
   public void Uninitialize()
@@ -278,6 +296,26 @@ public class AVI extends Data implements RSection
     unknown
   };
 
+  public static final String[] LIndex = new String[]
+  {
+    "<html>Stream index element.</html>",
+    "<html>Section name in \"LIST (movi)\".</html>",
+    "<html>Contains a bit combination of zero or more of the following flags:<br /><br />" +
+    "<table border=\"1\">" +
+    "<tr><td>Bit</td><td>Description</td></tr>" +
+    "<tr><td>00000000000000000000000000000001</td><td>The streams is gouged together into a 'rec ' list.</td></tr>" +
+    "<tr><td>00000000000000000000000000010000</td><td>The data is a key frame.</td></tr>" +
+    "<tr><td>00000000000000000000000000100000</td><td>This frame is the start of a partial frame.</td></tr>" +
+    "<tr><td>00000000000000000000000001000000</td><td>This frame is the end of a partial frame.</td></tr>" +
+    "<tr><td>00000000000000000000000100000000</td><td>The data does not affect the timing of the stream.<br /><br />" +
+    "For example, this flag should be set for palette changes.</td></tr>" +
+    "<tr><td>00001111111111110000000000000000</td><td>These are reserved for compressor use.</td></tr>" +
+    "</table></html>",
+    "<html>Specifies the location of the data in the file.<br /><br />The value should be specified as an offset, in bytes," +
+    " from the start of the 'movi' list; however, in some AVI files it is given as an offset from the start of the file.</html>",
+    "<html>The size of the section.</html>"
+  };
+
   public void AVIInfo( int el )
   {
     if( el < 0 )
@@ -294,6 +332,7 @@ public class AVI extends Data implements RSection
       "<tr><td>pc</td><td>Palette change</td></tr>" +
       "<tr><td>wb</td><td>Audio data</td></tr>" +
       "</table><br />" +
+      "Also The \"LIST (movi)\" can group together video and audio streams into \"LIST (rec)\" which makes indexing data in the \"LIST (movi)\" faster.<br /><br />" +
       "Depending on the size of the recoding or movie it may take a few seconds to open the \"LIST (movi)\" section.<br /><br />" +
       "The \"idx1\" list is the memory location and position to each frame, or audio in \"LIST (movi)\", so \"idx1\" is called an index list.</html>");
     }
@@ -343,6 +382,18 @@ public class AVI extends Data implements RSection
     else
     {
       info( Audio[el] );
+    }
+  }
+
+  public void IndexInfo( int el )
+  {
+    if( el < 0 )
+    {
+      info("<html>An index list specifying additional settings about each stream.</html>");
+    }
+    else
+    {
+      info( LIndex[el % 5] );
     }
   }
 }

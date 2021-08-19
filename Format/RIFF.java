@@ -138,7 +138,16 @@ public class RIFF extends Data implements JDEventListener
 
     //Set the first node.
 
-    tree.setSelectionPath( initPaths.get(0) ); open( new JDEvent( this, "", ((JDNode)tree.getLastSelectedPathComponent()).getArgs() ) );
+    if( initPaths.size() > 0 )
+    {
+      //If format header exists.
+
+      tree.setSelectionPath( initPaths.get(0) ); open( new JDEvent( this, "", ((JDNode)tree.getLastSelectedPathComponent()).getArgs() ) );
+    }
+
+    //Else set the RIFF header as main header.
+
+    else { tree.setSelectionPath( new TreePath( root.getFirstLeaf().getPath() ) ); open( new JDEvent( this, "", 0 ) ); }
     
     initPaths.clear(); init = true;
   }
