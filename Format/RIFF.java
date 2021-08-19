@@ -48,6 +48,9 @@ public class RIFF extends Data implements JDEventListener
     //The wave audio plugin defines the data sections of a wave audio file.
     
     if( type.equals("WAVE") ) { format = new WAV(); }
+
+    //The AVI video/audio plugin defines the data sections of a AVI file.
+
     if( type.equals("AVI ") ) { format = new AVI(); }
 
     //The data sub blocks.

@@ -175,6 +175,19 @@ public class AVI extends Data implements RSection
   public static final String res = "<html>A section that is reserved, is skipped. So that some day the empty space may be used for something new.</html>";
   public static final String unknown = "<html>Unknown data. May be used as padding.</html>";
 
+  public static final String SInfo = "The first \"LIST (strl)\" is stream 00, and second time we see \"LIST (strl)\" is stream 01 and so on (02, 03, 04...).<br /><br />" +
+  "Each stream has a header for the stream type, and a subsequent format header specifying the format information.<br /><br />" +
+  "The \"LIST (movi)\" section uses the first two numbers, for which stream. The last two characters is the expected data.<br /><br />" +
+  "If the expected data does not line up with the stream number, then the video is most likely corrupted.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Last Two-character code</td><td>Description</td></tr>" +
+  "<tr><td>db</td><td>Uncompressed video frame</td></tr>" +
+  "<tr><td>dc</td><td>Compressed video frame</td></tr>" +
+  "<tr><td>pc</td><td>Palette change</td></tr>" +
+  "<tr><td>wb</td><td>Audio data</td></tr>" +
+  "</table><br />" +
+  "Also The \"LIST (movi)\" can group together video and audio streams into \"LIST (rec)\" which makes indexing data in the \"LIST (movi)\" faster.";
+
   public static final String[] AVI = new String[]
   {
     "<html>Specifies the number of microseconds between frames.<br /><br />This value indicates the overall timing for the file.</html>",
@@ -321,19 +334,9 @@ public class AVI extends Data implements RSection
     if( el < 0 )
     {
       info("<html>The AVI header specifies the number of streams. For example, a movie with both video and audio will have 2 streams.<br /><br />" +
-      "The AVI header sets the width and height of the video. In an uncompressed AVI a video stream is made of bitmap pictures.<br /><br />" +
-      "Each \"LIST (strl)\" is each steam. Each stream has a header for the stream type, and a subsequent format header specifying the format information of the stream type.<br /><br />" +
-      "Each section labeled \"JUNK\" is used as padding to make sure frames and audio are equally spaced apart in memory for faster reading.<br /><br />" +
-      "The \"LIST (movi)\" uses the first two numbers which corresponds to the stream number. The last two characters is the expected type of data.<br /><br />" +
-      "<table border=\"1\">" +
-      "<tr><td>Last Two-character code</td><td>Description</td></tr>" +
-      "<tr><td>db</td><td>Uncompressed video frame</td></tr>" +
-      "<tr><td>dc</td><td>Compressed video frame</td></tr>" +
-      "<tr><td>pc</td><td>Palette change</td></tr>" +
-      "<tr><td>wb</td><td>Audio data</td></tr>" +
-      "</table><br />" +
-      "Also The \"LIST (movi)\" can group together video and audio streams into \"LIST (rec)\" which makes indexing data in the \"LIST (movi)\" faster.<br /><br />" +
-      "Depending on the size of the recoding or movie it may take a few seconds to open the \"LIST (movi)\" section.<br /><br />" +
+      "The AVI header sets the width and height of the video. In an uncompressed AVI the video stream is made of bitmap pictures.<br /><br />" +
+      "Each section labeled \"JUNK\" is used as padding in order to keep offsets evenly lined up for faster reading.<br /><br />" + SInfo +
+      "<br /><br />Depending on the size of the recoding or movie it may take a few seconds to open the \"LIST (movi)\" section.<br /><br />" +
       "The \"idx1\" list is the memory location and position to each frame, or audio in \"LIST (movi)\", so \"idx1\" is called an index list.</html>");
     }
     else
@@ -349,7 +352,8 @@ public class AVI extends Data implements RSection
       info("<html>Each stream has a header that specifies if the stream is audio, video, or text (subtitles).<br /><br />" +
       "At the end of this header is a rectangle that defines where the subtitles go, or video stream.<br /><br />" +
       "The preceding stream format header defines the details of the particular stream.<br /><br />" +
-      "Each steam goes in order by stream number per \"LIST (strl)\" starting from 00 to 01 and so on. These numbers are used in the \"LIST (movi)\" section.</html>");
+      "Each steam goes in order by stream number per \"LIST (strl)\" starting from 00 to 01 and so on.<br /><br />" +
+      "The stream numbers are used in the \"LIST (movi)\" section.</html>");
     }
     else
     {
@@ -389,7 +393,7 @@ public class AVI extends Data implements RSection
   {
     if( el < 0 )
     {
-      info("<html>An index list specifying additional settings about each stream.</html>");
+      info("<html>An index list specifying additional settings about each stream.<br /><br />" + SInfo + "</html>");
     }
     else
     {
