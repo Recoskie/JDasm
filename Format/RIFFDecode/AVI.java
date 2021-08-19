@@ -115,7 +115,7 @@ public class AVI extends Data implements RSection
         if( size > 3 ) { aviHeader.LUINT32("Height"); size -= 4; }
         if( size > 1 ) { aviHeader.LUINT16("Planes"); size -= 2; }
         if( size > 1 ) { aviHeader.LUINT16("BitCount"); size -= 2; }
-        if( size > 3 ) { aviHeader.LUINT32("Compression"); size -= 4; }
+        if( size > 3 ) { aviHeader.String8("Compression", 4); size -= 4; }
         if( size > 3 ) { aviHeader.LUINT32("Image Size"); size -= 4; }
         if( size > 3 ) { aviHeader.LUINT32("X Pixels per meter"); size -= 4; }
         if( size > 3 ) { aviHeader.LUINT32("Y Pixels per meter"); size -= 4; }
