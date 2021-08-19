@@ -307,7 +307,10 @@ public class AVI extends Data implements RSection
   {
     if( el < 0 )
     {
-      info("<html></html>");
+      info("<html>Each stream has a header that specifies if the stream is audio, video, or text (subtitles).<br /><br />" +
+      "At the end of this header is a rectangle that defines where the subtitles go, or video stream.<br /><br />" +
+      "The preceding stream format header defines the denials of the particular stream.<br /><br />" +
+      "Each steam goes in order by stream number starting from 00 to 01 and so on. These numbers are used in the \"LIST (movi)\" section.</html>");
     }
     else
     {
@@ -319,7 +322,9 @@ public class AVI extends Data implements RSection
   {
     if( el < 0 )
     {
-      info("<html></html>");
+      info("<html>Uncompressed video is just a set of bit map pictures that are gone through at a set frame rate.<br /><br />" +
+      "Bitmap pictures are very simple and easy to read pictures in which each pixel has a standard Red, Green, blue color value.<br /><br />" +
+      "AVI does support compressed picture formats for each frame rather than raw per pixel color format.</html>");
     }
     else
     {
@@ -331,7 +336,9 @@ public class AVI extends Data implements RSection
   {
     if( el < 0 )
     {
-      info("<html></html>");
+      info("<html>Uncompressed audio is just a set of positions to move the speaker magnet in a speaker cone at a set rate.<br /><br />" +
+      "Uses the same format as a wave audio file. We can plot the audio as a graph if we like.<br /><br />" +
+      "AVI does support compressed audio formats rather than raw ready to play audio output to speakers.</html>");
     }
     else
     {
