@@ -147,7 +147,7 @@ public class WAV extends Data implements RSection
   {
     if( el < 0 )
     {
-      info("<html>The RIFF header specifies the file as a WAVE audio file. The section name fmt is used as the wave audio header.</html>");
+      info("<html>The RIFF header specifies the file type as a WAVE audio file. The section named \"fmt \" is then used as the wave audio header.</html>");
     }
     else
     {

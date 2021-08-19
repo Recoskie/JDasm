@@ -282,7 +282,20 @@ public class AVI extends Data implements RSection
   {
     if( el < 0 )
     {
-      info("<html></html>");
+      info("<html>The AVI header specifies the number of streams. For example, a movie with both video and audio will have 2 streams.<br /><br />" +
+      "The AVI header sets the width and height of the video. In an uncompressed AVI a video stream is made of bitmap pictures.<br /><br />" +
+      "Each \"LIST (strl)\" is each steam. Each stream has a header for the stream type, and a subsequent format header specifying the format information of the stream type.<br /><br />" +
+      "Each section labeled \"JUNK\" is used as padding to make sure frames and audio are equally spaced apart in memory for faster reading.<br /><br />" +
+      "The \"LIST (movi)\" uses the first two numbers which corresponds to the stream number. The last two characters is the expected type of data.<br /><br />" +
+      "<table border=\"1\">" +
+      "<tr><td>Last Two-character code</td><td>Description</td></tr>" +
+      "<tr><td>db</td><td>Uncompressed video frame</td></tr>" +
+      "<tr><td>dc</td><td>Compressed video frame</td></tr>" +
+      "<tr><td>pc</td><td>Palette change</td></tr>" +
+      "<tr><td>wb</td><td>Audio data</td></tr>" +
+      "</table><br />" +
+      "Depending on the size of the recoding or movie it may take a few seconds to open the \"LIST (movi)\" section.<br /><br />" +
+      "The \"idx1\" list is the memory location and position to each frame, or audio in \"LIST (movi)\" it is called an index list.</html>");
     }
     else
     {
