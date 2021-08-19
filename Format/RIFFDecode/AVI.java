@@ -295,7 +295,7 @@ public class AVI extends Data implements RSection
       "<tr><td>wb</td><td>Audio data</td></tr>" +
       "</table><br />" +
       "Depending on the size of the recoding or movie it may take a few seconds to open the \"LIST (movi)\" section.<br /><br />" +
-      "The \"idx1\" list is the memory location and position to each frame, or audio in \"LIST (movi)\" it is called an index list.</html>");
+      "The \"idx1\" list is the memory location and position to each frame, or audio in \"LIST (movi)\", so \"idx1\" is called an index list.</html>");
     }
     else
     {
@@ -309,8 +309,8 @@ public class AVI extends Data implements RSection
     {
       info("<html>Each stream has a header that specifies if the stream is audio, video, or text (subtitles).<br /><br />" +
       "At the end of this header is a rectangle that defines where the subtitles go, or video stream.<br /><br />" +
-      "The preceding stream format header defines the denials of the particular stream.<br /><br />" +
-      "Each steam goes in order by stream number starting from 00 to 01 and so on. These numbers are used in the \"LIST (movi)\" section.</html>");
+      "The preceding stream format header defines the details of the particular stream.<br /><br />" +
+      "Each steam goes in order by stream number per \"LIST (strl)\" starting from 00 to 01 and so on. These numbers are used in the \"LIST (movi)\" section.</html>");
     }
     else
     {
@@ -323,7 +323,7 @@ public class AVI extends Data implements RSection
     if( el < 0 )
     {
       info("<html>Uncompressed video is just a set of bit map pictures that are gone through at a set frame rate.<br /><br />" +
-      "Bitmap pictures are very simple and easy to read pictures in which each pixel has a standard Red, Green, blue color value.<br /><br />" +
+      "Bitmap pictures are very simple and easy to read pictures in which each pixel has a standard Red, Green, blue color per each pixel.<br /><br />" +
       "AVI does support compressed picture formats for each frame rather than raw per pixel color format.</html>");
     }
     else
