@@ -53,6 +53,10 @@ public class RIFF extends Data implements JDEventListener
 
     if( type.equals("AVI ") ) { format = new AVI(); }
 
+    //Windows animated cursor.
+
+    if( type.equals("ACON") ) { format = new ANI(); }
+
     //The data sub blocks.
 
     while( file.getFilePointer() < fileSize )
