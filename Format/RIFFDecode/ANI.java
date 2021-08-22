@@ -85,7 +85,7 @@ public class ANI extends Data implements RSection
     "<tr><td>Bit setting</td><td>Description</td></tr>" +
     "<tr><td>00000000000000000000000000000001</td><td>Pictures are ICON's instead of bitmaps.</td></tr>" +
     "<tr><td>00000000000000000000000000000010</td><td>The \"seq\" section exists for the order we wish to draw the pictures in.</td></tr>" +
-    "</table><br /><br />Note that the value should be viewed in binary.</html>",
+    "</table><br />Note that the value should be viewed in binary.</html>",
     "<html>Unknown data.</html>"
   };
 
@@ -95,9 +95,9 @@ public class ANI extends Data implements RSection
     {
       info("<html>Animated cursors consist of a main header that sets the speed to go through each bitmap/icon picture in the \"LIST (fram)\".<br /><br />" +
       "There is also 2 sections that are optional.<br /><br />" +
-      "The \"rate\" section lets you set the delay between each picture.<br /><br />" +
+      "The \"rate\" section lets you set the delay between each individual picture.<br /><br />" +
       "The \"seq\" section lets you set the order each picture is used from the \"LIST (fram)\" section.<br /><br />" +
-      "They are not necessary as the frame list is in order; unless you want to use the same picture multiple times between the animation, and the rate should never have to very.</html>");
+      "These are not necessary as the frame list is in order; unless you want to use the same picture multiple times between the animation, and the rate should never have to very.</html>");
     }
     else
     {
