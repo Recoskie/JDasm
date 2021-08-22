@@ -95,8 +95,8 @@ public class ANI extends Data implements RSection
     {
       info("<html>Animated cursors consist of a main header that sets the speed to go through each bitmap/icon picture in the \"LIST (fram)\".<br /><br />" +
       "There is also 2 sections that are optional.<br /><br />" +
-      "The \"seq\" section lets you set the order each picture is used from the \"LIST (fram)\" section.<br /><br />" +
       "The \"rate\" section lets you set the delay between each picture.<br /><br />" +
+      "The \"seq\" section lets you set the order each picture is used from the \"LIST (fram)\" section.<br /><br />" +
       "They are not necessary as the frame list is in order; unless you want to use the same picture multiple times between the animation, and the rate should never have to very.</html>");
     }
     else
