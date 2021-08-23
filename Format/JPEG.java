@@ -264,7 +264,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
             JDNode HRow = new JDNode("Huffman codes.h", ref++); node.add( HRow );
 
-            for( int i = 1; i <= 16; i++ ) { Huff.UINT8("EL #" + i + ""); Sum += ((byte)Huff.value) & 0xFF; }
+            for( int i = 1; i <= 16; i++ ) { Huff.UINT8("Bits " + i + ""); Sum += ((byte)Huff.value) & 0xFF; }
 
             Huff = new Descriptor(file); des.add(Huff);
 
@@ -313,7 +313,7 @@ public class JPEG extends Window.Window implements JDEventListener
         {
           //Begin reading Quantization Tables.
 
-          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number");
+          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number"); nTable.setEvent( this::QTableInfo );
 
           int Precision = (((byte)nTable.value) & 0xF0) >> 4;
 
@@ -343,7 +343,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
             size -= eSize; if( size >= eSize )
             {
-              nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number");
+              nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number"); nTable.setEvent( this::QTableInfo );
 
               Precision = (((byte)nTable.value) & 0xF0) >> 4; eSize = Precision == 0 ? 65 : 129;
 
@@ -443,7 +443,7 @@ public class JPEG extends Window.Window implements JDEventListener
     "Because of the \"Start of frame\" marker we have to define a marker format column, and an extended description of what the maker implies the image data is by type.<br /><br />" +
     markerTypes + "</html>",
     "<html>This is the size of the marker. The two bytes that are read for the size are included as part of the marker size.<br /><br />Markers types 208 to 223 do not have a size.</html>",
-    "<html>Unknown marker data. This happens when it is an unknown maker type.</html>",
+    "<html>Unknown marker data. This happens when a unknown maker type is used.</html>",
   };
 
   public static final String[] AppInfo = new String[]
@@ -474,7 +474,7 @@ public class JPEG extends Window.Window implements JDEventListener
     "<html>This should always be 8 by 8 sample size.</html>",
     "<html>Picture Height in pixels.</html>",
     "<html>Picture Width in pixels.</html>",
-    "<html>Number of component's. Usually 3, for Red, Green, and Blue.<br /><br />" +
+    "<html>Number of component's. Usually 3, for Y, Cb, Cr.<br /><br />" +
     "Each component uses an 8 by 8 quantization table. You can change the table number each component uses if you like." +
     "You can also modify the 8 by 8 quantization matrix an component number uses if you like.</html>"
   };
@@ -539,6 +539,34 @@ public class JPEG extends Window.Window implements JDEventListener
     else
     {
       info( DefineComponents[el] );
+    }
+  }
+
+  public void QTableInfo( int el )
+  {
+    if( el < 0 )
+    {
+      info("<html>The quantitation tables are used with the start of frame marker which defines the color components that will be used with the quantization table number.<br /><br />" +
+      "JPEG pictures are compressed into luminous data that present 8 by 8 tiles of the image. Image color data is approximated using the quantitation matrix.</html>");
+    }
+    else
+    {
+      info("<html>The first 0 to F digit is the 0 to 15 precision. The last digit 0 to F is 0 to 15 table number.<br /><br />" +
+      "If precision is 1 then each point is 16 bits instead of 8 bits.</html>");
+    }
+  }
+
+  public void HTableInfo( int el )
+  {
+    if( el < 0 )
+    {
+      info("<html>The total sum of the 16 bytes is the length of the preceding data from the huffman table.<br /><br />" +
+      "Huffman tables are used to represent a set of bytes/bits that ocurred the most times as a single byte/bits.<br /><br />" +
+      "Longer codes that add a bigger sum are rarely used in the file. Using this lengths based encoding and key codes allows us to compress data as small as posable without loss.</html>");
+    }
+    else
+    {
+      info("<html></html>");
     }
   }
 }
