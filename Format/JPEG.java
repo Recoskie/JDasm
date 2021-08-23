@@ -267,7 +267,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           while( size > 0 )
           {
-            Descriptor Huff = new Descriptor(file); des.add(Huff);
+            Descriptor Huff = new Descriptor(file); des.add(Huff); Huff.setEvent( this::HTableCodes );
 
             JDNode HRow = new JDNode("Huffman codes.h", ref++); node.add( HRow );
 
@@ -609,15 +609,38 @@ public class JPEG extends Window.Window implements JDEventListener
     }
   }
 
+  public void HTableCodes( int el )
+  {
+    if( el < 0 )
+    {
+      info("<html>A huffman table specifies number of codes that use a set bit combination length 1 to 16.<br /><br />" +
+      "Say bit length 3 has 3 codes. Then we have 3 codes that are + 1 to 000 = ?, 001 = ?, 010 = ?.<br /><br />" +
+      "Thus we add one to the 3 bit combination before moving to the next bit combination length 010 + 1 = 011<br /><br />" +
+      "Now say bit length 5 has 2 values. We make our three bit combination into 5 by moving to the left 2 times; making 011 into 011 00." +
+      "The next 2 codes are then are 01100 = ?, 01101 = ? in + 1.<br /><br />" +
+      "The question marks are filled in with the bytes that are read after the 16 bytes for our bit length combinations." +
+      "</html>");
+    }
+    else
+    {
+      info("<html>Number of codes existent under bit combination.</html>");
+    }
+  }
+
   public void HTableData( int el )
   {
     if( el < 0 )
     {
-      info("<html>The expansion of this huffman table is as follows.<br /><br />" + huffExpansion.get( HuffTable ) + "</html>");
+      info("<html>See huffman codes to understand how the expansion table is computed.<br /><br />" +
+      "The bit combinations are the codes that appear in the image data which are expanded using trailing 1's.<br /><br />" +
+      "Some JPEG programs do not optimize the huffman table to compact as much data as possible.<br /><br />" +
+      "Some use already made huffman tables and match bit combinations within the image data giving reasonable compression.<br /><br />" +
+      "This is because optimized huffman tables can sometimes take a while to generate.<br /><br />" +
+      "<br /><br />" + huffExpansion.get( HuffTable ) + "</html>");
     }
     else
     {
-      info("<html></html>");
+      info("<html>Each byte specifying the expansion size of each bit combination.</html>");
     }
   }
 }
