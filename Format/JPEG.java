@@ -19,6 +19,7 @@ public class JPEG extends Window.Window implements JDEventListener
   //Decoding of huffman table expansion.
 
   private static java.util.LinkedList<String> huffExpansion = new java.util.LinkedList<String>();
+  private static int HuffTable = 0, Hufftables = 0;
 
   //Picture dimensions.
 
@@ -192,6 +193,8 @@ public class JPEG extends Window.Window implements JDEventListener
     {
       tree.expandPath( tree.getLeadSelectionPath() );
 
+      if( e.getArgs().length == 2 ) { HuffTable = (int)e.getArg(1); }
+
       ds.setDescriptor(des.get((int)e.getArg(0)));
     }
 
@@ -268,24 +271,40 @@ public class JPEG extends Window.Window implements JDEventListener
 
             JDNode HRow = new JDNode("Huffman codes.h", ref++); node.add( HRow );
 
-            int[] bits = new int[16]; int bitPos = 0;
+            int[] bits = new int[16]; int bitPos = 0, code = 0;
+
+            String bitDecode = "<table border=\"1\">";
+            bitDecode += "<tr><td>Bits</td><td>Code</td><td>Length</td></tr>";
 
             for( int i = 1; i <= 16; i++ ) { Huff.UINT8("Bits " + i + ""); Sum += bits[ i - 1 ] = ((byte)Huff.value) & 0xFF; }
 
-            Huff = new Descriptor(file); des.add(Huff);
+            Huff = new Descriptor(file); des.add(Huff); Huff.setEvent( this::HTableData );
+            
+            long[] arg = new long[2]; arg[0] = ref++; arg[1] = Hufftables++;
 
-            HRow = new JDNode("Data.h", ref++); node.add( HRow );
+            HRow = new JDNode("Data.h", arg ); node.add( HRow );
 
             for( int i1 = 1; i1 <= 16; i1++ )
             {
-              for( int i2 = 0; i2 < bits[ i1 - 1 ]; i2++ ) { Huff.UINT8("Huffman Code " + i1 + " bits"); }
+              for( int i2 = 0; i2 < bits[ i1 - 1 ]; i2++ )
+              {
+                Huff.UINT8("Huffman Code " + i1 + " bits"); code = ((byte)Huff.value) & 0xFF;
+
+                bitDecode += "<tr><td>" + pad( Integer.toBinaryString(bitPos), i1 ) + "</td><td>" + code + "</td><td>" + ( i1 + code ) + "</td></tr>";
+
+                bitPos += 1;
+              }
+
+              bitPos <<= 1;
             }
+
+            bitDecode += "</table>"; huffExpansion.add( bitDecode );
 
             //The tables can be grouped together under one marker.
 
             size -= 17 + Sum; Sum = 0; if( size > 0 )
             {
-              nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number");
+              nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number"); nTable.setEvent( this::HTableInfo );
 
               classType = (((byte)nTable.value) & 0xF0) >> 4;
 
@@ -408,6 +427,10 @@ public class JPEG extends Window.Window implements JDEventListener
       file.Events = true;
     }
   }
+
+  //Pad string with 0.
+
+  private String pad( String s, int size ) { for( int i = s.length(); i < size; i++, s = "0" + s ); return( s ); }
 
   private static String markerTypes = "<table border='1'>" +
   "<tr><td>Type</td><td>Format</td><td>Marker Defines.</td></tr>" +
@@ -583,6 +606,18 @@ public class JPEG extends Window.Window implements JDEventListener
     else
     {
       info("<html>The first 0 to F digit is the 0 to 15 is the Class type 1 = AC, and 0 = DC. The last digit 0 to F is 0 to 15 table number.</html>");
+    }
+  }
+
+  public void HTableData( int el )
+  {
+    if( el < 0 )
+    {
+      info("<html>The expansion of this huffman table is as follows.<br /><br />" + huffExpansion.get( HuffTable ) + "</html>");
+    }
+    else
+    {
+      info("<html></html>");
     }
   }
 }
