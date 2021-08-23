@@ -250,7 +250,7 @@ public class JPEG extends Window.Window implements JDEventListener
         {
           //Begin reading Huffman Tables.
 
-          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number");
+          Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number"); nTable.setEvent( this::HTableInfo );
 
           int classType = (((byte)nTable.value) & 0xF0) >> 4;
 
@@ -260,7 +260,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           while( size > 0 )
           {
-            Descriptor Huff = new Descriptor(file); des.add(Huff); Huff.setEvent( this::HTableInfo );
+            Descriptor Huff = new Descriptor(file); des.add(Huff);
 
             JDNode HRow = new JDNode("Huffman codes.h", ref++); node.add( HRow );
 
@@ -567,7 +567,7 @@ public class JPEG extends Window.Window implements JDEventListener
       "<tr><td>Huffman table #1 (Class = DC)</td><td>Used for DC component of Chrominance (Cb & Cr).</td></tr>" +
       "<tr><td>Huffman table #0 (Class = AC)</td><td>Used for AC component of Luminance (Y).</td></tr>" +
       "<tr><td>Huffman table #1 (Class = AC)</td><td>Used for AC component of Chrominance (Cb & Cr).</td></tr>" +
-      "</table>" +
+      "</table><br />" +
       "Huffman tables are used to represent a set of bits to a single byte." +
       "</html>");
     }
