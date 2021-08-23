@@ -16,6 +16,10 @@ public class JPEG extends Window.Window implements JDEventListener
 
   private static final String pad = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
+  //Decoding of huffman table expansion.
+
+  private static java.util.LinkedList<String> huffExpansion = new java.util.LinkedList<String>();
+
   //Picture dimensions.
 
   private int width = 0, height = 0;
@@ -264,13 +268,18 @@ public class JPEG extends Window.Window implements JDEventListener
 
             JDNode HRow = new JDNode("Huffman codes.h", ref++); node.add( HRow );
 
-            for( int i = 1; i <= 16; i++ ) { Huff.UINT8("Bits " + i + ""); Sum += ((byte)Huff.value) & 0xFF; }
+            int[] bits = new int[16]; int bitPos = 0;
+
+            for( int i = 1; i <= 16; i++ ) { Huff.UINT8("Bits " + i + ""); Sum += bits[ i - 1 ] = ((byte)Huff.value) & 0xFF; }
 
             Huff = new Descriptor(file); des.add(Huff);
 
             HRow = new JDNode("Data.h", ref++); node.add( HRow );
 
-            Huff.Other("Huffman Data", Sum);
+            for( int i1 = 1; i1 <= 16; i1++ )
+            {
+              for( int i2 = 0; i2 < bits[ i1 - 1 ]; i2++ ) { Huff.UINT8("Huffman Code " + i1 + " bits"); }
+            }
 
             //The tables can be grouped together under one marker.
 
