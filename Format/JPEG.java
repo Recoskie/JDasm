@@ -254,13 +254,13 @@ public class JPEG extends Window.Window implements JDEventListener
 
           int classType = (((byte)nTable.value) & 0xF0) >> 4;
 
-          node.setUserObject("Huffman Table #" + (((byte)nTable.value) & 0x0F) + " (Class = " + classType + ")"); node.setArgs( new long[]{ ref++ } );
+          node.setUserObject("Huffman Table #" + (((byte)nTable.value) & 0x0F) + " (Class = " + ( classType > 0 ? "AC" : "DC" ) + ")"); node.setArgs( new long[]{ ref++ } );
 
           int Sum = 0;
 
           while( size > 0 )
           {
-            Descriptor Huff = new Descriptor(file); des.add(Huff);
+            Descriptor Huff = new Descriptor(file); des.add(Huff); Huff.setEvent( this::HTableInfo );
 
             JDNode HRow = new JDNode("Huffman codes.h", ref++); node.add( HRow );
 
@@ -280,7 +280,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
               classType = (((byte)nTable.value) & 0xF0) >> 4;
 
-              node = new JDNode("Huffman Table #" + (((byte)nTable.value) & 0x0F) + " (Class = " + classType + ")", ref++);
+              node = new JDNode("Huffman Table #" + (((byte)nTable.value) & 0x0F) + " (Class = " + ( classType > 0 ? "AC" : "DC" ) + ")", ref++);
 
               model.insertNodeInto(node, root, root.getChildCount());
             }
@@ -560,13 +560,20 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     if( el < 0 )
     {
-      info("<html>The total sum of the 16 bytes is the length of the preceding data from the huffman table.<br /><br />" +
-      "Huffman tables are used to represent a set of bytes/bits that ocurred the most times as a single byte/bits.<br /><br />" +
-      "Longer codes that add a bigger sum are rarely used in the file. Using this lengths based encoding and key codes allows us to compress data as small as posable without loss.</html>");
+      info("<html>The huffman tables are used with the image data.<br /><br />" +
+      "<table border=\"1\">" +
+      "<tr><td>Table</td><td>Usage</td></tr>" +
+      "<tr><td>Huffman table #0 (Class = DC)</td><td>Used for DC component of Luminance (Y).</td></tr>" +
+      "<tr><td>Huffman table #1 (Class = DC)</td><td>Used for DC component of Chrominance (Cb & Cr).</td></tr>" +
+      "<tr><td>Huffman table #0 (Class = AC)</td><td>Used for AC component of Luminance (Y).</td></tr>" +
+      "<tr><td>Huffman table #1 (Class = AC)</td><td>Used for AC component of Chrominance (Cb & Cr).</td></tr>" +
+      "</table>" +
+      "Huffman tables are used to represent a set of bits to a single byte." +
+      "</html>");
     }
     else
     {
-      info("<html></html>");
+      info("<html>The first 0 to F digit is the 0 to 15 is the Class type 1 = AC, and 0 = DC. The last digit 0 to F is 0 to 15 table number.</html>");
     }
   }
 }
