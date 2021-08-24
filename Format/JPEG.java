@@ -19,7 +19,7 @@ public class JPEG extends Window.Window implements JDEventListener
   //Decoding of huffman table expansion.
 
   private static java.util.LinkedList<String> huffExpansion = new java.util.LinkedList<String>();
-  private static int HuffTable = 0, Hufftables = 0;
+  private static int HuffTable = 0, HuffTables = 0;
 
   //Picture dimensions.
 
@@ -280,7 +280,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
             Huff = new Descriptor(file); des.add(Huff); Huff.setEvent( this::HTableData );
             
-            long[] arg = new long[2]; arg[0] = ref++; arg[1] = Hufftables++;
+            long[] arg = new long[2]; arg[0] = ref++; arg[1] = HuffTables++;
 
             HRow = new JDNode("Data.h", arg ); node.add( HRow );
 
@@ -613,13 +613,12 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     if( el < 0 )
     {
-      info("<html>A huffman table specifies number of codes that use a set bit combination length 1 to 16.<br /><br />" +
+      info("<html>A Huffman table specifies the number of codes that use a set bit combination length 1 to 16.<br /><br />" +
       "Say bit length 3 has 3 codes. Then we count from 000 binary going 000 = ?, 001 = ?, 010 = ?.<br /><br />" +
-      "We add one more time to the 3 bit combination before moving to the next bit combination 010 + 1 = 011.<br /><br />" +
-      "Now say bit length 5 has 2 values. We then make our three bit combination into 5 by moving to the left 2 times making 011 into 011 00." +
-      "The next 2 codes are then are 01100 = ?, 01101 = ? when we continue the counting sequence.<br /><br />" +
-      "The question marks are filled in with the bytes that are read after the 16 bytes for our bit length combinations." +
-      "</html>");
+      "We add one more time to the 3-bit combination before moving to the next bit combination 010 + 1 = 011.<br /><br />" +
+      "Now say bit length 5 has 2 values. We then make our three-bit combination into 5 by moving to the left 2 times, making 011 into 011 00.<br /><br />" +
+      "The next 2 codes are then 01100 = ?, 01101 = ? when we continue the counting sequence.<br /><br />" +
+      "The question marks are filled in with the bytes that are read after the 16 bytes for our bit length combinations.</html>");
     }
     else
     {
@@ -631,12 +630,12 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     if( el < 0 )
     {
-      info("<html>See huffman codes to get a general understanding of huffman table expansion.<br /><br />" +
+      info("<html>To get a general understanding of Huffman binary tree expansion, see the \"Huffman codes\" section.<br /><br />" +
       "The bit combinations are the codes that appear in the image data which are expanded using trailing 1's.<br /><br />" +
-      "Some JPEG programs do not optimize the huffman table to compact as much data as possible.<br /><br />" +
-      "Some use already made huffman tables and match bit combinations within the image data giving reasonable compression.<br /><br />" +
-      "This is because optimized huffman tables can sometimes take a while to generate.<br /><br />" +
-      "<br /><br />" + huffExpansion.get( HuffTable ) + "</html>");
+      "Some JPEG programs do not optimize the Huffman table to compact as much data as possible.<br /><br />" +
+      "Some programs use already made Huffman tables and match bit combinations within the image data giving reasonable compression.<br /><br />" +
+      "This is because optimized Huffman tables can sometimes take a while to generate.<br /><br />" +
+      huffExpansion.get( HuffTable ) + "</html>");
     }
     else
     {
