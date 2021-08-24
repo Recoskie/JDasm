@@ -614,10 +614,10 @@ public class JPEG extends Window.Window implements JDEventListener
     if( el < 0 )
     {
       info("<html>A huffman table specifies number of codes that use a set bit combination length 1 to 16.<br /><br />" +
-      "Say bit length 3 has 3 codes. Then we have 3 codes that are + 1 to 000 = ?, 001 = ?, 010 = ?.<br /><br />" +
-      "Thus we add one to the 3 bit combination before moving to the next bit combination length 010 + 1 = 011<br /><br />" +
-      "Now say bit length 5 has 2 values. We make our three bit combination into 5 by moving to the left 2 times; making 011 into 011 00." +
-      "The next 2 codes are then are 01100 = ?, 01101 = ? in + 1.<br /><br />" +
+      "Say bit length 3 has 3 codes. Then we count from 000 binary going 000 = ?, 001 = ?, 010 = ?.<br /><br />" +
+      "We add one more time to the 3 bit combination before moving to the next bit combination 010 + 1 = 011.<br /><br />" +
+      "Now say bit length 5 has 2 values. We then make our three bit combination into 5 by moving to the left 2 times making 011 into 011 00." +
+      "The next 2 codes are then are 01100 = ?, 01101 = ? when we continue the counting sequence.<br /><br />" +
       "The question marks are filled in with the bytes that are read after the 16 bytes for our bit length combinations." +
       "</html>");
     }
@@ -631,7 +631,7 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     if( el < 0 )
     {
-      info("<html>See huffman codes to understand how the expansion table is computed.<br /><br />" +
+      info("<html>See huffman codes to get a general understanding of huffman table expansion.<br /><br />" +
       "The bit combinations are the codes that appear in the image data which are expanded using trailing 1's.<br /><br />" +
       "Some JPEG programs do not optimize the huffman table to compact as much data as possible.<br /><br />" +
       "Some use already made huffman tables and match bit combinations within the image data giving reasonable compression.<br /><br />" +
