@@ -290,7 +290,7 @@ public class JPEG extends Window.Window implements JDEventListener
               {
                 Huff.UINT8("Huffman Code " + i1 + " bits"); code = ((byte)Huff.value) & 0xFF;
 
-                bitDecode += "<tr><td>" + pad( Integer.toBinaryString(bitPos), i1 ) + "</td><td>" + code + "</td><td>" + ( i1 + code ) + "</td></tr>";
+                bitDecode += "<tr><td>" + pad( Integer.toBinaryString(bitPos), i1 ) + "</td><td>" + pad( Integer.toHexString( code ), 2 ) + "</td><td>" + ( i1 + ( code & 0x0F ) ) + "</td></tr>";
 
                 bitPos += 1;
               }
