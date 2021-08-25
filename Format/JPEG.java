@@ -552,7 +552,7 @@ public class JPEG extends Window.Window implements JDEventListener
     if( el < 0 )
     {
       info("The start of frame defines the width and height of the JPEG picture.<br /><br />" +
-      "The frame also usually specifies 3 image components, Red, green, and blue.<br /><br />" +
+      "The frame also usually specifies 3 image components, Y, Cb, and Cr.<br /><br />" +
       "The image components specify a quantization table number to use. An 8 by 8 matrix is shaded and blended together with three image components using the image data and quantization matrix in 8 by 8 pixel squares.<br /><br />" +
       "This allows JPEG pictures to be much smaller in size, but can only approximate the color in each 8x8.");
     }
