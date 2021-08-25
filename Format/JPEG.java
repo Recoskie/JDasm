@@ -600,8 +600,9 @@ public class JPEG extends Window.Window implements JDEventListener
       "<tr><td>Huffman table #0 (Class = AC)</td><td>Used for AC component of Luminance (Y).</td></tr>" +
       "<tr><td>Huffman table #1 (Class = AC)</td><td>Used for AC component of Chrominance (Cb & Cr).</td></tr>" +
       "</table><br />" +
-      "Huffman tables are used to represent a set of bits to a single byte." +
-      "</html>");
+      "JPEG pictures use variable length number for each Y, Cb, Cr color in the image data.<br /><br />" +
+      "A huffman table can say bits 01 is preceded by a 4 in length binary number.<br /><br />" +
+      "This way we use as little data as possible for image color values.</html>");
     }
     else
     {
@@ -618,7 +619,8 @@ public class JPEG extends Window.Window implements JDEventListener
       "We add one more time to the 3-bit combination before moving to the next bit combination 010 + 1 = 011.<br /><br />" +
       "Now say bit length 5 has 2 values. We then make our three-bit combination into 5 by moving to the left 2 times, making 011 into 011 00.<br /><br />" +
       "The next 2 codes are then 01100 = ?, 01101 = ? when we continue the counting sequence.<br /><br />" +
-      "The question marks are filled in with the bytes that are read after the 16 bytes for our bit length combinations.</html>");
+      "The question marks are filled in with the bytes that are read after the 16 bytes.<br /><br />" +
+      "If combination 010 is code 9, then the next 9 binary digits is the color value.<br /><br /></html>");
     }
     else
     {
@@ -631,15 +633,17 @@ public class JPEG extends Window.Window implements JDEventListener
     if( el < 0 )
     {
       info("<html>To get a general understanding of Huffman binary tree expansion, see the \"Huffman codes\" section.<br /><br />" +
-      "The bit combinations are the codes that appear in the image data which are expanded using trailing 1's.<br /><br />" +
+      "The bit combinations are the codes that appear in the image data. After the code is the color value.<br /><br />" +
+      "The number of bits used for the binary number is the Huffman code.<br /><br />" +
       "Some JPEG programs do not optimize the Huffman table to compact as much data as possible.<br /><br />" +
       "Some programs use already made Huffman tables and match bit combinations within the image data giving reasonable compression.<br /><br />" +
       "This is because optimized Huffman tables can sometimes take a while to generate.<br /><br />" +
+      "It also requires you to set optimizations when creating the JPEG.<br /><br />" +
       huffExpansion.get( HuffTable ) + "</html>");
     }
     else
     {
-      info("<html>Each byte specifying the expansion size of each bit combination.</html>");
+      info("<html>Each byte specifying the preceding binary number length of each bit combination.</html>");
     }
   }
 }
