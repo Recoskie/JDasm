@@ -207,9 +207,11 @@ public class JPEG extends Window.Window implements JDEventListener
       if( ((JDNode)tree.getLastSelectedPathComponent()).toString().equals("Image Data.h") )
       {
         info("<html>This is the image color data. A typical JPEG uses 4 huffman tables for each preceding color values.<br /><br />" +
-        "A huffman table can say 01 is preceded by a 4 bit binary number for color Y (luminance).<br /><br />" +
+        "A huffman table can say bits 01 is preceded by a 4 bit binary number for color Y (luminance).<br /><br />" +
+        "And that bits 11 is preceded by a 13 bit binary number for color Y (luminance).<br /><br />" +
         "This is done to save as much space as possible for color values.<br /><br />" +
-        "Colors are averaged in 8 by 8 pixels using quantitation matrices to save even more space.</html>"); ds.clear();
+        "Colors are averaged in 8 by 8 pixels using quantitation matrices to save even more space.<br /><br />" +
+        "This makes the picture color data as small as possible, but we loose some quality as we can only approximate the colors in 8x8.</html>"); ds.clear();
       }
       
       Offset.setSelected( e.getArg(1), e.getArg(2) );
@@ -605,6 +607,7 @@ public class JPEG extends Window.Window implements JDEventListener
       "</table><br />" +
       "JPEG pictures use variable length number for each Y, Cb, Cr color in the image data.<br /><br />" +
       "A huffman table can say bits 01 is preceded by a 4 in length binary number.<br /><br />" +
+      "And that bits 11 is preceded by a 13 in length binary number.<br /><br />" +
       "This way we use as little data as possible for image color values.</html>");
     }
     else
