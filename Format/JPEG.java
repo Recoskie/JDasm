@@ -613,8 +613,8 @@ public class JPEG extends Window.Window implements JDEventListener
   "If we chose not to filter out anything, then we would have 1 DC following 63 AC values for each 8x8.<br /><br />" +
   "A huffman table can say binary digits 01 uses the next 4 binary digits as a number.<br /><br />" +
   "And also that binary digits 11 uses the next 13 in length binary number.<br /><br />" +
-  "A huffman table cen specify 010 for a 0 in length number value. The 0 in length codes are used to set a end point for AC values.<br /><br />" +
-  "This way we use as little data as possible for image color values. An optimized huffman tables is the most used bit combinations as 1 to 2 bit combinations.";
+  "A huffman table cen specify 111 for a 0 in length number value. The 0 in length codes are used to set a end point for AC values.<br /><br />" +
+  "This way we use as little data as possible for image color data. An optimized huffman table is the most used bit combinations as 1 to 2 bit combinations.";
 
   public static final String[] markers = new String[]
   {
@@ -759,9 +759,10 @@ public class JPEG extends Window.Window implements JDEventListener
       "Say bit length 3 has 3 codes. Then we count from 000 binary going 000 = ?, 001 = ?, 010 = ?.<br /><br />" +
       "We add one more time to the 3-bit combination before moving to the next bit combination 010 + 1 = 011.<br /><br />" +
       "Now say bit length 5 has 2 values. We then make our current three-bit combination into 5 by moving to the left 2 times, making 011 into 011 00.<br /><br />" +
-      "The next 2 codes are then 01100 = ?, 01101 = ? as we continue the counting sequence. Thus after this last combination we must not forget to add +1 more.<br /><br />" +
+      "The next 2 codes are then 01100 = ?, 01101 = ? as we continue the counting sequence.<br /><br />" +
+      "After this last 5 bit combination we then must not forget to add +1 before moving to the next combination length.<br /><br />" +
       "The question marks are filled in with the bytes that are read after the 16 bytes.<br /><br />" +
-      "The counting sequence can also be graphed out as a binary tree using 0 to 1 nodes. Which for some makes it easier to map the codes combinations.</html>");
+      "The counting sequence can also be graphed out as a binary tree using 0 to 1 nodes. Which for some makes it easier to map the code combinations.</html>");
     }
     else
     {
