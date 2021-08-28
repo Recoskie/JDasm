@@ -610,7 +610,7 @@ public class JPEG extends Window.Window implements JDEventListener
   "</table><br />" +
   "JPEG pictures use variable length numbers for each Y, Cb, Cr color in the image data.<br /><br />" +
   "Each color uses one DC value that is added to the 8 by 8 quantized matrix. The AC huffman table is for individual values in the 8 by 8 matrix.<br /><br />" +
-  "If we chose not to filter out anything, then we would have 64 AC values for each 8x8.<br /><br />" +
+  "If we chose not to filter out anything, then we would have 1 DC following 63 AC values for each 8x8.<br /><br />" +
   "A huffman table can say binary digits 01 uses the next 4 binary digits as a number.<br /><br />" +
   "And also that binary digits 11 uses the next 13 in length binary number.<br /><br />" +
   "A huffman table cen specify 010 for a 0 in length number value. The 0 in length codes are used to set a end point for AC values.<br /><br />" +
@@ -758,10 +758,10 @@ public class JPEG extends Window.Window implements JDEventListener
       info("<html>A Huffman table specifies the number of codes that use a set bit combination length 1 to 16.<br /><br />" +
       "Say bit length 3 has 3 codes. Then we count from 000 binary going 000 = ?, 001 = ?, 010 = ?.<br /><br />" +
       "We add one more time to the 3-bit combination before moving to the next bit combination 010 + 1 = 011.<br /><br />" +
-      "Now say bit length 5 has 2 values. We then make our three-bit combination into 5 by moving to the left 2 times, making 011 into 011 00.<br /><br />" +
-      "The next 2 codes are then 01100 = ?, 01101 = ? when we continue the counting sequence.<br /><br />" +
+      "Now say bit length 5 has 2 values. We then make our current three-bit combination into 5 by moving to the left 2 times, making 011 into 011 00.<br /><br />" +
+      "The next 2 codes are then 01100 = ?, 01101 = ? as we continue the counting sequence. Thus after this last combination we must not forget to add +1 more.<br /><br />" +
       "The question marks are filled in with the bytes that are read after the 16 bytes.<br /><br />" +
-      "If combination 010 is code 9, then the next 9 binary digits is the color value.<br /><br /></html>");
+      "The counting sequence can also be graphed out as a binary tree using 0 to 1 nodes. Which for some makes it easier to map the codes combinations.</html>");
     }
     else
     {
@@ -775,9 +775,9 @@ public class JPEG extends Window.Window implements JDEventListener
     {
       info("<html>To get a general understanding of Huffman binary tree expansion, see the \"Huffman codes\" section.<br /><br />" +
       "The bit combinations are the codes that appear in the image data. After the code is the color value.<br /><br />" +
-      "The number of bits used for the binary number is the Huffman code.<br /><br />" +
+      "The number of bits used for the binary number is the last 4 bits in the Huffman code.<br /><br />" +
       "Some JPEG programs do not optimize the Huffman table to compact as much data as possible.<br /><br />" +
-      "Some programs use already made Huffman tables and match bit combinations within the image data giving reasonable compression.<br /><br />" +
+      "Some programs use already made Huffman tables pick combinations following the color value giving reasonable compression.<br /><br />" +
       "This is because optimized Huffman tables can sometimes take a while to generate.<br /><br />" +
       "It also requires you to set optimizations when creating the JPEG.<br /><br />" +
       huffExpansion.get( HuffTable ) + "</html>");
