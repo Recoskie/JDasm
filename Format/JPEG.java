@@ -20,6 +20,14 @@ public class JPEG extends Window.Window implements JDEventListener
 
   private static java.util.LinkedList<String> huffExpansion = new java.util.LinkedList<String>();
   private static int HuffTable = 0, HuffTables = 0;
+  
+  private static final int[] bits = new int[]
+  {
+    0x80000000,0xC0000000,0xE0000000,0xF0000000,0xF8000000,0xFC000000,0xFE000000,0xFF000000,
+    0xFF800000,0xFFC00000,0xFFE00000,0xFFF00000,0xFFF80000,0xFFFC0000,0xFFFE0000,0xFFFF0000
+  };
+  
+  private static int[] y, y_ac, crcb, crcb_ac;
 
   //Picture dimensions.
 
@@ -64,7 +72,11 @@ public class JPEG extends Window.Window implements JDEventListener
 
       if( MCode == -1 && (type > 0x01 && type != 0xFF) )
       {
-        if( pos + buf != markerPos ) { h.add( new JDNode("Image Data.h", new long[]{ -2, markerPos, ( pos + buf ) - 1 } ) ); }
+        if( pos + buf != markerPos )
+        {
+          JDNode t = new JDNode("Image Data", new long[]{ -2, markerPos, ( pos + buf ) - 1 } );
+          t.add( new JDNode("MCU 0,0.h", new long[]{ -1, markerPos, 0, 7 } ) ); h.add( t );
+        }
 
         markerPos = pos + buf; file.seek( markerPos ); //Seek the actual position.
 
@@ -120,8 +132,33 @@ public class JPEG extends Window.Window implements JDEventListener
 
     tree.setSelectionPath( new TreePath( h.getPath() ) ); open( new JDEvent( this, "", 0 ) );
   }
+  
+  //Decode all markers of a particular type. Some parts of the image can not be read without the markers being read.
+
+  private void openMarkers( int[] m )
+  {
+    TreePath currentPath = new TreePath( ((JDNode)tree.getLastSelectedPathComponent()).getPath() );
+    
+    JDNode node, nodes = (JDNode)root.getFirstChild(); long[] a;
+
+    for( int i1 = nodes.getChildCount() - 1; i1 > 0; i1-- )
+    {
+      for( int i2 = 0; i2 < m.length; i2++ )
+      {
+        a = ( node = (JDNode)nodes.getChildAt(i1)).getArgs();
+
+        if( m[i2] == ( a.length > 3 ? a[3] : -1 ) )
+        {
+          tree.setSelectionPath( new TreePath( node.getPath() ) ); open( new JDEvent(this, "", a ) );
+        }
+      }
+    }
+
+    tree.setSelectionPath( currentPath );
+  }
 
   //All of this moves into sub functions when user clicks on a maker.
+  //We can also open required markers when needed by type using the "openMarkers" method.
 
   private boolean decodeMarker( int type, int size, JDNode marker ) throws java.io.IOException
   {
@@ -204,14 +241,9 @@ public class JPEG extends Window.Window implements JDEventListener
     {
       try { file.seek( e.getArg(1) ); } catch( Exception er ) { }
 
-      if( ((JDNode)tree.getLastSelectedPathComponent()).toString().equals("Image Data.h") )
+      if( ((JDNode)tree.getLastSelectedPathComponent()).toString().equals("Image Data") )
       {
-        info("<html>This is the image color data. A typical JPEG uses 4 huffman tables for each preceding color values.<br /><br />" +
-        "A huffman table can say bits 01 is preceded by a 4 bit binary number for color Y (luminance).<br /><br />" +
-        "And that bits 11 is preceded by a 13 bit binary number for color Y (luminance).<br /><br />" +
-        "This is done to save as much space as possible for color values.<br /><br />" +
-        "Colors are averaged in 8 by 8 pixels using quantitation matrices to save even more space.<br /><br />" +
-        "This makes the picture color data as small as possible, but we loose some quality as we can only approximate the colors in 8x8.</html>"); ds.clear();
+        info("<html>" + imageData + "</html>"); ds.clear();
       }
       
       Offset.setSelected( e.getArg(1), e.getArg(2) );
@@ -221,7 +253,9 @@ public class JPEG extends Window.Window implements JDEventListener
 
     if( e.getArgs().length == 4 )
     {
-      JDNode root = (JDNode)tree.getLastSelectedPathComponent(), node = (JDNode)root.getFirstChild();
+      JDNode root = (JDNode)tree.getLastSelectedPathComponent(), node = new JDNode("");
+      
+      if( root.getChildCount() > 0 ){ node = (JDNode)root.getFirstChild(); }
 
       DefaultTreeModel model = ((DefaultTreeModel)tree.getModel());
 
@@ -264,17 +298,19 @@ public class JPEG extends Window.Window implements JDEventListener
 
           Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number"); nTable.setEvent( this::HTableInfo );
 
-          int classType = (((byte)nTable.value) & 0xF0) >> 4;
+          int classType = (((byte)nTable.value) & 0xF0) >> 4, num = (((byte)nTable.value) & 0x0F);
 
-          node.setUserObject("Huffman Table #" + (((byte)nTable.value) & 0x0F) + " (Class = " + ( classType > 0 ? "AC" : "DC" ) + ")"); node.setArgs( new long[]{ ref++ } );
+          node.setUserObject("Huffman Table #" + num + " (Class = " + ( classType > 0 ? "AC" : "DC" ) + ")"); node.setArgs( new long[]{ ref++ } );
 
-          int Sum = 0;
+          int Sum = 0, TableType = ( num << 1 ) + classType;
 
           while( size > 0 )
           {
             Descriptor Huff = new Descriptor(file); des.add(Huff); Huff.setEvent( this::HTableCodes );
 
             JDNode HRow = new JDNode("Huffman codes.h", ref++); node.add( HRow );
+
+            java.util.LinkedList<Integer> codes = new java.util.LinkedList<Integer>();
 
             int[] bits = new int[16]; int bitPos = 0, code = 0;
 
@@ -295,7 +331,14 @@ public class JPEG extends Window.Window implements JDEventListener
               {
                 Huff.UINT8("Huffman Code " + i1 + " bits"); code = ((byte)Huff.value) & 0xFF;
 
+                //Store the code in the integer with the higher 16 bits as the bit combination.
+                //The lower 4 bits as the 0 to 16 bit length next 4 bits as the huffman value length.
+
+                codes.add( ( bitPos << ( 16 + ( 16 - i1 ) ) ) + ( code << 4 ) + ( i1 - 1 ) );
+
                 bitDecode += "<tr><td>" + pad( Integer.toBinaryString(bitPos), i1 ) + "</td><td>" + pad( Integer.toHexString( code ), 2 ) + "</td><td>" + ( i1 + ( code & 0x0F ) ) + "</td></tr>";
+
+                bitDecode += "<tr><td>" + pad( Integer.toUnsignedString( ( bitPos << ( 16 + ( 16 - i1 ) ) ) + ( ( code & 0x0F ) << 4 ) + ( i1 - 1 ), 2), 32 ) + "</td><td>This is the int combination.</td></tr>";
 
                 bitPos += 1;
               }
@@ -305,15 +348,20 @@ public class JPEG extends Window.Window implements JDEventListener
 
             bitDecode += "</table>"; huffExpansion.add( bitDecode );
 
+            if( TableType == 0 ) { y = codes.stream().mapToInt(Integer::intValue).toArray(); }
+            if( TableType == 1 ) { y_ac = codes.stream().mapToInt(Integer::intValue).toArray(); }
+            if( TableType == 2 ) { crcb = codes.stream().mapToInt(Integer::intValue).toArray(); }
+            if( TableType == 3 ) { crcb_ac = codes.stream().mapToInt(Integer::intValue).toArray(); }
+
             //The tables can be grouped together under one marker.
 
             size -= 17 + Sum; Sum = 0; if( size > 0 )
             {
               nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number"); nTable.setEvent( this::HTableInfo );
 
-              classType = (((byte)nTable.value) & 0xF0) >> 4;
+              classType = (((byte)nTable.value) & 0xF0) >> 4; num = (((byte)nTable.value) & 0x0F); TableType = ( num << 1 ) + classType;
 
-              node = new JDNode("Huffman Table #" + (((byte)nTable.value) & 0x0F) + " (Class = " + ( classType > 0 ? "AC" : "DC" ) + ")", ref++);
+              node = new JDNode("Huffman Table #" + num + " (Class = " + ( classType > 0 ? "AC" : "DC" ) + ")", ref++);
 
               model.insertNodeInto(node, root, root.getChildCount());
             }
@@ -424,6 +472,85 @@ public class JPEG extends Window.Window implements JDEventListener
 
           node.setUserObject("Text.h"); node.setArgs( new long[]{ ref++ } );
         }
+        else if( type == 7 )
+        {
+          file.Events = false;
+
+          if( y == null ) { long t = file.getFilePointer(); System.out.println("Open markers."); openMarkers( new int[]{ 1 } ); file.seek( t ); }
+
+          String out = "";
+
+          file.read(4); int v = file.toInt();
+
+          boolean match = false, EOB = false;
+          
+          int c = 0;
+          
+          int bit = 0, code = 0, len = 0, zrl = 0;
+          
+          int value = 0;
+
+          int bitPos = 0, bytes = 0;
+
+          int loop = 0;
+
+          //Each code has a length for the number of bits is the binary number value.
+
+          while( !EOB && loop < 64 )
+          {
+            //There is only one DC per 8x8 block. The rest are AC.
+            
+            if( loop == 0 )
+            {
+              c = y.length; while( !match && c > 0 )
+              {
+                code = y[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+              }
+            }
+            else
+            {
+              c = y_ac.length; match = false; while( !match && c > 0 )
+              {
+                code = y_ac[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+              }
+            }
+
+            if( match )
+            {
+              out += "Matches " + pad( Integer.toBinaryString( code >>> ( 16 + ( 15 - bit ) ) ), bit + 1 ) + " in huffman table 0 class " + ( loop == 0 ? "DC" : "AC" ) + "."; v <<= bit + 1;
+
+              out += "<br />";
+
+              if( ( len + zrl ) > 0 )
+              {
+                if( len > 0 )
+                {
+                  value = ( v & bits[len - 1] ) >>> ( 32 - len );
+
+                  out += "Value = " + pad( Integer.toBinaryString( value ), len ); v <<= len;
+                }
+
+                //Load in new bytes as needed.
+
+                bitPos += ( len + bit + 1 ); bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
+                {
+                  bitPos -= 8; v |= file.read() << bitPos;
+                }
+
+                out += "<br />";
+              }
+              else { out += "Value = EOB"; EOB = true; }
+            }
+
+            loop += 1;
+          }
+
+          file.Events = true;
+
+          info( "<html>" + out + "</html>" );
+          
+          return;
+        }
 
         root.setArgs( new long[]{ root.getArg(0) } );
       }
@@ -469,6 +596,22 @@ public class JPEG extends Window.Window implements JDEventListener
 
   public static String markerRule = "Every marker must start with 255, and must not have a maker type with 255, 0, or 1.<br /><br />" +
   "Marker codes do not have to start one after another. Invalid makers are skipped as padding is allowed.";
+
+  public static final String imageData = "The huffman tables are used to decode the image data.<br /><br />" +
+  "<table border=\"1\">" +
+  "<tr><td>Table</td><td>Usage</td></tr>" +
+  "<tr><td>Huffman table #0 (Class = DC)</td><td>Used for DC component of Luminance (Y).</td></tr>" +
+  "<tr><td>Huffman table #1 (Class = DC)</td><td>Used for DC component of Chrominance (Cb & Cr).</td></tr>" +
+  "<tr><td>Huffman table #0 (Class = AC)</td><td>Used for AC component of Luminance (Y).</td></tr>" +
+  "<tr><td>Huffman table #1 (Class = AC)</td><td>Used for AC component of Chrominance (Cb & Cr).</td></tr>" +
+  "</table><br />" +
+  "JPEG pictures use variable length numbers for each Y, Cb, Cr color in the image data.<br /><br />" +
+  "Each color uses one DC value that is added to the 8 by 8 quantized matrix. The AC huffman table is for individual values in the 8 by 8 matrix.<br /><br />" +
+  "If we chose not to filter out anything, then we would have 64 AC values for each 8x8.<br /><br />" +
+  "A huffman table can say binary digits 01 uses the next 4 binary digits as a number.<br /><br />" +
+  "And also that binary digits 11 uses the next 13 in length binary number.<br /><br />" +
+  "A huffman table cen specify 010 for a 0 in length number value. The 0 in length codes are used to set a end point for AC values.<br /><br />" +
+  "This way we use as little data as possible for image color values. An optimized huffman tables is the most used bit combinations as 1 to 2 bit combinations.";
 
   public static final String[] markers = new String[]
   {
@@ -597,18 +740,7 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     if( el < 0 )
     {
-      info("<html>The huffman tables are used with the image data.<br /><br />" +
-      "<table border=\"1\">" +
-      "<tr><td>Table</td><td>Usage</td></tr>" +
-      "<tr><td>Huffman table #0 (Class = DC)</td><td>Used for DC component of Luminance (Y).</td></tr>" +
-      "<tr><td>Huffman table #1 (Class = DC)</td><td>Used for DC component of Chrominance (Cb & Cr).</td></tr>" +
-      "<tr><td>Huffman table #0 (Class = AC)</td><td>Used for AC component of Luminance (Y).</td></tr>" +
-      "<tr><td>Huffman table #1 (Class = AC)</td><td>Used for AC component of Chrominance (Cb & Cr).</td></tr>" +
-      "</table><br />" +
-      "JPEG pictures use variable length number for each Y, Cb, Cr color in the image data.<br /><br />" +
-      "A huffman table can say bits 01 is preceded by a 4 in length binary number.<br /><br />" +
-      "And that bits 11 is preceded by a 13 in length binary number.<br /><br />" +
-      "This way we use as little data as possible for image color values.</html>");
+      info("<html>" + imageData + "</html>");
     }
     else
     {
