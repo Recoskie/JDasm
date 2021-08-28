@@ -220,7 +220,12 @@ public class JPEG extends Window.Window implements JDEventListener
     n.add( new JDNode(pad) ); marker.add( n ); return( true );
   }
 
-  public void Uninitialize() { des.clear(); ref = 0; }
+  public void Uninitialize()
+  {
+    des.clear(); huffExpansion.clear(); HuffTables = 0;  ref = 0;
+    
+    y = null; y_ac = null; crcb = null; crcb_ac = null;
+  }
 
   public void open( JDEvent e )
   {
@@ -332,13 +337,11 @@ public class JPEG extends Window.Window implements JDEventListener
                 Huff.UINT8("Huffman Code " + i1 + " bits"); code = ((byte)Huff.value) & 0xFF;
 
                 //Store the code in the integer with the higher 16 bits as the bit combination.
-                //The lower 4 bits as the 0 to 16 bit length next 4 bits as the huffman value length.
+                //The lower 4 bits as the 0 to 16 bit length next 4 bits as the huffman code.
 
                 codes.add( ( bitPos << ( 16 + ( 16 - i1 ) ) ) + ( code << 4 ) + ( i1 - 1 ) );
 
                 bitDecode += "<tr><td>" + pad( Integer.toBinaryString(bitPos), i1 ) + "</td><td>" + pad( Integer.toHexString( code ), 2 ) + "</td><td>" + ( i1 + ( code & 0x0F ) ) + "</td></tr>";
-
-                bitDecode += "<tr><td>" + pad( Integer.toUnsignedString( ( bitPos << ( 16 + ( 16 - i1 ) ) ) + ( ( code & 0x0F ) << 4 ) + ( i1 - 1 ), 2), 32 ) + "</td><td>This is the int combination.</td></tr>";
 
                 bitPos += 1;
               }
@@ -476,7 +479,7 @@ public class JPEG extends Window.Window implements JDEventListener
         {
           file.Events = false;
 
-          if( y == null ) { long t = file.getFilePointer(); System.out.println("Open markers."); openMarkers( new int[]{ 1 } ); file.seek( t ); }
+          if( y == null ) { long t = file.getFilePointer(); openMarkers( new int[]{ 1 } ); file.seek( t ); file.Events = false; }
 
           String out = "";
 
