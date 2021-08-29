@@ -16,6 +16,10 @@ public class JPEG extends Window.Window implements JDEventListener
 
   private static final String pad = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
+  //If the image data has bean scanned yet.
+
+  private boolean isScanned = false;
+
   //Decoding of huffman table expansion.
 
   private static java.util.LinkedList<String> huffExpansion = new java.util.LinkedList<String>();
@@ -28,6 +32,13 @@ public class JPEG extends Window.Window implements JDEventListener
   };
   
   private static int[] y, y_ac, crcb, crcb_ac;
+
+  //Sub sampling is number of 8 by 8 matrixes that are used for each color component.
+  //This allows us to forum bigger matrixes like 16x16 using four 8 by 8.
+
+  private int subSamplingY = 0;
+  private int subSamplingCr = 0;
+  private int subSamplingCb = 0;
 
   //Picture dimensions.
 
@@ -244,11 +255,22 @@ public class JPEG extends Window.Window implements JDEventListener
 
     else if( e.getArg(0) == -2 )
     {
-      try { file.seek( e.getArg(1) ); } catch( Exception er ) { }
-
       if( ((JDNode)tree.getLastSelectedPathComponent()).toString().equals("Image Data") )
       {
+        if( !isScanned )
+        {
+          isScanned = true; openMarkers( new int[]{ 1, 0 } );
+        
+          try
+          {
+            scanImage( (int)e.getArg(1), (int)e.getArg(2) + 1 );
+          }
+          catch( Exception er ) { er.printStackTrace(); }
+        }
+
         info("<html>" + imageData + "</html>"); ds.clear();
+
+        tree.expandPath( tree.getLeadSelectionPath() );
       }
       
       Offset.setSelected( e.getArg(1), e.getArg(2) );
@@ -256,7 +278,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     //Read an marker.
 
-    if( e.getArgs().length == 4 )
+    if( e.getArgs().length > 3 )
     {
       JDNode root = (JDNode)tree.getLastSelectedPathComponent(), node = new JDNode("");
       
@@ -292,6 +314,11 @@ public class JPEG extends Window.Window implements JDEventListener
             
             imageComp.UINT8("Component Indemnifier");
             imageComp.UINT8("Vertical/Horizontal Sampling factor");
+
+            if( i == 1 ) { subSamplingY = ((byte)imageComp.value); subSamplingY = ( subSamplingY & 0x0F ) * ( ( subSamplingY >> 4 ) & 0x0F ); }
+            if( i == 2 ) { subSamplingCb = ((byte)imageComp.value); subSamplingCb = ( subSamplingCb & 0x0F ) * ( ( subSamplingCb >> 4 ) & 0x0F ); }
+            if( i == 3 ) { subSamplingCr = ((byte)imageComp.value); subSamplingCr = ( subSamplingCr & 0x0F ) * ( ( subSamplingCr >> 4 ) & 0x0F ); }
+
             imageComp.UINT8("Quantization table Number");
           }
 
@@ -477,7 +504,7 @@ public class JPEG extends Window.Window implements JDEventListener
         }
         else if( type == 7 )
         {
-          long t = file.getFilePointer(); if( y == null ) { openMarkers( new int[]{ 1 } ); file.seek( t ); }
+          long t = file.getFilePointer();
 
           file.Events = false;
 
@@ -495,7 +522,9 @@ public class JPEG extends Window.Window implements JDEventListener
           
           int value = 0;
 
-          int bitPos = 0, bytes = 0, byteLen = 1;
+          int bitPos = (int)e.getArg(2), bytes = 0, byteLen = 0;
+
+          v <<= bitPos;
 
           int loop = 0;
 
@@ -504,27 +533,49 @@ public class JPEG extends Window.Window implements JDEventListener
           while( !EOB && loop < 64 )
           {
             //There is only one DC per 8x8 block. The rest are AC.
-            
-            if( loop == 0 )
+
+            if( e.getArg(4) == 0 )
             {
-              c = y.length; while( !match && c > 0 )
+              if( loop == 0 )
               {
-                code = y[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+                c = y.length; while( !match && c > 0 )
+                {
+                  code = y[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+                }
+              }
+              else
+              {
+                c = y_ac.length; while( !match && c > 0 )
+                {
+                  code = y_ac[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+                }
               }
             }
             else
             {
-              c = y_ac.length; match = false; while( !match && c > 0 )
+              if( loop == 0 )
               {
-                code = y_ac[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+                c = crcb.length; while( !match && c > 0 )
+                {
+                  code = crcb[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+                }
+              }
+              else
+              {
+                c = crcb_ac.length; while( !match && c > 0 )
+                {
+                  code = crcb_ac[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+                }
               }
             }
 
             if( match )
             {
-              out += "<tr><td>Table #0 Class " + ( loop == 0 ? "DC" : "AC" ) + "</td><td>" + String.format( "%02X", ( code >>> 4 ) & 0xFF ) + "</td>";
+              out += "<tr><td>Table #" + e.getArg(4) + " Class " + ( loop == 0 ? "DC" : "AC" ) + "</td><td>" + String.format( "%02X", ( code >>> 4 ) & 0xFF ) + "</td>";
 
               out += "<td>" + pad( Integer.toBinaryString( code >>> ( 16 + ( 15 - bit ) ) ), bit + 1 ) + "</td>"; v <<= bit + 1;
+
+              bitPos += bit + 1; 
 
               if( ( len + zrl ) > 0 )
               {
@@ -533,32 +584,38 @@ public class JPEG extends Window.Window implements JDEventListener
                   value = ( v & bits[len - 1] ) >>> ( 32 - len );
 
                   out += "<td>" + pad( Integer.toBinaryString( value ), len ) + "</td>"; v <<= len;
-                }
 
-                //Load in new bytes as needed.
-
-                bitPos += ( len + bit + 1 ); bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
-                {
-                  bitPos -= 8; v |= file.read() << bitPos; byteLen += 1;
+                  bitPos += len; 
                 }
               }
-              else { out += "<td>EOB</td>"; EOB = true; }
+              else { out += "<td>EOB</td>"; EOB = loop > 0; }
+
+              //Load in new bytes as needed.
+
+              bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
+              {
+                bitPos -= 8; code = file.read(); v |= code << bitPos; if( code == 255 ){ file.skipBytes(1); } byteLen += 1;
+              }
 
               out += "</tr>";
             }
 
-            loop += zrl + 1;
+            loop += zrl + 1; match = false;
           }
 
           //The binary and hex string.
 
           file.Events = true;
 
+          if( bitPos != 0 ) { byteLen += 1; }
+
           file.seek(t); file.read( byteLen );
 
           String bin = ""; for( int i = 0; i < byteLen; i++ ) { bin += pad( Integer.toBinaryString( ((int)file.toByte(i)) & 0xFF ), 8 ) + " "; }
 
-          ds.clear(); info( "<html>The RAW binary data = " + bin + "<br /><br />The binary data is split apart by matching one Huffman combination, and reading a variable in length binary number value.<br /><br />" +
+          ds.clear(); info( "<html>The RAW binary data = " + bin + "<br /><br />" + 
+          ( e.getArg(2) > 0 ? "The previous 8x8 ended at the binary digit " + e.getArg(2) + ", so decoding starts at binary digit " + e.getArg(2) + "<br /><br />" : "" ) +
+          "The binary data is split apart by matching one Huffman combination, and reading a variable in length binary number value.<br /><br />" +
           "The RAW binary data is split apart in the last 2 columns. The first 2 columns show what the matching Huffman code is for the binary combination.<br /><br />" +
           "Table DC is used for the first value, then the rest use table AC.<br /><br />" +
           "Each huffman code is split into tow values. The first 0 to 15 hex digit tells us how many zero values are used before our color value.<br /><br />" +
@@ -575,6 +632,103 @@ public class JPEG extends Window.Window implements JDEventListener
 
       file.Events = true;
     }
+  }
+
+  //Do A fast optimized full scan of the image data defining each DCT start and end position.
+  //Thus when user clicks on a DCT, then algorithm is run for just the one DCT at any position in image.
+
+  private void scanImage( int Start, int End ) throws java.io.IOException
+  {
+    file.Events = false; file.seek( Start );
+
+    JDNode node = (JDNode)tree.getLastSelectedPathComponent(); node.removeAllChildren();
+
+    int size = End - Start;
+
+    file.read( size ); int v = file.toInt(0);
+
+    boolean match = false, EOB = false;
+    
+    int c = 0;
+    
+    int bit = 0, code = 0, len = 0, zrl = 0;
+    
+    int bitPos = 0, bytes = 0, pos = 4;
+
+    int loop = 0;
+
+    int smp = subSamplingY + subSamplingCb + subSamplingCr;
+
+    //Each code has a length for the number of bits is the binary number value.
+
+    for( int DCT = 0; ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ) < End; DCT++ )
+    {
+      //Add DCT matrix node with number, and position.
+
+      node.add( new JDNode("DCT #" + ( DCT + 1 ) + ".h", new long[]{ -1, Start + ( pos - 4 ), bitPos, 7, ( DCT % smp ) < subSamplingY ? 0 : 1 } ) );
+
+      loop = 0; EOB = false; while( !EOB && loop < 64 )
+      {
+        //There is only one DC per 8x8 block. The rest are AC.
+        
+        if( ( DCT % smp ) < subSamplingY )
+        {
+          if( loop == 0 )
+          {
+            c = y.length; while( !match && c > 0 )
+            {
+              code = y[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+            }
+          }
+          else
+          {
+            c = y_ac.length; while( !match && c > 0 )
+            {
+              code = y_ac[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+            }
+          }
+        }
+        else
+        {
+          if( loop == 0 )
+          {
+            c = crcb.length; while( !match && c > 0 )
+            {
+              code = crcb[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+            }
+          }
+          else
+          {
+            c = crcb_ac.length; while( !match && c > 0 )
+            {
+              code = crcb_ac[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+            }
+          }
+        }
+
+        if( match ) { bitPos += bit + 1; v <<= bit + 1; if( ( len + zrl ) > 0 ) { v <<= len; bitPos += len; } else { EOB = loop > 0; } }
+
+        //Load in new bytes as needed.
+
+        bytes = bitPos / 8;
+        
+        for( int i = 0; i < bytes; i++ )
+        {
+          bitPos -= 8;
+          
+          if( pos < size )
+          {
+            code = file.toByte( pos ) & 0xFF; v |= code << bitPos; if( code == 255 ) { pos += 1; }
+          }
+
+          pos += 1;
+        }
+
+        loop += zrl + 1; match = false;
+      }
+    }
+
+    file.Events = true;
   }
 
   //Pad string with 0.
