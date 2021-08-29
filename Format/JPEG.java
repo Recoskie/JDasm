@@ -477,11 +477,13 @@ public class JPEG extends Window.Window implements JDEventListener
         }
         else if( type == 7 )
         {
+          long t = file.getFilePointer(); if( y == null ) { openMarkers( new int[]{ 1 } ); file.seek( t ); }
+
           file.Events = false;
 
-          if( y == null ) { long t = file.getFilePointer(); openMarkers( new int[]{ 1 } ); file.seek( t ); file.Events = false; }
-
-          String out = "";
+          String out = "<table border=\"1\">";
+          out += "<tr><td colspan=\"2\">Huffman table.</td><td colspan=\"2\">RAW Binary Data</td></tr>";
+          out += "<tr><td>Huff Table</td><td>Huff Code</td><td>Match</td><td>Value</td></tr>";
 
           file.read(4); int v = file.toInt();
 
@@ -493,7 +495,7 @@ public class JPEG extends Window.Window implements JDEventListener
           
           int value = 0;
 
-          int bitPos = 0, bytes = 0;
+          int bitPos = 0, bytes = 0, byteLen = 1;
 
           int loop = 0;
 
@@ -520,9 +522,9 @@ public class JPEG extends Window.Window implements JDEventListener
 
             if( match )
             {
-              out += "Matches " + pad( Integer.toBinaryString( code >>> ( 16 + ( 15 - bit ) ) ), bit + 1 ) + " in huffman table 0 class " + ( loop == 0 ? "DC" : "AC" ) + "."; v <<= bit + 1;
+              out += "<tr><td>Table #0 Class " + ( loop == 0 ? "DC" : "AC" ) + "</td><td>" + String.format( "%02X", ( code >>> 4 ) & 0xFF ) + "</td>";
 
-              out += "<br />";
+              out += "<td>" + pad( Integer.toBinaryString( code >>> ( 16 + ( 15 - bit ) ) ), bit + 1 ) + "</td>"; v <<= bit + 1;
 
               if( ( len + zrl ) > 0 )
               {
@@ -530,27 +532,39 @@ public class JPEG extends Window.Window implements JDEventListener
                 {
                   value = ( v & bits[len - 1] ) >>> ( 32 - len );
 
-                  out += "Value = " + pad( Integer.toBinaryString( value ), len ); v <<= len;
+                  out += "<td>" + pad( Integer.toBinaryString( value ), len ) + "</td>"; v <<= len;
                 }
 
                 //Load in new bytes as needed.
 
                 bitPos += ( len + bit + 1 ); bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
                 {
-                  bitPos -= 8; v |= file.read() << bitPos;
+                  bitPos -= 8; v |= file.read() << bitPos; byteLen += 1;
                 }
-
-                out += "<br />";
               }
-              else { out += "Value = EOB"; EOB = true; }
+              else { out += "<td>EOB</td>"; EOB = true; }
+
+              out += "</tr>";
             }
 
             loop += zrl + 1;
           }
 
+          //The binary and hex string.
+
           file.Events = true;
 
-          info( "<html>" + out + "</html>" );
+          file.seek(t); file.read( byteLen );
+
+          String bin = ""; for( int i = 0; i < byteLen; i++ ) { bin += pad( Integer.toBinaryString( ((int)file.toByte(i)) & 0xFF ), 8 ) + " "; }
+
+          ds.clear(); info( "<html>The RAW binary data = " + bin + "<br /><br />The binary data is split apart by matching one Huffman combination, and reading a variable in length binary number value.<br /><br />" +
+          "The RAW binary data is split apart in the last 2 columns. The first 2 columns show what the matching Huffman code is for the binary combination.<br /><br />" +
+          "Table DC is used for the first value, then the rest use table AC.<br /><br />" +
+          "Each huffman code is split into tow values. The first 0 to 15 hex digit tells us how many zero values are used before our color value.<br /><br />" +
+          "The Last 0 to 15 hex digit tells us how many binary digits to read for the color value. This allows us to define all 64 values in 8x8 using as little data as possible.<br /><br />" +
+          "If we match a Huffman code that is 00 meanings no value. This means there is no more color values for for the 8x8, so we terminate early with EOB.<br /><br />" +
+          out + "</html>" );
           
           return;
         }
@@ -776,16 +790,21 @@ public class JPEG extends Window.Window implements JDEventListener
     {
       info("<html>To get a general understanding of Huffman binary tree expansion, see the \"Huffman codes\" section.<br /><br />" +
       "The bit combinations are the codes that appear in the image data. After the code is the color value.<br /><br />" +
-      "The number of bits used for the binary number is the last 4 bits in the Huffman code.<br /><br />" +
+      "A Huffman code that is 73 would mean the next 7 color values are zero [0,0,0,0,0,0,0,?] then the 8th value is our number value in 8x8.<br /><br />" +
+      "The lest hex digit is 3 meaning the next 3 binary digits is the color value.<br /><br />" +
       "Some JPEG programs do not optimize the Huffman table to compact as much data as possible.<br /><br />" +
-      "Some programs use already made Huffman tables pick combinations following the color value giving reasonable compression.<br /><br />" +
+      "Some programs use already made Huffman tables which it pick combinations following the color value giving reasonable compression.<br /><br />" +
       "This is because optimized Huffman tables can sometimes take a while to generate.<br /><br />" +
       "It also requires you to set optimizations when creating the JPEG.<br /><br />" +
       huffExpansion.get( HuffTable ) + "</html>");
     }
     else
     {
-      info("<html>Each byte specifying the preceding binary number length of each bit combination.</html>");
+      info("<html>Each byte is the Huffman code for a bit combination. The code is broken into tow 4 bit numbers.<br /><br />" +
+      "The first 0 to 15 hex digit is the number of 0 values in the 8x8 matrix before the value.<br /><br />" +
+      "The Last 0 to 15 hex digit is the length for the number of binary digits to read as the number value.<br /><br />" +
+      "A Huffman code that is 73 would mean the next 7 color values are [0,0,0,0,0,0,0,?] then the 8th value is our number value in 8x8.<br /><br />" +
+      "The lest hex digit is 3 meaning the next 3 binary digits us used for our value.</html>");
     }
   }
 }
