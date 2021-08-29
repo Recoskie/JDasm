@@ -85,8 +85,7 @@ public class JPEG extends Window.Window implements JDEventListener
       {
         if( pos + buf != markerPos )
         {
-          JDNode t = new JDNode("Image Data", new long[]{ -2, markerPos, ( pos + buf ) - 1 } );
-          t.add( new JDNode("MCU 0,0.h", new long[]{ -1, markerPos, 0, 7 } ) ); h.add( t );
+          JDNode t = new JDNode("Image Data", new long[]{ -3, markerPos, ( pos + buf ) - 1 } ); t.add( new JDNode( pad ) ); h.add( t );
         }
 
         markerPos = pos + buf; file.seek( markerPos ); //Seek the actual position.
@@ -257,21 +256,31 @@ public class JPEG extends Window.Window implements JDEventListener
     {
       if( ((JDNode)tree.getLastSelectedPathComponent()).toString().equals("Image Data") )
       {
-        if( !isScanned )
-        {
-          isScanned = true; openMarkers( new int[]{ 1, 0 } );
-        
-          try
-          {
-            scanImage( (int)e.getArg(1), (int)e.getArg(2) + 1 );
-          }
-          catch( Exception er ) { er.printStackTrace(); }
-        }
-
         info("<html>" + imageData + "</html>"); ds.clear();
-
-        tree.expandPath( tree.getLeadSelectionPath() );
       }
+      
+      Offset.setSelected( e.getArg(1), e.getArg(2) );
+    }
+
+    //Image data
+
+    else if( e.getArg(0) == -3 )
+    {
+      JDNode n = ((JDNode)tree.getLastSelectedPathComponent());
+
+      if( !isScanned ) { isScanned = true; openMarkers( new int[]{ 1, 0 } ); }
+
+      n.setArgs( new long[]{ -2, n.getArg(1), n.getArg(2) } );
+
+      try
+      {
+        scanImage( (int)e.getArg(1), (int)e.getArg(2) + 1 );
+      }
+      catch( Exception er ) { er.printStackTrace(); }
+
+      info("<html>" + imageData + "</html>"); ds.clear();
+
+      tree.expandPath( tree.getLeadSelectionPath() );
       
       Offset.setSelected( e.getArg(1), e.getArg(2) );
     }
