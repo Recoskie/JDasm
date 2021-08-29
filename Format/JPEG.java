@@ -545,7 +545,7 @@ public class JPEG extends Window.Window implements JDEventListener
               else { out += "Value = EOB"; EOB = true; }
             }
 
-            loop += 1;
+            loop += zrl + 1;
           }
 
           file.Events = true;
