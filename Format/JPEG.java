@@ -31,7 +31,7 @@ public class JPEG extends Window.Window implements JDEventListener
     0xFF800000,0xFFC00000,0xFFE00000,0xFFF00000,0xFFF80000,0xFFFC0000,0xFFFE0000,0xFFFF0000
   };
   
-  private static int[] y, y_ac, crcb, crcb_ac;
+  private static int[][] HuffmanCodes = new int[4][];
 
   //Sub sampling is number of 8 by 8 matrixes that are used for each color component.
   //This allows us to forum bigger matrixes like 16x16 using four 8 by 8.
@@ -232,9 +232,8 @@ public class JPEG extends Window.Window implements JDEventListener
 
   public void Uninitialize()
   {
-    des.clear(); huffExpansion.clear(); HuffTables = 0;  ref = 0;
-    
-    y = null; y_ac = null; crcb = null; crcb_ac = null;
+    des.clear(); ref = 0;
+    HuffmanCodes = new int[4][]; huffExpansion.clear(); HuffTables = 0;
   }
 
   public void open( JDEvent e )
@@ -387,10 +386,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
             bitDecode += "</table>"; huffExpansion.add( bitDecode );
 
-            if( TableType == 0 ) { y = codes.stream().mapToInt(Integer::intValue).toArray(); }
-            if( TableType == 1 ) { y_ac = codes.stream().mapToInt(Integer::intValue).toArray(); }
-            if( TableType == 2 ) { crcb = codes.stream().mapToInt(Integer::intValue).toArray(); }
-            if( TableType == 3 ) { crcb_ac = codes.stream().mapToInt(Integer::intValue).toArray(); }
+            HuffmanCodes[TableType] = codes.stream().mapToInt(Integer::intValue).toArray();
 
             //The tables can be grouped together under one marker.
 
@@ -537,46 +533,20 @@ public class JPEG extends Window.Window implements JDEventListener
 
           int loop = 0;
 
+          int[] HuffTable = HuffmanCodes[ e.getArg(4) == 0 ? 0 : 2 ];
+
           //Each code has a length for the number of bits is the binary number value.
 
           while( !EOB && loop < 64 )
           {
             //There is only one DC per 8x8 block. The rest are AC.
 
-            if( e.getArg(4) == 0 )
+            c = HuffTable.length; while( !match && c > 0 )
             {
-              if( loop == 0 )
-              {
-                c = y.length; while( !match && c > 0 )
-                {
-                  code = y[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
-                }
-              }
-              else
-              {
-                c = y_ac.length; while( !match && c > 0 )
-                {
-                  code = y_ac[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
-                }
-              }
+              code = HuffTable[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
             }
-            else
-            {
-              if( loop == 0 )
-              {
-                c = crcb.length; while( !match && c > 0 )
-                {
-                  code = crcb[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
-                }
-              }
-              else
-              {
-                c = crcb_ac.length; while( !match && c > 0 )
-                {
-                  code = crcb_ac[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
-                }
-              }
-            }
+
+            if( loop == 0 ) { HuffTable = HuffmanCodes[ e.getArg(4) == 0 ? 1 : 3 ]; }
 
             if( match )
             {
@@ -668,52 +638,28 @@ public class JPEG extends Window.Window implements JDEventListener
 
     int smp = subSamplingY + subSamplingCb + subSamplingCr;
 
+    int TableNum = 0; int[] HuffTable = HuffmanCodes[TableNum];
+
     //Each code has a length for the number of bits is the binary number value.
 
     for( int DCT = 0; ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ) < End; DCT++ )
     {
       //Add DCT matrix node with number, and position.
 
-      node.add( new JDNode("DCT #" + ( DCT + 1 ) + ".h", new long[]{ -1, Start + ( pos - 4 ), bitPos, 7, ( DCT % smp ) < subSamplingY ? 0 : 1 } ) );
+      TableNum = ( DCT % smp ) < subSamplingY ? 0 : 2; HuffTable = HuffmanCodes[TableNum];
+
+      node.add( new JDNode("DCT #" + ( DCT + 1 ) + ".h", new long[]{ -1, Start + ( pos - 4 ), bitPos, 7, TableNum == 0 ? 0 : 1 } ) );
 
       loop = 0; EOB = false; while( !EOB && loop < 64 )
       {
         //There is only one DC per 8x8 block. The rest are AC.
         
-        if( ( DCT % smp ) < subSamplingY )
+        c = HuffTable.length; while( !match && c > 0 )
         {
-          if( loop == 0 )
-          {
-            c = y.length; while( !match && c > 0 )
-            {
-              code = y[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
-            }
-          }
-          else
-          {
-            c = y_ac.length; while( !match && c > 0 )
-            {
-              code = y_ac[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
-            }
-          }
+          code = HuffTable[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
         }
-        else
-        {
-          if( loop == 0 )
-          {
-            c = crcb.length; while( !match && c > 0 )
-            {
-              code = crcb[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
-            }
-          }
-          else
-          {
-            c = crcb_ac.length; while( !match && c > 0 )
-            {
-              code = crcb_ac[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
-            }
-          }
-        }
+
+        if( loop == 0 ) { HuffTable = HuffmanCodes[ TableNum + 1 ]; }
 
         if( match ) { bitPos += bit + 1; v <<= bit + 1; if( ( len + zrl ) > 0 ) { v <<= len; bitPos += len; } else { EOB = loop > 0; } }
 
