@@ -594,7 +594,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
               bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
               {
-                bitPos -= 8; code = file.read(); v |= code << bitPos; if( code == 255 ){ file.skipBytes(1); } byteLen += 1;
+                bitPos -= 8; code = file.read() & 0xFF; v |= code << bitPos; if( code == 255 ){ file.skipBytes(1); } byteLen += 1;
               }
 
               out += "</tr>";
