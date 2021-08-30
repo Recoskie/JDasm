@@ -253,12 +253,22 @@ public class JPEG extends Window.Window implements JDEventListener
 
     else if( e.getArg(0) == -2 )
     {
-      if( ((JDNode)tree.getLastSelectedPathComponent()).toString().equals("Image Data") )
+      JDNode n = ((JDNode)tree.getLastSelectedPathComponent());
+
+      try { file.seek( e.getArg(1) ); } catch( Exception er ) { }
+
+      if( n.toString().equals("Image Data") )
       {
-        info("<html>" + imageData + "</html>"); ds.clear();
+        info("<html>" + imageData + "</html>");
       }
+      else if( n.toString().startsWith("MCU") )
+      {
+        info("<html>This is one 8x8 square in the image. Each color can have a max of 64 values, or less.</html>");
+      }
+
+      tree.expandPath( tree.getLeadSelectionPath() );
       
-      Offset.setSelected( e.getArg(1), e.getArg(2) );
+      Offset.setSelected( e.getArg(1), e.getArg(2) ); ds.clear();
     }
 
     //Image data
@@ -653,7 +663,7 @@ public class JPEG extends Window.Window implements JDEventListener
       if( DCT % smp == 0 )
       {
         MCU.setArgs( new long[]{ -2, MCU.getArg(1), ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ) - 1 } );
-        MCU = new JDNode("MCU #" + DCT / smp + "", new long[]{ -2, ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ), 0 } );
+        MCU = new JDNode("MCU #" + DCT / smp + "", new long[]{ -2, ( Start + ( pos - 4 ) ), 0 } );
         node.add( MCU );
       }
 
