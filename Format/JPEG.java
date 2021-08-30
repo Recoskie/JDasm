@@ -640,6 +640,8 @@ public class JPEG extends Window.Window implements JDEventListener
 
     int TableNum = 0; int[] HuffTable = HuffmanCodes[TableNum];
 
+    JDNode MCU = new JDNode( pad, new long[]{ 0, 0 } );
+
     //Each code has a length for the number of bits is the binary number value.
 
     for( int DCT = 0; ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ) < End; DCT++ )
@@ -648,7 +650,14 @@ public class JPEG extends Window.Window implements JDEventListener
 
       TableNum = ( DCT % smp ) < subSamplingY ? 0 : 2; HuffTable = HuffmanCodes[TableNum];
 
-      node.add( new JDNode("DCT #" + ( DCT + 1 ) + ".h", new long[]{ -1, Start + ( pos - 4 ), bitPos, 7, TableNum == 0 ? 0 : 1 } ) );
+      if( DCT % smp == 0 )
+      {
+        MCU.setArgs( new long[]{ -2, MCU.getArg(1), ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ) - 1 } );
+        MCU = new JDNode("MCU #" + DCT / smp + "", new long[]{ -2, ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ), 0 } );
+        node.add( MCU );
+      }
+
+      MCU.add( new JDNode("DCT #" + ( DCT + 1 ) + ".h", new long[]{ -1, Start + ( pos - 4 ), bitPos, 7, TableNum == 0 ? 0 : 1 } ) );
 
       loop = 0; EOB = false; while( !EOB && loop < 64 )
       {
