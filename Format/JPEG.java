@@ -686,8 +686,6 @@ public class JPEG extends Window.Window implements JDEventListener
           code = HuffTable[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
         }
 
-        if( mcu >= 126 ) { System.out.println("mcu = " + mcu + ", matches = " + String.format( "%02X", ( code >>> 4 ) & 0xFF ) + "" ); }
-
         if( loop == 0 ) { HuffTable = HuffmanCodes[ TableNum + 1 ]; }
 
         if( match ) { bitPos += bit + 1; v <<= bit + 1; if( ( len + zrl ) > 0 ) { v <<= len; bitPos += len; } else { EOB = loop > 0; } }
