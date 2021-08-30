@@ -537,7 +537,7 @@ public class JPEG extends Window.Window implements JDEventListener
           
           int value = 0;
 
-          int bitPos = (int)e.getArg(2), bytes = 0, byteLen = 0;
+          int bitPos = (int)e.getArg(2), bytes = 0, byteLen = 0, mp = 0;
 
           v <<= bitPos;
 
@@ -583,7 +583,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
               bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
               {
-                bitPos -= 8; code = file.read() & 0xFF; v |= code << bitPos; if( code == 255 ){ if( file.read() == 0 ) { byteLen += 1; } } byteLen += 1;
+                bitPos -= 8; code = file.read() & 0xFF; v |= code << bitPos; if( code == 255 ){ if( ( file.read() & 0xFF ) == 0 ) { byteLen += 1; mp = byteLen + 4; } } byteLen += 1;
               }
 
               out += "</tr>";
@@ -594,25 +594,27 @@ public class JPEG extends Window.Window implements JDEventListener
 
           //The binary and hex string.
 
-          file.Events = true;
-
           if( bitPos != 0 ) { byteLen += 1; }
+
+          if( byteLen <= mp ) { byteLen -= 1; } //We did not read Past the 0xFF00.
 
           file.seek(t); file.read( byteLen );
 
           String bin = ""; for( int i = 0; i < byteLen; i++ ) { bin += pad( Integer.toBinaryString( ((int)file.toByte(i)) & 0xFF ), 8 ) + " "; }
 
           ds.clear(); info( "<html>The RAW binary data = " + bin + "<br /><br />" + 
-          ( e.getArg(2) > 0 ? "The previous 8x8 ended at the binary digit " + e.getArg(2) + ", so decoding starts at binary digit " + e.getArg(2) + "<br /><br />" : "" ) +
+          ( e.getArg(2) > 0 ? "The previous 8x8 ended at binary digit " + e.getArg(2) + ", so decoding starts at binary digit " + e.getArg(2) + ".<br /><br />" : "" ) +
           "The binary data is split apart by matching one Huffman combination, and reading a variable in length binary number value.<br /><br />" +
           "The RAW binary data is split apart in the last 2 columns. The first 2 columns show what the matching Huffman code is for the binary combination.<br /><br />" +
           "Table DC is used for the first value, then the rest use table AC.<br /><br />" +
           "Each huffman code is split into tow values. The first 0 to 15 hex digit tells us how many zero values are used before our color value.<br /><br />" +
           "The Last 0 to 15 hex digit tells us how many binary digits to read for the color value. This allows us to define all 64 values in 8x8 using as little data as possible.<br /><br />" +
-          "If we match a Huffman code that is 00 meanings no value. This means there is no more color values for for the 8x8, so we terminate early with EOB.<br /><br />" +
+          "If we match a Huffman code that is 00 meanings no value. This means there is no more color values for the 8x8, so we terminate early with EOB.<br /><br />" +
           out + "</html>" );
+
+          Offset.setSelected( t, t + byteLen - 1 );
           
-          return;
+          file.Events = true; return;
         }
 
         root.setArgs( new long[]{ root.getArg(0) } );
@@ -646,6 +648,8 @@ public class JPEG extends Window.Window implements JDEventListener
 
     int loop = 0;
 
+    int mp = 0;
+
     int smpY = subSamplingY;
     int smpCb = subSamplingY + subSamplingCb;
     int smpCr = subSamplingY + subSamplingCb + subSamplingCr;
@@ -671,7 +675,7 @@ public class JPEG extends Window.Window implements JDEventListener
         node.add( MCU ); mcu += 1;
       }
 
-      MCU.add( new JDNode("DCT #" + ( smp + 1 ) + ( smp >= smpY ? ( smp >= smpCb ? " (Cr)" : " (Cb)" ) : " (Y)" ) + ".h", new long[]{ -1, Start + ( pos - 4 ), bitPos, 7, TableNum == 0 ? 0 : 1 } ) );
+      MCU.add( new JDNode("DCT #" + ( smp + 1 ) + ( smp >= smpY ? ( smp >= smpCb ? " (Cr)" : " (Cb)" ) : " (Y)" ) + ".h", new long[]{ -1, Start + pos - ( ( Start + pos - 4 ) < mp ? 5 : 4 ), bitPos, 7, TableNum == 0 ? 0 : 1 } ) );
 
       loop = 0; EOB = false; while( !EOB && loop < 64 )
       {
@@ -681,6 +685,8 @@ public class JPEG extends Window.Window implements JDEventListener
         {
           code = HuffTable[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
         }
+
+        if( mcu >= 126 ) { System.out.println("mcu = " + mcu + ", matches = " + String.format( "%02X", ( code >>> 4 ) & 0xFF ) + "" ); }
 
         if( loop == 0 ) { HuffTable = HuffmanCodes[ TableNum + 1 ]; }
 
@@ -696,7 +702,14 @@ public class JPEG extends Window.Window implements JDEventListener
           
           if( pos < size )
           {
-            code = file.toByte( pos ) & 0xFF; v |= code << bitPos; if( code == 255 ) { pos += 1; }
+            code = file.toByte( pos ) & 0xFF; v |= code << bitPos;
+            
+            if( code == 255 )
+            {
+              //If we EOB before "mp" then we subtract pos by 1.
+
+              pos += 1; mp = Start + pos;
+            }
           }
 
           pos += 1;
@@ -923,7 +936,7 @@ public class JPEG extends Window.Window implements JDEventListener
       info("<html>To get a general understanding of Huffman binary tree expansion, see the \"Huffman codes\" section.<br /><br />" +
       "The bit combinations are the codes that appear in the image data. After the code is the color value.<br /><br />" +
       "A Huffman code that is 73 would mean the next 7 color values are zero [0,0,0,0,0,0,0,?] then the 8th value is our number value in 8x8.<br /><br />" +
-      "The lest hex digit is 3 meaning the next 3 binary digits is the color value.<br /><br />" +
+      "The last hex digit is 3 meaning the next 3 binary digits is the color value.<br /><br />" +
       "Some JPEG programs do not optimize the Huffman table to compact as much data as possible.<br /><br />" +
       "Some programs use already made Huffman tables which it pick combinations following the color value giving reasonable compression.<br /><br />" +
       "This is because optimized Huffman tables can sometimes take a while to generate.<br /><br />" +
@@ -936,7 +949,7 @@ public class JPEG extends Window.Window implements JDEventListener
       "The first 0 to 15 hex digit is the number of 0 values in the 8x8 matrix before the value.<br /><br />" +
       "The Last 0 to 15 hex digit is the length for the number of binary digits to read as the number value.<br /><br />" +
       "A Huffman code that is 73 would mean the next 7 color values are [0,0,0,0,0,0,0,?] then the 8th value is our number value in 8x8.<br /><br />" +
-      "The lest hex digit is 3 meaning the next 3 binary digits us used for our value.</html>");
+      "The last hex digit is 3 meaning the next 3 binary digits us used for our value.</html>");
     }
   }
 }
