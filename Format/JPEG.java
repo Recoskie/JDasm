@@ -646,7 +646,9 @@ public class JPEG extends Window.Window implements JDEventListener
 
     int loop = 0;
 
-    int smp = subSamplingY + subSamplingCb + subSamplingCr;
+    int smpY = subSamplingY;
+    int smpCb = subSamplingY + subSamplingCb;
+    int smpCr = subSamplingY + subSamplingCb + subSamplingCr;
 
     int TableNum = 0; int[] HuffTable = HuffmanCodes[TableNum];
 
@@ -654,20 +656,22 @@ public class JPEG extends Window.Window implements JDEventListener
 
     //Each code has a length for the number of bits is the binary number value.
 
-    for( int DCT = 0; ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ) < End; DCT++ )
+    for( int smp = 0, mcu = 0; ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ) < End; smp++ )
     {
+      if( smp >= smpCr ){ smp = 0; }
+
       //Add DCT matrix node with number, and position.
 
-      TableNum = ( DCT % smp ) < subSamplingY ? 0 : 2; HuffTable = HuffmanCodes[TableNum];
+      TableNum = smp < subSamplingY ? 0 : 2; HuffTable = HuffmanCodes[TableNum];
 
-      if( DCT % smp == 0 )
+      if( smp == 0 )
       {
         MCU.setArgs( new long[]{ -2, MCU.getArg(1), ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ) - 1 } );
-        MCU = new JDNode("MCU #" + DCT / smp + "", new long[]{ -2, ( Start + ( pos - 4 ) ), 0 } );
-        node.add( MCU );
+        MCU = new JDNode("MCU #" + mcu + "", new long[]{ -2, ( Start + ( pos - 4 ) ), 0 } );
+        node.add( MCU ); mcu += 1;
       }
 
-      MCU.add( new JDNode("DCT #" + ( DCT + 1 ) + ".h", new long[]{ -1, Start + ( pos - 4 ), bitPos, 7, TableNum == 0 ? 0 : 1 } ) );
+      MCU.add( new JDNode("DCT #" + ( smp + 1 ) + ( smp >= smpY ? ( smp >= smpCb ? " (Cr)" : " (Cb)" ) : " (Y)" ) + ".h", new long[]{ -1, Start + ( pos - 4 ), bitPos, 7, TableNum == 0 ? 0 : 1 } ) );
 
       loop = 0; EOB = false; while( !EOB && loop < 64 )
       {
