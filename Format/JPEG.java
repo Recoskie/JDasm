@@ -524,8 +524,8 @@ public class JPEG extends Window.Window implements JDEventListener
           file.Events = false;
 
           String out = "<table border=\"1\">";
-          out += "<tr><td colspan=\"2\">Huffman table.</td><td colspan=\"2\">RAW Binary Data</td></tr>";
-          out += "<tr><td>Huff Table</td><td>Huff Code</td><td>Match</td><td>Value</td></tr>";
+          out += "<tr><td colspan=\"2\">Huffman table.</td><td colspan=\"2\">RAW Binary Data</td><td rowspan=\"2\">Decoded Value</td></tr>";
+          out += "<tr><td>Huff Table</td><td>Huff Code</td><td>Match</td><td>Binary Value</td></tr>";
 
           file.read(4); int v = file.toInt();
 
@@ -572,12 +572,12 @@ public class JPEG extends Window.Window implements JDEventListener
                 {
                   value = ( v & bits[len - 1] ) >>> ( 32 - len );
 
-                  out += "<td>" + pad( Integer.toBinaryString( value ), len ) + "</td>"; v <<= len;
+                  out += "<td>" + pad( Integer.toBinaryString( value ), len ) + "</td><td>" + ( value < ( 1 << ( len - 1 ) ) ? value - ( ( 1 << len ) - 1 ) : value ) + "</td>"; v <<= len;
 
                   bitPos += len; 
                 }
               }
-              else { out += "<td>EOB</td>"; EOB = loop > 0; }
+              else { out += "<td>EOB</td><td>0</td>"; EOB = loop > 0; }
 
               //Load in new bytes as needed.
 
@@ -605,7 +605,7 @@ public class JPEG extends Window.Window implements JDEventListener
           ds.clear(); info( "<html>The RAW binary data = " + bin + "<br /><br />" + 
           ( e.getArg(2) > 0 ? "The previous 8x8 ended at binary digit " + e.getArg(2) + ", so decoding starts at binary digit " + e.getArg(2) + ".<br /><br />" : "" ) +
           "The binary data is split apart by matching one Huffman combination, and reading a variable in length binary number value.<br /><br />" +
-          "The RAW binary data is split apart in the last 2 columns. The first 2 columns show what the matching Huffman code is for the binary combination.<br /><br />" +
+          "The RAW binary data is split apart in 2 columns. The first 2 columns show what the matching Huffman code is for the binary combination. The last column shows what the binary value decodes as.<br /><br />" +
           "Table DC is used for the first value, then the rest use table AC.<br /><br />" +
           "Each huffman code is split into tow values. The first 0 to 15 hex digit tells us how many zero values are used before our color value.<br /><br />" +
           "The Last 0 to 15 hex digit tells us how many binary digits to read for the color value. This allows us to define all 64 values in 8x8 using as little data as possible.<br /><br />" +
