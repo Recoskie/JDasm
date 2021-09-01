@@ -40,6 +40,22 @@ public class JPEG extends Window.Window implements JDEventListener
   private int subSamplingCr = 0;
   private int subSamplingCb = 0;
 
+  //A simple map for Y in zigzag matrix when showing the DCT matrix.
+  //We can easily compute Y, and X fast, but it is a bit faster using a matrix.
+
+  private static final int[] zigzag = new int[]
+  {
+    0, //Mid point +2.
+    0,1,2,1,0, //mid point +2.
+    0,1,2,3,4,3,2,1,0, //Mid point +2.
+    0,1,2,3,4,5,6,5,4,3,2,1,0, //Mid point +2.
+    0,1,2,3,4,5,6,7, //Mid point transition.
+    7,6,5,4,3,2,1,2,3,4,5,6,7, //Mid point 1.
+    7,6,5,4,3,4,5,6,7, //Mid point +2.
+    7,6,5,6,7, //Mid point +2.
+    7 //Mid point +2.
+  };
+
   //Picture dimensions.
 
   private int width = 0, height = 0;
@@ -529,7 +545,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           boolean match = false, EOB = false;
 
-          int v = 0;
+          int v = file.readInt();
           
           int c = 0;
           
@@ -537,25 +553,20 @@ public class JPEG extends Window.Window implements JDEventListener
           
           int value = 0;
 
-          int bitPos = (int)e.getArg(2), bytes = 0, byteLen = -4, mp = 0;
+          int bitPos = (int)e.getArg(2), bytes = 0, byteLen = 0, mp = 0;
 
           int loop = 0;
 
           int[] HuffTable = HuffmanCodes[ e.getArg(4) == 0 ? 0 : 2 ];
 
-          bitPos += 32;
+          v <<= bitPos;
 
           //Each code has a length for the number of bits is the binary number value.
 
+          int[] DCT = new int[64];
+
           while( !EOB && loop < 64 )
           {
-            //Load in new bytes as needed.
-
-            bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
-            {
-              bitPos -= 8; code = file.read() & 0xFF; v |= code << bitPos; if( code == 255 ){ if( ( file.read() & 0xFF ) == 0 ) { byteLen += 1; mp = byteLen + 4; } } byteLen += 1;
-            }
-
             //There is only one DC per 8x8 block. The rest are AC.
 
             c = HuffTable.length; while( !match && c > 0 )
@@ -579,9 +590,11 @@ public class JPEG extends Window.Window implements JDEventListener
                 {
                   value = ( v & bits[len - 1] ) >>> ( 32 - len );
 
-                  out += "<td>" + pad( Integer.toBinaryString( value ), len ) + "</td><td>" + ( value < ( 1 << ( len - 1 ) ) ? value - ( ( 1 << len ) - 1 ) : value ) + "</td>"; v <<= len;
+                  out += "<td>" + pad( Integer.toBinaryString( value ), len );
 
-                  bitPos += len;
+                  value = value < ( 1 << ( len - 1 ) ) ? value - ( ( 1 << len ) - 1 ) : value;
+                  
+                  out += "</td><td>" + value + "</td>"; v <<= len; bitPos += len;
                 }
               }
               else { out += "<td>EOB</td><td>0</td>"; EOB = loop > 0; }
@@ -589,8 +602,17 @@ public class JPEG extends Window.Window implements JDEventListener
               out += "</tr>";
             }
 
-            loop += zrl + 1; match = false;
+            //Load in new bytes as needed.
+
+            bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
+            {
+              bitPos -= 8; code = file.read() & 0xFF; v |= code << bitPos; if( code == 255 ){ if( ( file.read() & 0xFF ) == 0 ) { byteLen += 1; mp = byteLen + 4; } } byteLen += 1;
+            }
+
+            loop += zrl + 1; DCT[ loop - 1 ] = value; value = 0; match = false;
           }
+
+          out += "</table>";
 
           //The binary and hex string.
 
@@ -598,9 +620,17 @@ public class JPEG extends Window.Window implements JDEventListener
 
           if( byteLen <= mp ) { byteLen -= 1; } //We did not read Past the 0xFF00.
 
+          //Show the raw binary data.
+
           file.seek(t); file.read( byteLen );
 
           String bin = ""; for( int i = 0; i < byteLen; i++ ) { bin += pad( Integer.toBinaryString( ((int)file.toByte(i)) & 0xFF ), 8 ) + " "; }
+
+          //Decode the DCT matrix.
+
+          String[] row = new String[]{"<tr>","<tr>","<tr>","<tr>","<tr>","<tr>","<tr>","<tr>"}; for( int i = 0; i < zigzag.length; i++ ) { row[zigzag[i]] += "<td>" + DCT[i] + "</td>"; }
+
+          String DCTm = "<table border=\"1\"><tr><td colspan=\"8\">8x8 DCT matrix</td></tr>" + row[0] + "</tr>" + row[1] + "</tr>"+ row[2] + "</tr>"+ row[3] + "</tr>" + row[4] + "</tr>"+ row[5] + "</tr>"+ row[6] + "</tr>"+ row[7] + "</tr></table>"; row = null;
 
           ds.clear(); info( "<html>The RAW binary data = " + bin + "<br /><br />" + 
           ( e.getArg(2) > 0 ? "The previous 8x8 ended at binary digit " + e.getArg(2) + ", so decoding starts at binary digit " + e.getArg(2) + ".<br /><br />" : "" ) +
@@ -610,7 +640,9 @@ public class JPEG extends Window.Window implements JDEventListener
           "Each huffman code is split into tow values. The first 0 to 15 hex digit tells us how many zero values are used before our color value.<br /><br />" +
           "The Last 0 to 15 hex digit tells us how many binary digits to read for the color value. This allows us to define all 64 values in 8x8 using as little data as possible.<br /><br />" +
           "If we match a Huffman code that is 00 meanings no value. This means there is no more color values for the 8x8, so we terminate early with EOB.<br /><br />" +
-          out + "</html>" );
+          out + "<br /><br />Each of the decoded values are placed into a matrix in a zigzag pattern.<br /><br />" + DCTm + "</html>" );
+
+          out = null; DCTm = null;
 
           Offset.setSelected( t, t + byteLen - 1 );
           
