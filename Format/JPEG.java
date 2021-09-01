@@ -527,9 +527,9 @@ public class JPEG extends Window.Window implements JDEventListener
           out += "<tr><td colspan=\"2\">Huffman table.</td><td colspan=\"2\">RAW Binary Data</td><td rowspan=\"2\">Decoded Value</td></tr>";
           out += "<tr><td>Huff Table</td><td>Huff Code</td><td>Match</td><td>Binary Value</td></tr>";
 
-          file.read(4); int v = file.toInt();
-
           boolean match = false, EOB = false;
+
+          int v = 0;
           
           int c = 0;
           
@@ -537,18 +537,25 @@ public class JPEG extends Window.Window implements JDEventListener
           
           int value = 0;
 
-          int bitPos = (int)e.getArg(2), bytes = 0, byteLen = 0, mp = 0;
-
-          v <<= bitPos;
+          int bitPos = (int)e.getArg(2), bytes = 0, byteLen = -4, mp = 0;
 
           int loop = 0;
 
           int[] HuffTable = HuffmanCodes[ e.getArg(4) == 0 ? 0 : 2 ];
 
+          bitPos += 32;
+
           //Each code has a length for the number of bits is the binary number value.
 
           while( !EOB && loop < 64 )
           {
+            //Load in new bytes as needed.
+
+            bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
+            {
+              bitPos -= 8; code = file.read() & 0xFF; v |= code << bitPos; if( code == 255 ){ if( ( file.read() & 0xFF ) == 0 ) { byteLen += 1; mp = byteLen + 4; } } byteLen += 1;
+            }
+
             //There is only one DC per 8x8 block. The rest are AC.
 
             c = HuffTable.length; while( !match && c > 0 )
@@ -574,17 +581,10 @@ public class JPEG extends Window.Window implements JDEventListener
 
                   out += "<td>" + pad( Integer.toBinaryString( value ), len ) + "</td><td>" + ( value < ( 1 << ( len - 1 ) ) ? value - ( ( 1 << len ) - 1 ) : value ) + "</td>"; v <<= len;
 
-                  bitPos += len; 
+                  bitPos += len;
                 }
               }
               else { out += "<td>EOB</td><td>0</td>"; EOB = loop > 0; }
-
-              //Load in new bytes as needed.
-
-              bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
-              {
-                bitPos -= 8; code = file.read() & 0xFF; v |= code << bitPos; if( code == 255 ){ if( ( file.read() & 0xFF ) == 0 ) { byteLen += 1; mp = byteLen + 4; } } byteLen += 1;
-              }
 
               out += "</tr>";
             }
@@ -630,13 +630,11 @@ public class JPEG extends Window.Window implements JDEventListener
 
   private void scanImage( int Start, int End ) throws java.io.IOException
   {
-    file.Events = false; file.seek( Start );
+    file.Events = false; file.seek( Start ); file.read( End - Start );
 
     JDNode node = (JDNode)tree.getLastSelectedPathComponent(); node.removeAllChildren();
 
-    int size = End - Start;
-
-    file.read( size ); int v = file.toInt(0);
+    int size = End - Start, v = file.toInt();
 
     boolean match = false, EOB = false;
     
@@ -660,7 +658,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     //Each code has a length for the number of bits is the binary number value.
 
-    for( int smp = 0, mcu = 0; ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ) < End; smp++ )
+    for( int smp = 0, mcu = 0; pos < size; smp++ )
     {
       if( smp >= smpCr ){ smp = 0; }
 
@@ -679,6 +677,22 @@ public class JPEG extends Window.Window implements JDEventListener
 
       loop = 0; EOB = false; while( !EOB && loop < 64 )
       {
+        //Load in new bytes as needed.
+
+        bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
+        {
+          bitPos -= 8; if( pos < size )
+          {
+            code = file.toByte( pos ) & 0xFF; v |= code << bitPos;
+
+            //If we EOB before "mp" then we subtract pos by 1.
+            
+            if( code == 255 ) { pos += 1; mp = Start + pos; }
+          }
+
+          pos += 1;
+        }
+
         //There is only one DC per 8x8 block. The rest are AC.
         
         c = HuffTable.length; while( !match && c > 0 )
@@ -686,32 +700,9 @@ public class JPEG extends Window.Window implements JDEventListener
           code = HuffTable[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
         }
 
-        if( loop == 0 ) { HuffTable = HuffmanCodes[ TableNum + 1 ]; }
-
         if( match ) { bitPos += bit + 1; v <<= bit + 1; if( ( len + zrl ) > 0 ) { v <<= len; bitPos += len; } else { EOB = loop > 0; } }
 
-        //Load in new bytes as needed.
-
-        bytes = bitPos / 8;
-        
-        for( int i = 0; i < bytes; i++ )
-        {
-          bitPos -= 8;
-          
-          if( pos < size )
-          {
-            code = file.toByte( pos ) & 0xFF; v |= code << bitPos;
-            
-            if( code == 255 )
-            {
-              //If we EOB before "mp" then we subtract pos by 1.
-
-              pos += 1; mp = Start + pos;
-            }
-          }
-
-          pos += 1;
-        }
+        if( loop == 0 ) { HuffTable = HuffmanCodes[ TableNum + 1 ]; }
 
         loop += zrl + 1; match = false;
       }
