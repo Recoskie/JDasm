@@ -19,6 +19,7 @@ public class JPEG extends Window.Window implements JDEventListener
   //If the image data has bean scanned yet.
 
   private boolean isScanned = false;
+  private boolean readQMat = false;
 
   //Decoding of huffman table expansion.
 
@@ -55,6 +56,15 @@ public class JPEG extends Window.Window implements JDEventListener
     7,6,5,6,7, //Mid point +2.
     7 //Mid point +2.
   };
+
+  //The quantization matrixes are multiplied by the values for each color component.
+  //The bigger the values are in the quotation matrix, then the more values are divided into 0 when rounded off.
+
+  private static int[][] QMat = new int[2][];
+
+  //Image data format. This is determined by the start of frame marker number.
+
+  private int imageType = -1;
 
   //Picture dimensions.
 
@@ -192,7 +202,9 @@ public class JPEG extends Window.Window implements JDEventListener
 
     if( ( type & 0xF0 ) == 0xC0 && !( type == 0xC4 || type == 0xC8 || type == 0xCC ) )
     {
-      //Non-Deferential Huffman coded pictures
+      imageType = type - 0xC0;
+
+      //Non-Deferential Huffman coded pictures.
 
       if( type == 0xC0 ) { n = new JDNode("Start Of Frame (baseline DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 } ); }
       else if( type == 0xC1 ) { n = new JDNode("Start Of Frame (Extended Sequential DCT)", new long[]{ ref++, file.getFilePointer(), size, 0 }); }
@@ -293,7 +305,7 @@ public class JPEG extends Window.Window implements JDEventListener
     {
       JDNode n = ((JDNode)tree.getLastSelectedPathComponent());
 
-      if( !isScanned ) { isScanned = true; openMarkers( new int[]{ 1, 0 } ); }
+      if( !isScanned && imageType == 0 ) { isScanned = true; openMarkers( new int[]{ 1, 0 } ); }
 
       n.setArgs( new long[]{ -2, n.getArg(1), n.getArg(2) } );
 
@@ -545,7 +557,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           boolean match = false, EOB = false;
 
-          int v = file.readInt();
+          int v = 0;
           
           int c = 0;
           
@@ -553,13 +565,11 @@ public class JPEG extends Window.Window implements JDEventListener
           
           int value = 0;
 
-          int bitPos = (int)e.getArg(2), bytes = 0, byteLen = 0, mp = 0;
+          int bitPos = (int)e.getArg(2) + 32, bytes = 0, bitLen = 0, mp = 0;
 
           int loop = 0;
 
           int[] HuffTable = HuffmanCodes[ e.getArg(4) == 0 ? 0 : 2 ];
-
-          v <<= bitPos;
 
           //Each code has a length for the number of bits is the binary number value.
 
@@ -567,14 +577,26 @@ public class JPEG extends Window.Window implements JDEventListener
 
           while( !EOB && loop < 64 )
           {
-            //There is only one DC per 8x8 block. The rest are AC.
+            //Load in new bytes as needed.
 
-            c = HuffTable.length; while( !match && c > 0 )
+            bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
             {
-              code = HuffTable[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+              bitPos -= 8; code = file.read();
+              
+              if( code > 0 )
+              {
+                v |= code << bitPos; if( code == 255 ){ if( ( file.read() & 0xFF ) == 0 ) { bitLen += 8; } }
+              }
             }
 
-            if( loop == 0 ) { HuffTable = HuffmanCodes[ e.getArg(4) == 0 ? 1 : 3 ]; }
+            //There is only one DC per 8x8 block. The rest are AC.
+
+            c = 0; while( !match && c < HuffTable.length )
+            {
+              code = HuffTable[c++]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+            }
+
+            if( loop == 0 ) { HuffTable = HuffmanCodes[ e.getArg(4) == 0 ? 1 : 3 ]; if( HuffTable == null ){ EOB = true;}  }
 
             if( match )
             {
@@ -582,7 +604,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
               out += "<td>" + pad( Integer.toBinaryString( code >>> ( 16 + ( 15 - bit ) ) ), bit + 1 ) + "</td>"; v <<= bit + 1;
 
-              bitPos += bit + 1; 
+              bitPos += bit + 1; bitLen += bit + len + 1;
 
               if( ( len + zrl ) > 0 )
               {
@@ -602,13 +624,6 @@ public class JPEG extends Window.Window implements JDEventListener
               out += "</tr>";
             }
 
-            //Load in new bytes as needed.
-
-            bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
-            {
-              bitPos -= 8; code = file.read() & 0xFF; v |= code << bitPos; if( code == 255 ){ if( ( file.read() & 0xFF ) == 0 ) { byteLen += 1; mp = byteLen + 4; } } byteLen += 1;
-            }
-
             loop += zrl + 1; DCT[ loop - 1 ] = value; value = 0; match = false;
           }
 
@@ -616,15 +631,13 @@ public class JPEG extends Window.Window implements JDEventListener
 
           //The binary and hex string.
 
-          if( bitPos != 0 ) { byteLen += 1; }
-
-          if( byteLen <= mp ) { byteLen -= 1; } //We did not read Past the 0xFF00.
+          if( ( bitLen & 7 ) != 0 ) { bitLen += 8; }
 
           //Show the raw binary data.
 
-          file.seek(t); file.read( byteLen );
+          file.seek(t); file.read( bitLen >> 3 );
 
-          String bin = ""; for( int i = 0; i < byteLen; i++ ) { bin += pad( Integer.toBinaryString( ((int)file.toByte(i)) & 0xFF ), 8 ) + " "; }
+          String bin = ""; for( int i = 0; i < ( bitLen >> 3 ); i++ ) { bin += pad( Integer.toBinaryString( ((int)file.toByte(i)) & 0xFF ), 8 ) + " "; }
 
           //Decode the DCT matrix.
 
@@ -644,7 +657,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           out = null; DCTm = null;
 
-          Offset.setSelected( t, t + byteLen - 1 );
+          Offset.setSelected( t, t + ( bitLen >> 3 ) - 1 );
           
           file.Events = true; return;
         }
@@ -662,11 +675,13 @@ public class JPEG extends Window.Window implements JDEventListener
 
   private void scanImage( int Start, int End ) throws java.io.IOException
   {
-    file.Events = false; file.seek( Start ); file.read( End - Start );
-
     JDNode node = (JDNode)tree.getLastSelectedPathComponent(); node.removeAllChildren();
 
-    int size = End - Start, v = file.toInt();
+    if( imageType != 0 ) { node.add( new JDNode("Unsupported.h") ); return; }
+
+    file.Events = false; file.seek( Start ); file.read( End - Start );
+
+    int size = End - Start, bitSize = ( size << 3 ) - 7, v = 0;
 
     boolean match = false, EOB = false;
     
@@ -674,68 +689,75 @@ public class JPEG extends Window.Window implements JDEventListener
     
     int bit = 0, code = 0, len = 0, zrl = 0;
     
-    int bitPos = 0, bytes = 0, pos = 4;
+    int bitPos = 32, bytes = 0, BPos = 0, pos = 0;
 
     int loop = 0;
 
-    int mp = 0;
-
-    int smpY = subSamplingY;
-    int smpCb = subSamplingY + subSamplingCb;
-    int smpCr = subSamplingY + subSamplingCb + subSamplingCr;
+    int mp = Integer.MAX_VALUE;
 
     int TableNum = 0; int[] HuffTable = HuffmanCodes[TableNum];
+
+    //Color components. Note this should vary based on the start of scan markers.
+
+    int nComps = 2, comp = 0, smp = 0;
+    int[] samples = new int[]{ subSamplingY, subSamplingCb, subSamplingCr };
+    String[] Colors = new String[]{ " (Y)", " (Cb)", " (Cr)" };
+
+    //Define the first MCU.
 
     JDNode MCU = new JDNode( pad, new long[]{ 0, 0 } );
 
     //Each code has a length for the number of bits is the binary number value.
 
-    for( int smp = 0, mcu = 0; pos < size; smp++ )
+    for( int mcu = 0; pos < bitSize; smp++ )
     {
-      if( smp >= smpCr ){ smp = 0; }
+      if( smp >= samples[comp] ){ smp = 0; comp = comp == nComps ? 0 : comp + 1; }
 
       //Add DCT matrix node with number, and position.
 
-      TableNum = smp < subSamplingY ? 0 : 2; HuffTable = HuffmanCodes[TableNum];
+      TableNum = comp == 0 ? 0 : 2; HuffTable = HuffmanCodes[TableNum];
 
-      if( smp == 0 )
+      if( smp == 0 && comp == 0 )
       {
-        MCU.setArgs( new long[]{ -2, MCU.getArg(1), ( Start + ( pos - 4 ) + ( bitPos > 0 ? 1 : 0 ) ) - 1 } );
-        MCU = new JDNode("MCU #" + mcu + "", new long[]{ -2, ( Start + ( pos - 4 ) ), 0 } );
+        MCU.setArgs( new long[]{ -2, MCU.getArg(1), ( Start + ( pos >> 3 ) ) } );
+        MCU = new JDNode("MCU #" + mcu + "", new long[]{ -2, ( Start + ( pos >> 3 ) ), 0 } );
         node.add( MCU ); mcu += 1;
       }
 
-      MCU.add( new JDNode("DCT #" + ( smp + 1 ) + ( smp >= smpY ? ( smp >= smpCb ? " (Cr)" : " (Cb)" ) : " (Y)" ) + ".h", new long[]{ -1, Start + pos - ( ( Start + pos - 4 ) < mp ? 5 : 4 ), bitPos, 7, TableNum == 0 ? 0 : 1 } ) );
+      MCU.add( new JDNode("DCT #" + smp + Colors[comp] + ".h", new long[]{ -1, Start + ( pos >> 3 ), pos & 7, 7, TableNum == 0 ? 0 : 1 } ) );
 
       loop = 0; EOB = false; while( !EOB && loop < 64 )
       {
-        //Load in new bytes as needed.
+        //Load in new bytes as needed into integer.
 
         bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
         {
-          bitPos -= 8; if( pos < size )
+          bitPos -= 8; if( BPos < size )
           {
-            code = file.toByte( pos ) & 0xFF; v |= code << bitPos;
-
-            //If we EOB before "mp" then we subtract pos by 1.
-            
-            if( code == 255 ) { pos += 1; mp = Start + pos; }
+            code = file.toByte( BPos ) & 0xFF; v |= code << bitPos;
+                
+            //The code 0xFF is used for markers. In some cases we need to use 0xFF as value.
+            //If the next byte after 0xFF is 0x00, then 0xFF is used as a value, and 0x00 is skipped.
+                            
+            if( code == 255 ) { mp = BPos << 3; BPos += 1; }
           }
-
-          pos += 1;
+                
+          BPos += 1;
         }
 
         //There is only one DC per 8x8 block. The rest are AC.
         
-        c = HuffTable.length; while( !match && c > 0 )
+        c = 0; while( !match && c < HuffTable.length )
         {
-          code = HuffTable[--c]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+          code = HuffTable[c++]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ bit += 1; len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
         }
 
-        if( match ) { bitPos += bit + 1; v <<= bit + 1; if( ( len + zrl ) > 0 ) { v <<= len; bitPos += len; } else { EOB = loop > 0; } }
+        if( match ) { bitPos += bit; v <<= bit; if( ( len + zrl ) > 0 ) { v <<= len; bitPos += len; } else { EOB = loop > 0; } }
 
-        if( loop == 0 ) { HuffTable = HuffmanCodes[ TableNum + 1 ]; }
+        if( loop == 0 ) { HuffTable = HuffmanCodes[ TableNum + 1 ]; if( HuffTable == null ){ EOB = true; } }
 
+        pos += bit + len; if( pos > mp ){ mp = Integer.MAX_VALUE; pos += 8; }
+        
         loop += zrl + 1; match = false;
       }
     }
