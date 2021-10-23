@@ -547,6 +547,9 @@ public class JPEG extends Window.Window implements JDEventListener
         }
         else if( type == 7 )
         {
+          if( imageType != 0 ){ info("<html>The start of frame marker type value specifies the image data type.<br /><br />" +
+          "Right now Arithmetic encoded JPEG image data is not supported. Only baseline image data is supported.</html>"); ds.clear(); return; }
+
           long t = file.getFilePointer();
 
           file.Events = false;
@@ -565,7 +568,7 @@ public class JPEG extends Window.Window implements JDEventListener
           
           int value = 0;
 
-          int bitPos = (int)e.getArg(2) + 32, bytes = 0, bitLen = 0, mp = 0;
+          int bitPos = (int)e.getArg(2) + 32, bytes = 0, bitLen = 0, mp = Integer.MAX_VALUE, mpx = 0;
 
           int loop = 0;
 
@@ -585,7 +588,7 @@ public class JPEG extends Window.Window implements JDEventListener
               
               if( code > 0 )
               {
-                v |= code << bitPos; if( code == 255 ){ if( ( file.read() & 0xFF ) == 0 ) { bitLen += 8; } }
+                v |= code << bitPos; if( code == 255 ){ if( ( file.read() & 0xFF ) == 0 ) { mp = ( bitLen + ( 24 - bitPos ) ) & -8; mpx += 8; } }
               }
             }
 
@@ -623,6 +626,8 @@ public class JPEG extends Window.Window implements JDEventListener
 
               out += "</tr>";
             }
+
+            if( bitLen >= mp ) { mp = Integer.MAX_VALUE; bitLen += mpx; mpx = 0; }
 
             loop += zrl + 1; DCT[ loop - 1 ] = value; value = 0; match = false;
           }
@@ -671,13 +676,13 @@ public class JPEG extends Window.Window implements JDEventListener
   }
 
   //Do A fast optimized full scan of the image data defining each DCT start and end position.
-  //Thus when user clicks on a DCT, then algorithm is run for just the one DCT at any position in image.
+  //When user clicks on a DCT, then the algorithm is run with detailed output for just the one DCT at any position in image.
 
   private void scanImage( int Start, int End ) throws java.io.IOException
   {
     JDNode node = (JDNode)tree.getLastSelectedPathComponent(); node.removeAllChildren();
 
-    if( imageType != 0 ) { node.add( new JDNode("Unsupported.h") ); return; }
+    if( imageType != 0 ) { node.add( new JDNode("Unsupported.h", new long[]{-1,0,0,7}) ); return; }
 
     file.Events = false; file.seek( Start ); file.read( End - Start );
 
@@ -693,7 +698,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     int loop = 0;
 
-    int mp = Integer.MAX_VALUE;
+    int mp = Integer.MAX_VALUE, mpx = 0;
 
     int TableNum = 0; int[] HuffTable = HuffmanCodes[TableNum];
 
@@ -739,7 +744,7 @@ public class JPEG extends Window.Window implements JDEventListener
             //The code 0xFF is used for markers. In some cases we need to use 0xFF as value.
             //If the next byte after 0xFF is 0x00, then 0xFF is used as a value, and 0x00 is skipped.
                             
-            if( code == 255 ) { mp = BPos << 3; BPos += 1; }
+            if( code == 255 ) { mp = BPos << 3; mpx += 8; BPos += 1; }
           }
                 
           BPos += 1;
@@ -756,7 +761,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
         if( loop == 0 ) { HuffTable = HuffmanCodes[ TableNum + 1 ]; if( HuffTable == null ){ EOB = true; } }
 
-        pos += bit + len; if( pos > mp ){ mp = Integer.MAX_VALUE; pos += 8; }
+        pos += bit + len; if( pos > mp ){ mp = Integer.MAX_VALUE; pos += mpx; mpx = 0; }
         
         loop += zrl + 1; match = false;
       }
