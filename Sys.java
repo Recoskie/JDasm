@@ -67,9 +67,9 @@ public class Sys
       catch( Exception e ) { e.printStackTrace(); }
     }
 
-    //Linux does not have a nice prompt like Mac OS X. So we have to create one.
+    //Linux, and macOS both use "sudo" autentication.
 
-    else if( linux )
+    else if( linux || mac )
     {
       InputStreamReader input; OutputStreamWriter output;
 
@@ -79,7 +79,12 @@ public class Sys
         
         f = File.createTempFile ("JFH", ".sh"); PrintWriter script = new PrintWriter(f);
 
-        script.printf("#!/bin/sh\r\n"); script.printf("sudo nohup java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n"); script.close();
+        script.printf("#!/bin/sh\r\n");
+        
+        if( linux ) { script.printf("sudo nohup java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n"); }
+        else { script.printf("sudo -i java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n"); }
+        
+        script.close();
         
         Process p = Runtime.getRuntime().exec(new String[]
         {
@@ -104,7 +109,7 @@ public class Sys
           
           String data = String.valueOf(buffer, 0, bytes);
           
-          if (data.contains("[sudo] password"))
+          if ( data.contains("[sudo] password") || data.contains("Password:") )
           {
             if( !oneTry )
             {
@@ -129,35 +134,7 @@ public class Sys
           else if ( data.contains("running") ) { return( true ); }
         }
       }
-      catch (IOException ex) { System.out.println(ex.getMessage()); }
-    }
-
-    //Mac OS X. Much cleaner with osascript. Be nice if linux had an equivalent.
-
-    else if( mac )
-    {
-      try
-      {
-        //Create the process.
-        
-        f = File.createTempFile ("test", ".command"); PrintWriter script = new PrintWriter(f);
-
-        script.printf("osascript -e \"do shell script \\\"java " + Jar + "'" + app + "' '" + f.getAbsolutePath() + "' " + args + "\\\" with administrator privileges\"\r\n");
-        script.close();
-        
-        Process p = new ProcessBuilder(new String[] {"chmod", "+x", "'" + f.getAbsolutePath() + "'"} ).start(); p.waitFor();
-
-        p = new ProcessBuilder(new String[] {"sh", "" + f.getAbsolutePath() + ""} ).start();
-
-        //Test if a new process started as administrator.
-
-        while( p.isAlive() ) { if( !f.exists() ) { return( true ); } }
-
-        //User declined run as administrator.
-      
-        f.delete();
-      }
-      catch (Exception ex) { System.out.println(ex.getMessage()); }
+      catch (IOException ex) { }
     }
 
     //User declined run as administrator, or operation failed.
