@@ -20,7 +20,7 @@ public class Sys
   {
     if( app == "" ) { return( false ); }
 
-    File f = new File(System.getProperty("java.home")), f2; f = new File(f, "bin"); f = new File(f, "javaw.exe");
+    File f = new File(System.getProperty("java.home")), f2; f = new File(f, "bin"); f = new File(f, windows ? "javaw.exe" : "java" );
 
     //The java engine.
       
@@ -67,7 +67,7 @@ public class Sys
       catch( Exception e ) { e.printStackTrace(); }
     }
 
-    //Linux, and macOS both use "sudo" autentication.
+    //Linux, and macOS both use "sudo" authentication.
 
     else if( linux || mac )
     {
@@ -77,19 +77,17 @@ public class Sys
       {
         //Create the process.
         
-        f = File.createTempFile ("JFH", ".sh"); PrintWriter script = new PrintWriter(f);
-
-        script.printf("#!/bin/sh\r\n");
+        f = File.createTempFile ("JD-asm", linux ? ".sh" : ".command"); PrintWriter script = new PrintWriter(f);
         
         if( linux ) { script.printf("sudo nohup java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n"); }
         else { script.printf("sudo -i java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n"); }
         
         script.close();
         
-        Process p = Runtime.getRuntime().exec(new String[]
+        Process p = new ProcessBuilder(new String[]
         {
           "/bin/bash", "-c", "/usr/bin/sudo -S /bin/cat /etc/sudoers 2>&1 ; echo running ; sudo chmod +x \"" + f.getAbsolutePath() + "\" ; sudo bash \"" + f.getAbsolutePath() + "\""
-        });
+        }).start();
         
         output = new OutputStreamWriter(p.getOutputStream()); input = new InputStreamReader(p.getInputStream());
 
@@ -158,14 +156,24 @@ public class Sys
 
     if( args.length > 0 )
     {
-      File f = new File( args[0] );
+      if( !(test = args[0].equals("Admin")) )
+      {
+        File f = new File( args[0] );
       
-      test = f.exists();
+        test = f.exists(); f.delete();
+      }
       
       if( test )
       {
-        int i = 1; for( ; i < args.length; args[ i - 1 ] = args[ i ], i++ ); args[ i - 1 ] = ""; f.delete();
+        int i = 1; for( ; i < args.length; args[ i - 1 ] = args[ i ], i++ ); args[ i - 1 ] = "";
       }
+    }
+
+    if( !test && mac )
+    {
+      if( javax.swing.JOptionPane.showConfirmDialog(null, "Running JDasm on macOS is limited without running as administrator.\r\n" +
+      "Would you like to launch this java application as administrator?", null, javax.swing.JOptionPane.YES_NO_OPTION) == javax.swing.JOptionPane.YES_OPTION )
+      { promptAdmin( "Admin" ); }
     }
 
     return( test );
