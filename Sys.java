@@ -67,9 +67,10 @@ public class Sys
       catch( Exception e ) { e.printStackTrace(); }
     }
 
-    //Linux, and macOS both use "sudo" authentication.
+    //This method works for both Linux, and macOS.
+    //It has a small bug on macOS with reading files in user folder, so we will not use it.
 
-    else if( linux || mac )
+    else if( linux )
     {
       InputStreamReader input; OutputStreamWriter output;
 
@@ -77,10 +78,12 @@ public class Sys
       {
         //Create the process.
         
-        f = File.createTempFile ("JD-asm", linux ? ".sh" : ".command"); PrintWriter script = new PrintWriter(f);
+        f = File.createTempFile ("JD-asm", ".sh" ); PrintWriter script = new PrintWriter(f);
         
-        if( linux ) { script.printf("sudo nohup java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n"); }
-        else { script.printf("sudo -i java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n"); }
+        script.printf("sudo nohup java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + " &\r\n");
+
+        /*The following works on macOS. It seems to be a little buggy so we will use the terminal instead.
+        script.printf("sudo -i & sudo java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args + "\r\n");*/
         
         script.close();
         
@@ -107,7 +110,7 @@ public class Sys
           
           String data = String.valueOf(buffer, 0, bytes);
           
-          if ( data.contains("[sudo] password") || data.contains("Password:") )
+          if ( data.contains("[sudo] password") ) //We compare for data.contains("Password:") on macOS.
           {
             if( !oneTry )
             {
@@ -135,6 +138,30 @@ public class Sys
       catch (IOException ex) { }
     }
 
+    //We are stuck to using the ugly terminal window on macOS to run java as administrator.
+
+    else if( mac )
+    {
+      try
+      {
+        //Create the process.
+
+        long pid = ProcessHandle.current().pid();
+        
+        f = File.createTempFile("JD-asm", ".command"); f.deleteOnExit(); PrintWriter script = new PrintWriter(f);
+        
+        script.printf("clear ; echo sudo -i \\& sudo java " + Jar + "\"" + app + "\"\n" +
+        "sudo -i & sudo java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args +
+        " & sudo kill -9 " + pid + "\n");
+        
+        script.close(); new ProcessBuilder(new String[]
+        {
+          "/bin/bash", "-c", "chmod +x \"" + f.getAbsolutePath() + "\" ; open \"" + f.getAbsolutePath() + "\""
+        }).start();
+      }
+      catch (Exception ex) { }
+    }
+
     //User declined run as administrator, or operation failed.
 
     return( false );
@@ -156,12 +183,7 @@ public class Sys
 
     if( args.length > 0 )
     {
-      if( !(test = args[0].equals("Admin")) )
-      {
-        File f = new File( args[0] );
-      
-        test = f.exists(); f.delete();
-      }
+      File f = new File( args[0] ); test = f.exists(); f.delete();
       
       if( test )
       {
@@ -169,11 +191,14 @@ public class Sys
       }
     }
 
+    //We should notify the user about the limitations on macOS. As macOS hides downloads and documents folder
+    //This makes it that we can not open files we wish to analyze in downloads or user folders.
+
     if( !test && mac )
     {
-      if( javax.swing.JOptionPane.showConfirmDialog(null, "Running JDasm on macOS is limited without running as administrator.\r\n" +
+      if( javax.swing.JOptionPane.showConfirmDialog(null, "macOS hides files in user folders, so running JDasm on macOS is limited to analyze binary files.\r\n" +
       "Would you like to launch this java application as administrator?", null, javax.swing.JOptionPane.YES_NO_OPTION) == javax.swing.JOptionPane.YES_OPTION )
-      { promptAdmin( "Admin" ); }
+      { promptAdmin( "" ); }
     }
 
     return( test );
