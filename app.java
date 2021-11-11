@@ -478,7 +478,14 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     {
       java.util.List<File> f = ((java.util.List<File>)dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor));
 
-      df = f.get(0).toString(); if( new File( df ).isFile() && f.size() == 1 ) { dtde.acceptDrag(DnDConstants.ACTION_LINK); } else { dtde.rejectDrag(); }
+      //Note macOS always returns null no matter which data flavour we use.
+      //Drag and drop is broken on macOS. I do not know if this will be fixed in later version of java environment.
+
+      if( f != null )
+      {
+        df = f.get(0).toString(); if( new File( df ).isFile() && f.size() == 1 ) { dtde.acceptDrag(DnDConstants.ACTION_LINK); } else { dtde.rejectDrag(); }
+      }
+      else { dtde.rejectDrag(); }
     }
     catch( Exception e ) { dtde.rejectDrag(); }
   }

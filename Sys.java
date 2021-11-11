@@ -191,7 +191,7 @@ public class Sys
       }
     }
 
-    //We should notify the user about the limitations on macOS. As macOS hides downloads and documents folder
+    //We should notify the user about the limitations on macOS. As macOS hides downloads and documents folders.
     //This makes it that we can not open files we wish to analyze in downloads or user folders.
 
     if( !test && mac )
