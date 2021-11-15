@@ -23,7 +23,7 @@ public class Sys
     File f = new File(System.getProperty("java.home")), f2; f = new File(f, "bin"); f = new File(f, windows ? "javaw.exe" : "java" );
 
     //The java engine.
-      
+    
     String jre = f.getAbsolutePath();
 
     //Windows
