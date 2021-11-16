@@ -197,7 +197,7 @@ public class Sys
     if( !test && mac )
     {
       if( javax.swing.JOptionPane.showConfirmDialog(null, "Running JDasm on macOS to analyze binary files is limited as macOS hides files in user folders.\r\n" +
-      "If you do not wish to run as administrator, then you can still copy files to folders which JDasm can read the files.\r\n" +
+      "You can still copy files to folders which JDasm can read the files.\r\n" +
       "Would you like to launch this java application as administrator?", null, javax.swing.JOptionPane.YES_NO_OPTION) == javax.swing.JOptionPane.YES_OPTION )
       { promptAdmin( "" ); }
     }
