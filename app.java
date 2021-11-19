@@ -437,9 +437,18 @@ public class app extends Window implements ActionListener, DropTargetListener, J
         }
         else
         {
-          if( !fc.disks( !admin ) ) { javax.swing.JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); }
+          fc.disks( false );
 
-          JOptionPane.showMessageDialog(null,"Unable to read disk drive.");
+          if( Sys.mac )
+          {
+            JOptionPane.showMessageDialog(null,"Only Readable disk dives are displayed when running as Administrator.\r\n\r\n" +
+            "Some disks can not be read directly unless you disable SIV protection on macOS.\r\n" +
+            "Do not disable SIV protection unless you are disconnected from the internet as it makes your mac vulnerable.");
+          }
+          else
+          {
+            JOptionPane.showMessageDialog(null,"Unable to read disk drive.");
+          }
           
           return;
         }
