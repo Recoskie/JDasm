@@ -340,7 +340,7 @@ As there is no such thing as a singed add or subtract in any CPU. Singed numbers
 
 <br />
 
-<a href="http://www.play-hookey.com/digital/combinational/binary_subtraction.html" target="_blank">Play hooky digital. Singed add, and subtract.</a>
+<a href="http://www.play-hookey.com/digital/combinational/binary_subtraction.html" target="_blank">Play hookey digital. Singed add, and subtract.</a>
 
 <h2 style="clear:left;">Floating point numbers.</h2>
 
@@ -851,6 +851,10 @@ In actuality, you can build an operating system that only does software-rendered
 
 However, it is recommended to add Hardware accelerated graphics through a GPU by implementing basic method calls on the GPU.
 
+<br />
+
+Lastly you can get very creative in software with raw graphics pixel format. You can compare the difference in colors and define edges and shapes and create an artificial intelligence that learns and understands its surroundings, or create video/picture enhancers, and filters. The possibilities are limitless.
+
 <h2>Audio format.</h2>
 
 Audio is also another standard format. It can be a bit confusing at first. It also does not change between systems, just like video memory.
@@ -914,6 +918,10 @@ The wave audio format does not have to convert format as it is wrote in raw PCM 
 <br />
 
 You can learn more about digital audio and the wave audio format viable <a href="http://www.topherlee.com/software/pcm-tut-wavformat.html">link</a>.
+
+<br />
+
+Lastly you can get very creative in software with raw audio stream format. You can compare the difference in vibration and define sounds and create an artificial intelligence that learns and understands, or create sound enhancers, and filters. The possibilities are limitless.
 
 <h2>Closing.</h2>
 
