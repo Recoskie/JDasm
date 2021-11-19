@@ -350,7 +350,6 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
       else
       {
-        winFrame.setContentPane( new JLabel( "Loading...", SwingConstants.CENTER ) );
         file = new RandomAccessDevice( e.getID(), "r" );
 
         bdBar.add(BootSector);
@@ -397,7 +396,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
       
       //Set back tools after disk finish loading.
 
-      if( e.getArg(0) == -2 ) { winFrame.setContentPane( tools ); }
+      //if( e.getArg(0) == -2 ) { winFrame.setContentPane( tools ); }
 
       //Adjust the window.
 
