@@ -12,7 +12,7 @@ image:
   <tr><td>High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a></td></tr>
 </table>
 
-## What is J-Disassembly.
+## What is JDisassembly.
 
 <table style="width:50%;">
   <tr>
@@ -25,7 +25,7 @@ image:
   </tr>
 </table>
 
-J-Disassembly makes binary files and machine code visual and also, easy to understand and modify in raw binary form.
+JDisassembly makes binary files and machine code visual and also, easy to understand and modify in raw binary form.
 
 It is designed for anyone as an easy way to learn how binary files are read. In which a processor processes standard binary types.
 
@@ -35,9 +35,9 @@ Does not matter what CPU you use as all arithmetic types are the same across all
 
 The tools are explained in help and documentation. Plus, both audio and graphics use a standard format as well. Which is nice to learn if you are into writing an operating system. All of this is put in detail, as well as machine code and compilation of software.
 
-J-Disassembly can visually take binary software apart to allow you to create source code.
+JDisassembly can visually take binary software apart to allow you to create source code.
 
-J-Disassembly also visualizes binary data and file types. Showing you what every binary digit read is actually used for.
+JDisassembly also visualizes binary data and file types. Showing you what every binary digit read is actually used for.
 
 This tool is also a hex editor and data forensics tool for binary files that is fun, visual, easy to use, and understand.
 
@@ -91,7 +91,7 @@ A Windows or Linux installation disk also has a boot sector at address 0 that be
 
 Thus it writes a boot sector to the disk you want to put the operating system on. However, that boot sector begins the operating system.
 
-You can analyze boot sectors and bootable media that run on blank computers with J-Disassembly.
+You can analyze boot sectors and bootable media that run on blank computers with JDisassembly.
 
 # Running the application.
 
