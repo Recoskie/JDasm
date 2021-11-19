@@ -7,9 +7,9 @@ image:
 ## Help and documentation.
 
 <table border="1">
-  <tr><td>Basics: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a></td></tr>
-  <tr><td>Machine code: <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a></td></tr>
-  <tr><td>High Level Code: <a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a></td></tr>
+  <tr><td>Basics: <a href="https://recoskie.github.io/JDisassembly/docs/Basics.html">Link</a></td></tr>
+  <tr><td>Machine code: <a href="https://recoskie.github.io/JDisassembly/docs/Machine.html">Link</a></td></tr>
+  <tr><td>High Level Code: <a href="https://recoskie.github.io/JDisassembly/docs/Code.html">Link</a></td></tr>
 </table>
 
 ## What is JDisassembly.
@@ -17,10 +17,10 @@ image:
 <table style="width:50%;">
   <tr>
     <td>
-      <a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif" target="_blank"><img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre1.gif"></a>
+      <a href="https://recoskie.github.io/JDisassembly/docs/Figs/pre1.gif" target="_blank"><img src="https://recoskie.github.io/JDisassembly/docs/Figs/pre1.gif"></a>
     </td>
     <td>
-      <a href="https://recoskie.github.io/J-Disassembly/docs/Figs/pre2.gif" target="_blank"><img src="https://recoskie.github.io/J-Disassembly/docs/Figs/pre2.gif"></a>
+      <a href="https://recoskie.github.io/JDisassembly/docs/Figs/pre2.gif" target="_blank"><img src="https://recoskie.github.io/JDisassembly/docs/Figs/pre2.gif"></a>
     </td>
   </tr>
 </table>

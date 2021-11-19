@@ -7,7 +7,7 @@ image:
 
 <h1>Machine code Introduction.</h1>
 
-In the <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">basics document</a> we discussed the basic primitive data types that processors can work with and do operations with.
+In the <a href="https://recoskie.github.io/JDisassembly/docs/Basics.html">basics document</a> we discussed the basic primitive data types that processors can work with and do operations with.
 
 <br />
 

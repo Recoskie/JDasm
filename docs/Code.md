@@ -39,7 +39,7 @@ Which mainly meant AMD, Intel cores, and some off-brand x86 cores that run x86 i
 
 <br />
 
-You can learn some of the basics of machine code and processor architecture the following <a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">link</a>.
+You can learn some of the basics of machine code and processor architecture the following <a href="https://recoskie.github.io/JDisassembly/docs/Machine.html">link</a>.
 
 <h1>Dynamically generated code.</h1>
 
@@ -103,7 +103,7 @@ Also, everything is in bytes. Thus numbers are in different word sizes using byt
 
 <br />
 
-You can learn about them following: <a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html#dTypes">link</a>.
+You can learn about them following: <a href="https://recoskie.github.io/JDisassembly/docs/Basics.html#dTypes">link</a>.
 
 <br />
 

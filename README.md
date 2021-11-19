@@ -2,7 +2,7 @@ JDisassembly.
 =============================
 
 <table>
-  <tr><td>Main Page:</td><td><a href="https://recoskie.github.io/J-Disassembly/index.html">Link</a></td></tr>
+  <tr><td>Main Page:</td><td><a href="https://recoskie.github.io/JDisassembly/index.html">Link</a></td></tr>
 </table>
 
 ------------------------------------------------------------
@@ -10,9 +10,9 @@ JDisassembly.
 ## Help, and documentation.
 
 <table>
-  <tr><td>Basics:</td><td><a href="https://recoskie.github.io/J-Disassembly/docs/Basics.html">Link</a></td></tr>
-  <tr><td>Machine code:</td><td><a href="https://recoskie.github.io/J-Disassembly/docs/Machine.html">Link</a></td></tr>
-  <tr><td>High Level Code:</td><td><a href="https://recoskie.github.io/J-Disassembly/docs/Code.html">Link</a></td></tr>
+  <tr><td>Basics:</td><td><a href="https://recoskie.github.io/JDisassembly/docs/Basics.html">Link</a></td></tr>
+  <tr><td>Machine code:</td><td><a href="https://recoskie.github.io/JDisassembly/docs/Machine.html">Link</a></td></tr>
+  <tr><td>High Level Code:</td><td><a href="https://recoskie.github.io/JDisassembly/docs/Code.html">Link</a></td></tr>
 </table>
 
 ------------------------------------------------------------
