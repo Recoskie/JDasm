@@ -56,7 +56,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   {
     //Create GUI.
 
-    createGUI("J-Disassembly", this, this); new DropTarget(winFrame, DnDConstants.ACTION_LINK, this, true);
+    createGUI("JDisassembly", this, this); new DropTarget(winFrame, DnDConstants.ACTION_LINK, this, true);
 
     //Display GUI.
     
@@ -105,7 +105,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
     //Disk selector.
     
-    if( e.getActionCommand() == "O" ) { if( !fc.disks() ) { javax.swing.JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); } }
+    if( e.getActionCommand() == "O" ) { if( !fc.disks( !admin ) ) { javax.swing.JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); } }
 
     //Disassemble boot program.
     
@@ -437,7 +437,11 @@ public class app extends Window implements ActionListener, DropTargetListener, J
         }
         else
         {
+          if( !fc.disks( !admin ) ) { javax.swing.JOptionPane.showMessageDialog(null,"Unable to Find any Disk drives on this System."); }
+
           JOptionPane.showMessageDialog(null,"Unable to read disk drive.");
+          
+          return;
         }
       }
 
