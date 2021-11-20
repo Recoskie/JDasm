@@ -206,7 +206,7 @@ The original names stay intact in disassembly between basic CPU operations, like
 
 <br />
 
-IT also does not matter if you have an ARM core, X86 core, or emended core. The primitive types are the same even if the processor runs entirely differently binary-encoded instructions.
+IT also does not matter if you have an ARM core, X86 core, or embedded core. The primitive types are the same even if the processor runs entirely differently binary-encoded instructions.
 
 <br />
 
