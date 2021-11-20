@@ -700,7 +700,7 @@ Each number in the array can locate to a string. Which a string is a variable in
 
 <br />
 
-The x86 processor has an address system built into Handel reading elements one after another, plus an index.
+The x86 processor has an address system built in to Handel reading elements one after another, plus an index.
 
 <br />
 
