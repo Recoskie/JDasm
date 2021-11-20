@@ -340,7 +340,15 @@ As there is no such thing as a singed add or subtract in any CPU. Singed numbers
 
 <br />
 
-<a href="http://www.play-hookey.com/digital/combinational/binary_subtraction.html" target="_blank">Play hookey digital. Singed add, and subtract.</a>
+See <a href="https://www.swarthmore.edu/NatSci/echeeve1/Ref/BinaryMath/BinaryMath.html" target="_blank">swarthmore.edu Binary arithmetic.</a>
+
+<br />
+
+It is important to understand that there is no magic way of adding or subtracting different number types (Even fractional numbers).
+
+<br />
+
+This is because you will actually see this in code when translating machine code. Thus you have to make the determination of the number type based on how it is used.
 
 <h2 style="clear:left;">Floating point numbers.</h2>
 
@@ -368,7 +376,7 @@ These numbers are added the same as regular numbers. With the integer part adjus
 
 <br />
 
-So the implementation of said binary number format is the same on mobile as it is on PC as well.
+The implementation of said binary number format is the same on mobile as it is on PC as well.
 
 <br />
 
