@@ -917,7 +917,7 @@ This is how uncompressed audio works across all systems. Thus generally, this is
 
 <br />
 
-In order for audio files to be playable, they must convert to the standard PCM audio. Then we set number of channels and sample rate, and sample integer size in the PCM.
+In order for audio files to be playable, they must convert to the standard PCM audio stream format. Then we set number of channels and sample rate, and sample integer size in the PCM.
 
 <br />
 
@@ -929,7 +929,7 @@ You can learn more about digital audio and the wave audio format viable <a href=
 
 <br />
 
-Lastly you can get very creative in software with raw audio stream format. You can compare the difference in vibration and define sounds and create an artificial intelligence that learns and understands, or create sound enhancers, and filters. The possibilities are limitless.
+Lastly you can get very creative in software with raw audio stream format. You can compare the difference in vibration and define sounds and create an artificial intelligence that learns and understands, or you can create sound enhancers, and filters. The possibilities are limitless.
 
 <h2>Closing.</h2>
 
@@ -949,7 +949,7 @@ We do not have to write the PCM data to an wave audio file to play standard PCM 
 
 <br />
 
-Any developer that has built a keyboard application, for android, console, or PC should already know what uncompressed audio looks like and how to play it.
+Any developer that has built a piano application, for android, console, or PC should already know what uncompressed audio looks like and how to play it.
 
 <br />
 
