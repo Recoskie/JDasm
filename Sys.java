@@ -150,7 +150,7 @@ public class Sys
         
         f = File.createTempFile("JD-asm", ".command"); f.deleteOnExit(); PrintWriter script = new PrintWriter(f);
         
-        script.printf("clear ; echo sudo -i \\& sudo java " + Jar + "\"" + app + "\"\n" +
+        script.printf("clear ; echo sudo -i \\& sudo java " + Jar + "\"" + app + "\" admin\n" +
         "sudo -i & sudo java " + Jar + "\"" + app + "\" \"" + f.getAbsolutePath() + "\" " + args +
         " & sudo kill -9 " + pid + "\n");
         
@@ -183,7 +183,7 @@ public class Sys
 
     if( args.length > 0 )
     {
-      File f = new File( args[0] ); test = f.exists(); f.delete();
+      if( !(test = args[0].equals("admin")) ) { File f = new File( args[0] ); if( test = f.exists() ) { f.delete(); } }
       
       if( test )
       {
