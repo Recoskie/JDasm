@@ -12,25 +12,27 @@ public class JPEG extends Window.Window implements JDEventListener
   private JDNode root;
   private Descriptor markerData;
 
-  private long EOI = 0;
-
   private static final String pad = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
-  //If the image data has been scanned.
+  //Is scanned is used to check if the huffman markers and scan markers are read before reding image data.
 
   private boolean isScanned = false;
   private boolean readQMat = false;
 
-  //Decoding of huffman table expansion.
+  //Image data format. This is determined by the start of frame marker number.
 
-  private static java.util.LinkedList<String> huffExpansion = new java.util.LinkedList<String>();
-  private static int HuffTable = 0, HuffTables = 0;
+  private int imageType = -1;
+
+  //Picture dimensions. This is determined by the start of frame marker.
   
-  private static final int[] bits = new int[]
-  {
-    0x80000000,0xC0000000,0xE0000000,0xF0000000,0xF8000000,0xFC000000,0xFE000000,0xFF000000,
-    0xFF800000,0xFFC00000,0xFFE00000,0xFFF00000,0xFFF80000,0xFFFC0000,0xFFFE0000,0xFFFF0000
-  };
+  private int width = 0, height = 0;
+
+  //Sub sampling is number of 8 by 8 matrixes that are used for each color component.
+  //This allows us to forum bigger matrixes like 16x16 using four 8 by 8.
+
+  private int subSamplingY = 0;
+  private int subSamplingCr = 0;
+  private int subSamplingCb = 0;
 
   //If there are no huffman tables defined, then this is the default tables that are used by the JPEG standard.
   
@@ -54,12 +56,35 @@ public class JPEG extends Window.Window implements JDEventListener
     }
   };
 
-  //Sub sampling is number of 8 by 8 matrixes that are used for each color component.
-  //This allows us to forum bigger matrixes like 16x16 using four 8 by 8.
+  //The quantization matrixes are multiplied by the values for each color component.
+  //The bigger the values are in the quotation matrix, then the more values are divided into 0 when rounded off.
+  //The default quantization matrixes if none defined in JPEG.
 
-  private int subSamplingY = 0;
-  private int subSamplingCr = 0;
-  private int subSamplingCb = 0;
+  private static int[][] QMat = new int[][]
+  {
+    new int[]
+    {
+      16,11,10,16,124,140,151,161,
+      12,12,14,19,126,158,160,155,
+      14,13,16,24,140,157,169,156,
+      14,17,22,29,151,187,180,162,
+      18,22,37,56,168,109,103,177,
+      24,35,55,64,181,104,113,192,
+      49,64,78,87,103,121,120,101,
+      72,92,95,98,112,100,103,199
+    },
+    new int[]
+    {
+      17,18,24,47,99,99,99,99,
+      18,21,26,66,99,99,99,99,
+      24,26,56,99,99,99,99,99,
+      47,66,99,99,99,99,99,99,
+      99,99,99,99,99,99,99,99,
+      99,99,99,99,99,99,99,99,
+      99,99,99,99,99,99,99,99,
+      99,99,99,99,99,99,99,99
+    }
+  };
 
   //A simple map for Y in zigzag matrix when showing the DCT matrix.
   //We can easily compute Y, and X fast, but it is a bit faster using a matrix.
@@ -77,18 +102,20 @@ public class JPEG extends Window.Window implements JDEventListener
     7 //Mid point +2.
   };
 
-  //The quantization matrixes are multiplied by the values for each color component.
-  //The bigger the values are in the quotation matrix, then the more values are divided into 0 when rounded off.
+  //Decoding of huffman table expansion.
 
-  private static int[][] QMat = new int[2][];
+  private static java.util.LinkedList<String> huffExpansion = new java.util.LinkedList<String>();
+  private static int HuffTable = 0, HuffTables = 0;
+      
+  private static final int[] bits = new int[]
+  {
+    0x80000000,0xC0000000,0xE0000000,0xF0000000,0xF8000000,0xFC000000,0xFE000000,0xFF000000,
+    0xFF800000,0xFFC00000,0xFFE00000,0xFFF00000,0xFFF80000,0xFFFC0000,0xFFFE0000,0xFFFF0000
+  };
 
-  //Image data format. This is determined by the start of frame marker number.
+  //Stores the end of the image. Speeds up reading the markers.
 
-  private int imageType = -1;
-
-  //Picture dimensions.
-
-  private int width = 0, height = 0;
+  private long EOI = 0;
   
   public JPEG() throws java.io.IOException
   {
