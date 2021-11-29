@@ -30,6 +30,13 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     new byte[] { 0x52, 0x46, 0x36, 0x34 } //Multimedia RIFF/64 file.
   };
 
+  //Depending on the file format we do not need a virtual address space.
+
+  private static boolean SignatureV[] = new boolean[]
+  {
+    true, true, false, false, false
+  };
+
   //Buffer should be set to the length of the largest signature sequence.
 
   private byte[] Sig = new byte[4];
@@ -41,6 +48,10 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   //By file extension.
 
   private String Extension[] = new String[]{ ".com" };
+
+  //Depending on the file format extension we do not need a virtual address space.
+
+  private static boolean ExtensionV[] = new boolean[] { true };
 
   //What file to load by file extension.
 
@@ -380,7 +391,9 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
           stree.setVisible(true); ds.setVisible(true); iData.setVisible(true);
       
-          Virtual.setVisible(true); Offset.setVisible(true); di.setVisible(true);
+          if( I > 0 ) { Virtual.setVisible( E == -1 ? SignatureV[ I ] : ExtensionV[ E ] ); }
+          
+          Offset.setVisible(true); di.setVisible(true);
         }
         catch(Exception er) { er.printStackTrace(); I = -1; JOptionPane.showMessageDialog(null,"Unable to Load Format reader, For This File Format!"); }
       }
@@ -393,10 +406,6 @@ public class app extends Window implements ActionListener, DropTargetListener, J
       
         Virtual.setVisible(false); Offset.setVisible(true); di.setVisible(true);
       }
-      
-      //Set back tools after disk finish loading.
-
-      //if( e.getArg(0) == -2 ) { winFrame.setContentPane( tools ); }
 
       //Adjust the window.
 

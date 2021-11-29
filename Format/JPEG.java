@@ -167,6 +167,8 @@ public class JPEG extends Window.Window implements JDEventListener
     //Set the first node.
 
     tree.setSelectionPath( new TreePath( h.getPath() ) ); open( new JDEvent( this, "", 0 ) );
+
+    Virtual.setVisible( true ); Virtual.setVisible( false );
   }
   
   //Decode all markers of a particular type. Some parts of the image can not be read without the markers being read.
@@ -829,8 +831,9 @@ public class JPEG extends Window.Window implements JDEventListener
     "<html>" + markerRule + "<br /><br />" +
     "Marker types 208 to 223 do not have a marker size number after marker type.<br /><br /><hr /><br />" +
     "All JPEG pictures start with a start of image marker type = 216. The maker does not contain a size after it as it is in the maker range 208 to 223.<br /><br />" +
-    "Lastly \"Start of frame\" defines the picture width and height. There is a lot of \"start of frame\" makers, but they are all read in the same format.<br /><br />" +
-    "Because of the \"Start of frame\" marker we have to define a marker format column, and an extended description of what the maker implies the image data is by type.<br /><br />" +
+    "There is always one \"Start of frame\" marker in a JPEG which defines the picture width and height and the format the image data is read in.<br /><br />" +
+    "The \"Start of frame\" type number defines how to read the image data so there is a lot of \"start of frame\" maker types even though they are all read the same.<br /><br />" +
+    "Because of the \"Start of frame\" marker I have defined a marker format column, and an extended description of what the maker implies the image data is by marker type.<br /><br />" +
     markerTypes + "</html>",
     "<html>This is the size of the marker. The two bytes that are read for the size are included as part of the marker size.<br /><br />Markers types 208 to 223 do not have a size.</html>",
     "<html>Unknown marker data. This happens when a unknown maker type is used.</html>",
