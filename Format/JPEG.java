@@ -80,16 +80,36 @@ public class JPEG extends Window.Window implements JDEventListener
 
   private long EOI = 0;
 
-  //We count number of tables to setup the memory for reading the JPEG.
-  //The first 4 huffman tables are the default tables that are used if the picture does not assign an huffman table to use.
-  //The first 2 quantization matrixes are the default quantization matrixes if the picture does not assign a quantization matrix to use.
+  //We store the tables position, and type/number.
+  //This lets us know which tables to use as we use the most recently defined tables going backwards from our current offset in image data.
 
-  int HTables = 4, QTables = 2, scan = 0;
+  private class markerInfo
+  {
+    int type = 0; long Offset = 0;
+
+    public markerInfo( int t, long o ) { type = t; Offset = o; }
+  };
+
+  private static java.util.LinkedList<markerInfo> H = new java.util.LinkedList<markerInfo>();
+  private static java.util.LinkedList<markerInfo> Q = new java.util.LinkedList<markerInfo>();
+  private static java.util.LinkedList<markerInfo> S = new java.util.LinkedList<markerInfo>();
 
   //We parse the JPEG markers, but do not really read them on first load.
   
   public JPEG() throws java.io.IOException
   {
+    //The first 4 default huffman tables.
+
+    H.add( new markerInfo( 0, 0 ) );
+    H.add( new markerInfo( 16, 0 ) );
+    H.add( new markerInfo( 1, 0 ) );
+    H.add( new markerInfo( 17, 0 ) );
+
+    //The first 2 default quantization matrixes.
+
+    Q.add( new markerInfo( 0, 0 ) );
+    Q.add( new markerInfo( 1, 0 ) );
+
     //Setup.
 
     tree.setEventListener( this ); file.Events = false; EOI = file.length();
@@ -104,7 +124,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     int MCode = 0, size = 0, type = 0;
 
-    //Read image data in 4k buffer.
+    //Parse image data in 4k buffer.
 
     long pos = 0, markerPos = 0; int buf = 0; byte[] b = new byte[4096]; file.read(b);
 
@@ -182,9 +202,11 @@ public class JPEG extends Window.Window implements JDEventListener
 
     //We setup the memory for our huffman tables, and quantization markers as needed.
 
-    Scan = new int[scan][];
+    Scan = new int[S.size()][];
 
-    HuffmanCodes = new int[HTables][];
+    //We setup the defaults that are used if there is no assigned huffman tables, or quantization matrixes.
+
+    HuffmanCodes = new int[H.size()][];
     HuffmanCodes[0] = new int[]
     {
       0x00000001,0x40000012,0x60000022,0x80000032,0xA0000042,0xC0000052,0xE0000063,0xF0000074,0xF8000085,0xFC000096,0xFE0000A7,0xFF0000B8
@@ -202,7 +224,7 @@ public class JPEG extends Window.Window implements JDEventListener
       0x00000001,0x40000011,0x80000022,0xA0000033,0xB0000113,0xC0000044,0xC8000054,0xD0000214,0xD8000314,0xE0000065,0xE4000125,0xE8000415,0xEC000515,0xF0000076,0xF2000616,0xF4000716,0xF6000137,0xF7000227,0xF8000327,0xF9000817,0xFA000088,0xFA800148,0xFB000428,0xFB800918,0xFC000A18,0xFC800B18,0xFD000C18,0xFD800099,0xFDC00239,0xFE000339,0xFE400529,0xFE800F09,0xFEC0015A,0xFEE0062A,0xFF00072A,0xFF200D1A,0xFF4000AB,0xFF50016B,0xFF60024B,0xFF70034B,0xFF800E1D,0xFF84025E,0xFF860F1E,0xFF88017F,0xFF89018F,0xFF8A019F,0xFF8B01AF,0xFF8C026F,0xFF8D027F,0xFF8E028F,0xFF8F029F,0xFF9002AF,0xFF91035F,0xFF92036F,0xFF93037F,0xFF94038F,0xFF95039F,0xFF9603AF,0xFF97043F,0xFF98044F,0xFF99045F,0xFF9A046F,0xFF9B047F,0xFF9C048F,0xFF9D049F,0xFF9E04AF,0xFF9F053F,0xFFA0054F,0xFFA1055F,0xFFA2056F,0xFFA3057F,0xFFA4058F,0xFFA5059F,0xFFA605AF,0xFFA7063F,0xFFA8064F,0xFFA9065F,0xFFAA066F,0xFFAB067F,0xFFAC068F,0xFFAD069F,0xFFAE06AF,0xFFAF073F,0xFFB0074F,0xFFB1075F,0xFFB2076F,0xFFB3077F,0xFFB4078F,0xFFB5079F,0xFFB607AF,0xFFB7082F,0xFFB8083F,0xFFB9084F,0xFFBA085F,0xFFBB086F,0xFFBC087F,0xFFBD088F,0xFFBE089F,0xFFBF08AF,0xFFC0092F,0xFFC1093F,0xFFC2094F,0xFFC3095F,0xFFC4096F,0xFFC5097F,0xFFC6098F,0xFFC7099F,0xFFC809AF,0xFFC90A2F,0xFFCA0A3F,0xFFCB0A4F,0xFFCC0A5F,0xFFCD0A6F,0xFFCE0A7F,0xFFCF0A8F,0xFFD00A9F,0xFFD10AAF,0xFFD20B2F,0xFFD30B3F,0xFFD40B4F,0xFFD50B5F,0xFFD60B6F,0xFFD70B7F,0xFFD80B8F,0xFFD90B9F,0xFFDA0BAF,0xFFDB0C2F,0xFFDC0C3F,0xFFDD0C4F,0xFFDE0C5F,0xFFDF0C6F,0xFFE00C7F,0xFFE10C8F,0xFFE20C9F,0xFFE30CAF,0xFFE40D2F,0xFFE50D3F,0xFFE60D4F,0xFFE70D5F,0xFFE80D6F,0xFFE90D7F,0xFFEA0D8F,0xFFEB0D9F,0xFFEC0DAF,0xFFED0E2F,0xFFEE0E3F,0xFFEF0E4F,0xFFF00E5F,0xFFF10E6F,0xFFF20E7F,0xFFF30E8F,0xFFF40E9F,0xFFF50EAF,0xFFF60F2F,0xFFF70F3F,0xFFF80F4F,0xFFF90F5F,0xFFFA0F6F,0xFFFB0F7F,0xFFFC0F8F,0xFFFD0F9F,0xFFFE0FAF
     };
 
-    QMat = new int[QTables][];
+    QMat = new int[Q.size()][];
     QMat[0] = new int[]
     {
       16,11,10,16,124,140,151,161,
@@ -297,6 +319,8 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else if( type == 0xC4 )
     {
+      n = new JDNode("Huffman Table", new long[]{ ref++, H.size(), size, 1 } );
+
       long pos = file.getFilePointer();
 
       //Huffman tables can be grouped together so we sum them up and skip them.
@@ -307,53 +331,52 @@ public class JPEG extends Window.Window implements JDEventListener
 
       while( t < e )
       {
-        //This is where we should be storing when the tables are assigned by offset, and their table number.
+        //Tables are assigned by offset, and their table number.
         //This is so we know which ones to load when needed.
 
-        int tableInfo = file.readByte();
+        H.add( new markerInfo( file.readByte(), pos ) );
 
         //We do not need to load and decode the Huffman table at this time.
         //We are only setting up memory to Read the JPEG.
 
         sum = 0; for( int i = 0; i < 16; sum += file.readByte(), i++ );
 
-        file.skipBytes(sum); HTables += 1; t = t + 17 + sum;
+        file.skipBytes(sum); t = t + 17 + sum;
       }
 
       skipM = false; //We do not need to skip the marker as it should be at the end of the marker.
-
-      n = new JDNode("Huffman Table", new long[]{ ref++, pos, size, 1 } );
     }
     else if( type == 0xDA )
     {
-      long pos = file.getFilePointer(); scan += 1;
+      n = new JDNode("Start Of Scan", new long[]{ ref++, S.size(), size, 2 } );
 
-      n = new JDNode("Start Of Scan", new long[]{ ref++, pos, size, 2 } );
+      S.add( new markerInfo( 0, file.getFilePointer() ) );
     }
     else if( type == 0xDB )
     {
+      n = new JDNode("Quantization Table", new long[]{ ref++, Q.size(), size, 3 } );
+
       long pos = file.getFilePointer();
 
       //Quantization tables can be grouped together so we skip them and count them.
       //We do not decode them fully here.
 
       long t = pos, e = pos + size;
+      int tableInfo = 0;
 
       while( t < e )
       {
-        //This is where we should be storing when the tables are assigned by offset, and their table number.
+        //Tables are assigned by offset, and their table number.
         //This is so we know which ones to load when needed.
 
-        int tableInfo = file.readByte();
+        Q.add( new markerInfo( tableInfo = file.readByte(), pos ) );
 
         file.skipBytes( tableInfo >= 16 ? 128 : 64 );
         
-        t += tableInfo >= 16 ? 129 : 65; QTables += 1;
+        t += tableInfo >= 16 ? 129 : 65;
       }
 
       skipM = false; //We do not need to skip the marker as it should be at the end of the marker.
-
-      n = new JDNode("Quantization Table", new long[]{ ref++, pos, size, 3 } );
     }
     else if( type == 0xDD )
     {
@@ -374,8 +397,8 @@ public class JPEG extends Window.Window implements JDEventListener
 
   public void Uninitialize()
   {
-    des.clear(); ref = 0;
-    HuffmanCodes = new int[4][]; huffExpansion.clear(); HuffTables = 0;
+    des.clear(); H.clear(); Q.clear(); S.clear(); ref = 0;
+    HuffmanCodes = null; QMat = null; Scan = null; huffExpansion.clear(); HuffTables = 0;
   }
 
   public void open( JDEvent e )
@@ -452,40 +475,10 @@ public class JPEG extends Window.Window implements JDEventListener
       
       try
       {
-        file.seek( e.getArg(1) );
-
-        if( type == 0 )
+        if( type == 1 )
         {
-          Descriptor image = new Descriptor(file); des.add(image); image.setEvent( this::StartOfFrame );
+          int base = (int)e.getArg(1); file.seek( H.get( base ).Offset );
 
-          node.setUserObject("Image Information"); node.setArgs( new long[]{ ref++ } );
-    
-          image.UINT8("Sample Precision");
-          image.UINT16("Picture Height"); width = ((short)image.value) & 0xFFFF;
-          image.UINT16("Picture Width"); height = ((short)image.value) & 0xFFFF;
-    
-          image.UINT8("Number of Color Components in Picture"); int Nf = ((byte)image.value) & 0xFF, comp = 0;
-
-          subSampling = new int[Nf]; table = new int[Nf];
-    
-          for( int i = 1; i <= Nf; i++ )
-          {
-            Descriptor imageComp = new Descriptor(file); des.add(imageComp); imageComp.setEvent( this::ComponentInfo );
-            
-            node.add( new JDNode("Color Component" + i + ".h", ref++) );
-            
-            imageComp.UINT8("Component Indemnifier"); comp = ((byte)imageComp.value) - 1;
-            imageComp.UINT8("Vertical Horizontal squares");
-
-            subSampling[comp] = ((byte)imageComp.value); subSampling[comp] = ( subSampling[comp] & 0x0F ) * ( ( subSampling[comp] >> 4 ) & 0x0F );
-
-            imageComp.UINT8("Table Number"); table[comp] = ((byte)imageComp.value);
-          }
-
-          ((DefaultTreeModel)tree.getModel()).nodeChanged( (JDNode)tree.getLastSelectedPathComponent() );
-        }
-        else if( type == 1 )
-        {
           //Begin reading Huffman Tables.
 
           Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number"); nTable.setEvent( this::HTableInfo );
@@ -494,7 +487,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           node.setUserObject("Huffman Table #" + num + " (Class = " + ( classType > 0 ? "AC" : "DC" ) + ")"); node.setArgs( new long[]{ ref++ } );
 
-          int Sum = 0, TableType = ( num << 1 ) + classType;
+          int Sum = 0, TableType = ( num << 1 ) + classType, tableNum = 0;
 
           while( size > 0 )
           {
@@ -538,7 +531,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
             bitDecode += "</table>"; huffExpansion.add( bitDecode );
 
-            HuffmanCodes[TableType] = codes.stream().mapToInt(Integer::intValue).toArray();
+            HuffmanCodes[base + tableNum] = codes.stream().mapToInt(Integer::intValue).toArray();
 
             //The tables can be grouped together under one marker.
 
@@ -552,10 +545,14 @@ public class JPEG extends Window.Window implements JDEventListener
 
               model.insertNodeInto(node, root, root.getChildCount());
             }
+
+            tableNum += 1;
           }
         }
         else if( type == 2 )
         {
+          int base = (int)e.getArg(1); file.seek( S.get( base ).Offset );
+
           node.setUserObject("Components.h"); node.setArgs( new long[]{ ref++ } );
 
           Descriptor Scan = new Descriptor(file); des.add(Scan);
@@ -579,6 +576,8 @@ public class JPEG extends Window.Window implements JDEventListener
         }
         else if( type == 3 )
         {
+          int base = (int)e.getArg(1); file.seek( Q.get( base ).Offset );
+
           //Begin reading Quantization Tables.
 
           Descriptor nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Precision/Table Number"); nTable.setEvent( this::QTableInfo );
@@ -620,6 +619,38 @@ public class JPEG extends Window.Window implements JDEventListener
               model.insertNodeInto(node, root, root.getChildCount());
             }
           }
+        }
+        else { file.seek( e.getArg(1) ); }
+
+        if( type == 0 )
+        {
+          Descriptor image = new Descriptor(file); des.add(image); image.setEvent( this::StartOfFrame );
+
+          node.setUserObject("Image Information"); node.setArgs( new long[]{ ref++ } );
+    
+          image.UINT8("Sample Precision");
+          image.UINT16("Picture Height"); width = ((short)image.value) & 0xFFFF;
+          image.UINT16("Picture Width"); height = ((short)image.value) & 0xFFFF;
+    
+          image.UINT8("Number of Color Components in Picture"); int Nf = ((byte)image.value) & 0xFF, comp = 0;
+
+          subSampling = new int[Nf]; table = new int[Nf];
+    
+          for( int i = 1; i <= Nf; i++ )
+          {
+            Descriptor imageComp = new Descriptor(file); des.add(imageComp); imageComp.setEvent( this::ComponentInfo );
+            
+            node.add( new JDNode("Color Component" + i + ".h", ref++) );
+            
+            imageComp.UINT8("Component Indemnifier"); comp = ((byte)imageComp.value) - 1;
+            imageComp.UINT8("Vertical Horizontal squares");
+
+            subSampling[comp] = ((byte)imageComp.value); subSampling[comp] = ( subSampling[comp] & 0x0F ) * ( ( subSampling[comp] >> 4 ) & 0x0F );
+
+            imageComp.UINT8("Table Number"); table[comp] = ((byte)imageComp.value);
+          }
+
+          ((DefaultTreeModel)tree.getModel()).nodeChanged( (JDNode)tree.getLastSelectedPathComponent() );
         }
         else if( type == 4 )
         {
