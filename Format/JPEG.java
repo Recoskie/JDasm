@@ -17,7 +17,11 @@ public class JPEG extends Window.Window implements JDEventListener
   //Is scanned is used to check if the huffman markers and scan markers are read before reding image data.
 
   private boolean isScanned = false;
-  private boolean readQMat = false;
+
+  //Some markers are semi read to setup memory for decoding the picture. Then it is set false.
+  //This boolean value identifies if a marker needs to be skipped when parsing.
+
+  private boolean skipM = true;
 
   //Image data format. This is determined by the start of frame marker number.
 
@@ -32,58 +36,18 @@ public class JPEG extends Window.Window implements JDEventListener
   //Table is which quantization table number and huffman table number that is being used for a color.
 
   private int[] subSampling, table;
-
-  //If there are no huffman tables defined, then this is the default tables that are used by the JPEG standard.
   
-  private static int[][] HuffmanCodes = new int[][]
-  {
-    new int[]
-    {
-      0x00000001,0x40000012,0x60000022,0x80000032,0xA0000042,0xC0000052,0xE0000063,0xF0000074,0xF8000085,0xFC000096,0xFE0000A7,0xFF0000B8
-    },
-    new int[]
-    {
-      0x00000011,0x40000021,0x80000032,0xA0000003,0xB0000043,0xC0000113,0xD0000054,0xD8000124,0xE0000214,0xE8000315,0xEC000415,0xF0000066,0xF2000136,0xF4000516,0xF6000616,0xF8000077,0xF9000227,0xFA000717,0xFB000148,0xFB800328,0xFC000818,0xFC800918,0xFD000A18,0xFD800089,0xFDC00239,0xFE000429,0xFE400B19,0xFE800C19,0xFEC0015A,0xFEE0052A,0xFF000D1A,0xFF200F0A,0xFF40024B,0xFF50033B,0xFF60062B,0xFF70072B,0xFF80082E,0xFF82009F,0xFF8300AF,0xFF84016F,0xFF85017F,0xFF86018F,0xFF87019F,0xFF8801AF,0xFF89025F,0xFF8A026F,0xFF8B027F,0xFF8C028F,0xFF8D029F,0xFF8E02AF,0xFF8F034F,0xFF90035F,0xFF91036F,0xFF92037F,0xFF93038F,0xFF94039F,0xFF9503AF,0xFF96043F,0xFF97044F,0xFF98045F,0xFF99046F,0xFF9A047F,0xFF9B048F,0xFF9C049F,0xFF9D04AF,0xFF9E053F,0xFF9F054F,0xFFA0055F,0xFFA1056F,0xFFA2057F,0xFFA3058F,0xFFA4059F,0xFFA505AF,0xFFA6063F,0xFFA7064F,0xFFA8065F,0xFFA9066F,0xFFAA067F,0xFFAB068F,0xFFAC069F,0xFFAD06AF,0xFFAE073F,0xFFAF074F,0xFFB0075F,0xFFB1076F,0xFFB2077F,0xFFB3078F,0xFFB4079F,0xFFB507AF,0xFFB6083F,0xFFB7084F,0xFFB8085F,0xFFB9086F,0xFFBA087F,0xFFBB088F,0xFFBC089F,0xFFBD08AF,0xFFBE092F,0xFFBF093F,0xFFC0094F,0xFFC1095F,0xFFC2096F,0xFFC3097F,0xFFC4098F,0xFFC5099F,0xFFC609AF,0xFFC70A2F,0xFFC80A3F,0xFFC90A4F,0xFFCA0A5F,0xFFCB0A6F,0xFFCC0A7F,0xFFCD0A8F,0xFFCE0A9F,0xFFCF0AAF,0xFFD00B2F,0xFFD10B3F,0xFFD20B4F,0xFFD30B5F,0xFFD40B6F,0xFFD50B7F,0xFFD60B8F,0xFFD70B9F,0xFFD80BAF,0xFFD90C2F,0xFFDA0C3F,0xFFDB0C4F,0xFFDC0C5F,0xFFDD0C6F,0xFFDE0C7F,0xFFDF0C8F,0xFFE00C9F,0xFFE10CAF,0xFFE20D2F,0xFFE30D3F,0xFFE40D4F,0xFFE50D5F,0xFFE60D6F,0xFFE70D7F,0xFFE80D8F,0xFFE90D9F,0xFFEA0DAF,0xFFEB0E1F,0xFFEC0E2F,0xFFED0E3F,0xFFEE0E4F,0xFFEF0E5F,0xFFF00E6F,0xFFF10E7F,0xFFF20E8F,0xFFF30E9F,0xFFF40EAF,0xFFF50F1F,0xFFF60F2F,0xFFF70F3F,0xFFF80F4F,0xFFF90F5F,0xFFFA0F6F,0xFFFB0F7F,0xFFFC0F8F,0xFFFD0F9F,0xFFFE0FAF
-    },
-    new int[]
-    {
-      0x00000001,0x40000011,0x80000021,0xC0000032,0xE0000043,0xF0000054,0xF8000065,0xFC000076,0xFE000087,0xFF000098,0xFF8000A9,0xFFC000BA
-    },
-    new int[]
-    {
-     0x00000001,0x40000011,0x80000022,0xA0000033,0xB0000113,0xC0000044,0xC8000054,0xD0000214,0xD8000314,0xE0000065,0xE4000125,0xE8000415,0xEC000515,0xF0000076,0xF2000616,0xF4000716,0xF6000137,0xF7000227,0xF8000327,0xF9000817,0xFA000088,0xFA800148,0xFB000428,0xFB800918,0xFC000A18,0xFC800B18,0xFD000C18,0xFD800099,0xFDC00239,0xFE000339,0xFE400529,0xFE800F09,0xFEC0015A,0xFEE0062A,0xFF00072A,0xFF200D1A,0xFF4000AB,0xFF50016B,0xFF60024B,0xFF70034B,0xFF800E1D,0xFF84025E,0xFF860F1E,0xFF88017F,0xFF89018F,0xFF8A019F,0xFF8B01AF,0xFF8C026F,0xFF8D027F,0xFF8E028F,0xFF8F029F,0xFF9002AF,0xFF91035F,0xFF92036F,0xFF93037F,0xFF94038F,0xFF95039F,0xFF9603AF,0xFF97043F,0xFF98044F,0xFF99045F,0xFF9A046F,0xFF9B047F,0xFF9C048F,0xFF9D049F,0xFF9E04AF,0xFF9F053F,0xFFA0054F,0xFFA1055F,0xFFA2056F,0xFFA3057F,0xFFA4058F,0xFFA5059F,0xFFA605AF,0xFFA7063F,0xFFA8064F,0xFFA9065F,0xFFAA066F,0xFFAB067F,0xFFAC068F,0xFFAD069F,0xFFAE06AF,0xFFAF073F,0xFFB0074F,0xFFB1075F,0xFFB2076F,0xFFB3077F,0xFFB4078F,0xFFB5079F,0xFFB607AF,0xFFB7082F,0xFFB8083F,0xFFB9084F,0xFFBA085F,0xFFBB086F,0xFFBC087F,0xFFBD088F,0xFFBE089F,0xFFBF08AF,0xFFC0092F,0xFFC1093F,0xFFC2094F,0xFFC3095F,0xFFC4096F,0xFFC5097F,0xFFC6098F,0xFFC7099F,0xFFC809AF,0xFFC90A2F,0xFFCA0A3F,0xFFCB0A4F,0xFFCC0A5F,0xFFCD0A6F,0xFFCE0A7F,0xFFCF0A8F,0xFFD00A9F,0xFFD10AAF,0xFFD20B2F,0xFFD30B3F,0xFFD40B4F,0xFFD50B5F,0xFFD60B6F,0xFFD70B7F,0xFFD80B8F,0xFFD90B9F,0xFFDA0BAF,0xFFDB0C2F,0xFFDC0C3F,0xFFDD0C4F,0xFFDE0C5F,0xFFDF0C6F,0xFFE00C7F,0xFFE10C8F,0xFFE20C9F,0xFFE30CAF,0xFFE40D2F,0xFFE50D3F,0xFFE60D4F,0xFFE70D5F,0xFFE80D6F,0xFFE90D7F,0xFFEA0D8F,0xFFEB0D9F,0xFFEC0DAF,0xFFED0E2F,0xFFEE0E3F,0xFFEF0E4F,0xFFF00E5F,0xFFF10E6F,0xFFF20E7F,0xFFF30E8F,0xFFF40E9F,0xFFF50EAF,0xFFF60F2F,0xFFF70F3F,0xFFF80F4F,0xFFF90F5F,0xFFFA0F6F,0xFFFB0F7F,0xFFFC0F8F,0xFFFD0F9F,0xFFFE0FAF
-    }
-  };
+  //Start of scan marker locations and set colors.
 
-  //The quantization matrixes are multiplied by the values for each color component.
-  //The bigger the values are in the quantization matrix, then the more values are divided into 0 when rounded off.
-  //The default quantization matrixes if none defined in JPEG.
+  private int[][] Scan;
 
-  private static int[][] QMat = new int[][]
-  {
-    new int[]
-    {
-      16,11,10,16,124,140,151,161,
-      12,12,14,19,126,158,160,155,
-      14,13,16,24,140,157,169,156,
-      14,17,22,29,151,187,180,162,
-      18,22,37,56,168,109,103,177,
-      24,35,55,64,181,104,113,192,
-      49,64,78,87,103,121,120,101,
-      72,92,95,98,112,100,103,199
-    },
-    new int[]
-    {
-      17,18,24,47,99,99,99,99,
-      18,21,26,66,99,99,99,99,
-      24,26,56,99,99,99,99,99,
-      47,66,99,99,99,99,99,99,
-      99,99,99,99,99,99,99,99,
-      99,99,99,99,99,99,99,99,
-      99,99,99,99,99,99,99,99,
-      99,99,99,99,99,99,99,99
-    }
-  };
+  //Initialized after parsing the JPEG markers.
+
+  private static int[][] HuffmanCodes;
+
+  //Initialized after parsing the JPEG markers.
+
+  private static int[][] QMat;
 
   //A simple map for Y in zigzag matrix when showing the DCT matrix.
   //We can easily compute Y, and X fast, but it is a bit faster using a matrix.
@@ -115,6 +79,14 @@ public class JPEG extends Window.Window implements JDEventListener
   //Stores the end of the image. Speeds up reading the markers.
 
   private long EOI = 0;
+
+  //We count number of tables to setup the memory for reading the JPEG.
+  //The first 4 huffman tables are the default tables that are used if the picture does not assign an huffman table to use.
+  //The first 2 quantization matrixes are the default quantization matrixes if the picture does not assign a quantization matrix to use.
+
+  int HTables = 4, QTables = 2, scan = 0;
+
+  //We parse the JPEG markers, but do not really read them on first load.
   
   public JPEG() throws java.io.IOException
   {
@@ -201,10 +173,58 @@ public class JPEG extends Window.Window implements JDEventListener
 
           if( !decodeMarker( type, size, h ) ) { markerData.Other("Maker Data", size); }
 
-          markerPos += size + 4; buf += size + 4; file.skipBytes(size);
+          markerPos += size + 4; buf += size + 4;
+
+          if( skipM ) { file.skipBytes(size); } else { skipM = true; }
         }
       } else { buf += type != 0xFF ? 2 : 1; }
     }
+
+    //We setup the memory for our huffman tables, and quantization markers as needed.
+
+    Scan = new int[scan][];
+
+    HuffmanCodes = new int[HTables][];
+    HuffmanCodes[0] = new int[]
+    {
+      0x00000001,0x40000012,0x60000022,0x80000032,0xA0000042,0xC0000052,0xE0000063,0xF0000074,0xF8000085,0xFC000096,0xFE0000A7,0xFF0000B8
+    };
+    HuffmanCodes[1] = new int[]
+    {
+      0x00000011,0x40000021,0x80000032,0xA0000003,0xB0000043,0xC0000113,0xD0000054,0xD8000124,0xE0000214,0xE8000315,0xEC000415,0xF0000066,0xF2000136,0xF4000516,0xF6000616,0xF8000077,0xF9000227,0xFA000717,0xFB000148,0xFB800328,0xFC000818,0xFC800918,0xFD000A18,0xFD800089,0xFDC00239,0xFE000429,0xFE400B19,0xFE800C19,0xFEC0015A,0xFEE0052A,0xFF000D1A,0xFF200F0A,0xFF40024B,0xFF50033B,0xFF60062B,0xFF70072B,0xFF80082E,0xFF82009F,0xFF8300AF,0xFF84016F,0xFF85017F,0xFF86018F,0xFF87019F,0xFF8801AF,0xFF89025F,0xFF8A026F,0xFF8B027F,0xFF8C028F,0xFF8D029F,0xFF8E02AF,0xFF8F034F,0xFF90035F,0xFF91036F,0xFF92037F,0xFF93038F,0xFF94039F,0xFF9503AF,0xFF96043F,0xFF97044F,0xFF98045F,0xFF99046F,0xFF9A047F,0xFF9B048F,0xFF9C049F,0xFF9D04AF,0xFF9E053F,0xFF9F054F,0xFFA0055F,0xFFA1056F,0xFFA2057F,0xFFA3058F,0xFFA4059F,0xFFA505AF,0xFFA6063F,0xFFA7064F,0xFFA8065F,0xFFA9066F,0xFFAA067F,0xFFAB068F,0xFFAC069F,0xFFAD06AF,0xFFAE073F,0xFFAF074F,0xFFB0075F,0xFFB1076F,0xFFB2077F,0xFFB3078F,0xFFB4079F,0xFFB507AF,0xFFB6083F,0xFFB7084F,0xFFB8085F,0xFFB9086F,0xFFBA087F,0xFFBB088F,0xFFBC089F,0xFFBD08AF,0xFFBE092F,0xFFBF093F,0xFFC0094F,0xFFC1095F,0xFFC2096F,0xFFC3097F,0xFFC4098F,0xFFC5099F,0xFFC609AF,0xFFC70A2F,0xFFC80A3F,0xFFC90A4F,0xFFCA0A5F,0xFFCB0A6F,0xFFCC0A7F,0xFFCD0A8F,0xFFCE0A9F,0xFFCF0AAF,0xFFD00B2F,0xFFD10B3F,0xFFD20B4F,0xFFD30B5F,0xFFD40B6F,0xFFD50B7F,0xFFD60B8F,0xFFD70B9F,0xFFD80BAF,0xFFD90C2F,0xFFDA0C3F,0xFFDB0C4F,0xFFDC0C5F,0xFFDD0C6F,0xFFDE0C7F,0xFFDF0C8F,0xFFE00C9F,0xFFE10CAF,0xFFE20D2F,0xFFE30D3F,0xFFE40D4F,0xFFE50D5F,0xFFE60D6F,0xFFE70D7F,0xFFE80D8F,0xFFE90D9F,0xFFEA0DAF,0xFFEB0E1F,0xFFEC0E2F,0xFFED0E3F,0xFFEE0E4F,0xFFEF0E5F,0xFFF00E6F,0xFFF10E7F,0xFFF20E8F,0xFFF30E9F,0xFFF40EAF,0xFFF50F1F,0xFFF60F2F,0xFFF70F3F,0xFFF80F4F,0xFFF90F5F,0xFFFA0F6F,0xFFFB0F7F,0xFFFC0F8F,0xFFFD0F9F,0xFFFE0FAF
+    };
+    HuffmanCodes[2] = new int[]
+    {
+      0x00000001,0x40000011,0x80000021,0xC0000032,0xE0000043,0xF0000054,0xF8000065,0xFC000076,0xFE000087,0xFF000098,0xFF8000A9,0xFFC000BA
+    };
+    HuffmanCodes[3] = new int[]
+    {
+      0x00000001,0x40000011,0x80000022,0xA0000033,0xB0000113,0xC0000044,0xC8000054,0xD0000214,0xD8000314,0xE0000065,0xE4000125,0xE8000415,0xEC000515,0xF0000076,0xF2000616,0xF4000716,0xF6000137,0xF7000227,0xF8000327,0xF9000817,0xFA000088,0xFA800148,0xFB000428,0xFB800918,0xFC000A18,0xFC800B18,0xFD000C18,0xFD800099,0xFDC00239,0xFE000339,0xFE400529,0xFE800F09,0xFEC0015A,0xFEE0062A,0xFF00072A,0xFF200D1A,0xFF4000AB,0xFF50016B,0xFF60024B,0xFF70034B,0xFF800E1D,0xFF84025E,0xFF860F1E,0xFF88017F,0xFF89018F,0xFF8A019F,0xFF8B01AF,0xFF8C026F,0xFF8D027F,0xFF8E028F,0xFF8F029F,0xFF9002AF,0xFF91035F,0xFF92036F,0xFF93037F,0xFF94038F,0xFF95039F,0xFF9603AF,0xFF97043F,0xFF98044F,0xFF99045F,0xFF9A046F,0xFF9B047F,0xFF9C048F,0xFF9D049F,0xFF9E04AF,0xFF9F053F,0xFFA0054F,0xFFA1055F,0xFFA2056F,0xFFA3057F,0xFFA4058F,0xFFA5059F,0xFFA605AF,0xFFA7063F,0xFFA8064F,0xFFA9065F,0xFFAA066F,0xFFAB067F,0xFFAC068F,0xFFAD069F,0xFFAE06AF,0xFFAF073F,0xFFB0074F,0xFFB1075F,0xFFB2076F,0xFFB3077F,0xFFB4078F,0xFFB5079F,0xFFB607AF,0xFFB7082F,0xFFB8083F,0xFFB9084F,0xFFBA085F,0xFFBB086F,0xFFBC087F,0xFFBD088F,0xFFBE089F,0xFFBF08AF,0xFFC0092F,0xFFC1093F,0xFFC2094F,0xFFC3095F,0xFFC4096F,0xFFC5097F,0xFFC6098F,0xFFC7099F,0xFFC809AF,0xFFC90A2F,0xFFCA0A3F,0xFFCB0A4F,0xFFCC0A5F,0xFFCD0A6F,0xFFCE0A7F,0xFFCF0A8F,0xFFD00A9F,0xFFD10AAF,0xFFD20B2F,0xFFD30B3F,0xFFD40B4F,0xFFD50B5F,0xFFD60B6F,0xFFD70B7F,0xFFD80B8F,0xFFD90B9F,0xFFDA0BAF,0xFFDB0C2F,0xFFDC0C3F,0xFFDD0C4F,0xFFDE0C5F,0xFFDF0C6F,0xFFE00C7F,0xFFE10C8F,0xFFE20C9F,0xFFE30CAF,0xFFE40D2F,0xFFE50D3F,0xFFE60D4F,0xFFE70D5F,0xFFE80D6F,0xFFE90D7F,0xFFEA0D8F,0xFFEB0D9F,0xFFEC0DAF,0xFFED0E2F,0xFFEE0E3F,0xFFEF0E4F,0xFFF00E5F,0xFFF10E6F,0xFFF20E7F,0xFFF30E8F,0xFFF40E9F,0xFFF50EAF,0xFFF60F2F,0xFFF70F3F,0xFFF80F4F,0xFFF90F5F,0xFFFA0F6F,0xFFFB0F7F,0xFFFC0F8F,0xFFFD0F9F,0xFFFE0FAF
+    };
+
+    QMat = new int[QTables][];
+    QMat[0] = new int[]
+    {
+      16,11,10,16,124,140,151,161,
+      12,12,14,19,126,158,160,155,
+      14,13,16,24,140,157,169,156,
+      14,17,22,29,151,187,180,162,
+      18,22,37,56,168,109,103,177,
+      24,35,55,64,181,104,113,192,
+      49,64,78,87,103,121,120,101,
+      72,92,95,98,112,100,103,199
+    };
+    QMat[1] = new int[]
+    {
+      17,18,24,47,99,99,99,99,
+      18,21,26,66,99,99,99,99,
+      24,26,56,99,99,99,99,99,
+      47,66,99,99,99,99,99,99,
+      99,99,99,99,99,99,99,99,
+      99,99,99,99,99,99,99,99,
+      99,99,99,99,99,99,99,99,
+      99,99,99,99,99,99,99,99
+    };
 
     //Setup headers.
     
@@ -277,15 +297,63 @@ public class JPEG extends Window.Window implements JDEventListener
     }
     else if( type == 0xC4 )
     {
-      n = new JDNode("Huffman Table", new long[]{ ref++, file.getFilePointer(), size, 1 } );
+      long pos = file.getFilePointer();
+
+      //Huffman tables can be grouped together so we sum them up and skip them.
+      //We do not decode them fully here.
+
+      long t = pos, e = pos + size;
+      int sum = 0;
+
+      while( t < e )
+      {
+        //This is where we should be storing when the tables are assigned by offset, and their table number.
+        //This is so we know which ones to load when needed.
+
+        int tableInfo = file.readByte();
+
+        //We do not need to load and decode the Huffman table at this time.
+        //We are only setting up memory to Read the JPEG.
+
+        sum = 0; for( int i = 0; i < 16; sum += file.readByte(), i++ );
+
+        file.skipBytes(sum); HTables += 1; t = t + 17 + sum;
+      }
+
+      skipM = false; //We do not need to skip the marker as it should be at the end of the marker.
+
+      n = new JDNode("Huffman Table", new long[]{ ref++, pos, size, 1 } );
     }
     else if( type == 0xDA )
     {
-      n = new JDNode("Start Of Scan", new long[]{ ref++, file.getFilePointer(), size, 2 } );
+      long pos = file.getFilePointer(); scan += 1;
+
+      n = new JDNode("Start Of Scan", new long[]{ ref++, pos, size, 2 } );
     }
     else if( type == 0xDB )
     {
-      n = new JDNode("Quantization Table", new long[]{ ref++, file.getFilePointer(), size, 3 } );
+      long pos = file.getFilePointer();
+
+      //Quantization tables can be grouped together so we skip them and count them.
+      //We do not decode them fully here.
+
+      long t = pos, e = pos + size;
+
+      while( t < e )
+      {
+        //This is where we should be storing when the tables are assigned by offset, and their table number.
+        //This is so we know which ones to load when needed.
+
+        int tableInfo = file.readByte();
+
+        file.skipBytes( tableInfo >= 16 ? 128 : 64 );
+        
+        t += tableInfo >= 16 ? 129 : 65; QTables += 1;
+      }
+
+      skipM = false; //We do not need to skip the marker as it should be at the end of the marker.
+
+      n = new JDNode("Quantization Table", new long[]{ ref++, pos, size, 3 } );
     }
     else if( type == 0xDD )
     {
