@@ -29,10 +29,9 @@ public class JPEG extends Window.Window implements JDEventListener
 
   //Sub sampling is number of 8 by 8 matrixes that are used for each color component.
   //This allows us to forum bigger matrixes like 16x16 using four 8 by 8.
+  //Table is which quantization table number and huffman table number that is being used for a color.
 
-  private int subSamplingY = 0;
-  private int subSamplingCr = 0;
-  private int subSamplingCb = 0;
+  private int[] subSampling, table;
 
   //If there are no huffman tables defined, then this is the default tables that are used by the JPEG standard.
   
@@ -57,7 +56,7 @@ public class JPEG extends Window.Window implements JDEventListener
   };
 
   //The quantization matrixes are multiplied by the values for each color component.
-  //The bigger the values are in the quotation matrix, then the more values are divided into 0 when rounded off.
+  //The bigger the values are in the quantization matrix, then the more values are divided into 0 when rounded off.
   //The default quantization matrixes if none defined in JPEG.
 
   private static int[][] QMat = new int[][]
@@ -397,22 +396,22 @@ public class JPEG extends Window.Window implements JDEventListener
           image.UINT16("Picture Height"); width = ((short)image.value) & 0xFFFF;
           image.UINT16("Picture Width"); height = ((short)image.value) & 0xFFFF;
     
-          image.UINT8("Number of Components in Picture"); int Nf = ((byte)image.value) & 0xFF;
+          image.UINT8("Number of Color Components in Picture"); int Nf = ((byte)image.value) & 0xFF, comp = 0;
+
+          subSampling = new int[Nf]; table = new int[Nf];
     
           for( int i = 1; i <= Nf; i++ )
           {
             Descriptor imageComp = new Descriptor(file); des.add(imageComp); imageComp.setEvent( this::ComponentInfo );
             
-            node.add( new JDNode("Image Component" + i + ".h", ref++) );
+            node.add( new JDNode("Color Component" + i + ".h", ref++) );
             
-            imageComp.UINT8("Component Indemnifier");
-            imageComp.UINT8("Vertical/Horizontal Sampling factor");
+            imageComp.UINT8("Component Indemnifier"); comp = ((byte)imageComp.value) - 1;
+            imageComp.UINT8("Vertical Horizontal squares");
 
-            if( i == 1 ) { subSamplingY = ((byte)imageComp.value); subSamplingY = ( subSamplingY & 0x0F ) * ( ( subSamplingY >> 4 ) & 0x0F ); }
-            if( i == 2 ) { subSamplingCb = ((byte)imageComp.value); subSamplingCb = ( subSamplingCb & 0x0F ) * ( ( subSamplingCb >> 4 ) & 0x0F ); }
-            if( i == 3 ) { subSamplingCr = ((byte)imageComp.value); subSamplingCr = ( subSamplingCr & 0x0F ) * ( ( subSamplingCr >> 4 ) & 0x0F ); }
+            subSampling[comp] = ((byte)imageComp.value); subSampling[comp] = ( subSampling[comp] & 0x0F ) * ( ( subSampling[comp] >> 4 ) & 0x0F );
 
-            imageComp.UINT8("Quantization table Number");
+            imageComp.UINT8("Table Number"); table[comp] = ((byte)imageComp.value);
           }
 
           ((DefaultTreeModel)tree.getModel()).nodeChanged( (JDNode)tree.getLastSelectedPathComponent() );
@@ -752,7 +751,7 @@ public class JPEG extends Window.Window implements JDEventListener
     //Color components. Note this should vary based on the start of scan markers.
 
     int nComps = 2, comp = 0, smp = 0;
-    int[] samples = new int[]{ subSamplingY, subSamplingCb, subSamplingCr };
+    int[] samples = subSampling;
     String[] Colors = new String[]{ " (Y)", " (Cb)", " (Cr)" };
 
     //Define the first MCU.
@@ -913,16 +912,16 @@ public class JPEG extends Window.Window implements JDEventListener
     "<html>Picture Height in pixels.</html>",
     "<html>Picture Width in pixels.</html>",
     "<html>Number of component's. Usually 3, for Y, Cb, Cr.<br /><br />" +
-    "Each component uses an 8 by 8 quantization table. You can change the table number each component uses if you like." +
-    "You can also modify the 8 by 8 quantization matrix an component number uses if you like.</html>"
+    "Each component uses an 8 by 8 quantization table, and huffman table. You can change the table number each color uses if you like." +
+    "You can also modify the 8 by 8 quantization matrix an color uses if you like.</html>"
   };
 
   public static final String[] DefineComponents = new String[]
   {
-    "<html>This is the assigned component number. Each \"start of scan\" marker uses the component number.<br /><br />" +
-    "You can switch component numbers if you like. You can set component 1 to 2, and component 2 to 1.</html>",
+    "<html>This is the assigned color number. Each \"start of scan\" marker uses the color number.<br /><br />" +
+    "You can switch color numbers if you like. You can set color 1 to 2, and color 2 to 1.</html>",
     "<html>The first hex digit is Vertical 0 to 15, and the last hex digit is 0 to 15 horizontal.</html>",
-    "<html>This is the quantization matrix that will be used with this component number.<br /><br />" +
+    "<html>This is the huffman table, and quantization matrix that will be used with this color number.<br /><br />" +
     "You can modify the quantization matrix this component uses, or set it to a different one defined in this image.</html>"
   };
 
@@ -957,10 +956,15 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     if( el < 0 )
     {
-      info("The start of frame defines the width and height of the JPEG picture.<br /><br />" +
-      "The frame also usually specifies 3 image components, Y, Cb, and Cr.<br /><br />" +
-      "The image components specify a quantization table number to use. An 8 by 8 matrix is shaded and blended together with three image components using the image data and quantization matrix in 8 by 8 pixel squares.<br /><br />" +
-      "This allows JPEG pictures to be much smaller in size, but can only approximate the color in each 8x8.");
+      info("The <strong>Start Of Frame</strong> defines the width and height of the JPEG picture.<br /><br />" +
+      "The frame also usually specifies 3 color components, Y, Cb, and Cr per pixel color.<br /><br />" +
+      "Each <strong>Start Of Scan</strong> marker lets us pick which colors to use preceding the <strong>Image Data</strong>.<br /><br />" +
+      "Color is read in 8 by 8 squares then we move to the next color in image data till we complete one 8 by 8 square called a MCU (Minium codded unit).<br /><br />" +
+      "Each color has a SubSampling setting that lets us set number of vertical and horizontal squares one color takes up.<br /><br />" +
+      "This allows us to make one color 16 by 8, or 16 by 16, but if the other colors are 8 by 8 then that means we must scale the other colors into 16 by 16.<br /><br />" +
+      "JPEGS often do this with Color Y and leave Cr, and Cb as 8 by 8 per square. This is called halving the quality of the chroma color per pixel.<br /><br />" +
+      "The color components specify which table number to use for both the quantization table, and Huffman table number.<br /><br />" +
+      "This is a general description. You can see how the two tables are used to read the picture in the image data sections.");
     }
     else
     {
@@ -972,7 +976,7 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     if( el < 0 )
     {
-      info("Defines the image components which are used by each start of scan maker preceding the image data.");
+      info("Defines the image colors which are assigned by the <strong>Start Of Scan</strong> maker preceding the image data.");
     }
     else
     {
