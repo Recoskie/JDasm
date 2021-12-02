@@ -778,7 +778,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
             if( bitLen >= mp ) { mp = Integer.MAX_VALUE; bitLen += mpx; mpx = 0; }
 
-            loop += zrl + 1; DCT[ loop - 1 ] = value; value = 0; match = false;
+            loop += zrl + 1; if( loop < 64 ) { DCT[ loop - 1 ] = value; } value = 0; match = false;
           }
 
           out += "</table>";
