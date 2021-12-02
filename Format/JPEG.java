@@ -695,7 +695,7 @@ public class JPEG extends Window.Window implements JDEventListener
         }
         else if( type == 7 )
         {
-          if( imageType != 0 ){ info("<html>The start of frame marker type value specifies the image data type.<br /><br />" +
+          if( imageType > 8 ){ info("<html>The start of frame marker type value specifies the image data type.<br /><br />" +
           "Right now Arithmetic encoded JPEG image data is not supported. Only baseline image data is supported.</html>"); ds.clear(); return; }
 
           long t = file.getFilePointer();
@@ -826,7 +826,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
   //Finds the huffman tables that are active at an offset for each color component.
 
-  public int[][] getHuffmanTables( int Offset )
+  private int[][] getHuffmanTables( int Offset )
   {
     int[][] tables = new int[table.length << 1][];
     int num;
@@ -856,6 +856,20 @@ public class JPEG extends Window.Window implements JDEventListener
     }
 
     return( tables );
+  }
+
+  //Finds the closest scan marker for the active color components in image data.
+
+  private int[] getScan( int Offset )
+  {
+    markerInfo i;
+
+    for( int i1 = S.size() - 1; i1 >= 0; i1-- )
+    {
+      i = S.get( i1 ); if( i.Offset < Offset ){ return( scanC[i1] ); }
+    }
+
+    return( new int[]{0,0,0} );
   }
 
   //Do A fast optimized full scan of the image data defining each DCT start and end position.
@@ -889,11 +903,11 @@ public class JPEG extends Window.Window implements JDEventListener
     
     int[] HuffTable = Huffman[TableNum];
 
-    //Color components. Note this should vary based on the start of scan markers.
+    //Color components. The closest start of scan marker tells us which colors are used in image data.
 
-    int nComps = 2, comp = 0, smp = 0;
-    
-    int[] samples = subSampling;
+    int[] samples = getScan( Start );
+
+    int nComps = samples.length - 1, comp = 0, smp = 0;
 
     String[] Colors = new String[16]; Colors[0] = " (Y)"; Colors[1] = " (Cb)"; Colors[2] = " (Cr)";
 
@@ -918,41 +932,46 @@ public class JPEG extends Window.Window implements JDEventListener
         node.add( MCU ); mcu += 1;
       }
 
-      MCU.add( new JDNode("DCT #" + smp + Colors[comp] + ".h", new long[]{ -1, Start + ( pos >> 3 ), pos & 7, 7, TableNum } ) );
+      //Skip color components that are 0.
 
-      loop = 0; EOB = false; while( !EOB && loop < 64 )
+      if( samples[comp] > 0 )
       {
-        //Load in new bytes as needed into integer.
+        MCU.add( new JDNode("DCT #" + smp + Colors[comp] + ".h", new long[]{ -1, Start + ( pos >> 3 ), pos & 7, 7, TableNum } ) );
 
-        bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
+        loop = 0; EOB = false; while( !EOB && loop < 64 )
         {
-          bitPos -= 8; if( BPos < size )
+          //Load in new bytes as needed into integer.
+
+          bytes = bitPos / 8; for( int i = 0; i < bytes; i++ )
           {
-            code = file.toByte( BPos ) & 0xFF; v |= code << bitPos;
+            bitPos -= 8; if( BPos < size )
+            {
+              code = file.toByte( BPos ) & 0xFF; v |= code << bitPos;
                 
-            //The code 0xFF is used for markers. In some cases we need to use 0xFF as value.
-            //If the next byte after 0xFF is 0x00, then 0xFF is used as a value, and 0x00 is skipped.
+              //The code 0xFF is used for markers. In some cases we need to use 0xFF as value.
+              //If the next byte after 0xFF is 0x00, then 0xFF is used as a value, and 0x00 is skipped.
                             
-            if( code == 255 ) { mp = BPos << 3; mpx += 8; BPos += 1; }
-          }
+              if( code == 255 ) { mp = BPos << 3; mpx += 8; BPos += 1; }
+            }
                 
-          BPos += 1;
-        }
+            BPos += 1;
+          }
 
-        //There is only one DC per 8x8 block. The rest are AC.
+          //There is only one DC per 8x8 block. The rest are AC.
         
-        c = 0; while( !match && c < HuffTable.length )
-        {
-          code = HuffTable[c++]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ bit += 1; len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
-        }
+          c = 0; while( !match && c < HuffTable.length )
+          {
+            code = HuffTable[c++]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ bit += 1; len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
+          }
 
-        if( match ) { bitPos += bit; v <<= bit; if( ( len + zrl ) > 0 ) { v <<= len; bitPos += len; } else { EOB = loop > 0; } }
+          if( match ) { bitPos += bit; v <<= bit; if( ( len + zrl ) > 0 ) { v <<= len; bitPos += len; } else { EOB = loop > 0; } }
 
-        if( loop == 0 ) { HuffTable = Huffman[ TableNum + 1 ]; if( HuffTable == null ){ EOB = true; } }
+          if( loop == 0 ) { HuffTable = Huffman[ TableNum + 1 ]; if( HuffTable == null ){ EOB = true; } }
 
-        pos += bit + len; if( pos > mp ){ mp = Integer.MAX_VALUE; pos += mpx; mpx = 0; }
+          pos += bit + len; if( pos > mp ){ mp = Integer.MAX_VALUE; pos += mpx; mpx = 0; }
         
-        loop += zrl + 1; match = false;
+          loop += zrl + 1; match = false;
+        }
       }
     }
 
