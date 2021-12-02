@@ -16,6 +16,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
   //Is scanned is used to check if the huffman markers and scan markers are read before reding image data.
 
+  private boolean scanFrame = false;
   private boolean isScanned = false;
 
   //Some markers are semi read to setup memory for decoding the picture. Then it is set false.
@@ -39,7 +40,7 @@ public class JPEG extends Window.Window implements JDEventListener
   
   //Start of scan marker locations and set colors.
 
-  private int[][] Scan;
+  private int[][] scanC;
 
   //Initialized after parsing the JPEG markers.
 
@@ -202,7 +203,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     //We setup the memory for our huffman tables, and quantization markers as needed.
 
-    Scan = new int[S.size()][];
+    scanC = new int[S.size()][];
 
     //We setup the defaults that are used if there is no assigned huffman tables, or quantization matrixes.
 
@@ -398,7 +399,7 @@ public class JPEG extends Window.Window implements JDEventListener
   public void Uninitialize()
   {
     des.clear(); H.clear(); Q.clear(); S.clear(); ref = 0;
-    HuffmanCodes = null; QMat = null; Scan = null; huffExpansion.clear(); HuffTables = 0;
+    HuffmanCodes = null; QMat = null; scanC = null; huffExpansion.clear(); HuffTables = 0;
   }
 
   public void open( JDEvent e )
@@ -442,7 +443,7 @@ public class JPEG extends Window.Window implements JDEventListener
     {
       JDNode n = ((JDNode)tree.getLastSelectedPathComponent());
 
-      if( !isScanned && imageType == 0 ) { isScanned = true; openMarkers( new int[]{ 1, 0 } ); }
+      if( !isScanned ) { isScanned = true; openMarkers( new int[]{ 1, 2 } ); }
 
       n.setArgs( new long[]{ -2, n.getArg(1), n.getArg(2) } );
 
@@ -487,7 +488,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
           node.setUserObject("Huffman Table #" + num + " (Class = " + ( classType > 0 ? "AC" : "DC" ) + ")"); node.setArgs( new long[]{ ref++ } );
 
-          int Sum = 0, TableType = ( num << 1 ) + classType, tableNum = 0;
+          int Sum = 0, tableNum = 0;
 
           while( size > 0 )
           {
@@ -539,7 +540,7 @@ public class JPEG extends Window.Window implements JDEventListener
             {
               nTable = new Descriptor(file); des.add(nTable); nTable.UINT8("Class/Table Number"); nTable.setEvent( this::HTableInfo );
 
-              classType = (((byte)nTable.value) & 0xF0) >> 4; num = (((byte)nTable.value) & 0x0F); TableType = ( num << 1 ) + classType;
+              classType = (((byte)nTable.value) & 0xF0) >> 4; num = (((byte)nTable.value) & 0x0F);
 
               node = new JDNode("Huffman Table #" + num + " (Class = " + ( classType > 0 ? "AC" : "DC" ) + ")", ref++);
 
@@ -551,18 +552,20 @@ public class JPEG extends Window.Window implements JDEventListener
         }
         else if( type == 2 )
         {
+          if( !scanFrame ){ openMarkers( new int[]{ 0 } ); scanFrame = true; }
+
           int base = (int)e.getArg(1); file.seek( S.get( base ).Offset );
 
           node.setUserObject("Components.h"); node.setArgs( new long[]{ ref++ } );
 
           Descriptor Scan = new Descriptor(file); des.add(Scan);
 
-          Scan.UINT8("Number of Components"); int Ns = ((byte)Scan.value) & 0xFF;
+          Scan.UINT8("Number of Components"); int Ns = ((byte)Scan.value) & 0xFF; scanC[base] = new int[subSampling.length];
 
           for( int c = 1; c <= Ns; c++ )
           {
             Scan.Array("Component #" + c + "", 2);
-            Scan.UINT8("Scan component");
+            Scan.UINT8("Scan component"); scanC[base][(byte)Scan.value - 1] = subSampling[(byte)Scan.value - 1];
             Scan.UINT8("Entropy Table");
           }
     
@@ -717,7 +720,8 @@ public class JPEG extends Window.Window implements JDEventListener
 
           int loop = 0;
 
-          int[] HuffTable = HuffmanCodes[ e.getArg(4) == 0 ? 0 : 2 ];
+          int[][] HuffTables = getHuffmanTables((int)t);
+          int[] HuffTable = HuffTables[(int)e.getArg(4)];
 
           //Each code has a length for the number of bits is the binary number value.
 
@@ -744,7 +748,7 @@ public class JPEG extends Window.Window implements JDEventListener
               code = HuffTable[c++]; bit = code & 0xF; if( ( v & bits[bit] ) == ( code & 0xFFFF0000 ) ){ len = ( code >>> 4 ) & 0x0F; zrl = ( code >>> 8 ) & 0x0F; match = true; }
             }
 
-            if( loop == 0 ) { HuffTable = HuffmanCodes[ e.getArg(4) == 0 ? 1 : 3 ]; if( HuffTable == null ){ EOB = true;}  }
+            if( loop == 0 ) { HuffTable = HuffTables[(int)e.getArg(4) + 1]; if( HuffTable == null ){ EOB = true; }  }
 
             if( match )
             {
@@ -820,6 +824,40 @@ public class JPEG extends Window.Window implements JDEventListener
     }
   }
 
+  //Finds the huffman tables that are active at an offset for each color component.
+
+  public int[][] getHuffmanTables( int Offset )
+  {
+    int[][] tables = new int[table.length << 1][];
+    int num;
+    boolean DC, AC;
+    markerInfo i;
+
+    //For each color component.
+
+    for( int i1 = 0; i1 < table.length; i1++ )
+    {
+      num = table[i1]; DC = false; AC = false;
+
+      //Find closest previous DC/AC class for table number needed.
+
+      for( int i2 = H.size() - 1; i2 >= 0; i2-- )
+      {
+        i = H.get(i2);
+
+        if( i.Offset < Offset && ( i.type & 0x0F ) == num )
+        {
+          if( !DC && i.type < 16 ) { tables[i1 << 1] = HuffmanCodes[i2]; DC = true; }
+          else if( !AC ) { tables[( i1 << 1 ) + 1] = HuffmanCodes[i2]; AC = true; }
+        }
+
+        if( AC & DC ){ break; }
+      }
+    }
+
+    return( tables );
+  }
+
   //Do A fast optimized full scan of the image data defining each DCT start and end position.
   //When user clicks on a DCT, then the algorithm is run with detailed output for just the one DCT at any position in image.
 
@@ -827,7 +865,7 @@ public class JPEG extends Window.Window implements JDEventListener
   {
     JDNode node = (JDNode)tree.getLastSelectedPathComponent(); node.removeAllChildren();
 
-    if( imageType != 0 ) { node.add( new JDNode("Unsupported.h", new long[]{-1,0,0,7}) ); return; }
+    if( imageType > 8 ) { node.add( new JDNode("Unsupported.h", new long[]{-1,0,0,7}) ); return; }
 
     file.Events = false; file.seek( Start ); file.read( End - Start );
 
@@ -845,13 +883,19 @@ public class JPEG extends Window.Window implements JDEventListener
 
     int mp = Integer.MAX_VALUE, mpx = 0;
 
-    int TableNum = 0; int[] HuffTable = HuffmanCodes[TableNum];
+    //WE have to search for which huffman tables to use that are closest to the image data.
+
+    int[][] Huffman = getHuffmanTables(Start); int TableNum = 0;
+    
+    int[] HuffTable = Huffman[TableNum];
 
     //Color components. Note this should vary based on the start of scan markers.
 
     int nComps = 2, comp = 0, smp = 0;
+    
     int[] samples = subSampling;
-    String[] Colors = new String[]{ " (Y)", " (Cb)", " (Cr)" };
+
+    String[] Colors = new String[16]; Colors[0] = " (Y)"; Colors[1] = " (Cb)"; Colors[2] = " (Cr)";
 
     //Define the first MCU.
 
@@ -861,11 +905,11 @@ public class JPEG extends Window.Window implements JDEventListener
 
     for( int mcu = 0; pos < bitSize; smp++ )
     {
-      if( smp >= samples[comp] ){ smp = 0; comp = comp == nComps ? 0 : comp + 1; }
+      if( smp >= samples[comp] ){ smp = 0; comp = comp == nComps ? 0 : comp + 1; TableNum = TableNum == ( nComps << 1 ) ? 0 : TableNum + 2; }
 
       //Add DCT matrix node with number, and position.
 
-      TableNum = comp == 0 ? 0 : 2; HuffTable = HuffmanCodes[TableNum];
+      HuffTable = Huffman[TableNum];
 
       if( smp == 0 && comp == 0 )
       {
@@ -874,7 +918,7 @@ public class JPEG extends Window.Window implements JDEventListener
         node.add( MCU ); mcu += 1;
       }
 
-      MCU.add( new JDNode("DCT #" + smp + Colors[comp] + ".h", new long[]{ -1, Start + ( pos >> 3 ), pos & 7, 7, TableNum == 0 ? 0 : 1 } ) );
+      MCU.add( new JDNode("DCT #" + smp + Colors[comp] + ".h", new long[]{ -1, Start + ( pos >> 3 ), pos & 7, 7, TableNum } ) );
 
       loop = 0; EOB = false; while( !EOB && loop < 64 )
       {
@@ -904,7 +948,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
         if( match ) { bitPos += bit; v <<= bit; if( ( len + zrl ) > 0 ) { v <<= len; bitPos += len; } else { EOB = loop > 0; } }
 
-        if( loop == 0 ) { HuffTable = HuffmanCodes[ TableNum + 1 ]; if( HuffTable == null ){ EOB = true; } }
+        if( loop == 0 ) { HuffTable = Huffman[ TableNum + 1 ]; if( HuffTable == null ){ EOB = true; } }
 
         pos += bit + len; if( pos > mp ){ mp = Integer.MAX_VALUE; pos += mpx; mpx = 0; }
         
