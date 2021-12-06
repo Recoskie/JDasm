@@ -879,7 +879,7 @@ public class JPEG extends Window.Window implements JDEventListener
   }
 
   //The first scan of a color component should have one DC value. Any new scans should only scan the AC values.
-  //This method checks the scan markers to see if the DC value still needs to be read.
+  //This method checks the previous scan markers to see if the DC value still needs to be read.
 
   private boolean[] checkDC( int Scan )
   {
@@ -980,11 +980,15 @@ public class JPEG extends Window.Window implements JDEventListener
       {
         MCU.add( new JDNode("DCT #" + smp + Colors[comp] + ".h", new long[]{ -1, Start + ( pos >> 3 ), pos & 7, 7, DC[comp] ? -TableNum : TableNum } ) );
 
-        sc = 0; loop = start + ( DC[comp] ? 1 : 0 );
+        sc = 0;
+
+        loop = start; if( !DC[comp] ) { end += 1; }
         
         EOB = false;
+
+        System.out.println("start = " + loop + ", end = " + end + "" );
         
-        while( !EOB && loop < end + ( DC[comp] ? 0 : 1 ) )
+        while( !EOB && loop < end )
         {
           //Load in new bytes as needed into integer.
 
@@ -1020,6 +1024,8 @@ public class JPEG extends Window.Window implements JDEventListener
           
           match = false;
         }
+
+        if( !DC[comp] ) { end -= 1; }
       }
     }
 
