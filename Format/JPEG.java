@@ -959,7 +959,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     //Each code has a length for the number of bits is the binary number value.
 
-    for( int mcu = 0; pos < bitSize; smp++ )
+    for( int mcu = 0; pos < bitSize || comp < nComps; smp++ )
     {
       if( smp >= samples[comp] ){ smp = 0; comp = comp == nComps ? 0 : comp + 1; TableNum = TableNum == ( nComps << 1 ) ? 0 : TableNum + 2; }
 
