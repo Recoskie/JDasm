@@ -204,7 +204,7 @@ public class JPEG extends Window.Window implements JDEventListener
 
     //The memory for our huffman tables, and quantization markers as needed.
 
-    scanC = new int[S.size()][]; Spectral = new int[S.size() << 1];
+    scanC = new int[S.size()][]; Spectral = new int[S.size() << 2];
 
     //The defaults that are used if there is no assigned huffman tables, or quantization matrixes.
 
@@ -574,9 +574,10 @@ public class JPEG extends Window.Window implements JDEventListener
     
           model.insertNodeInto(new JDNode("Scan info.h", ref++), root, root.getChildCount());
     
-          info.UINT8("Start of Spectral"); Spectral[base << 1] = (byte)info.value;
-          info.UINT8("End of Spectral"); Spectral[(base << 1) + 1] = (byte)info.value;
-          info.UINT8("ah/al");
+          info.UINT8("Start of Spectral"); Spectral[base << 2] = (byte)info.value;
+          info.UINT8("End of Spectral"); Spectral[(base << 2) + 1] = (byte)info.value;
+          info.UINT8("ah/al"); Spectral[(base << 2) + 2] = (byte)info.value >>> 4;
+          Spectral[(base << 2) + 3] = (byte)info.value & 0x0F;
         }
         else if( type == 3 )
         {
@@ -725,7 +726,7 @@ public class JPEG extends Window.Window implements JDEventListener
           
           int sc = (int)e.getArg(4); int[] HuffTable = HuffTables[ loop == 0 ? sc + 1 : sc ];
 
-          sc = getScan((int)t); loop = Spectral[sc << 1]; int end = Spectral[(sc << 1) + 1];
+          sc = getScan((int)t); loop = Spectral[sc << 2]; int end = Spectral[(sc << 2) + 1];
 
           //Each code has a length for the number of bits is the binary number value.
 
@@ -914,7 +915,7 @@ public class JPEG extends Window.Window implements JDEventListener
     //This allows us to add more color details to previously scanned color components.
     //Spectral start and end does not include the DC color value that must be read on first scan of a color component.
 
-    int start = Spectral[sc << 1], end = Spectral[(sc << 1) + 1];
+    int start = Spectral[sc << 2], end = Spectral[(sc << 2) + 1];
 
     //We define the color component names if used. We can define fewer or more colors in the start of frame marker.
     //It is unknown what the color names would be if they exceed past the YCbCr color type.
