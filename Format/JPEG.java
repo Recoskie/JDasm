@@ -726,7 +726,7 @@ public class JPEG extends Window.Window implements JDEventListener
           
           int sc = (int)e.getArg(4); int[] HuffTable = HuffTables[ loop == 0 ? sc + 1 : sc ];
 
-          sc = getScan((int)t); loop = Spectral[sc << 2]; int end = Spectral[(sc << 2) + 1];
+          sc = getScan((int)t); loop = Spectral[sc << 2]; int end = Spectral[(sc << 2) + 1], ah = Spectral[(sc << 2) + 2], al = Spectral[(sc << 2) + 3];
 
           //Each code has a length for the number of bits is the binary number value.
 
@@ -915,7 +915,7 @@ public class JPEG extends Window.Window implements JDEventListener
     //This allows us to add more color details to previously scanned color components.
     //Spectral start and end does not include the DC color value that must be read on first scan of a color component.
 
-    int start = Spectral[sc << 2], end = Spectral[(sc << 2) + 1];
+    int start = Spectral[sc << 2], end = Spectral[(sc << 2) + 1], ah = Spectral[(sc << 2) + 2], al = Spectral[(sc << 2) + 3];
 
     //We define the color component names if used. We can define fewer or more colors in the start of frame marker.
     //It is unknown what the color names would be if they exceed past the YCbCr color type.
