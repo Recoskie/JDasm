@@ -81,6 +81,12 @@ Supports analyzing and editing XMA Audio files.
 
 Supports analyzing and editing AVI video files.
 
+## Contributing a file format.
+
+If you wish to contribute a Format. Then put it under the format folder.
+
+The following link to the <a href="https://gist.github.com/Recoskie/1c75264cb072aaf41e871ffd2a1f7370">template</a> will allow you to add new formats to JDisassembly quickly.
+
 # x86 Boot sectors.
 
 A boot sector is the first 512 bytes of a disk that contains machine instructions for a blank computer to start running at address 0.
