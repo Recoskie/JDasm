@@ -94,6 +94,8 @@ Supports analyzing and editing AVI video files.
 
 If you wish to contribute a Format. Then put it under the format folder.
 
+The following link to the <a href="https://gist.github.com/Recoskie/1c75264cb072aaf41e871ffd2a1f7370">template</a> will allow you to add new formats to JDisassembly quickly.
+
 ------------------------------------------------------------
 x86 Boot sectors.
 ------------------------------------------------------------

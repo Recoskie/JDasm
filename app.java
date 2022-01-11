@@ -34,7 +34,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   private static boolean SignatureV[] = new boolean[]
   {
-    true, true, false, false, false
+    true, true, false, false, false, false
   };
 
   //Buffer should be set to the length of the largest signature sequence.
