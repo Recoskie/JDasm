@@ -60,6 +60,8 @@ This application currently supports Microsoft binaries formats: .exe, .dll, .sys
 
 Supports Unix/Linux binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod, .so
 
+Supports MacOS/iPhone binaries, and also MacOS Universal binaries.
+
 Supports .efi boot binaries and boot sector disassembly.
 
 ## Picture formats.
@@ -159,8 +161,6 @@ I plan on creating an ARM core disassembler as well for mobile devices.
 ------------------------------------------------------------
 Planed tools.
 ------------------------------------------------------------
-
-- [ ] Mach-o, for MacOSX reader.
 
 - [ ] ARM core, for mobile systems.
 
