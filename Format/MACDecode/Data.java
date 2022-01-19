@@ -2,9 +2,9 @@ package Format.MACDecode;
 
 public class Data extends Window.Window
 {
-  //Mach-O universal binaries.
+  //In the case of a universal binary we must unload a binary before loading in another.
 
-  public static boolean Universal;
+  public static swingIO.tree.JDNode App;
 
   //Error when reading headers, or section.
 
