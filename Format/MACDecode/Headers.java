@@ -152,6 +152,7 @@ public class Headers extends Data
 
   private static final String CPU_SubARM = "The First two Hex digit is the CPU sub type.<br /><br />" +
   "The last two hex digits are used for capability settings on arm64e platforms (Experimental).<br /><br />" +
+  "The last two hex digits can be ignored on all ARM cores without encountering problems.<br /><br />" +
   "<table border='1'>" +
   "<tr><td>Hex Value.</td><td>CPU version.</td></tr>" +
   "<tr><td>00 00 00 00</td><td>All ARM cores.</td></tr>" +
