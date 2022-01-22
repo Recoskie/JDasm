@@ -11,17 +11,9 @@ public class MAC extends Data implements JDEventListener
 
   private JDNode root;
 
-  //A temporary descriptor holder that is used when reading data and adding descriptor to the list.
+  //Mac header reader.
 
-  private Descriptor DTemp;
-
-  //The descriptors explain the binary data sections as it is read.
-
-  private static java.util.ArrayList<Descriptor> des = new java.util.ArrayList<Descriptor>();
-
-  //This integer is used to keep track of the descriptors added to the list adn set to a node on the open event.
-
-  private static int ref = 0;
+  private static Headers header = new Headers();
   
   public MAC() throws java.io.IOException
   {
@@ -29,7 +21,7 @@ public class MAC extends Data implements JDEventListener
 
     ((DefaultTreeModel)tree.getModel()).setRoot(null); tree.setRootVisible(true); tree.setShowsRootHandles(true); root = new JDNode( fc.getFileName() + ( fc.getFileName().indexOf(".") > 0 ? "" : ".exe" ), -1 );
 
-    header( root );
+    header.readMAC( root );
 
     //Set binary tree view, and enable IO system events.
       
@@ -42,73 +34,6 @@ public class MAC extends Data implements JDEventListener
     //Make it as if we clicked and opened the node.
 
     open( new JDEvent( this, "", new long[]{ 0, 0 } ) );
-  }
-
-  //A universal mac binary can have more than one application header.
-
-  private void header( JDNode n ) throws java.io.IOException
-  {
-    if( App == n ) { return; } //We do not need to reload an application header.
-
-    //Begin reading the MacOS header.
-
-    DTemp = new Descriptor( file ); n.removeAllChildren();
-    
-    DTemp.LUINT32("Signature"); int sig = (int)DTemp.value;
-    
-    is64bit = sig == -17958193;
-    
-    DTemp.setEvent( sig == -1095041334 ? this::UMacHInfo : this::MacHInfo );
-    
-    if( sig != -1095041334 )
-    {
-      //Uninitialize the loaded app before loading a new one.
-
-      if( App != null )
-      {
-        java.util.ArrayList<Descriptor> bd = new java.util.ArrayList<Descriptor>();
-
-        bd.add( des.get(0) ); des = bd; ref = 1;
-
-        App.removeAllChildren(); App.add( new JDNode( "" ) );
-
-        ((DefaultTreeModel)tree.getModel()).reload(root);
-      }
-      
-      App = n;
-
-      DTemp.UINT32("CPU Type"); coreType = (int)DTemp.value;
-      DTemp.UINT32("CPU Sub Type");
-      DTemp.LUINT32("File Type");
-      DTemp.LUINT32("Commands");
-      DTemp.LUINT32("Commands Size");
-      DTemp.LUINT32("Flags");
-    
-      if( is64bit ){ DTemp.UINT32("Reserved"); }
-    }
-    else
-    {
-      DTemp.UINT32("Binaries"); int b = (int)DTemp.value;
-    
-      JDNode Apps;
-          
-      for( int i = 0; i < b; i++ )
-      {
-        DTemp.Array("Mac Binary #" + i + "", 20 );
-        DTemp.UINT32("CPU Type");
-        DTemp.UINT32("CPU Sub Type");
-        DTemp.UINT32("File Offset");
-    
-        Apps = new JDNode("App #" + i + "", new long[] { 1, (int)DTemp.value } ); Apps.add( new JDNode("") );
-    
-        n.add( Apps );
-    
-        DTemp.UINT32("Size");
-        DTemp.UINT32("Align");
-      }
-    }
-
-    n.insert( new JDNode("Mac Header.h", new long[]{ 0, ref++ } ), 0 ); des.add( DTemp );
   }
 
   public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; }
@@ -127,91 +52,16 @@ public class MAC extends Data implements JDEventListener
     {
       JDNode root = (JDNode)tree.getLastSelectedPathComponent();
 
-      int Offset = (int)e.getArg(1); file.Events = false;
+      //We do not want to reload an existing binary if already loaded.
 
-      try { file.seek( Offset ); header( root ); } catch(Exception er) { er.printStackTrace(); }
+      if( App != root )
+      {
+        int Offset = (int)e.getArg(1); file.Events = false;
 
-      file.Events = true; tree.setSelectionPath( new TreePath( App.getPath() ) ); tree.expandPath( new TreePath( App.getPath() ) );
-    }
-  }
+        try { file.seek( Offset ); header.readMAC( root ); } catch(Exception er) { er.printStackTrace(); }
 
-  private static final String Singatures = "<html>The MacOS binary format uses two signature types.<br /><br />" +
-  "<table border='1'>" +
-  "<tr><td>Hex Value</td><td>Binary Type</td></tr>" +
-  "<tr><td>CE FA ED FE</td><td>32 bit binary application.</td></tr>" +
-  "<tr><td>CF FA ED FE</td><td>64 bit binary application.</td></tr>" +
-  "</table><br />" +
-  "Signature type CA FE BA BE is used for universal binaries.<br /><br />" +
-  "A universal binary has more than one binary application in the file for different core types which begin with Mac Headers as well.<br /><br />" +
-  "It is not useful most of the time since majority of all systems run x86 instructions, or ARM instructions natively.</html>";
-
-  private static final String CPU_type1 = "<html>This is the processor type that the binary is meant to run on.<br /><br />";
-  private static final String CPU_type2 = "<table border='1'>" +
-  "<tr><td>Core</td><td>Type value Hex</td></tr>" +
-  "<tr><td>VAX</td><td>01</td></tr>" +
-  "<tr><td>MC680x0</td><td>06</td></tr>" +
-  "<tr><td>X86</td><td>07</td></tr>" +
-  "<tr><td>MC98000</td><td>0A</td></tr>" +
-  "<tr><td>HPPA</td><td>0B</td></tr>" +
-  "<tr><td>ARM</td><td>0C</td></tr>" +
-  "<tr><td>MC88000</td><td>0D</td></tr>" +
-  "<tr><td>SPARC</td><td>0E</td></tr>" +
-  "<tr><td>I860</td><td>0F</td></tr>" +
-  "<tr><td>POWERPC</td><td>12</td></tr>" +
-  "</table><br />" +
-  "The most used types are 07, and 0C which are x86, and ARM.<br /><br />" +
-  "MacOS is switching from Intel x86 cores to ARM.<br /><br />" +
-  "Note that MacOS and iPhone also use the same Mach-O format. iPhone used ARM way before MacOS did.</html>";
-
-  private static final String[] MacHeaderInfo = new String[]
-  {
-    Singatures,
-    CPU_type1 + "The first two hex digits is the CPU type.<br /><br />" +
-    "The last two hex digits are 01 for 64 bit, and 00 for 32 bit version of the core.<br /><br />" + CPU_type2,
-    "<html>The CPU sub type is used to specify features the core supports.</html>",
-    "<html>File Type.</html>",
-    "<html>Number of load commands.</html>",
-    "<html>The size of all the load commands.</html>",
-    "<html>Flag settings.</html>",
-    "<html>This is reserved for use with 64 bit programs in the future.</html>"
-  };
-
-  public void MacHInfo( int i )
-  {
-    if( i < 0 )
-    {
-      info("<html>The MacOS header identifies the type of core the machine code binary is intended to run on.<br /><br />" +
-      "It also specifies the number of loading commands to map and load the binary into memory.</html>");
-    }
-    else
-    {
-      info( MacHeaderInfo[ i ] );
-    }
-  }
-
-  private static final String[] UMacHeaderInfo = new String[]
-  {
-    Singatures,
-    "<html>Number of binaries in the universal binary.</html>",
-    "<html>Binary application information.</html>",
-    CPU_type1 + "The last two hex digits is the CPU type.<br /><br />" +
-    "The first two hex digits are 01 for 64 bit, and 00 for 32 bit version of the core.<br /><br />" + CPU_type2,
-    "<html>The CPU sub type is used to specify features the core supports.</html>",
-    "<html>File position to application.</html>",
-    "<html>The size of the application in the file.</html>",
-    "<html>Section alignment in power of 2.</html>"
-  };
-
-  public void UMacHInfo( int i )
-  {
-    if( i < 0 )
-    {
-      info("<html>The MacOS header identifies the type of core the machine code binary is intended to run on.<br /><br />" +
-      "It also specifies the number of loading commands to map and load the binary into memory.</html>");
-    }
-    else
-    {
-      info( i > 1 ? UMacHeaderInfo[ ( ( i - 2 ) % 6 ) + 2 ] : UMacHeaderInfo[ i ] );
+        file.Events = true; tree.setSelectionPath( new TreePath( App.getPath() ) ); tree.expandPath( new TreePath( App.getPath() ) );
+      }
     }
   }
 }
