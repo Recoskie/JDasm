@@ -76,7 +76,7 @@ public class Headers extends Data
       //Read the application header.
 
       DTemp.LUINT32("CPU Type"); coreType = ((int)DTemp.value) & 0xFF;
-      DTemp.UINT32("CPU Sub Type");
+      DTemp.LUINT32("CPU Sub Type");
       DTemp.LUINT32("File Type");
       DTemp.LUINT32("Commands");
       DTemp.LUINT32("Commands Size");
@@ -116,16 +116,68 @@ public class Headers extends Data
   "MacOS is switching from Intel x86 cores to ARM.<br /><br />" +
   "Note that MacOS and iPhone also use the same Mach-O format. iPhone used ARM way before MacOS did.</html>";
 
+  private static final String CPU_Subx86 = "The First Hex digit is the CPU sub type.<br /><br />" +
+  "<table border='1'>" +
+  "<tr><td>Hex Value.</td><td>CPU version.</td></tr>" +
+  "<tr><td>03 00 00 00</td><td>All x86 cores.</td></tr>" +
+  "<tr><td>04 00 00 00</td><td>Optimized for 486 or newer.</td></tr>" +
+  "<tr><td>84 00 00 00</td><td>Optimized for 486SX or newer.</td></tr>" +
+  "<tr><td>05 00 00 00</td><td>Optimized for 586, pentium or newer.</td></tr>" +
+  "<tr><td>16 00 00 00</td><td>Optimized for Pentium professional or newer.</td></tr>" +
+  "<tr><td>36 00 00 00</td><td>Optimized for Pentium M3 or newer.</td></tr>" +
+  "<tr><td>56 00 00 00</td><td>Optimized for Pentium M5 or newer.</td></tr>" +
+  "<tr><td>67 00 00 00</td><td>Optimized for Celeron or newer.</td></tr>" +
+  "<tr><td>77 00 00 00</td><td>Optimized for Celeron Mobile.</td></tr>" +
+  "<tr><td>08 00 00 00</td><td>Optimized for Pentium 3 or newer.</td></tr>" +
+  "<tr><td>18 00 00 00</td><td>Optimized for Pentium 3-M or newer.</td></tr>" +
+  "<tr><td>28 00 00 00</td><td>Optimized for Pentium 3-XEON or newer.</td></tr>" +
+  "<tr><td>09 00 00 00</td><td>Optimized for Pentium M or newer.</td></tr>" +
+  "<tr><td>0A 00 00 00</td><td>Optimized for Pentium-4 or newer.</td></tr>" +
+  "<tr><td>1A 00 00 00</td><td>Optimized for Pentium-4-M or newer.</td></tr>" +
+  "<tr><td>0B 00 00 00</td><td>Optimized for Itanium or newer.</td></tr>" +
+  "<tr><td>1B 00 00 00</td><td>Optimized for Itanium-2 or newer.</td></tr>" +
+  "<tr><td>0C 00 00 00</td><td>Optimized for XEON or newer.</td></tr>" +
+  "<tr><td>1C 00 00 00</td><td>Optimized for XEON-MP or newer.</td></tr>" +
+  "</table><br /><br />" +
+  "Over the years Intel/AMD have added new instructions to x86 cores to perform different arithmetic operations to speed up performance.<br /><br />" +
+  "The instructions used binary codes that did nothing on prior cores. This means a x86 program optimized for 486 can run on a newer core than 486.<br /><br />" +
+  "Most software is compiled using no fancy instructions meaning the code is compatible to all x86 cores.<br /><br />" +
+  "It is still important to test if a particular instruction does nothing, or does said arithmetic operation before the CPU is set to the programs instruction codes.";
+
+  private static final String CPU_SubARM = "";
+
   private static final String[] MacHeaderInfo = new String[]
   {
     Singatures,
     CPU_type1 + "The first two hex digits is the CPU type.<br /><br />" +
     "The last two hex digits are 01 for 64 bit, and 00 for 32 bit version of the core.<br /><br />" + CPU_type2,
     "<html>The CPU sub type is used to specify features the core supports.</html>",
-    "<html>File Type.</html>",
+    "<html>How the file is intended to be used.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>File Type Value</td><td>Description</td></tr>" +
+    "<tr><td>1</td><td>Relocatable object file.</td></tr>" +
+    "<tr><td>2</td><td>Demand paged executable file.</td></tr>" +
+    "<tr><td>3</td><td>Fixed VM shared library file.</td></tr>" +
+    "<tr><td>4</td><td>Core file.</td></tr>" +
+    "<tr><td>5</td><td>Preloaded executable file.</td></tr>" +
+    "<tr><td>6</td><td>Dynamicly bound shared library file.</td></tr>" +
+    "<tr><td>7</td><td>Dynamic link editor.</td></tr>" +
+    "<tr><td>8</td><td>Dynamicly bound bundle file.</td></tr>" +
+    "</table></html>",
     "<html>Number of load commands.</html>",
     "<html>The size of all the load commands.</html>",
-    "<html>Flag settings.</html>",
+    "<html>The flags settings should be viewed in binary.<br /><br />" +
+    "The value 00000000000000000000000000010000 means the file has it's dynamic undefined references prebound.<br /><br />" +
+    "More than one binary digit can be set for more than one setting, or information about the file.<br /><br />" +
+    "The table bellow show the break down of what bits have to be set for each setting.<br /><br />" +
+    "<table border=\"1\">" +
+    "<tr><td>00000000000000000000000000000001</td><td>The object file has no undefined references, can be executed.</td></tr>" +
+    "<tr><td>00000000000000000000000000000010</td><td>The object file is the output of an incremental link against a base file and can't be link edited again.</td></tr>" +
+    "<tr><td>00000000000000000000000000000100</td><td>The object file is input for the dynamic linker and can't be staticly link edited again.</td></tr>" +
+    "<tr><td>00000000000000000000000000001000</td><td>The object file's undefined references are bound by the dynamic linker when loaded.</td></tr>" +
+    "<tr><td>00000000000000000000000000010000</td><td>The file has it's dynamic undefined references prebound.</td></tr>" +
+    "<tr><td>xxxxxxxxxxxxxxxxxxxxxxxxxxx00000</td><td>The digits marked with \"x\" have no use yet, and are reserved for future use.</td></tr>" +
+    "</table></html>",
     "<html>This is reserved for use with 64 bit programs in the future.</html>"
   };
 
@@ -134,12 +186,21 @@ public class Headers extends Data
     if( i < 0 )
     {
       info("<html>The MacOS header identifies the type of core the machine code binary is intended to run on.<br /><br />" +
-      "It also specifies the number of loading commands to map and load the binary into memory.</html>");
+      "It also specifies the number of loading commands to map and load the binary into memory.</html>"); return;
     }
-    else
+    else if ( i == 2 )
     {
-      info( MacHeaderInfo[ i ] );
+      if( coreType == 7 )
+      {
+        info( CPU_Subx86 ); return;
+      }
+      else if( coreType == 12 )
+      {
+        info( CPU_SubARM ); return;
+      }
     }
+
+    info( MacHeaderInfo[ i ] );
   }
 
   private static final String[] UMacHeaderInfo = new String[]
