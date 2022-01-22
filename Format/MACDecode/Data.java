@@ -12,11 +12,15 @@ public class Data extends Window.Window
 
   //A temporary descriptor holder that is used when reading data and adding descriptor to the list.
 
-  public static swingIO.Descriptor DTemp;
+  public static swingIO.Descriptor DTemp = null;
 
   //In the case of a universal binary we must unload a binary before loading in another.
 
-  public static swingIO.tree.JDNode App;
+  public static swingIO.tree.JDNode App = null;
+
+  //The Number of load commands.
+
+  public static int loadCMD = 0;
 
   //Error when reading headers, or section.
 
