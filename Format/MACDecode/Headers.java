@@ -183,8 +183,8 @@ public class Headers extends Data
     Singatures,
     CPU_type1 + "The first two hex digits is the CPU type.<br /><br />" +
     "The last two hex digits are 01 for 64 bit, and 02 for 32 bit version of the core.<br /><br />" + CPU_type2,
-    "<html>The CPU sub type is used to specify features the core should have support for as the code my be optimized for a particular core or newer.<br /><br />" +
-    "Meaning some earlier cores may encounter operation codes that do nothing that are usable in ner version of the core.</html>",
+    "<html>The CPU sub type is used to specify features the core should have support for as the code is optimized for a particular core or newer.<br /><br />" +
+    "Meaning some earlier cores may encounter operation codes that do nothing that are usable in newer version of the core.</html>",
     "<html>How the file is intended to be used.<br /><br />" +
     "<table border='1'>" +
     "<tr><td>File Type Value</td><td>Description</td></tr>" +
@@ -271,8 +271,8 @@ public class Headers extends Data
     "<html>Binary application information.</html>",
     CPU_type1 + "The last two hex digits is the CPU type.<br /><br />" +
     "The first two hex digits are 01 for 64 bit, and 02 for 32 bit version of the core.<br /><br />" + CPU_type2,
-    "<html>The CPU sub type is used to specify features the core should have support for as the code my be optimized for a particular core or newer.<br /><br />" +
-    "Meaning some earlier cores may encounter operation codes that do nothing that are usable in ner version of the core.</html>",
+    "<html>The CPU sub type is used to specify features the core should have support for as the code is optimized for a particular core or newer.<br /><br />" +
+    "Meaning some earlier cores may encounter operation codes that do nothing that are usable in newer version of the core.</html>",
     "<html>File position to application.</html>",
     "<html>The size of the application in the file.</html>",
     "<html>Section alignment in power of 2.</html>"
