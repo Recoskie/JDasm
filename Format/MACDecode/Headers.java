@@ -116,7 +116,7 @@ public class Headers extends Data
   "MacOS is switching from Intel x86 cores to ARM.<br /><br />" +
   "Note that MacOS and iPhone also use the same Mach-O format. iPhone used ARM way before MacOS did.</html>";
 
-  private static final String CPU_Subx86 = "The First Hex digit is the CPU sub type.<br /><br />" +
+  private static final String CPU_Subx86 = "The First two Hex digit is the CPU sub type.<br /><br />" +
   "<table border='1'>" +
   "<tr><td>Hex Value.</td><td>CPU version.</td></tr>" +
   "<tr><td>03 00 00 00</td><td>All x86 cores.</td></tr>" +
@@ -144,14 +144,39 @@ public class Headers extends Data
   "Most software is compiled using no fancy instructions meaning the code is compatible to all x86 cores.<br /><br />" +
   "It is still important to test if a particular instruction does nothing, or does said arithmetic operation before the CPU is set to the programs instruction codes.";
 
-  private static final String CPU_SubARM = "";
+  private static final String CPU_SubARM = "The First two Hex digit is the CPU sub type.<br /><br />" +
+  "<table border='1'>" +
+  "<tr><td>Hex Value.</td><td>CPU version.</td></tr>" +
+  "<tr><td>00 00 00 00</td><td>All ARM cores.</td></tr>" +
+  "<tr><td>01 00 00 00</td><td>Optimized for ARM-A500 ARCH or newer.</td></tr>" +
+  "<tr><td>02 00 00 00</td><td>Optimized for ARM-A500 or newer.</td></tr>" +
+  "<tr><td>03 00 00 00</td><td>Optimized for ARM-A440 or newer.</td></tr>" +
+  "<tr><td>04 00 00 00</td><td>Optimized for ARM-M4 or newer.</td></tr>" +
+  "<tr><td>05 00 00 00</td><td>Optimized for ARM-V4T or newer.</td></tr>" +
+  "<tr><td>06 00 00 00</td><td>Optimized for ARM-V6 or newer.</td></tr>" +
+  "<tr><td>07 00 00 00</td><td>Optimized for ARM-V5TEJ or newer.</td></tr>" +
+  "<tr><td>08 00 00 00</td><td>Optimized for ARM-XSCALE or newer.</td></tr>" +
+  "<tr><td>09 00 00 00</td><td>Optimized for ARM-V7 or newer.</td></tr>" +
+  "<tr><td>0A 00 00 00</td><td>Optimized for ARM-V7F or newer.</td></tr>" +
+  "<tr><td>0B 00 00 00</td><td>Optimized for ARM-V7S or newer.</td></tr>" +
+  "<tr><td>0C 00 00 00</td><td>Optimized for ARM-V7K or newer.</td></tr>" +
+  "<tr><td>0D 00 00 00</td><td>Optimized for ARM-V8 or newer.</td></tr>" +
+  "<tr><td>0E 00 00 00</td><td>Optimized for ARM-V6M or newer.</td></tr>" +
+  "<tr><td>0F 00 00 00</td><td>Optimized for ARM-V7M or newer.</td></tr>" +
+  "<tr><td>10 00 00 00</td><td>Optimized for ARM-V7EM or newer.</td></tr>" +
+  "</table><br /><br />" +
+  "Over the years ARM has grow a lot with new instructions to perform different arithmetic operations to speed up performance.<br /><br />" +
+  "The instructions used binary codes that did nothing on prior cores. This means a ARM-V6 optimized program can run on a newer core like ARM-V8.<br /><br />" +
+  "In the case the all type no fancy instructions are used meaning the code is compatible to all ARM cores.<br /><br />" +
+  "It is still important to test if a particular instruction does nothing, or does said arithmetic operation before the CPU is set to the programs instruction codes.";
 
   private static final String[] MacHeaderInfo = new String[]
   {
     Singatures,
     CPU_type1 + "The first two hex digits is the CPU type.<br /><br />" +
     "The last two hex digits are 01 for 64 bit, and 00 for 32 bit version of the core.<br /><br />" + CPU_type2,
-    "<html>The CPU sub type is used to specify features the core supports.</html>",
+    "<html>The CPU sub type is used to specify features the core should have support for as the code my be optimized for a particular core or newer.<br /><br />" +
+    "Meaning some earlier cores may encounter operation codes that do nothing that are usable in ner version of the core.</html>",
     "<html>How the file is intended to be used.<br /><br />" +
     "<table border='1'>" +
     "<tr><td>File Type Value</td><td>Description</td></tr>" +
@@ -210,7 +235,8 @@ public class Headers extends Data
     "<html>Binary application information.</html>",
     CPU_type1 + "The last two hex digits is the CPU type.<br /><br />" +
     "The first two hex digits are 01 for 64 bit, and 00 for 32 bit version of the core.<br /><br />" + CPU_type2,
-    "<html>The CPU sub type is used to specify features the core supports.</html>",
+    "<html>The CPU sub type is used to specify features the core should have support for as the code my be optimized for a particular core or newer.<br /><br />" +
+    "Meaning some earlier cores may encounter operation codes that do nothing that are usable in ner version of the core.</html>",
     "<html>File position to application.</html>",
     "<html>The size of the application in the file.</html>",
     "<html>Section alignment in power of 2.</html>"
