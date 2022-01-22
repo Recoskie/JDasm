@@ -102,14 +102,20 @@ public class Headers extends Data
   private static final String CPU_type2 = "<table border='1'>" +
   "<tr><td>Core</td><td>Type value Hex</td></tr>" +
   "<tr><td>VAX</td><td>01</td></tr>" +
+  "<tr><td>ROMP</td><td>02</td></tr>" +
+  "<tr><td>NS32032</td><td>04</td></tr>" +
+  "<tr><td>NS32332</td><td>05</td></tr>" +
   "<tr><td>MC680x0</td><td>06</td></tr>" +
   "<tr><td>X86</td><td>07</td></tr>" +
+  "<tr><td>VAX</td><td>08</td></tr>" +
   "<tr><td>MC98000</td><td>0A</td></tr>" +
   "<tr><td>HPPA</td><td>0B</td></tr>" +
   "<tr><td>ARM</td><td>0C</td></tr>" +
   "<tr><td>MC88000</td><td>0D</td></tr>" +
   "<tr><td>SPARC</td><td>0E</td></tr>" +
-  "<tr><td>I860</td><td>0F</td></tr>" +
+  "<tr><td>I860 (big-endian)</td><td>0F</td></tr>" +
+  "<tr><td>I860 (little-endian)</td><td>10</td></tr>" +
+  "<tr><td>RS6000</td><td>11</td></tr>" +
   "<tr><td>POWERPC</td><td>12</td></tr>" +
   "</table><br />" +
   "The most used types are 07, and 0C which are x86, and ARM.<br /><br />" +
@@ -145,6 +151,7 @@ public class Headers extends Data
   "It is still important to test if a particular instruction does nothing, or does said arithmetic operation before the CPU is set to the programs instruction codes.";
 
   private static final String CPU_SubARM = "The First two Hex digit is the CPU sub type.<br /><br />" +
+  "The last two hex digits are used for capability settings on arm64e platforms (Experimental).<br /><br />" +
   "<table border='1'>" +
   "<tr><td>Hex Value.</td><td>CPU version.</td></tr>" +
   "<tr><td>00 00 00 00</td><td>All ARM cores.</td></tr>" +
@@ -157,9 +164,9 @@ public class Headers extends Data
   "<tr><td>07 00 00 00</td><td>Optimized for ARM-V5TEJ or newer.</td></tr>" +
   "<tr><td>08 00 00 00</td><td>Optimized for ARM-XSCALE or newer.</td></tr>" +
   "<tr><td>09 00 00 00</td><td>Optimized for ARM-V7 or newer.</td></tr>" +
-  "<tr><td>0A 00 00 00</td><td>Optimized for ARM-V7F or newer.</td></tr>" +
-  "<tr><td>0B 00 00 00</td><td>Optimized for ARM-V7S or newer.</td></tr>" +
-  "<tr><td>0C 00 00 00</td><td>Optimized for ARM-V7K or newer.</td></tr>" +
+  "<tr><td>0A 00 00 00</td><td>Optimized for ARM-V7F (Cortex A9) or newer.</td></tr>" +
+  "<tr><td>0B 00 00 00</td><td>Optimized for ARM-V7S (Swift) or newer.</td></tr>" +
+  "<tr><td>0C 00 00 00</td><td>Optimized for ARM-V7K (Kirkwood40) or newer.</td></tr>" +
   "<tr><td>0D 00 00 00</td><td>Optimized for ARM-V8 or newer.</td></tr>" +
   "<tr><td>0E 00 00 00</td><td>Optimized for ARM-V6M or newer.</td></tr>" +
   "<tr><td>0F 00 00 00</td><td>Optimized for ARM-V7M or newer.</td></tr>" +
@@ -174,7 +181,7 @@ public class Headers extends Data
   {
     Singatures,
     CPU_type1 + "The first two hex digits is the CPU type.<br /><br />" +
-    "The last two hex digits are 01 for 64 bit, and 00 for 32 bit version of the core.<br /><br />" + CPU_type2,
+    "The last two hex digits are 01 for 64 bit, and 02 for 32 bit version of the core.<br /><br />" + CPU_type2,
     "<html>The CPU sub type is used to specify features the core should have support for as the code my be optimized for a particular core or newer.<br /><br />" +
     "Meaning some earlier cores may encounter operation codes that do nothing that are usable in ner version of the core.</html>",
     "<html>How the file is intended to be used.<br /><br />" +
@@ -234,7 +241,7 @@ public class Headers extends Data
     "<html>Number of binaries in the universal binary.</html>",
     "<html>Binary application information.</html>",
     CPU_type1 + "The last two hex digits is the CPU type.<br /><br />" +
-    "The first two hex digits are 01 for 64 bit, and 00 for 32 bit version of the core.<br /><br />" + CPU_type2,
+    "The first two hex digits are 01 for 64 bit, and 02 for 32 bit version of the core.<br /><br />" + CPU_type2,
     "<html>The CPU sub type is used to specify features the core should have support for as the code my be optimized for a particular core or newer.<br /><br />" +
     "Meaning some earlier cores may encounter operation codes that do nothing that are usable in ner version of the core.</html>",
     "<html>File position to application.</html>",
