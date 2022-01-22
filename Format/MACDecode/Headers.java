@@ -196,6 +196,10 @@ public class Headers extends Data
     "<tr><td>6</td><td>Dynamicly bound shared library file.</td></tr>" +
     "<tr><td>7</td><td>Dynamic link editor.</td></tr>" +
     "<tr><td>8</td><td>Dynamicly bound bundle file.</td></tr>" +
+    "<tr><td>9</td><td>Shared library stub for static linking only, no section contents.</td></tr>" +
+    "<tr><td>10</td><td>Companion file with only debug sections.</td></tr>" +
+    "<tr><td>11</td><td>x86_64 kexts.</td></tr>" +
+    "<tr><td>12</td><td>a file composed of other Mach-Os to be run in the same userspace sharing a single linkedit.</td></tr>" +
     "</table></html>",
     "<html>Number of load commands.</html>",
     "<html>The size of all the load commands.</html>",
@@ -204,12 +208,36 @@ public class Headers extends Data
     "More than one binary digit can be set for more than one setting, or information about the file.<br /><br />" +
     "The table bellow show the break down of what bits have to be set for each setting.<br /><br />" +
     "<table border=\"1\">" +
-    "<tr><td>00000000000000000000000000000001</td><td>The object file has no undefined references, can be executed.</td></tr>" +
+    "<tr><td>00000000000000000000000000000001</td><td>The object file has no undefined references.</td></tr>" +
     "<tr><td>00000000000000000000000000000010</td><td>The object file is the output of an incremental link against a base file and can't be link edited again.</td></tr>" +
     "<tr><td>00000000000000000000000000000100</td><td>The object file is input for the dynamic linker and can't be staticly link edited again.</td></tr>" +
     "<tr><td>00000000000000000000000000001000</td><td>The object file's undefined references are bound by the dynamic linker when loaded.</td></tr>" +
-    "<tr><td>00000000000000000000000000010000</td><td>The file has it's dynamic undefined references prebound.</td></tr>" +
-    "<tr><td>xxxxxxxxxxxxxxxxxxxxxxxxxxx00000</td><td>The digits marked with \"x\" have no use yet, and are reserved for future use.</td></tr>" +
+    "<tr><td>00000000000000000000000000010000</td><td>The file has its dynamic undefined references prebound.</td></tr>" +
+    "<tr><td>00000000000000000000000000100000</td><td>The file has its read-only and read-write segments split.</td></tr>" +
+    "<tr><td>00000000000000000000000001000000</td><td>The shared library init routine is to be run lazily via catching memory faults to its writeable segments (obsolete).</td></tr>" +
+    "<tr><td>00000000000000000000000010000000</td><td>The image is using two-level name space bindings.</td></tr>" +
+    "<tr><td>00000000000000000000000100000000</td><td>The executable is forcing all images to use flat name space bindings.</td></tr>" +
+    "<tr><td>00000000000000000000001000000000</td><td>This umbrella guarantees no multiple defintions of symbols in its sub-images so the two-level namespace hints can always be used.</td></tr>" +
+    "<tr><td>00000000000000000000010000000000</td><td>Do not have dyld notify the prebinding agent about this executable.</td></tr>" +
+    "<tr><td>00000000000000000000100000000000</td><td>The binary is not prebound but can have its prebinding redone. only used when MH_PREBOUND is not set.</td></tr>" +
+    "<tr><td>00000000000000000001000000000000</td><td>Indicates that this binary binds to all two-level namespace modules of its dependent libraries.</td></tr>" +
+    "<tr><td>00000000000000000010000000000000</td><td>Safe to divide up the sections into sub-sections via symbols for dead code stripping.</td></tr>" +
+    "<tr><td>00000000000000000100000000000000</td><td>The binary has been canonicalized via the unprebind operation.</td></tr>" +
+    "<tr><td>00000000000000001000000000000000</td><td>The final linked image contains external weak symbols.</td></tr>" +
+    "<tr><td>00000000000000010000000000000000</td><td>The final linked image uses weak symbols.</td></tr>" +
+    "<tr><td>00000000000000100000000000000000</td><td>When this bit is set, all stacks in the task will be given stack execution privilege.</td></tr>" +
+    "<tr><td>00000000000001000000000000000000</td><td>When this bit is set, the binary declares it is safe for use in processes with uid zero.</td></tr>" +
+    "<tr><td>00000000000010000000000000000000</td><td>When this bit is set, the binary declares it is safe for use in processes when UGID is true.</td></tr>" +
+    "<tr><td>00000000000100000000000000000000</td><td>When this bit is set on a dylib, the static linker does not need to examine dependent dylibs to see if any are re-exported.</td></tr>" +
+    "<tr><td>00000000001000000000000000000000</td><td>When this bit is set, the OS will load the main executable at a random address.</td></tr>" +
+    "<tr><td>00000000010000000000000000000000</td><td>Only for use on dylibs. When linking against a dylib that has this bit set, the static linker will automatically not create a load command to the dylib if no symbols are being referenced from the dylib.</td></tr>" +
+    "<tr><td>00000000100000000000000000000000</td><td>Contains a section of type S_THREAD_LOCAL_VARIABLES.</td></tr>" +
+    "<tr><td>00000001000000000000000000000000</td><td>When this bit is set, the OS will run the main executable with a non-executable heap even on platforms (e.g. i386) that don't require it.</td></tr>" +
+    "<tr><td>00000010000000000000000000000000</td><td>The code was linked for use in an application.</td></tr>" +
+    "<tr><td>00000100000000000000000000000000</td><td>The external symbols listed in the nlist symbol table do not include all the symbols listed in the dyld info.</td></tr>" +
+    "<tr><td>00001000000000000000000000000000</td><td>Allow LC_MIN_VERSION_MACOS and LC_BUILD_VERSION load commands with the platforms macOS, macCatalyst, iOSSimulator, tvOSSimulator and watchOSSimulator.</td></tr>" +
+    "<tr><td>10000000000000000000000000000000</td><td>Only for use on dylibs. When this bit is set, the dylib is part of the dyld shared cache, rather than loose in the filesystem.</td></tr>" +
+    "<tr><td>0xxx0000000000000000000000000000</td><td>The digits marked with \"x\" have no use yet, and are reserved for future use.</td></tr>" +
     "</table></html>",
     "<html>This is reserved for use with 64 bit programs in the future.</html>"
   };
