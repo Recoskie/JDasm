@@ -62,7 +62,7 @@ Supports Unix/Linux binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod
 
 Supports MacOS/iPhone binaries, and also MacOS/iPhone Universal binaries.
 
-If you wish to analyze an iPhone applications you need to download the IPA for the iPhone program. The IPA file stores application files in a zip file. You then have to decompress the IPA file as a zip file. This creates a folder called payload. In the folder payload you then can open the main Mac binary using JDisassembly.
+To analyze iPhone applications you need to download the IPA file for the iPhone program. The IPA file stores application files in a zip file. You then have to decompress the IPA file as a zip file. This creates a folder called payload. In the folder payload you then can open the main Mac binary using JDisassembly.
 
 Supports .efi boot binaries and boot sector disassembly.
 
