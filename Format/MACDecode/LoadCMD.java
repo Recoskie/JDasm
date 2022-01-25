@@ -198,7 +198,7 @@ public class LoadCMD extends Data
 
   private static final String[] segInfo = new String[]
   {
-    dataInfo[2],
+    "<html>This is the name given to a section of data in this section. We call it a segment.</html>",
     "<html>This is the section the segment belongs to. It should match the main sections name.</html>",
     dataInfo[3], dataInfo[4], dataInfo[5],
     "<html>Section alignment. Some values in the section are read using a multiply. This means things must be evenly spaced apart.<br /><br />" +
