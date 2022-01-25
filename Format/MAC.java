@@ -54,7 +54,7 @@ public class MAC extends Data implements JDEventListener
 
     else if( e.getArg(0) < 0 )
     {
-      ds.clear();
+      ds.clear(); info("");
 
       //Select bytes in virtual space.
 
