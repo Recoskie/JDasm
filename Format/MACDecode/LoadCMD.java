@@ -24,15 +24,28 @@ public class LoadCMD extends Data
 
       //Begin reading the command by type.
 
-      if( cmd == 0x19 )
+      if( cmd == 0x19 || cmd == 0x01 )
       {
         String name = "";
 
         DTemp.String8("Section Name", 16 ); name = (String)DTemp.value;
-        DTemp.LUINT64("Address"); long address = (long)DTemp.value;
-        DTemp.LUINT64("Size"); long vSize = (long)DTemp.value;
-        DTemp.LUINT64("File position"); long offset = (long)DTemp.value;
-        DTemp.LUINT64("Length"); long oSize = (long)DTemp.value;
+
+        long address = 0, vSize = 0, offset = 0, oSize = 0;
+
+        if( is64bit )
+        {
+          DTemp.LUINT64("Address"); address = (long)DTemp.value;
+          DTemp.LUINT64("Size"); vSize = (long)DTemp.value;
+          DTemp.LUINT64("File position"); offset = (long)DTemp.value;
+          DTemp.LUINT64("Length"); oSize = (long)DTemp.value;
+        }
+        else
+        {
+          DTemp.LUINT32("Address"); address = (int)DTemp.value;
+          DTemp.LUINT32("Size"); vSize = (int)DTemp.value;
+          DTemp.LUINT32("File position"); offset = (int)DTemp.value;
+          DTemp.LUINT32("Length"); oSize = (int)DTemp.value;
+        }
 
         file.addV( offset, oSize, address, vSize );
 
@@ -56,8 +69,18 @@ public class LoadCMD extends Data
           JDNode t = new JDNode( DTemp.value + "", new long[] { 0, ref++ } ); des.add( DTemp );
 
           DTemp.String8("Segment Name", 16); name =(String)DTemp.value;
-          DTemp.LUINT64("Address"); address = (long)DTemp.value;
-          DTemp.LUINT64("Size"); vSize = (long)DTemp.value;
+
+          if( is64bit )
+          {
+            DTemp.LUINT64("Address"); address = (long)DTemp.value;
+            DTemp.LUINT64("Size"); vSize = (long)DTemp.value;
+          }
+          else
+          {
+            DTemp.LUINT32("Address"); address = (int)DTemp.value;
+            DTemp.LUINT32("Size"); vSize = (int)DTemp.value;
+          }
+
           DTemp.LUINT32("Offset"); offset = (int)DTemp.value;
 
           file.addV(offset, vSize, address, vSize);
@@ -70,7 +93,8 @@ public class LoadCMD extends Data
           DTemp.LUINT32("flags");
           DTemp.LUINT32("Reserved");
           DTemp.LUINT32("Reserved");
-          DTemp.LUINT32("Reserved");
+          
+          if( is64bit ) { DTemp.LUINT32("Reserved"); }
 
           n2.add( t );
         }
