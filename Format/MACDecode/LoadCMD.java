@@ -188,10 +188,11 @@ public class LoadCMD extends Data
     "<html>File position to the bytes that will be read and placed into RAM at the memory address.<br /><br />" +
     "If this is a universal binary then the offset is added to the start of the application in this file.</html>",
     "<html>The number of bytes to read from the file to be placed at the RAM address.<br /><br />" +
-    "If this is smaller than the number of bytes to place in RAM for this section then the rest are 00 byte filled.</html>",
+    "If this is smaller than the number of bytes to place in RAM for this section then the rest are 00 byte filled.<br /><br />" +
+    "The section named PAGEZERO generally creates a large space of 0 for where the program is going be loaded.</html>",
     "<html>Maximum virtual memory protection.</html>",
     "<html>Initial virtual memory protection.</html>",
-    "<html>Number of sections in segment.</html>",
+    "<html>Number of segment this section is broken into.</html>",
     "<html>Flags.</html>"
   };
 
@@ -200,13 +201,17 @@ public class LoadCMD extends Data
     dataInfo[2],
     "<html>This is the section the segment belongs to. It should match the main sections name.</html>",
     dataInfo[3], dataInfo[4], dataInfo[5],
-    "<html>Section alignment.</html>",
-    "<html>Relocations offset.</html>",
-    "<html>Number of relocations.</html>",
+    "<html>Section alignment. Some values in the section are read using a multiply. This means things must be evenly spaced apart.<br /><br />" +
+    "If we place this section somewhere else in memory we must make sure we move it in a even multiple of this number.</html>",
+    "<html>Relocations offset. This is a list of addresses that access a value in this section.<br /><br />" +
+    "This means if we palace this section somewhere else in memory 128 bytes away then we must use the address locations in the relocation list to add 128 bytes to the locations that access values in this section.<br /><br />" +
+    "This program always loads all sections to their defined RAM address locations. The relocations are only used when the address location is already in use by another program.<br /><br />" +
+    "The section must also be aligned by section alignment. See the section alignment properties for details.</html>",
+    "<html>Number of relocations. This is the number of addresses in the offset to the relocation list. See relocation offset property for details.</html>",
     dataInfo[10],
-    "reserved (for offset or index)",
-    "reserved (for count or sizeof)",
-    "reserved"
+    "<html>Reserved for future use (for offset or index).</html>",
+    "<html>Reserved for future use (for count or sizeof).</html>",
+    "<html>Reserved for future use (for use on 64 bit programs only).</html>"
   };
 
   private void cmdInfo( int i )
