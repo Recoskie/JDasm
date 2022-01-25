@@ -36,14 +36,14 @@ public class LoadCMD extends Data
         {
           DTemp.LUINT64("Address"); address = (long)DTemp.value;
           DTemp.LUINT64("Size"); vSize = (long)DTemp.value;
-          DTemp.LUINT64("File position"); offset = (long)DTemp.value;
+          DTemp.LUINT64("File position"); offset = base + (long)DTemp.value;
           DTemp.LUINT64("Length"); oSize = (long)DTemp.value;
         }
         else
         {
           DTemp.LUINT32("Address"); address = (int)DTemp.value;
           DTemp.LUINT32("Size"); vSize = (int)DTemp.value;
-          DTemp.LUINT32("File position"); offset = (int)DTemp.value;
+          DTemp.LUINT32("File position"); offset = base + (int)DTemp.value;
           DTemp.LUINT32("Length"); oSize = (int)DTemp.value;
         }
 
@@ -62,13 +62,13 @@ public class LoadCMD extends Data
 
         for( int i2 = 0; i2 < sect; i2++ )
         {
-          DTemp = new Descriptor( file );
+          DTemp = new Descriptor( file ); DTemp.setEvent( this::segInfo );
 
-          DTemp.String8("Section Name", 16);
+          DTemp.String8("Segment Name", 16);
           
           JDNode t = new JDNode( DTemp.value + "", new long[] { 0, ref++ } ); des.add( DTemp );
 
-          DTemp.String8("Segment Name", 16); name =(String)DTemp.value;
+          DTemp.String8("Section Name", 16); name = (String)DTemp.value;
 
           if( is64bit )
           {
@@ -81,11 +81,11 @@ public class LoadCMD extends Data
             DTemp.LUINT32("Size"); vSize = (int)DTemp.value;
           }
 
-          DTemp.LUINT32("Offset"); offset = (int)DTemp.value;
+          DTemp.LUINT32("Offset"); offset = base + (int)DTemp.value;
 
           file.addV(offset, vSize, address, vSize);
 
-          t.add( new JDNode( name + ".h", new long[] { -3, address, address + vSize - 1 } ) );
+          t.add( new JDNode( "Goto Data.h", new long[] { -3, address, address + vSize - 1 } ) );
 
           DTemp.LUINT32("Alignment");
           DTemp.LUINT32("Relocations Offset");
@@ -171,14 +171,22 @@ public class LoadCMD extends Data
   "<tr><td>35</td><td>Used with fileset_entry_command.</td></tr>" +
   "</table>";
 
+  private static final String cmdSize = "<html>The size of the command and all it's parameters.</html>";
+
+  private static final String[] cmdInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>The commands values and parameters.</html>"
+  };
+
   private static final String[] dataInfo = new String[]
   {
-    cmdType,
-    "<html>The size of the command and all it's parameters.</html>",
-    "<html>Segment name.</html>",
+    cmdType, cmdSize,
+    "<html>Section name. A section can be divided into smaller section called segments by segment names.</html>",
     "<html>Memory address to place the section in RAM memory.</html>",
     "<html>Number of bytes to place in RAM memory for this section.</html>",
-    "<html>File position to the bytes that will be read and placed into RAM at the memory address.</html>",
+    "<html>File position to the bytes that will be read and placed into RAM at the memory address.<br /><br />" +
+    "If this is a universal binary then the offset is added to the start of the application in this file.</html>",
     "<html>The number of bytes to read from the file to be placed at the RAM address.<br /><br />" +
     "If this is smaller than the number of bytes to place in RAM for this section then the rest are 00 byte filled.</html>",
     "<html>Maximum virtual memory protection.</html>",
@@ -187,11 +195,18 @@ public class LoadCMD extends Data
     "<html>Flags.</html>"
   };
 
-  private static final String[] cmdInfo = new String[]
+  private static final String[] segInfo = new String[]
   {
-    cmdType,
-    "<html>The size of the command and all it's parameters.</html>",
-    "<html>The commands values and parameters.</html>"
+    dataInfo[2],
+    "<html>This is the section the segment belongs to. It should match the main sections name.</html>",
+    dataInfo[3], dataInfo[4], dataInfo[5],
+    "<html>Section alignment.</html>",
+    "<html>Relocations offset.</html>",
+    "<html>Number of relocations.</html>",
+    dataInfo[10],
+    "reserved (for offset or index)",
+    "reserved (for count or sizeof)",
+    "reserved"
   };
 
   private void cmdInfo( int i )
@@ -210,11 +225,23 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>Command for mapping and loading the program.</html>" );
+      info( "<html>Load a section of the program into RAM memory.</html>" );
     }
     else
     {
       info( dataInfo[i] );
+    }
+  }
+
+  private void segInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>This is a segment. It labels a sections within the loaded section.</html>" );
+    }
+    else
+    {
+      info( segInfo[i] );
     }
   }
 }

@@ -18,6 +18,10 @@ public class Data extends Window.Window
 
   public static swingIO.tree.JDNode App = null;
 
+  //The selected application base address.
+
+  public static long base = 0;
+
   //The Number of load commands.
 
   public static int loadCMD = 0;

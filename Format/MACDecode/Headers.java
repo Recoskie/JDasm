@@ -71,7 +71,7 @@ public class Headers extends Data
 
       //Set the current node for the application that is being read.
       
-      App = n; DTemp.setEvent( this::MacHInfo );
+      base = file.getFilePointer() - 4; App = n; DTemp.setEvent( this::MacHInfo );
 
       //Read the application header.
 
