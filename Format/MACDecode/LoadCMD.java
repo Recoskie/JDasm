@@ -229,8 +229,9 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>Load a section of the program into RAM memory. Sections generally have standard names for their use.<br /><br />" +
+      info( "<html>Load a section of the program into RAM memory. Sections generally have standard segment name for their use.<br /><br />" +
       "<table border='1'>" +
+      "<tr><td>__PAGEZERO</td><td>Fills the area the program is going to load into RAM memory with zeros.</td></tr>" +
       "<tr><td>__TEXT</td><td>The tradition UNIX text segment. Contains machine code, and data types or strings.</td></tr>" +
       "<tr><td>__DATA</td><td>The real initialized data section. Data that should be loaded before program starts.</td></tr>" +
       "<tr><td>__OBJC</td><td>Objective-C runtime segment.</td></tr>" +
@@ -250,7 +251,7 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>This is a segment. It labels a sections within the loaded section.<br /><br />" +
+      info( "<html>This is a section. It labels a section within the loaded data segment.<br /><br />" +
       "<table border='1'>" +
       "<tr><td>__text</td><td>Contains the processor instructions of the program.</td></tr>" +
       "<tr><td>__fvmlib_init0</td><td>the fvmlib initialization section</td></tr>" +
