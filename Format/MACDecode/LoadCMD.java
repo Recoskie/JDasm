@@ -28,7 +28,7 @@ public class LoadCMD extends Data
       {
         String name = "";
 
-        DTemp.String8("Section Name", 16 ); name = (String)DTemp.value;
+        DTemp.String8("Segment Name", 16 ); name = (String)DTemp.value;
 
         long address = 0, vSize = 0, offset = 0, oSize = 0;
 
@@ -54,7 +54,7 @@ public class LoadCMD extends Data
         DTemp.LUINT32("Number of sections"); int sect = (int)DTemp.value;
         DTemp.LUINT32("flags");
 
-        DTemp.setEvent( this::dataInfo );
+        DTemp.setEvent( this::segInfo );
 
         JDNode n2 = new JDNode( name, new long[] { 0, ref++ } ); des.add( DTemp );
 
@@ -62,13 +62,13 @@ public class LoadCMD extends Data
 
         for( int i2 = 0; i2 < sect; i2++ )
         {
-          DTemp = new Descriptor( file ); DTemp.setEvent( this::segInfo );
+          DTemp = new Descriptor( file ); DTemp.setEvent( this::sectInfo );
 
-          DTemp.String8("Segment Name", 16);
+          DTemp.String8("Section Name", 16);
           
           JDNode t = new JDNode( DTemp.value + "", new long[] { 0, ref++ } ); des.add( DTemp );
 
-          DTemp.String8("Section Name", 16); name = (String)DTemp.value;
+          DTemp.String8("Segment Name", 16); name = (String)DTemp.value;
 
           if( is64bit )
           {
@@ -175,32 +175,31 @@ public class LoadCMD extends Data
 
   private static final String[] cmdInfo = new String[]
   {
-    cmdType, cmdSize,
-    "<html>The commands values and parameters.</html>"
+    cmdType, cmdSize, "<html>The commands values and parameters.</html>"
   };
 
-  private static final String[] dataInfo = new String[]
+  private static final String[] segInfo = new String[]
   {
     cmdType, cmdSize,
-    "<html>Section name. A section can be divided into smaller section called segments by segment names.</html>",
-    "<html>Memory address to place the section in RAM memory.</html>",
-    "<html>Number of bytes to place in RAM memory for this section.</html>",
+    "<html>Segment name. A Segment can be divided into smaller section names.</html>",
+    "<html>Memory address to place the Segment in RAM memory.</html>",
+    "<html>Number of bytes to place in RAM memory for this Segment.</html>",
     "<html>File position to the bytes that will be read and placed into RAM at the memory address.<br /><br />" +
     "If this is a universal binary then the offset is added to the start of the application in this file.</html>",
     "<html>The number of bytes to read from the file to be placed at the RAM address.<br /><br />" +
-    "If this is smaller than the number of bytes to place in RAM for this section then the rest are 00 byte filled.<br /><br />" +
-    "The section named PAGEZERO generally creates a large space of 0 for where the program is going be loaded.</html>",
+    "If this is smaller than the number of bytes to place in RAM for this Segment then the rest are 00 byte filled.<br /><br />" +
+    "The segment named PAGEZERO generally creates a large space of 0 for where the program is going be loaded.</html>",
     "<html>Maximum virtual memory protection.</html>",
     "<html>Initial virtual memory protection.</html>",
     "<html>Number of segment this section is broken into.</html>",
     "<html>Flags.</html>"
   };
 
-  private static final String[] segInfo = new String[]
+  private static final String[] sectInfo = new String[]
   {
-    "<html>This is the name given to a section of data in this section. We call it a segment.</html>",
-    "<html>This is the section the segment belongs to. It should match the main sections name.</html>",
-    dataInfo[3], dataInfo[4], dataInfo[5],
+    "<html>This is the name given to a section of data in this segment.</html>",
+    "<html>This is the the segment that this section belongs to. It should match the main data segment name.</html>",
+    segInfo[3], segInfo[4], segInfo[5],
     "<html>Section alignment. Some values in the section are read using a multiply. This means things must be evenly spaced apart.<br /><br />" +
     "If we place this section somewhere else in memory we must make sure we move it in a even multiple of this number.</html>",
     "<html>Relocations offset. This is a list of addresses that access a value in this section.<br /><br />" +
@@ -208,7 +207,7 @@ public class LoadCMD extends Data
     "This program always loads all sections to their defined RAM address locations. The relocations are only used when the address location is already in use by another program.<br /><br />" +
     "The section must also be aligned by section alignment. See the section alignment properties for details.</html>",
     "<html>Number of relocations. This is the number of addresses in the offset to the relocation list. See relocation offset property for details.</html>",
-    dataInfo[10],
+    segInfo[10],
     "<html>Reserved for future use (for offset or index).</html>",
     "<html>Reserved for future use (for count or sizeof).</html>",
     "<html>Reserved for future use (for use on 64 bit programs only).</html>"
@@ -226,27 +225,50 @@ public class LoadCMD extends Data
     }
   }
 
-  private void dataInfo( int i )
-  {
-    if( i < 0 )
-    {
-      info( "<html>Load a section of the program into RAM memory.</html>" );
-    }
-    else
-    {
-      info( dataInfo[i] );
-    }
-  }
-
   private void segInfo( int i )
   {
     if( i < 0 )
     {
-      info( "<html>This is a segment. It labels a sections within the loaded section.</html>" );
+      info( "<html>Load a section of the program into RAM memory. Sections generally have standard names for their use.<br /><br />" +
+      "<table border='1'>" +
+      "<tr><td>__TEXT</td><td>The tradition UNIX text segment. Contains machine code, and data types or strings.</td></tr>" +
+      "<tr><td>__DATA</td><td>The real initialized data section. Data that should be loaded before program starts.</td></tr>" +
+      "<tr><td>__OBJC</td><td>Objective-C runtime segment.</td></tr>" +
+      "<tr><td>__ICON</td><td>The icon segment.</td></tr>" +
+      "<tr><td>__LINKEDIT</td><td>The segment containing all structs.</td></tr>" +
+      "<tr><td>__UNIXSTACK</td><td>The unix stack segment.</td></tr>" +
+      "<tr><td>__IMPORT</td><td>The segment for the self (dyld).</td></tr>" +
+      "</table></html>" );
     }
     else
     {
       info( segInfo[i] );
+    }
+  }
+
+  private void sectInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>This is a segment. It labels a sections within the loaded section.<br /><br />" +
+      "<table border='1'>" +
+      "<tr><td>__text</td><td>Contains the processor instructions of the program.</td></tr>" +
+      "<tr><td>__fvmlib_init0</td><td>the fvmlib initialization section</td></tr>" +
+      "<tr><td>__fvmlib_init1</td><td>the section following the fvmlib initialization section</td></tr>" +
+      "<tr><td>__data</td><td>The real data that should be initialized before the program starts.</td></tr>" +
+      "<tr><td>__bss</td><td>Section of data to set all 0 before program starts (uninitialized data).</td></tr>" +
+      "<tr><td>__common</td><td>The section common symbols are in.</td></tr>" +
+      "<tr><td>__symbol_table</td><td>The symbol table.</td></tr>" +
+      "<tr><td>__module_info</td><td>Module information.</td></tr>" +
+      "<tr><td>__selector_strs</td><td>String table.</td></tr>" +
+      "<tr><td>__selector_refs</td><td>String table references.</td></tr>" +
+      "<tr><td>__header</td><td>The icon headers.</td></tr>" +
+      "<tr><td>__tiff</td><td>The icons in tiff format.</td></tr>" +
+      "</table></html>" );
+    }
+    else
+    {
+      info( sectInfo[i] );
     }
   }
 }
