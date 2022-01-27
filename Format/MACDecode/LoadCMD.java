@@ -199,8 +199,8 @@ public class LoadCMD extends Data
     "<tr><td>00000000000000000000000000000001</td><td>The file contents for this segment is for the high part of the VM space, the low part is zero filled (for stacks in core files).</td></tr>" +
     "<tr><td>00000000000000000000000000000010</td><td>This segment is the VM that is allocated by a fixed VM library, for overlap checking in the link editor.</td></tr>" +
     "<tr><td>00000000000000000000000000000100</td><td>This segment has nothing that was relocated in it and nothing relocated to it, that is it maybe safely replaced without relocation.</td></tr>" +
-    "<tr><td>00000000000000000000000000001000</td><td>This segment is protected. If the segment starts at file offset 0, the first page of the segment is not protected.  All other pages of the segment are protected.</td></tr>" +
-    "<tr><td>00000000000000000000000000010000</td><td>This segment is made read-only after fixups.</td></tr>" +
+    "<tr><td>00000000000000000000000000001000</td><td>This segment is protected. If the segment starts at file offset 0, the first page of the segment is not protected. All other pages of the segment are protected.</td></tr>" +
+    "<tr><td>00000000000000000000000000010000</td><td>This segment is made read-only after relocations are applied if needed.</td></tr>" +
     "</table></html>"
   };
 
