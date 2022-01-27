@@ -56,9 +56,9 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::segInfo );
 
-        JDNode n2 = new JDNode( name, new long[] { 0, ref++ } ); des.add( DTemp );
+        JDNode n2 = new JDNode( name + ( oSize > 0 ? "" : ".h" ), new long[] { 0, ref++ } ); des.add( DTemp );
 
-        n2.add( new JDNode( name + " (Data).h", new long[] { -3, address, address + vSize - 1 } ) );
+        if( oSize > 0 ) { n2.add( new JDNode( name + " (Data).h", new long[] { -3, address, address + vSize - 1 } ) ); }
 
         for( int i2 = 0; i2 < sect; i2++ )
         {
@@ -191,8 +191,17 @@ public class LoadCMD extends Data
     "The segment named PAGEZERO generally creates a large space of 0 for where the program is going be loaded.</html>",
     "<html>Maximum virtual memory protection.</html>",
     "<html>Initial virtual memory protection.</html>",
-    "<html>Number of segment this section is broken into.</html>",
-    "<html>Flags.</html>"
+    "<html>Number of sections that this segment is broken into.</html>",
+    "<html>The flag setting should be viewed in binary. Each binary digit that is set 1 in value is a setting that is active.<br /><br />" +
+    "The Table bellow shows what each setting is for this section.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Binary digit</td><td>Active Setting</td></tr>" +
+    "<tr><td>00000000000000000000000000000001</td><td>The file contents for this segment is for the high part of the VM space, the low part is zero filled (for stacks in core files).</td></tr>" +
+    "<tr><td>00000000000000000000000000000010</td><td>This segment is the VM that is allocated by a fixed VM library, for overlap checking in the link editor.</td></tr>" +
+    "<tr><td>00000000000000000000000000000100</td><td>This segment has nothing that was relocated in it and nothing relocated to it, that is it maybe safely replaced without relocation.</td></tr>" +
+    "<tr><td>00000000000000000000000000001000</td><td>This segment is protected. If the segment starts at file offset 0, the first page of the segment is not protected.  All other pages of the segment are protected.</td></tr>" +
+    "<tr><td>00000000000000000000000000010000</td><td>This segment is made read-only after fixups.</td></tr>" +
+    "</table></html>"
   };
 
   private static final String[] sectInfo = new String[]
@@ -200,14 +209,47 @@ public class LoadCMD extends Data
     "<html>This is the name given to a section of data in this segment.</html>",
     "<html>This is the the segment that this section belongs to. It should match the main data segment name.</html>",
     segInfo[3], segInfo[4], segInfo[5],
-    "<html>Section alignment. Some values in the section are read using a multiply. This means things must be evenly spaced apart.<br /><br />" +
+    "<html>Section alignment. Some values in the section are read using a multiply such as an grouping of elements that are 2 bytes each (multiple is then 2). This means things must be evenly spaced apart.<br /><br />" +
     "If we place this section somewhere else in memory we must make sure we move it in a even multiple of this number.</html>",
-    "<html>Relocations offset. This is a list of addresses that access a value in this section.<br /><br />" +
-    "This means if we palace this section somewhere else in memory 128 bytes away then we must use the address locations in the relocation list to add 128 bytes to the locations that access values in this section.<br /><br />" +
+    "<html>Relocations offset. This is a list of addresses that locate to addresses that access a value in this section. If there is none it is set 0.<br /><br />" +
+    "The offsets in the Relocations are wrote to if we move this section somewhere else in memory like 128 bytes away then we must add 128 bytes to the locations that access values in this section.<br /><br />" +
     "This program always loads all sections to their defined RAM address locations. The relocations are only used when the address location is already in use by another program.<br /><br />" +
-    "The section must also be aligned by section alignment. See the section alignment properties for details.</html>",
-    "<html>Number of relocations. This is the number of addresses in the offset to the relocation list. See relocation offset property for details.</html>",
-    segInfo[10],
+    "The section must also be aligned by section alignment. See the Alignment property of this section for details.</html>",
+    "<html>Number of relocations. This is the number of addresses in the relocation list. See relocation offset property for details.</html>",
+    "<html>The first two hex digits is the section type. The reaming 24 binary digits after the first hex digit is 24 flag settings.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Hex value</td><td>Section type</td></tr>" +
+    "<tr><td>06</td><td>Section with only non-lazy symbol pointers.</td></tr>" +
+    "<tr><td>07</td><td>Section with only lazy symbol pointers.</td></tr>" +
+    "<tr><td>08</td><td>Section with only symbol stubs, byte size of stub in the reserved2 field.</td></tr>" +
+    "<tr><td>09</td><td>Section with only function pointers for initialization.</td></tr>" +
+    "<tr><td>0A</td><td>Section with only function pointers for termination.</td></tr>" +
+    "<tr><td>0B</td><td>Section contains symbols that are to be coalesced</td></tr>" +
+    "<tr><td>0C</td><td>Zero fill on demand section (that can be larger than 4 gigabytes).</td></tr>" +
+    "<tr><td>0D</td><td>Section with only pairs of function pointers for interposing.</td></tr>" +
+    "<tr><td>0E</td><td>Section with only 16 byte literals.</td></tr>" +
+    "<tr><td>0F</td><td>Section contains DTrace Object Format.</td></tr>" +
+    "<tr><td>10</td><td>Section with only lazy symbol pointers to lazy loaded dylibs.</td></tr>" +
+    "<tr><td>11</td><td>Template of initial values for TLVs.</td></tr>" +
+    "<tr><td>12</td><td>Template of initial values for TLVs with zero fill.</td></tr>" +
+    "<tr><td>13</td><td>TLV descriptors.</td></tr>" +
+    "<tr><td>14</td><td>Pointers to TLV descriptors.</td></tr>" +
+    "<tr><td>15</td><td>Functions to call to initialize TLV values.</td></tr>" +
+    "<tr><td>16</td><td>32-bit offsets to initializers.</td></tr>" +
+    "</table><br /><br />" +
+    "The flag settings are intended to be viewed in binary. Each setting that is active is a binary digit that is set 1. The following bits are used for the sections attributes.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>10000000000000000000000000000000</td><td>Section contains only true machine instructions.</td></tr>" +
+    "<tr><td>01000000000000000000000000000000</td><td>Section contains coalesced symbols that are not to be in a ranlib table of contents.</td></tr>" +
+    "<tr><td>00100000000000000000000000000000</td><td>Ok to strip static symbols in this section in files with the MH_DYLDLINK flag.</td></tr>" +
+    "<tr><td>00010000000000000000000000000000</td><td>No dead stripping.</td></tr>" +
+    "<tr><td>00001000000000000000000000000000</td><td>blocks are live if they reference live blocks.</td></tr>" +
+    "<tr><td>00000100000000000000000000000000</td><td>Used with i386 code stubs written on by dyld.</td></tr>" +
+    "<tr><td>00000010000000000000000000000000</td><td>A debug section.</td></tr>" +
+    "<tr><td>00000000000000000000010000000000</td><td>Section contains some machine instructions.</td></tr>" +
+    "<tr><td>00000000000000000000001000000000</td><td>Section has external relocation entries.</td></tr>" +
+    "<tr><td>00000000000000000000000100000000</td><td>Section has local relocation entries.</td></tr>" +
+    "</table></html>",
     "<html>Reserved for future use (for offset or index).</html>",
     "<html>Reserved for future use (for count or sizeof).</html>",
     "<html>Reserved for future use (for use on 64 bit programs only).</html>"
