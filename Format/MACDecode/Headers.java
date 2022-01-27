@@ -304,25 +304,4 @@ public class Headers extends Data
       info( i > 1 ? UMacHeaderInfo[ ( ( i - 2 ) % 6 ) + 2 ] : UMacHeaderInfo[ i ] );
     }
   }
-
-  //Disassembler.
-
-  public void Dis( long loc, boolean crawl )
-  {
-    try
-    {
-      file.seekV( loc );
-
-      long floc = file.getFilePointer();
-
-      String d = core.disASM_Code();
-
-      info( "<html>" + d + "</html>" );
-
-      Virtual.setSelected( loc, file.getVirtualPointer() - 1 ); Offset.setSelected( floc, file.getFilePointer() - 1 );
-
-      ds.setDescriptor( core );
-    }
-    catch( java.io.IOException e ) { e.printStackTrace(); }
-  }
 }

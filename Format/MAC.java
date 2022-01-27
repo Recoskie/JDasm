@@ -53,9 +53,18 @@ public class MAC extends Data implements JDEventListener
       {
         if( coreLoaded )
         {
-          core.clear(); core.Crawl.add( e.getArg(1) );
+          core.clear();
+          
+          if( e.getArgs().length == 2 )
+          {
+            core.Crawl.add( e.getArg(1) ); core.disLoc(0, true);
+          }
+          else
+          {
+            core.Linear.add( e.getArg(1) ); core.Linear.add( e.getArg(2) ); core.disLoc(0, false);
+          }
 
-          core.disLoc(0, true); ds.setDescriptor( core );
+          ds.setDescriptor( core );
         }
         else { info("<html>The processor core architecture type has not been added to JDisassembly yet.</html>"); }
       }

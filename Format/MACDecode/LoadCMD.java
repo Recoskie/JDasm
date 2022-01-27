@@ -8,6 +8,11 @@ public class LoadCMD extends Data
   public void load(JDNode root) throws java.io.IOException
   {
     long sectStart = file.getFilePointer();
+    long main = 0;
+
+    //WE should divide sections by data.
+
+    JDNode code = new JDNode( "Code Sections" );
 
     //Preparing to add the load commands.
 
@@ -28,7 +33,7 @@ public class LoadCMD extends Data
 
       if( cmd == 0x19 || cmd == 0x01 )
       {
-        String name = "";
+        String segName = "", name = "";
 
         DTemp.String8("Segment Name", 16 ); name = (String)DTemp.value;
 
@@ -66,11 +71,11 @@ public class LoadCMD extends Data
         {
           DTemp = new Descriptor( file ); DTemp.setEvent( this::sectInfo );
 
-          DTemp.String8("Section Name", 16);
+          DTemp.String8("Section Name", 16); segName = (String)DTemp.value;
           
           JDNode t = new JDNode( DTemp.value + "", new long[] { 0, ref++ } ); des.add( DTemp );
 
-          DTemp.String8("Segment Name", 16); name = (String)DTemp.value;
+          DTemp.String8("Segment Name", 16);
 
           if( is64bit )
           {
@@ -92,11 +97,18 @@ public class LoadCMD extends Data
           DTemp.LUINT32("Alignment");
           DTemp.LUINT32("Relocations Offset");
           DTemp.LUINT32("Relocations");
-          DTemp.LUINT32("flags");
+          DTemp.LUINT32("flags"); int flag = (int)DTemp.value;
           DTemp.LUINT32("Reserved");
           DTemp.LUINT32("Reserved");
           
           if( is64bit ) { DTemp.LUINT32("Reserved"); }
+
+          //Section contains only machine code.
+
+          if( ( flag & 0x80000000 ) != 0 )
+          {
+            code.add( new JDNode( name + "." + segName + "().h", new long[]{ -4, address, vSize } ) );
+          }
 
           n2.add( t );
         }
@@ -108,7 +120,7 @@ public class LoadCMD extends Data
 
       else if( cmd == 0x28 )
       {
-        DTemp.LUINT64("Programs start address"); long start = (long)DTemp.value;
+        DTemp.LUINT64("Programs start address"); main = file.toVirtual( base + (long)DTemp.value );
         DTemp.LUINT64("Stack memory size");
 
         DTemp.setEvent( this::startInfo ); des.add( DTemp );
@@ -116,8 +128,6 @@ public class LoadCMD extends Data
         n.setArgs( new long[]{ -2, sectStart, file.getFilePointer() } );
 
         n.add( new JDNode( "Start Address.h", new long[]{ 0, ref++ } ) );
-
-        root.add( new JDNode("Program Start (Machine Code).h", new long[]{ -4, file.toVirtual( base + start ) } ) );
       }
 
       //An unknown command, or a command I have not added Yet.
@@ -131,6 +141,14 @@ public class LoadCMD extends Data
         n.add( new JDNode( "CMD #" + i + ".h", new long[]{ 0, ref++ } ) );
       }
     }
+
+    //Sections that only machine code.
+
+    if( code.getChildCount() > 0 ) { root.add( code ); }
+
+    //The programs main entry point.
+
+    if( main != 0 ) { root.add( new JDNode("Program Start (Machine Code).h", new long[]{ -4, main } ) ); }
   }
 
   public static final String cmdType = "The first 2 hex digits is the load command. If the last two hex digits are 80 this means the section is required for the program to run properly.<br /><br />" +
