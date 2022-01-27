@@ -4,6 +4,8 @@ import swingIO.*;
 import swingIO.tree.*;
 import javax.swing.tree.*;
 
+import core.x86.*;
+
 public class Headers extends Data
 {
   public void readMAC(JDNode n) throws java.io.IOException
@@ -83,6 +85,18 @@ public class Headers extends Data
       DTemp.LUINT32("Flags");
     
       if( is64bit ){ DTemp.UINT32("Reserved"); }
+
+      //Setup the processor core.
+
+      if( ( coreType & 0xFF ) == 0x07 )
+      {
+        if( core == null || core.type() != 0 ) { core = new X86( file ); } else { core.setTarget( file ); }
+            
+        core.setBit( is64bit ? X86.x86_64 : X86.x86_32 );
+                          
+        core.setEvent( this::Dis ); coreLoaded = true;
+      }
+      else { coreLoaded = false; }
     }
 
     n.insert( new JDNode("Mac Header.h", new long[]{ 0, ref++ } ), 0 ); des.add( DTemp ); DTemp = null;
@@ -289,5 +303,26 @@ public class Headers extends Data
     {
       info( i > 1 ? UMacHeaderInfo[ ( ( i - 2 ) % 6 ) + 2 ] : UMacHeaderInfo[ i ] );
     }
+  }
+
+  //Disassembler.
+
+  public void Dis( long loc, boolean crawl )
+  {
+    try
+    {
+      file.seekV( loc );
+
+      long floc = file.getFilePointer();
+
+      String d = core.disASM_Code();
+
+      info( "<html>" + d + "</html>" );
+
+      Virtual.setSelected( loc, file.getVirtualPointer() - 1 ); Offset.setSelected( floc, file.getFilePointer() - 1 );
+
+      ds.setDescriptor( core );
+    }
+    catch( java.io.IOException e ) { e.printStackTrace(); }
   }
 }

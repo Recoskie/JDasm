@@ -24,14 +24,7 @@ public class MAC extends Data implements JDEventListener
 
     //Load the application header.
 
-    header.readMAC( root );
-
-    //If it is the main application header then load the binary using the load commands.
-
-    if( App != null )
-    {
-      JDNode cmd = new JDNode("Load Commands"); commands.load( cmd ); root.add( cmd );
-    }
+    header.readMAC( root ); if( App != null ) { commands.load( root ); }
 
     //Set binary tree view, and enable IO system events.
       
@@ -54,12 +47,25 @@ public class MAC extends Data implements JDEventListener
 
     else if( e.getArg(0) < 0 )
     {
-      ds.clear(); info("");
+      //Begin disassembling the program.
+
+      if( e.getArg(0) == -4 )
+      {
+        if( coreLoaded )
+        {
+          core.clear(); core.Crawl.add( e.getArg(1) );
+
+          core.disLoc(0, true); ds.setDescriptor( core );
+        }
+        else { info("<html>The processor core architecture type has not been added to JDisassembly yet.</html>"); }
+      }
 
       //Select bytes in virtual space.
 
       if( e.getArg( 0 ) == -3 )
       {
+        ds.clear(); info("<html></html>");
+
         try
         {
           file.seekV( e.getArg(1) );
@@ -73,6 +79,8 @@ public class MAC extends Data implements JDEventListener
 
       else if( e.getArg( 0 ) == -2 )
       {
+        ds.clear(); info("<html></html>");
+
         if( tree.getLastSelectedPathComponent().toString().equals("Load Commands") )
         {
           tree.expandPath( tree.getSelectionPath() );
@@ -110,7 +118,7 @@ public class MAC extends Data implements JDEventListener
 
           //Begin loading the program with load commands.
 
-          JDNode cmd = new JDNode("Load Commands"); commands.load( cmd ); root.add( cmd );
+          commands.load( root );
         }
         catch(Exception er) { er.printStackTrace(); }
 

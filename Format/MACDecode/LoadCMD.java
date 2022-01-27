@@ -5,11 +5,13 @@ import swingIO.tree.*;
 
 public class LoadCMD extends Data
 {
-  public void load(JDNode n) throws java.io.IOException
+  public void load(JDNode root) throws java.io.IOException
   {
     long sectStart = file.getFilePointer();
 
     //Preparing to add the load commands.
+
+    JDNode n = new JDNode("Load Commands"); root.add( n ); 
 
     int cmd = 0, size = 0;
 
@@ -17,7 +19,7 @@ public class LoadCMD extends Data
     {
       DTemp = new Descriptor( file );
 
-      DTemp.LUINT32("Command"); cmd = (int)DTemp.value;
+      DTemp.LUINT32("Command"); cmd = (int)DTemp.value & 0xFF;
       DTemp.LUINT32("Size"); size = (int)DTemp.value - 8;
 
       if( size <= 0 ){ size = 0; }
@@ -101,6 +103,25 @@ public class LoadCMD extends Data
 
         n.add( n2 );
       }
+    
+      //The start of the application.
+
+      else if( cmd == 0x28 )
+      {
+        DTemp.LUINT64("Programs start address"); long start = (long)DTemp.value;
+        DTemp.LUINT64("Stack memory size");
+
+        DTemp.setEvent( this::startInfo ); des.add( DTemp );
+
+        n.setArgs( new long[]{ -2, sectStart, file.getFilePointer() } );
+
+        n.add( new JDNode( "Start Address.h", new long[]{ 0, ref++ } ) );
+
+        root.add( new JDNode("Program Start (Machine Code).h", new long[]{ -4, file.toVirtual( base + start ) } ) );
+      }
+
+      //An unknown command, or a command I have not added Yet.
+
       else
       {
         DTemp.Other("Command Data", size ); DTemp.setEvent( this::cmdInfo ); des.add( DTemp );
@@ -155,7 +176,7 @@ public class LoadCMD extends Data
   "<tr><td>25</td><td>Build for iPhoneOS min OS version.</td></tr>" +
   "<tr><td>26</td><td>Compressed table of function start addresses.</td></tr>" +
   "<tr><td>27</td><td>String for dyld to treat like environment variable.</td></tr>" +
-  "<tr><td>28</td><td>Replacement for LC_UNIXTHREAD.</td></tr>" +
+  "<tr><td>28</td><td>The start address for the application. Replacement for LC_UNIXTHREAD.</td></tr>" +
   "<tr><td>29</td><td>Table of non-instructions in __text.</td></tr>" +
   "<tr><td>2A</td><td>Source version used to build binary</td></tr>" +
   "<tr><td>2B</td><td>Code signing DRs copied from linked dylibs.</td></tr>" +
@@ -255,6 +276,13 @@ public class LoadCMD extends Data
     "<html>Reserved for future use (for use on 64 bit programs only).</html>"
   };
 
+  private static final String[] startInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>The file offset to the programs start Address.</html>",
+    "<html>Stack memory size.</html>"
+  };
+
   private void cmdInfo( int i )
   {
     if( i < 0 )
@@ -312,6 +340,18 @@ public class LoadCMD extends Data
     else
     {
       info( sectInfo[i] );
+    }
+  }
+
+  private void startInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>This is the location to the beginning of the program.</html>" );
+    }
+    else
+    {
+      info( startInfo[i] );
     }
   }
 }
