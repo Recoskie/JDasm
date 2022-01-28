@@ -66,7 +66,12 @@ public class MAC extends Data implements JDEventListener
 
           ds.setDescriptor( core );
         }
-        else { info("<html>The processor core architecture type has not been added to JDisassembly yet.</html>"); }
+        else
+        {
+          try { file.seekV( e.getArg(1) ); } catch( java.io.IOException er ) {  }
+          
+          info("<html>The processor core architecture type has not been added to JDisassembly yet.</html>");
+        }
       }
 
       //Select bytes in virtual space.

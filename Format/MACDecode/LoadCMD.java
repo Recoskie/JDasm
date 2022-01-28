@@ -29,7 +29,7 @@ public class LoadCMD extends Data
 
       if( size <= 0 ){ size = 0; }
 
-      //Begin reading the command by type.
+      //Loading the programs sections and data is the main priority here, so commands 0x19, and 0x01 come first.
 
       if( cmd == 0x19 || cmd == 0x01 )
       {
@@ -61,19 +61,21 @@ public class LoadCMD extends Data
         DTemp.LUINT32("Number of sections"); int sect = (int)DTemp.value;
         DTemp.LUINT32("flags");
 
-        DTemp.setEvent( this::segInfo );
-
-        JDNode n2 = new JDNode( name + ( oSize > 0 ? "" : ".h" ), new long[] { 0, ref++ } ); des.add( DTemp );
+        JDNode n2 = new JDNode( name + ( oSize > 0 ? "" : ".h" ), new long[] { 0, ref++ } );
+        
+        DTemp.setEvent( this::segInfo ); des.add( DTemp );
 
         if( oSize > 0 ) { n2.add( new JDNode( name + " (Data).h", new long[] { -3, address, address + vSize - 1 } ) ); }
 
+        JDNode t;
+
         for( int i2 = 0; i2 < sect; i2++ )
         {
-          DTemp = new Descriptor( file ); DTemp.setEvent( this::sectInfo );
+          DTemp = new Descriptor( file ); DTemp.setEvent( this::sectInfo ); des.add( DTemp );
 
           DTemp.String8("Section Name", 16); segName = (String)DTemp.value;
           
-          JDNode t = new JDNode( DTemp.value + "", new long[] { 0, ref++ } ); des.add( DTemp );
+          t = new JDNode( DTemp.value + "", new long[] { 0, ref++ } );
 
           DTemp.String8("Segment Name", 16);
 
@@ -115,6 +117,84 @@ public class LoadCMD extends Data
 
         n.add( n2 );
       }
+
+      //Symbol information.
+
+      else if( cmd == 0x02 )
+      {
+        DTemp.LUINT32("Symbol Offset"); int off = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Number of symbol"); int len = (int)DTemp.value;
+        DTemp.LUINT32("String table offset"); int strOff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("String table size"); int strSize = (int)DTemp.value;
+
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+        
+        JDNode n2 = new JDNode( "Symbol Table", new long[]{ 0, ref++ } ); n.add( n2 );
+      
+        n2.add( new JDNode( "String table.h", new long[]{ -2, strOff, strOff + strSize - 1 } ) );
+
+        JDNode n3 = new JDNode( "Symbols", new long[]{ 0, ref++ } ); n2.add( n3 );
+        
+        //Begin reading all the symbols.
+        
+        Descriptor string;
+
+        long t1 = file.getFilePointer(), t2 = 0;
+
+        file.seek(off); DTemp = new Descriptor( file ); DTemp.setEvent( this::blank ); des.add( DTemp );
+      
+        for( int i2 = 0; i2 < len; i2++ )
+        {
+          DTemp.Array("Symbol #" + i2 + "", is64bit ? 16 : 12 );
+          DTemp.LUINT32("Name"); int name = (int)DTemp.value;
+          DTemp.UINT8("Type");
+          DTemp.UINT8("Sect");
+          DTemp.LUINT16("D Sect");
+          if( is64bit ) { DTemp.LUINT64("Symbol offset"); } else { DTemp.LUINT32("Symbol offset"); }
+
+          t2 = file.getFilePointer(); file.seek( name + strOff );
+
+          string = new Descriptor( file ); string.setEvent( this::blank );
+
+          string.String8("Symbol name", (byte)0x00 );
+
+          n3.add( new JDNode( string.value + ".h", new long[]{ 0, ref++ }) );
+
+          des.add( string ); file.seek( t2 );
+        }
+
+        file.seek( t1 );
+      }
+
+      //Load a link library.
+
+      else if( cmd == 0x0C || cmd == 0x0D )
+      {
+        DTemp.LUINT32("String Offset"); int off = (int)DTemp.value;
+        DTemp.LUINT32("Time date stamp");
+        DTemp.LUINT32("Current version");
+        DTemp.LUINT32("Compatibility version");
+
+        if( off < 24 ){ DTemp.Other( "Other Data", off - 24 ); }
+
+        DTemp.String8("Dynamic Library", ( size + 8 ) - off );
+
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+      
+        n.add( new JDNode( "Load link library.h", new long[]{ 0, ref++ } ) );
+      }
+
+      //Load a dynamic linker.
+
+      else if( cmd == 0x0E )
+      {
+        DTemp.LUINT32("String Offset"); int off = (int)DTemp.value;
+        DTemp.String8("Dynamic linker", ( size + 8 ) - off );
+
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+
+        n.add( new JDNode( "Dynamic linker.h", new long[]{ 0, ref++ } ) );
+      }
     
       //The start of the application.
 
@@ -125,8 +205,6 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::startInfo ); des.add( DTemp );
 
-        n.setArgs( new long[]{ -2, sectStart, file.getFilePointer() } );
-
         n.add( new JDNode( "Start Address.h", new long[]{ 0, ref++ } ) );
       }
 
@@ -136,11 +214,13 @@ public class LoadCMD extends Data
       {
         DTemp.Other("Command Data", size ); DTemp.setEvent( this::cmdInfo ); des.add( DTemp );
 
-        n.setArgs( new long[]{ -2, sectStart, file.getFilePointer() } );
-
         n.add( new JDNode( "CMD #" + i + ".h", new long[]{ 0, ref++ } ) );
       }
     }
+
+    //The end of all commands.
+
+    n.setArgs( new long[]{ -2, sectStart, file.getFilePointer() } );
 
     //Sections that only machine code.
 
@@ -371,5 +451,10 @@ public class LoadCMD extends Data
     {
       info( startInfo[i] );
     }
+  }
+
+  private void blank( int i )
+  {
+    info("<html>No information on this section or its properties yet.</html>");
   }
 }
