@@ -152,15 +152,22 @@ public class LoadCMD extends Data
           DTemp.LUINT16("D Sect");
           if( is64bit ) { DTemp.LUINT64("Symbol offset"); } else { DTemp.LUINT32("Symbol offset"); }
 
-          t2 = file.getFilePointer(); file.seek( name + strOff );
+          if( name != 0 )
+          {
+            t2 = file.getFilePointer(); file.seek( name + strOff );
 
-          string = new Descriptor( file ); string.setEvent( this::blank );
+            string = new Descriptor( file ); string.setEvent( this::blank );
 
-          string.String8("Symbol name", (byte)0x00 );
+            string.String8("Symbol name", (byte)0x00 );
 
-          n3.add( new JDNode( string.value + ".h", new long[]{ 0, ref++ }) );
+            n3.add( new JDNode( string.value + ".h", new long[]{ 0, ref++ }) );
 
-          des.add( string ); file.seek( t2 );
+            des.add( string ); file.seek( t2 );
+          }
+          else
+          {
+            n3.add( new JDNode( "null.h", new long[]{ 0, ref++ }) );
+          }
         }
 
         file.seek( t1 );
