@@ -127,7 +127,7 @@ public class LoadCMD extends Data
         DTemp.LUINT32("String table offset"); int strOff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("String table size"); int strSize = (int)DTemp.value;
 
-        DTemp.setEvent( this::blank ); des.add( DTemp );
+        DTemp.setEvent( this::symInfo ); des.add( DTemp );
         
         JDNode n2 = new JDNode( "Symbol Table", new long[]{ 0, ref++ } ); n.add( n2 );
       
@@ -141,18 +141,22 @@ public class LoadCMD extends Data
 
         long t1 = file.getFilePointer(), t2 = 0;
 
-        file.seek(off); DTemp = new Descriptor( file ); DTemp.setEvent( this::blank ); des.add( DTemp );
+        file.seek(off); DTemp = new Descriptor( file ); DTemp.setEvent( this::symsInfo ); des.add( DTemp );
       
         for( int i2 = 0; i2 < len; i2++ )
         {
           DTemp.Array("Symbol #" + i2 + "", is64bit ? 16 : 12 );
           DTemp.LUINT32("Name"); int name = (int)DTemp.value;
-          DTemp.UINT8("Type");
-          DTemp.UINT8("Sect");
-          DTemp.LUINT16("D Sect");
+          DTemp.UINT8("Type"); int type = (byte)DTemp.value; 
+          DTemp.UINT8("NSect"); int NSect = (byte)DTemp.value;
+          DTemp.LUINT16("DSect"); int DSect = (short)DTemp.value;
           if( is64bit ) { DTemp.LUINT64("Symbol offset"); } else { DTemp.LUINT32("Symbol offset"); }
 
-          if( name != 0 )
+          if( ( type & 0x0E ) == 0x0E && NSect > 0 )
+          {
+            n3.add( new JDNode("Symbol #" + NSect + ".h") );
+          }
+          else if( name != 0 )
           {
             t2 = file.getFilePointer(); file.seek( name + strOff );
 
@@ -166,7 +170,7 @@ public class LoadCMD extends Data
           }
           else
           {
-            n3.add( new JDNode( "null.h", new long[]{ 0, ref++ }) );
+            n3.add( new JDNode( "null.h" ) );
           }
         }
 
@@ -238,7 +242,9 @@ public class LoadCMD extends Data
     if( main != 0 ) { root.add( new JDNode("Program Start (Machine Code).h", new long[]{ -4, main } ) ); }
   }
 
-  public static final String cmdType = "The first 2 hex digits is the load command. If the last two hex digits are 80 this means the section is required for the program to run properly.<br /><br />" +
+  private static final String offsets = "<br /><br />If this is a universal binary then the offset is added to the start of the application in this file.";
+
+  private static final String cmdType = "The first 2 hex digits is the load command. If the last two hex digits are 80 this means the section is required for the program to run properly.<br /><br />" +
   "Majority of the section types are not necessary to load or run the program.<br /><br />" +
   "<table border='1'>" +
   "<tr><td>Command</td><td>Section</td></tr>" +
@@ -310,8 +316,7 @@ public class LoadCMD extends Data
     "<html>Segment name. A Segment can be divided into smaller section names.</html>",
     "<html>Memory address to place the Segment in RAM memory.</html>",
     "<html>Number of bytes to place in RAM memory for this Segment.</html>",
-    "<html>File position to the bytes that will be read and placed into RAM at the memory address.<br /><br />" +
-    "If this is a universal binary then the offset is added to the start of the application in this file.</html>",
+    "<html>File position to the bytes that will be read and placed into RAM at the memory address." + offsets + "</html>",
     "<html>The number of bytes to read from the file to be placed at the RAM address.<br /><br />" +
     "If this is smaller than the number of bytes to place in RAM for this Segment then the rest are 00 byte filled.<br /><br />" +
     "The segment named PAGEZERO generally creates a large space of 0 for where the program is going be loaded.</html>",
@@ -381,6 +386,63 @@ public class LoadCMD extends Data
     "<html>Reserved for future use (for use on 64 bit programs only).</html>"
   };
 
+  private static final String[] symInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>This is the file position to the symbol table." + offsets + "</html>",
+    "<html>This is the number of symbols at the symbol table offset.</html>",
+    "<html>This is the file position to the string table. This value is added with the name value in the symbol table to find create the file position to the name of a symbol." + offsets + "</html>",
+    "<html>This is the size of the string table. If the name value is bigger than the string table size then we know we are reading outside the names and that there is something wrong.</html>"
+  };
+
+  private static final String[] symsInfo = new String[]
+  {
+    "<html>Array element for defining one symbol.</html>",
+    "<html>The name value is added to the file position for the string table. If this value is 0 then the symbol has no name." + offsets + "</html>",
+    "<html>This value is broken into tow sections. First is the flag setting. Any of the binary digits that are set one correspond to the following settings.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Digit</td><td>Setting</td></tr>" +
+    "<tr><td>10000000</td><td>Symbolic debugging entry.</td></tr>" +
+    "<tr><td>01000000</td><td>Symbolic debugging entry.</td></tr>" +
+    "<tr><td>00100000</td><td>Symbolic debugging entry.</td></tr>" +
+    "<tr><td>00010000</td><td>Private external symbol.</td></tr>" +
+    "<tr><td>00000001</td><td>External symbol.</td></tr>" +
+    "<tr><td>0000xxx0</td><td>The digits marked x here are used as a combination for the type setting.</td></tr>" +
+    "</table><br /><br />" +
+    "The type setting uses the three digits marked as x in the above table as the type setting combination. The hyphens are used to separate the tree bits for the type setting.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Combination</td><td>Setting</td></tr>" +
+    "<tr><td>0000-000-0</td><td>Symbol undefined.</td></tr>" +
+    "<tr><td>0000-001-0</td><td>Symbol absolute.</td></tr>" +
+    "<tr><td>0000-101-0</td><td>Symbol indirect.</td></tr>" +
+    "<tr><td>0000-110-0</td><td>Symbol prebound undefined.</td></tr>" +
+    "<tr><td>0000-111-0</td><td>Symbol does not use a name. Instead it uses a number value.</td></tr>" +
+    "</table></html>",
+    "<html>An integer specifying the number of the section that this symbol can be found in.<br  /><br />" +
+    "If the type setting of the symbol is set to use no name, then this value is used as the symbols number name.<br /><br />" +
+    "If the symbol is set to use no name and this value is set also set to 0 then it means that the symbol is undefined, or non existing.</html>",
+    "<html>The DSect value setting describes additional information about the type of symbol this is. The last four binary digits are used as a combination for the symbol type.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Value</td><td>Description</td></tr>" +
+    "<tr><td>000000000000-0000</td><td>This symbol is a reference to an external symbol.</td></tr>" +
+    "<tr><td>000000000000-0001</td><td>This symbol is a reference to an external function call.</td></tr>" +
+    "<tr><td>000000000000-0010</td><td>This symbol is defined in this library/program.</td></tr>" +
+    "<tr><td>000000000000-0011</td><td>This symbol is defined in this module and is visible only to library/program within this shared library.</td></tr>" +
+    "<tr><td>000000000000-0100</td><td>This symbol is defined in another module in this file, and is visible only to libraries/programs within this shared library.</td></tr>" +
+    "<tr><td>000000000000-0101</td><td>This symbol is defined in another module in this file, is a lazy (function) symbol, and is visible only to libraries/programs within this shared library.</td></tr>" +
+    "</table><br />" +
+    "The following digits if set one correspond to a setting. More than one can be set.<br /><br />" +
+    "<table border='1'>"+
+    "<tr><td>Digit</td><td>Setting</td></tr>" +
+    "<tr><td>0000000000010000</td><td>Must be set for any defined symbol that is referenced by dynamic-loader.</td></tr>" +
+    "<tr><td>0000000000100000</td><td>Used by the dynamic linker at runtime.</td></tr>" +
+    "<tr><td>0000000001000000</td><td>If the dynamic linker cannot find a definition for this symbol, it sets the address of this symbol to 0.</td></tr>" +
+    "<tr><td>0000000010000000</td><td>If the static linker or the dynamic linker finds another definition for this symbol, the definition is ignored.</td></tr>" +
+    "<tr><td>000000000000xxxx</td><td>The digits marked as x here are used for the symbol type information. See the first table for type information.</td></tr>" +
+    "</table></html>",
+    "<html>The address location that the symbol is at.</html>",
+  };
+
   private static final String[] startInfo = new String[]
   {
     cmdType, cmdSize,
@@ -445,6 +507,30 @@ public class LoadCMD extends Data
     else
     {
       info( sectInfo[i] );
+    }
+  }
+
+  private void symInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>The symbols define the method calls and function calls in a mac binary.</html>" );
+    }
+    else
+    {
+      info( symInfo[i] );
+    }
+  }
+
+  private void symsInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>This is the symbol array.</html>" );
+    }
+    else
+    {
+      info( symsInfo[ i % 6 ] );
     }
   }
 
