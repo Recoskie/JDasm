@@ -142,21 +142,24 @@ public class LoadCMD extends Data
         long t1 = file.getFilePointer(), t2 = 0;
 
         file.seek(off); DTemp = new Descriptor( file ); DTemp.setEvent( this::symsInfo ); des.add( DTemp );
+
+        int id;
       
         for( int i2 = 0; i2 < len; i2++ )
         {
+          id = 0;
+
           DTemp.Array("Symbol #" + i2 + "", is64bit ? 16 : 12 );
           DTemp.LUINT32("Name"); int name = (int)DTemp.value;
           DTemp.UINT8("Type"); int type = (byte)DTemp.value; 
           DTemp.UINT8("NSect"); int NSect = (byte)DTemp.value;
           DTemp.LUINT16("DSect"); int DSect = (short)DTemp.value;
+
           if( is64bit ) { DTemp.LUINT64("Symbol offset"); } else { DTemp.LUINT32("Symbol offset"); }
 
-          if( ( type & 0x0E ) == 0x0E && NSect > 0 )
-          {
-            n3.add( new JDNode("Symbol #" + NSect + ".h") );
-          }
-          else if( name != 0 )
+          if( ( type & 0x0E ) == 0x0E ) { id = NSect; }
+          
+          if( name != 0 )
           {
             t2 = file.getFilePointer(); file.seek( name + strOff );
 
@@ -164,9 +167,13 @@ public class LoadCMD extends Data
 
             string.String8("Symbol name", (byte)0x00 );
 
-            n3.add( new JDNode( string.value + ".h", new long[]{ 0, ref++ }) );
+            n3.add( new JDNode( string.value + ( id > 0 ? " #" + id + "" : "" ) + ".h", new long[]{ 0, ref++ }) );
 
             des.add( string ); file.seek( t2 );
+          }
+          else if( id > 0 )
+          {
+            n3.add( new JDNode("Symbol #" + id + ".h") );
           }
           else
           {
@@ -416,12 +423,22 @@ public class LoadCMD extends Data
     "<tr><td>0000-001-0</td><td>Symbol absolute.</td></tr>" +
     "<tr><td>0000-101-0</td><td>Symbol indirect.</td></tr>" +
     "<tr><td>0000-110-0</td><td>Symbol prebound undefined.</td></tr>" +
-    "<tr><td>0000-111-0</td><td>Symbol does not use a name. Instead it uses a number value.</td></tr>" +
+    "<tr><td>0000-111-0</td><td>Symbol does not the section value.</td></tr>" +
     "</table></html>",
     "<html>An integer specifying the number of the section that this symbol can be found in.<br  /><br />" +
-    "If the type setting of the symbol is set to use no name, then this value is used as the symbols number name.<br /><br />" +
-    "If the symbol is set to use no name and this value is set also set to 0 then it means that the symbol is undefined, or non existing.</html>",
-    "<html>The DSect value setting describes additional information about the type of symbol this is. The last four binary digits are used as a combination for the symbol type.<br /><br />" +
+    "If the type setting of the symbol is set to use no section, then this value is used as the symbols number name.<br /><br />" +
+    "An symbol can be both referenced by a name, or by a number. If the symbol is set to use no name and this value is set also set to 0 then it means that the symbol is null (Non existent).</html>",
+    "<html>The DSect value setting describes additional information about the type of symbol this is.<br /><br />" +
+    "This value is broken into tow sections. First is the flag setting. Any of the binary digits that are set one correspond to the following settings.<br /><br />" +
+    "<table border='1'>"+
+    "<tr><td>Digit</td><td>Setting</td></tr>" +
+    "<tr><td>0000000000010000</td><td>Must be set for any defined symbol that is referenced by dynamic-loader.</td></tr>" +
+    "<tr><td>0000000000100000</td><td>Used by the dynamic linker at runtime.</td></tr>" +
+    "<tr><td>0000000001000000</td><td>If the dynamic linker cannot find a definition for this symbol, it sets the address of this symbol to 0.</td></tr>" +
+    "<tr><td>0000000010000000</td><td>If the static linker or the dynamic linker finds another definition for this symbol, the definition is ignored.</td></tr>" +
+    "<tr><td>000000000000xxxx</td><td>The digits marked as x here are used for the symbol type information. See the next table for type information.</td></tr>" +
+    "</table><br />" +
+    "The last four binary digits are used as a combination for the symbol type which are separated by a hyphen.<br /><br />" +
     "<table border='1'>" +
     "<tr><td>Value</td><td>Description</td></tr>" +
     "<tr><td>000000000000-0000</td><td>This symbol is a reference to an external symbol.</td></tr>" +
@@ -430,15 +447,6 @@ public class LoadCMD extends Data
     "<tr><td>000000000000-0011</td><td>This symbol is defined in this module and is visible only to library/program within this shared library.</td></tr>" +
     "<tr><td>000000000000-0100</td><td>This symbol is defined in another module in this file, and is visible only to libraries/programs within this shared library.</td></tr>" +
     "<tr><td>000000000000-0101</td><td>This symbol is defined in another module in this file, is a lazy (function) symbol, and is visible only to libraries/programs within this shared library.</td></tr>" +
-    "</table><br />" +
-    "The following digits if set one correspond to a setting. More than one can be set.<br /><br />" +
-    "<table border='1'>"+
-    "<tr><td>Digit</td><td>Setting</td></tr>" +
-    "<tr><td>0000000000010000</td><td>Must be set for any defined symbol that is referenced by dynamic-loader.</td></tr>" +
-    "<tr><td>0000000000100000</td><td>Used by the dynamic linker at runtime.</td></tr>" +
-    "<tr><td>0000000001000000</td><td>If the dynamic linker cannot find a definition for this symbol, it sets the address of this symbol to 0.</td></tr>" +
-    "<tr><td>0000000010000000</td><td>If the static linker or the dynamic linker finds another definition for this symbol, the definition is ignored.</td></tr>" +
-    "<tr><td>000000000000xxxx</td><td>The digits marked as x here are used for the symbol type information. See the first table for type information.</td></tr>" +
     "</table></html>",
     "<html>The address location that the symbol is at.</html>",
   };
