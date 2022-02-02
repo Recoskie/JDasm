@@ -114,6 +114,8 @@ public class MAC extends Data implements JDEventListener
 
     else if( e.getArg( 0 ) == 1 )
     {
+      ds.clear(); info("<html></html>");
+
       JDNode root = (JDNode)tree.getLastSelectedPathComponent();
 
       //We do not want to reload an existing binary if already loaded.
