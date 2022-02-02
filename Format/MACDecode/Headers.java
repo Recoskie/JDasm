@@ -12,11 +12,9 @@ public class Headers extends Data
   {
     //Begin reading the MacOS header.
 
-    DTemp = new Descriptor( file ); des.add( DTemp ); JDNode n = new JDNode("Mac Header", new long[]{ 0, ref++ } );
+    DTemp = new Descriptor( file ); JDNode n = new JDNode("Mac Header");
     
-    DTemp.LUINT32("Signature");
-    
-    is64bit = (int)DTemp.value == -17958193;
+    DTemp.LUINT32("Signature"); is64bit = (int)DTemp.value == -17958193;
 
     //Mac universal binaries have more than one loadable mac program that can be switch between.
     
@@ -58,8 +56,6 @@ public class Headers extends Data
 
         bd.add( des.get(0) ); des = bd; ref = 1;
 
-        des.add( DTemp ); n.setArgs( new long[]{ 0, ref++ } );
-
         //Remove everything read under the other App.
 
         App.removeAllChildren(); App.add( new JDNode( "" ) );
@@ -100,6 +96,8 @@ public class Headers extends Data
       }
       else { coreLoaded = false; }
     }
+
+    des.add( DTemp ); n.setArgs( new long[]{ 0, ref++ } );
 
     return( n );
   }

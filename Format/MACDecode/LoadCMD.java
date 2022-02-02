@@ -7,7 +7,11 @@ public class LoadCMD extends Data
 {
   public void load(JDNode root) throws java.io.IOException
   {
-    App.removeAllChildren();
+    //Remove the dummy node.
+
+    App.remove(0);
+
+    //Program start address.
 
     long main = 0;
 
