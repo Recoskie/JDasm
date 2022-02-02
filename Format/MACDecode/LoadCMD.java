@@ -153,7 +153,7 @@ public class LoadCMD extends Data
           DTemp.LUINT32("Name"); int name = (int)DTemp.value;
           DTemp.UINT8("Type"); int type = (byte)DTemp.value; 
           DTemp.UINT8("NSect"); int NSect = (byte)DTemp.value;
-          DTemp.LUINT16("DSect"); int DSect = (short)DTemp.value;
+          DTemp.LUINT16("DSect");
 
           if( is64bit ) { DTemp.LUINT64("Symbol offset"); } else { DTemp.LUINT32("Symbol offset"); }
 
@@ -182,6 +182,49 @@ public class LoadCMD extends Data
         }
 
         file.seek( t1 );
+      }
+
+      //Dynamic link edit symbol table.
+
+      else if( cmd == 0x0B )
+      {
+        DTemp.LUINT32("Local sym index");
+        DTemp.LUINT32("Number of local symbols");
+        DTemp.LUINT32("Index to external sym");
+        DTemp.LUINT32("Number of external sym");
+        DTemp.LUINT32("Index to undefined sym");
+        DTemp.LUINT32("Number of undefined sym");
+
+        DTemp.LUINT32("Contents table offset"); int coff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Entries in table of contents"); int csize = (int)DTemp.value;
+
+        DTemp.LUINT32("Offset to module table"); int moff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("number of module table entries"); int msize = (int)DTemp.value;
+
+        DTemp.LUINT32("Offset to referenced symbol table"); int roff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Number of referenced symbol table entries"); int rsize = (int)DTemp.value;
+
+        DTemp.LUINT32("File offset to the indirect symbol table"); int indoff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Number of indirect symbol table entries"); int indsize = (int)DTemp.value;
+
+        DTemp.LUINT32("Offset to external relocation entries"); int extoff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Number of external relocation entries"); int extsize = (int)DTemp.value;
+
+        DTemp.LUINT32("Offset to local relocation entries"); int loff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Number of local relocation entries"); int lsize = (int)DTemp.value;
+
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+
+        JDNode n1 = new JDNode( "Link Edit info", new long[]{ 0, ref++ } );
+      
+        if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ -2, coff, coff + csize * 4 - 1 } ) ); }
+        if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ -2, moff, moff + msize * 4 - 1 } ) ); }
+        if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ -2, roff, roff + rsize * 4 - 1 } ) ); }
+        if( indsize > 0 ) { n1.add( new JDNode("Indirect Sym.h", new long[]{ -2, indoff, indoff + indsize * 4 - 1 } ) ); }
+        if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ -2, extoff, extoff + extsize * 4 - 1 } ) ); }
+        if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ -2, loff, loff + lsize * 4 - 1 } ) ); }
+
+        n.add( n1 );
       }
 
       //Load a link library.
@@ -224,6 +267,102 @@ public class LoadCMD extends Data
         DTemp.setEvent( this::startInfo ); des.add( DTemp );
 
         n.add( new JDNode( "Start Address.h", new long[]{ 0, ref++ } ) );
+      }
+
+      //The UUID.
+
+      else if( cmd == 0x1B )
+      {
+        DTemp.Other("128-bit UUID", 16);
+
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+
+        n.add( new JDNode( "APP UUID.h", new long[]{ 0, ref++ } ) );
+      }
+
+      //Link edit.
+
+      else if( cmd == 0x1D || cmd == 0x1E || cmd == 0x26 || cmd == 0x29 || cmd == 0x2B || cmd == 0x2E || cmd == 0x33 || cmd == 0x34 )
+      {
+        DTemp.LUINT32("Offset"); int off = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Size"); int s = (int)DTemp.value;
+
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+
+        JDNode n1;
+        
+        if( cmd == 0x1D ) { n1 = new JDNode( "Code Signature", new long[]{ 0, ref++ } ); }
+        else if( cmd == 0x1E ) { n1 = new JDNode( "Split info", new long[]{ 0, ref++ } ); }
+        else if( cmd == 0x26) { n1 = new JDNode( "Function Starts", new long[]{ 0, ref++ } ); }
+        else if( cmd == 0x29 ) { n1 = new JDNode( "Data in Code", new long[]{ 0, ref++ } ); }
+        else if( cmd == 0x2B ) { n1 = new JDNode( "Code Singing", new long[]{ 0, ref++ } ); }
+        else if( cmd == 0x2E ) { n1 = new JDNode( "Optimization Hints", new long[]{ 0, ref++ } ); }
+        else if( cmd == 0x33 ) { n1 = new JDNode( "Exports", new long[]{ 0, ref++ } ); }
+        else { n1 = new JDNode( "Chained Fixups", new long[]{ 0, ref++ } ); }
+
+        n1.add( new JDNode("sect.h", new long[]{ -2, off, off + s - 1 } ) );
+
+        n.add( n1 );
+      }
+
+      //Compressed link information.
+
+      else if( cmd == 0x22 )
+      {
+        DTemp.LUINT32("rebase offset"); int roff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("rebase size"); int rsize = (int)DTemp.value;
+        DTemp.LUINT32("bind offset"); int boff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("bind size"); int bsize = (int)DTemp.value;
+        DTemp.LUINT32("weak bind offset"); int wboff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("weak bind size"); int wbsize = (int)DTemp.value;
+        DTemp.LUINT32("lazy bind offset"); int lboff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("lazy bind size"); int lbsize = (int)DTemp.value;
+        DTemp.LUINT32("export offset"); int eoff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("export size"); int esize = (int)DTemp.value;
+
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+
+        JDNode n1 = new JDNode( "Link info", new long[]{ 0, ref++ } );
+
+        if( rsize > 0 ){ n1.add( new JDNode("rebase.h", new long[]{ -2, roff, roff + rsize - 1 } ) ); }
+        if( bsize > 0 ){ n1.add( new JDNode("bind.h", new long[]{ -2, boff, boff + bsize - 1 } ) ); }
+        if( wbsize > 0 ){ n1.add( new JDNode("weak bind.h", new long[]{ -2, wboff, wboff + wbsize - 1 } ) ); }
+        if( lbsize > 0 ){ n1.add( new JDNode("lazy bind.h", new long[]{ -2, lboff, lboff + lbsize - 1 } ) ); }
+        if( esize > 0 ){ n1.add( new JDNode("export.h", new long[]{ -2, eoff, eoff + esize - 1 } ) ); }
+
+        n.add( n1 );
+      }
+
+      //The Source Version.
+
+      else if( cmd == 0x2A )
+      {
+        DTemp.LUINT64("Source Version");
+      
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+      
+        n.add( new JDNode( "Source Version.h", new long[]{ 0, ref++ } ) );
+      }
+
+      //Minimum OS version.
+
+      else if( cmd == 0x32 )
+      {
+        DTemp.LUINT32("Platform");
+        DTemp.LUINT32("Minium OS");
+        DTemp.LUINT32("SDK");
+        DTemp.LUINT32("Num Tools"); int t = (int)DTemp.value;
+
+        for( int i1 = 0; i1 < t; i1++ )
+        {
+          DTemp.Array("Tool #" + i1 + "", 8);
+          DTemp.LUINT32("Tool type");
+          DTemp.LUINT32("Tool version");
+        }
+
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+
+        n.add( new JDNode( "OS Version.h", new long[]{ 0, ref++ } ) );
       }
 
       //An unknown command, or a command I have not added Yet.
