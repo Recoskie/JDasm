@@ -64,7 +64,7 @@ public class Headers extends Data
 
         //Reset the applications virtual address space.
 
-        file.resetV();
+        file.resetV(); core.clear(); ds.clear();
 
         //Update the tree.
 
