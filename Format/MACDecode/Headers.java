@@ -8,11 +8,11 @@ import core.x86.*;
 
 public class Headers extends Data
 {
-  public void readMAC(JDNode n) throws java.io.IOException
+  public JDNode readMAC( JDNode app ) throws java.io.IOException
   {
     //Begin reading the MacOS header.
 
-    DTemp = new Descriptor( file ); n.removeAllChildren();
+    DTemp = new Descriptor( file ); des.add( DTemp ); JDNode n = new JDNode("Mac Header", new long[]{ 0, ref++ } );
     
     DTemp.LUINT32("Signature");
     
@@ -58,6 +58,8 @@ public class Headers extends Data
 
         bd.add( des.get(0) ); des = bd; ref = 1;
 
+        des.add( DTemp ); n.setArgs( new long[]{ 0, ref++ } );
+
         //Remove everything read under the other App.
 
         App.removeAllChildren(); App.add( new JDNode( "" ) );
@@ -73,7 +75,7 @@ public class Headers extends Data
 
       //Set the current node for the application that is being read.
       
-      base = file.getFilePointer() - 4; App = n; DTemp.setEvent( this::MacHInfo );
+      base = file.getFilePointer() - 4; App = app; DTemp.setEvent( this::MacHInfo );
 
       //Read the application header.
 
@@ -99,7 +101,7 @@ public class Headers extends Data
       else { coreLoaded = false; }
     }
 
-    n.insert( new JDNode("Mac Header.h", new long[]{ 0, ref++ } ), 0 ); des.add( DTemp ); DTemp = null;
+    return( n );
   }
 
   private static final String Singatures = "<html>The MacOS binary format uses two signature types.<br /><br />" +
@@ -260,6 +262,7 @@ public class Headers extends Data
   {
     if( i < 0 )
     {
+      tree.expandPath( tree.getSelectionPath() );
       info("<html>The MacOS header identifies the type of core the machine code binary is intended to run on.<br /><br />" +
       "It also specifies the number of loading commands to map and load the binary into memory.</html>"); return;
     }
@@ -296,6 +299,7 @@ public class Headers extends Data
   {
     if( i < 0 )
     {
+      tree.expandPath( tree.getSelectionPath() );
       info("<html>The MacOS header identifies the type of core the machine code binary is intended to run on.<br /><br />" +
       "It also specifies the number of loading commands to map and load the binary into memory.</html>");
     }

@@ -24,7 +24,7 @@ public class MAC extends Data implements JDEventListener
 
     //Load the application header.
 
-    header.readMAC( root ); if( App != null ) { commands.load( root ); }
+    JDNode h = header.readMAC( root ); if( App != null ) { commands.load( h ); } root.insert( h, 0 );
 
     //Set binary tree view, and enable IO system events.
       
@@ -128,11 +128,11 @@ public class MAC extends Data implements JDEventListener
         {
           //Load the main application header.
 
-          file.seek( Offset ); header.readMAC( root );
+          file.seek( Offset ); JDNode h = header.readMAC( root );
 
           //Begin loading the program with load commands.
 
-          commands.load( root );
+          commands.load( h ); root.insert( h, 0 );
         }
         catch(Exception er) { er.printStackTrace(); }
 

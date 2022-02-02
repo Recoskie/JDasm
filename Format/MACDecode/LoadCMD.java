@@ -7,16 +7,13 @@ public class LoadCMD extends Data
 {
   public void load(JDNode root) throws java.io.IOException
   {
-    long sectStart = file.getFilePointer();
+    App.removeAllChildren();
+
     long main = 0;
 
     //WE should divide sections by data.
 
     JDNode code = new JDNode( "Code Sections" );
-
-    //Preparing to add the load commands.
-
-    JDNode n = new JDNode("Load Commands"); root.add( n ); 
 
     int cmd = 0, size = 0;
 
@@ -115,7 +112,7 @@ public class LoadCMD extends Data
           n2.add( t );
         }
 
-        n.add( n2 );
+        root.add( n2 );
       }
 
       //Symbol information.
@@ -129,7 +126,7 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::symInfo ); des.add( DTemp );
         
-        JDNode n2 = new JDNode( "Symbol Table", new long[]{ 0, ref++ } ); n.add( n2 );
+        JDNode n2 = new JDNode( "Symbol Table", new long[]{ 0, ref++ } ); root.add( n2 );
       
         n2.add( new JDNode( "String table.h", new long[]{ -2, strOff, strOff + strSize - 1 } ) );
 
@@ -224,7 +221,7 @@ public class LoadCMD extends Data
         if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ -2, extoff, extoff + extsize * 4 - 1 } ) ); }
         if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ -2, loff, loff + lsize * 4 - 1 } ) ); }
 
-        n.add( n1 );
+        root.add( n1 );
       }
 
       //Load a link library.
@@ -242,7 +239,7 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::blank ); des.add( DTemp );
       
-        n.add( new JDNode( "Load link library.h", new long[]{ 0, ref++ } ) );
+        root.add( new JDNode( "Load link library.h", new long[]{ 0, ref++ } ) );
       }
 
       //Load a dynamic linker.
@@ -254,7 +251,7 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::blank ); des.add( DTemp );
 
-        n.add( new JDNode( "Dynamic linker.h", new long[]{ 0, ref++ } ) );
+        root.add( new JDNode( "Dynamic linker.h", new long[]{ 0, ref++ } ) );
       }
     
       //The start of the application.
@@ -266,7 +263,7 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::startInfo ); des.add( DTemp );
 
-        n.add( new JDNode( "Start Address.h", new long[]{ 0, ref++ } ) );
+        root.add( new JDNode( "Start Address.h", new long[]{ 0, ref++ } ) );
       }
 
       //The UUID.
@@ -277,7 +274,7 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::blank ); des.add( DTemp );
 
-        n.add( new JDNode( "APP UUID.h", new long[]{ 0, ref++ } ) );
+        root.add( new JDNode( "APP UUID.h", new long[]{ 0, ref++ } ) );
       }
 
       //Link edit.
@@ -302,7 +299,7 @@ public class LoadCMD extends Data
 
         n1.add( new JDNode("sect.h", new long[]{ -2, off, off + s - 1 } ) );
 
-        n.add( n1 );
+        root.add( n1 );
       }
 
       //Compressed link information.
@@ -330,7 +327,7 @@ public class LoadCMD extends Data
         if( lbsize > 0 ){ n1.add( new JDNode("lazy bind.h", new long[]{ -2, lboff, lboff + lbsize - 1 } ) ); }
         if( esize > 0 ){ n1.add( new JDNode("export.h", new long[]{ -2, eoff, eoff + esize - 1 } ) ); }
 
-        n.add( n1 );
+        root.add( n1 );
       }
 
       //The Source Version.
@@ -341,7 +338,7 @@ public class LoadCMD extends Data
       
         DTemp.setEvent( this::blank ); des.add( DTemp );
       
-        n.add( new JDNode( "Source Version.h", new long[]{ 0, ref++ } ) );
+        root.add( new JDNode( "Source Version.h", new long[]{ 0, ref++ } ) );
       }
 
       //Minimum OS version.
@@ -362,7 +359,7 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::blank ); des.add( DTemp );
 
-        n.add( new JDNode( "OS Version.h", new long[]{ 0, ref++ } ) );
+        root.add( new JDNode( "OS Version.h", new long[]{ 0, ref++ } ) );
       }
 
       //An unknown command, or a command I have not added Yet.
@@ -371,21 +368,17 @@ public class LoadCMD extends Data
       {
         DTemp.Other("Command Data", size ); DTemp.setEvent( this::cmdInfo ); des.add( DTemp );
 
-        n.add( new JDNode( "CMD #" + i + ".h", new long[]{ 0, ref++ } ) );
+        root.add( new JDNode( "CMD #" + i + ".h", new long[]{ 0, ref++ } ) );
       }
     }
 
-    //The end of all commands.
-
-    n.setArgs( new long[]{ -2, sectStart, file.getFilePointer() } );
-
     //Sections that only machine code.
 
-    if( code.getChildCount() > 0 ) { root.add( code ); }
+    if( code.getChildCount() > 0 ) { App.add( code ); }
 
     //The programs main entry point.
 
-    if( main != 0 ) { root.add( new JDNode("Program Start (Machine Code).h", new long[]{ -4, main } ) ); }
+    if( main != 0 ) { App.add( new JDNode("Program Start (Machine Code).h", new long[]{ -4, main } ) ); }
   }
 
   private static final String offsets = "<br /><br />If this is a universal binary then the offset is added to the start of the application in this file.";
