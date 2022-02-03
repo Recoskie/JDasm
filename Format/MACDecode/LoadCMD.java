@@ -376,7 +376,7 @@ public class LoadCMD extends Data
           DTemp.LUINT32("Tool version");
         }
 
-        DTemp.setEvent( this::blank ); des.add( DTemp );
+        DTemp.setEvent( this::osVerInfo ); des.add( DTemp );
 
         root.add( new JDNode( "OS Version.h", new long[]{ 0, ref++ } ) );
       }
@@ -610,6 +610,39 @@ public class LoadCMD extends Data
     "<html>The address location that the symbol is at.</html>",
   };
 
+  private static final String[] osVerInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>This is the platform that this binary is intended to run on.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Value</td><td>Platform</td></tr>" +
+    "<tr><td>1</td><td>MacOS</td></tr>" +
+    "<tr><td>2</td><td>iPhone IOS</td></tr>" +
+    "<tr><td>3</td><td>Apple TV Box</td></tr>" +
+    "<tr><td>4</td><td>Apple Watch</td></tr>" +
+    "<tr><td>5</td><td>Bridge OS</td></tr>" +
+    "<tr><td>6</td><td>Mac Catalyst</td></tr>" +
+    "<tr><td>7</td><td>iPhone IOS simulator</td></tr>" +
+    "<tr><td>8</td><td>Apple TV simulator</td></tr>" +
+    "<tr><td>9</td><td>Apple watch simulator</td></tr>" +
+    "<tr><td>10</td><td>Driver KIT</td></tr>" +
+    "</table></html>",
+    "<html>Minimum os version that this binary is meant to run on.<br /><br />" +
+    "The version number is encoded as follows 12341212 is 1234.12.12v.</html>",
+    "<html>This is the SDK tool set version that was used to create this binary.<br /><br />" +
+    "The version number is encoded as follows 12341212 is 1234.12.12v.</html>",
+    "<html>Number of tools used in this binary</html>",
+    "<html>Array element containing the tool type and version.</html>",
+    "<html>The type of tool used.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Value</td><td>Tool</td></tr>" +
+    "<tr><td>1</td><td>CLANG</td></tr>" +
+    "<tr><td>2</td><td>SWIFT</td></tr>" +
+    "<tr><td>3</td><td>LD</td></tr>" +
+    "</table></html>",
+    "<html>Tool version number.</html>"
+  };
+
   private static final String[] dynInfo = new String[]
   {
     cmdType, cmdSize,
@@ -620,7 +653,6 @@ public class LoadCMD extends Data
   private static final String[] uuidInfo = new String[]
   {
     cmdType, cmdSize,
-    "<html>" + offStr + "</html>",
     "<html>This is a randomly generated number that can be used to uniquely indemnify your application.</html>"
   };
 
@@ -737,6 +769,19 @@ public class LoadCMD extends Data
     else
     {
       info( uuidInfo[i] );
+    }
+  }
+
+  private void osVerInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>Specifies the OS that this binary is meant to run on.<br /><br />" +
+      "Also defines the minium version of the OS this binary is meant to run on, and tools used to compile it.</html>" );
+    }
+    else
+    {
+      info( osVerInfo[ i >= 6 ? ( ( i - 6 ) % 3 ) + 6 : i ] );
     }
   }
 
