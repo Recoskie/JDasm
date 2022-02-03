@@ -64,6 +64,8 @@ Supports MacOS/iPhone binaries, and also MacOS/iPhone Universal binaries.
 
 To analyze iPhone applications you need to download the IPA file for the iPhone program. The IPA file stores application files in a zip file. You then have to decompress the IPA file as a zip file. This creates a folder called payload. In the folder payload you then can open the main Mac binary using JDisassembly.
 
+To analyze Android applications you need to download the APK file for the program. The APK file stores application files in a zip file. You then have to decompress the APK file as a zip file. In the application folder, you then can open the main ELF binaries using JDisassembly.
+
 Supports .efi boot binaries and boot sector disassembly.
 
 ## Picture formats.
