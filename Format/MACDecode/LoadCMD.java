@@ -241,7 +241,7 @@ public class LoadCMD extends Data
 
         DTemp.String8("Dynamic Library", ( size + 8 ) - off );
 
-        DTemp.setEvent( this::blank ); des.add( DTemp );
+        DTemp.setEvent( this::dynlInfo ); des.add( DTemp );
       
         root.add( new JDNode( "Load link library.h", new long[]{ 0, ref++ } ) );
       }
@@ -253,7 +253,7 @@ public class LoadCMD extends Data
         DTemp.LUINT32("String Offset"); int off = (int)DTemp.value;
         DTemp.String8("Dynamic linker", ( size + 8 ) - off );
 
-        DTemp.setEvent( this::blank ); des.add( DTemp );
+        DTemp.setEvent( this::dynInfo ); des.add( DTemp );
 
         root.add( new JDNode( "Dynamic linker.h", new long[]{ 0, ref++ } ) );
       }
@@ -276,7 +276,7 @@ public class LoadCMD extends Data
       {
         DTemp.Other("128-bit UUID", 16);
 
-        DTemp.setEvent( this::blank ); des.add( DTemp );
+        DTemp.setEvent( this::uuidInfo ); des.add( DTemp );
 
         root.add( new JDNode( "APP UUID.h", new long[]{ 0, ref++ } ) );
       }
@@ -306,7 +306,7 @@ public class LoadCMD extends Data
         root.add( n1 );
       }
 
-      //Compressed link information.
+      //Compressed link information. Note this section is easy to read and uses opcodes for the type of rebase, or symbol bind.
 
       else if( cmd == 0x22 )
       {
@@ -461,6 +461,14 @@ public class LoadCMD extends Data
   "<tr><td>35</td><td>Used with fileset_entry_command.</td></tr>" +
   "</table>";
 
+  private static final String offStr = "This is the number of bytes from the start of this command to the string that tells us the binary to load.";
+
+  private static final String Str = "This is the string that the offset in the command locates to. The end of the string of text is defined by the remaining size of this command.<br /><br />" +
+  "Values that are 00 in value after the text is to be ignored as padding bytes.";
+
+  private static final String dateTime = "A date time stamp is in seconds. The seconds are added to the starting date \"Wed Dec 31 7:00:00PM 1969\".<br /><br />" +
+  "If the time date stamp is \"37\" in value, then it is plus 37 seconds giving \"Wed Dec 31 7:00:37PM 1969\".<br /><br />Note that the start time varies based on time zone.";
+
   private static final String cmdSize = "<html>The size of the command and all it's parameters.</html>";
 
   private static final String[] cmdInfo = new String[]
@@ -602,6 +610,30 @@ public class LoadCMD extends Data
     "<html>The address location that the symbol is at.</html>",
   };
 
+  private static final String[] dynInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>" + offStr + "</html>",
+    "<html>" + Str + " This tells us the dynamic linker to use in loading link libraries in this application.</html>"
+  };
+
+  private static final String[] uuidInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>" + offStr + "</html>",
+    "<html>This is a randomly generated number that can be used to uniquely indemnify your application.</html>"
+  };
+
+  private static final String[] dynlInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>" + offStr + "</html>",
+    "<html>Library's build time stamp (sometimes is not set).<br /><br />" + dateTime + "</html>",
+    "<html>This was the library's current version number when this application was built.</html>",
+    "<html>The Library must at least be updated to the compatibility version number or later in order to run this application.</html>",
+    "<html>" + Str + " This tells us the binary to start loading. The dynamic linker links the symbols into our programs symbols.</html>"
+  };
+
   private static final String[] startInfo = new String[]
   {
     cmdType, cmdSize,
@@ -666,6 +698,45 @@ public class LoadCMD extends Data
     else
     {
       info( sectInfo[i] );
+    }
+  }
+
+  private void dynInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>We can specify the tool we wish to use to link in methods from other binaries into this binary.</html>" );
+    }
+    else
+    {
+      info( dynInfo[i] );
+    }
+  }
+
+  private void dynlInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>This is a binary we wish to load. Every binary has a symbol table that gives parts of the program names by locations.<br /><br />" +
+      "Not all symbols locate to a section of code. There is a command called link info that defines which symbols are exportable and which ones need to be binded to another binary.<br /><br />" +
+      "The symbols that need to be binded are a jump or call operation which are to be set to the location of a exportable method from another binary.<br /><br />" +
+      "It is the dynamic linker job to make sure our symbols that need to be binded locate to the exportable symbols when the processor hits the call and jump instructions.</html>" );
+    }
+    else
+    {
+      info( dynlInfo[i] );
+    }
+  }
+
+  private void uuidInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>The UUID is a randomly generated number that can be used to identify your application.</html>" );
+    }
+    else
+    {
+      info( uuidInfo[i] );
     }
   }
 
