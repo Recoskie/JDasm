@@ -9,7 +9,7 @@ public class LoadCMD extends Data
   {
     //Remove the dummy node.
 
-    App.remove(0);
+    if( App.getChildCount() > 0 ) { App.remove( 0 ); }
 
     //Program start address.
 
@@ -230,7 +230,7 @@ public class LoadCMD extends Data
 
       //Load a link library.
 
-      else if( cmd == 0x0C || cmd == 0x0D )
+      else if( cmd == 0x0C || cmd == 0x0D || cmd == 0x18 )
       {
         DTemp.LUINT32("String Offset"); int off = (int)DTemp.value;
         DTemp.LUINT32("Time date stamp");
@@ -332,6 +332,21 @@ public class LoadCMD extends Data
         if( esize > 0 ){ n1.add( new JDNode("export.h", new long[]{ -2, eoff, eoff + esize - 1 } ) ); }
 
         root.add( n1 );
+      }
+
+      //Min os version.
+
+      else if( cmd == 0x24 || cmd == 0x25 || cmd == 0x2F || cmd == 0x30 )
+      {
+        DTemp.LUINT32("Min Version");
+        DTemp.LUINT32("Min SDK");
+
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+
+        if( cmd == 0x24 ){ root.add( new JDNode("Min MacOS version.h", new long[]{ 0, ref++ } ) ); }
+        else if( cmd == 0x25 ){ root.add( new JDNode("Min iPhone Version.h", new long[]{ 0, ref++ } ) ); }
+        else if( cmd == 0x2F ){ root.add( new JDNode("Min Apple TV Version.h", new long[]{ 0, ref++ } ) ); }
+        if( cmd == 0x30 ){ root.add( new JDNode("Min Apple Watch Version.h", new long[]{ 0, ref++ } ) ); }
       }
 
       //The Source Version.
