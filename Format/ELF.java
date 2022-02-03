@@ -143,7 +143,7 @@ public class ELF extends Data implements JDEventListener
       }
       else { coreLoaded = false; }
 
-      core.setAddressMode(true);
+      if( core != null ) { core.setAddressMode(true); }
 
       //Machine code start pos.
 

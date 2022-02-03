@@ -260,7 +260,7 @@ public class Window
         d = core.disASM_Code( core.codeSize(), crawl );
       }
     
-      info( "<html>" + d + "</html>" );
+      info( "<html>" + d + "</html>" ); d = "";
     
       Virtual.setSelected( loc, file.getVirtualPointer() - 1 ); Offset.setSelected( floc, file.getFilePointer() - 1 );
     
