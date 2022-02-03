@@ -257,7 +257,7 @@ public class Window
       if( disEnd != null ) { d = core.disASM_Code( disEnd, true ); }
       else
       {
-        d = core.disASM_Code( core.codeSize(), crawl );
+        d = core.codeSize() > 0 ? core.disASM_Code( core.codeSize(), crawl ) : core.disASM_Code();
       }
     
       info( "<html>" + d + "</html>" ); d = "";
