@@ -68,6 +68,10 @@ To analyze Android applications you need to download the APK file for the progra
 
 Supports .efi boot binaries and boot sector disassembly.
 
+## Compression.
+
+Supports analyzing and editing ZIP files.
+
 ## Picture formats.
 
 Supports analyzing and editing BIT Map pictures.
