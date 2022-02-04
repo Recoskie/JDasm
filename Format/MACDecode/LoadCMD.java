@@ -376,7 +376,7 @@ public class LoadCMD extends Data
       {
         DTemp.LUINT64("Source Version");
       
-        DTemp.setEvent( this::blank ); des.add( DTemp );
+        DTemp.setEvent( this::sourceVerInfo ); des.add( DTemp );
       
         root.add( new JDNode( "Source Version.h", new long[]{ 0, ref++ } ) );
       }
@@ -652,12 +652,6 @@ public class LoadCMD extends Data
     "<html>" + Str + " This tells us the dynamic linker to use in loading link libraries in this application.</html>"
   };
 
-  private static final String[] uuidInfo = new String[]
-  {
-    cmdType, cmdSize,
-    "<html>This is a randomly generated number that can be used to uniquely indemnify your application.</html>"
-  };
-
   private static final String[] dynlInfo = new String[]
   {
     cmdType, cmdSize,
@@ -666,6 +660,20 @@ public class LoadCMD extends Data
     "<html>This was the library's current version number when this application was built.</html>",
     "<html>The Library must at least be updated to the compatibility version number or later in order to run this application.</html>",
     "<html>" + Str + " This tells us the binary to start loading. The dynamic linker links the symbols into our programs symbols.</html>"
+  };
+
+  private static final String[] sourceVerInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>The version value is meant to be read in binary. The 64 binary digits are separated as follows:<br /><br />" +
+    "000000000000000000000000.0000000000.0000000000.0000000000.0000000000<br /><br />" +
+    "You then can change each of the separated binary numbers into decimal numbers followed by a dot to forum the source version number.</html>"
+  };
+
+  private static final String[] uuidInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>This is a randomly generated number that can be used to uniquely indemnify your application.</html>"
   };
 
   private static final String[] startInfo = new String[]
@@ -796,6 +804,18 @@ public class LoadCMD extends Data
     else
     {
       info( osVerInfo[ i >= 2 ? i + 1 : i ] );
+    }
+  }
+
+  private void sourceVerInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>Defines the source version for the application.</html>" );
+    }
+    else
+    {
+      info( sourceVerInfo[ i ] );
     }
   }
 
