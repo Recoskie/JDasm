@@ -45,7 +45,7 @@ public class ZIP extends Window.Window implements JDEventListener
       if( sig == 0x04034B50 )
       {
         DTemp.LUINT16("Min Version");
-        DTemp.LUINT16("Flag");
+        DTemp.LUINT16("Flag"); int flag = (short)DTemp.value;
         DTemp.LUINT16("Compression method");
         DTemp.LUINT16("Last Modified (Time)");
         DTemp.LUINT16("Last Modified (Date)");
@@ -72,6 +72,14 @@ public class ZIP extends Window.Window implements JDEventListener
         //opath = name.split("/"); We can path walk usually without having to compare the full path.
         
         file.skipBytes( size );
+      }
+      else if( sig == 0x08074B50 )
+      {
+        des.add( DTemp ); r.add( new JDNode( "Data Descriptor.h", new long[]{ 0, ref++ } ) );
+
+        DTemp.LUINT32("CRC-32");
+        DTemp.LUINT32("Compressed Size");
+        DTemp.LUINT32("Uncompressed Size");
       }
       else { break; }
     }
@@ -123,22 +131,24 @@ public class ZIP extends Window.Window implements JDEventListener
 
   private static final String[] zipInfo = new String[]
   {
-    "<html>This is the file signature of a compressed zip file.</html>",
+    "<html>This is the local file signature of a compressed zip file.</html>",
     "<html>Version needed to extract (minimum).</html>",
-    "<html>General purpose bit flag.</html>",
-    "<html>Compression method; none = 0, DEFLATE = 8.</html>",
+    "<html>General purpose bit flag. Detailed breakdown of this flag will be added soon.</html>",
+    "<html>Compression method; none = 0, DEFLATE = 8. A table of all formats will be added soon.</html>",
     "<html>File last modification time.</html>",
     "<html>File last modification date.</html>",
     "<html>CRC-32 of uncompressed data. This is the number of zeros that should exist in the binary file.<br /><br />" +
     "If the CRC does not match the count of zeros in binary in the file we know there is something wrong.</html>",
     "<html>Compressed size. This is the size of the data after this PK signature.</html>",
     "<html>Uncompressed file size. This is the file size after we decompress the file.<br /><br />" +
-    "In some cases this is 0 as it is a folder. The extra data field defines properties for the folder.</html>",
+    "In some cases this is 0 as it is a folder. The extra data field defines properties for the folder.<br /><br /" +
+    "Details for the breakdown of the extra data field will be added soon.</html>",
     "<html>File name length in bytes.</html>",
-    "<html>Extra field length. The extra felid is useful for folder and file attributes and properties. For example if the file/folder should be hidden, or visible.<br /><br />" +
-    "Some PK signatures have a zero size uncompressed as they only define attributes to a folder.</html>",
+    "<html>Extra field length. The extra felid is useful for folder and file attributes and properties.<br /><br />" +
+    "Some PK signatures have a zero size uncompressed as they only define attributes to a folder.<br /><br />" +
+    "The extra data felid can also be used to extend the zip file format.</html>",
     "<html>The zip file format uses the full path to the file then name of the file.</html>",
-    "<html>Extra field. Mainly used for file/folder properties or attributes which will be used by the OS.</html>"
+    "<html>Extra field. Usually a set of 2 byte pairs that add additional information about the file or entire.</html>"
   };
 
   public void zipInfo( int i )
