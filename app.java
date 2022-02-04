@@ -30,7 +30,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     new byte[] { 0x42, 0x4D }, //Bit map pictures.
     new byte[] { -1, -40 }, //JPEG start of image marker.
     new byte[] { 0x52, 0x49, 0x46, 0x46 }, //Multimedia RIFF file.
-    new byte[] { 0x52, 0x46, 0x36, 0x34 } //Multimedia RIFF/64 file.
+    new byte[] { 0x52, 0x46, 0x36, 0x34 }, //Multimedia RIFF/64 file.
+    new byte[] { 0x50, 0x4B, 0x03, 0x04 } //Compressed ZIP files.
   };
 
   //Depending on the file format we do not need a virtual address space.
@@ -38,7 +39,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   private static boolean SignatureV[] = new boolean[]
   {
     true, true, true, true, true,
-    false, false, false, false
+    false, false, false, false, false
   };
 
   //Buffer should be set to the length of the largest signature sequence.
@@ -50,7 +51,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   private String DecodeAPP[] = new String[]
   {
     "Format.EXE", "Format.ELF", "Format.MAC", "Format.MAC", "Format.MAC",
-    "Format.BMP", "Format.JPEG", "Format.RIFF", "Format.RIFF"
+    "Format.BMP", "Format.JPEG", "Format.RIFF", "Format.RIFF", "Format.ZIP"
   };
 
   //By file extension.
