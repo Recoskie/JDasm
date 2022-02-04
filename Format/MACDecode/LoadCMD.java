@@ -628,9 +628,11 @@ public class LoadCMD extends Data
     "<tr><td>10</td><td>Driver KIT</td></tr>" +
     "</table></html>",
     "<html>Minimum os version that this binary is meant to run on.<br /><br />" +
-    "The version number is encoded as follows 12341212 is 1234.12.12v.</html>",
+    "The version number is encoded as follows 12341212 is 1234.12.12v.<br /><br />" +
+    "You then can change the hex values after each dot to a decimal value.</html>",
     "<html>This is the SDK tool set version that was used to create this binary.<br /><br />" +
-    "The version number is encoded as follows 12341212 is 1234.12.12v.</html>",
+    "The version number is encoded as follows 12341212 is 1234.12.12v.<br /><br />" +
+    "You then can change the hex values after each dot to a decimal value.</html>",
     "<html>Number of tools used in this binary</html>",
     "<html>Array element containing the tool type and version.</html>",
     "<html>The type of tool used.<br /><br />" +
@@ -750,9 +752,9 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>This is a binary we wish to load. Every binary has a symbol table that gives parts of the program names by locations.<br /><br />" +
-      "Not all symbols locate to a section of code. There is a command called link info that defines which symbols are exportable and which ones need to be binded to another binary.<br /><br />" +
-      "The symbols that need to be binded are a jump or call operation which are to be set to the location of a exportable method from another binary.<br /><br />" +
-      "It is the dynamic linker job to make sure our symbols that need to be binded locate to the exportable symbols when the processor hits the call and jump instructions.</html>" );
+      "Not all symbols locate to a section of code. There is a command called \"link info\" that defines which symbols are exportable and which ones need to be binded to another binary.<br /><br />" +
+      "The symbols that need to be binded are a jump or call operation which are to be set to the location of a exportable method from another binary. We call these jumps and calls studs.<br /><br />" +
+      "It is the dynamic linkers job to make sure our symbols that need to be binded locate to the exportable symbols when the processor hits the call and jump instructions that read the value.</html>" );
     }
     else
     {
