@@ -334,33 +334,7 @@ public class LoadCMD extends Data
         root.add( n1 );
       }
 
-      //Min os version.
-
-      else if( cmd == 0x24 || cmd == 0x25 || cmd == 0x2F || cmd == 0x30 )
-      {
-        DTemp.LUINT32("Min Version");
-        DTemp.LUINT32("Min SDK");
-
-        DTemp.setEvent( this::blank ); des.add( DTemp );
-
-        if( cmd == 0x24 ){ root.add( new JDNode("Min MacOS version.h", new long[]{ 0, ref++ } ) ); }
-        else if( cmd == 0x25 ){ root.add( new JDNode("Min iPhone Version.h", new long[]{ 0, ref++ } ) ); }
-        else if( cmd == 0x2F ){ root.add( new JDNode("Min Apple TV Version.h", new long[]{ 0, ref++ } ) ); }
-        if( cmd == 0x30 ){ root.add( new JDNode("Min Apple Watch Version.h", new long[]{ 0, ref++ } ) ); }
-      }
-
-      //The Source Version.
-
-      else if( cmd == 0x2A )
-      {
-        DTemp.LUINT64("Source Version");
-      
-        DTemp.setEvent( this::blank ); des.add( DTemp );
-      
-        root.add( new JDNode( "Source Version.h", new long[]{ 0, ref++ } ) );
-      }
-
-      //Minimum OS version.
+      //Minimum OS version. Specifying platform and tools.
 
       else if( cmd == 0x32 )
       {
@@ -378,7 +352,33 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::osVerInfo ); des.add( DTemp );
 
-        root.add( new JDNode( "OS Version.h", new long[]{ 0, ref++ } ) );
+        root.add( new JDNode( "Min OS Version.h", new long[]{ 0, ref++ } ) );
+      }
+
+      //The old way of doing Min os version.
+
+      else if( cmd == 0x24 || cmd == 0x25 || cmd == 0x2F || cmd == 0x30 )
+      {
+        DTemp.LUINT32("Min Version");
+        DTemp.LUINT32("Min SDK");
+
+        DTemp.setEvent( this::osInfo ); des.add( DTemp );
+
+        if( cmd == 0x24 ){ root.add( new JDNode("Min MacOS version.h", new long[]{ 0, ref++ } ) ); }
+        else if( cmd == 0x25 ){ root.add( new JDNode("Min iPhone Version.h", new long[]{ 0, ref++ } ) ); }
+        else if( cmd == 0x2F ){ root.add( new JDNode("Min Apple TV Version.h", new long[]{ 0, ref++ } ) ); }
+        if( cmd == 0x30 ){ root.add( new JDNode("Min Apple Watch Version.h", new long[]{ 0, ref++ } ) ); }
+      }
+
+      //The Source Version.
+
+      else if( cmd == 0x2A )
+      {
+        DTemp.LUINT64("Source Version");
+      
+        DTemp.setEvent( this::blank ); des.add( DTemp );
+      
+        root.add( new JDNode( "Source Version.h", new long[]{ 0, ref++ } ) );
       }
 
       //An unknown command, or a command I have not added Yet.
@@ -582,7 +582,7 @@ public class LoadCMD extends Data
     "<tr><td>0000-001-0</td><td>Symbol absolute.</td></tr>" +
     "<tr><td>0000-101-0</td><td>Symbol indirect.</td></tr>" +
     "<tr><td>0000-110-0</td><td>Symbol prebound undefined.</td></tr>" +
-    "<tr><td>0000-111-0</td><td>Symbol does not the section value.</td></tr>" +
+    "<tr><td>0000-111-0</td><td>Symbol does not use the section value.</td></tr>" +
     "</table></html>",
     "<html>An integer specifying the number of the section that this symbol can be found in.<br  /><br />" +
     "If the type setting of the symbol is set to use no section, then this value is used as the symbols number name.<br /><br />" +
@@ -782,6 +782,18 @@ public class LoadCMD extends Data
     else
     {
       info( osVerInfo[ i >= 6 ? ( ( i - 6 ) % 3 ) + 6 : i ] );
+    }
+  }
+
+  private void osInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>Defines the minium version of the OS this binary is meant to run on.</html>" );
+    }
+    else
+    {
+      info( osVerInfo[ i >= 2 ? i + 1 : i ] );
     }
   }
 
