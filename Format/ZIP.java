@@ -144,7 +144,7 @@ public class ZIP extends Window.Window implements JDEventListener
 
     //Make it as if we clicked and opened the node.
 
-    //open( new JDEvent( this, "", new long[]{ 2, 0 } ) );
+    open( new JDEvent( this, "", new long[]{ 2, 0 } ) );
   }
 
   //This method is called when opening a new file format to get rid of variables and arrays needed by this format reader by
