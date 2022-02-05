@@ -27,35 +27,68 @@ public class ZIP extends Window.Window implements JDEventListener
     JDNode r = root; //The current path node.
 
     int level = 1;
+
+    //Parse zip in 4k buffer.
+
+    long pos = 0, pkPos = 0; int buf = 0; byte[] b = new byte[4096]; file.read(b);
+
+    //Signature.
+
+    int sig = 0;
+
+    //Constants to know when the buffer needs to be updated.
+  
+    int sigEnd = b.length - 4; //Next 4 bytes must be available to read signature.
+    int pkEnd = b.length - 30; //There must be 30 bytes left to read the PK header.
+
+    //Old path and new path.
+
+    String[] path, opath;
+
+    //Zip pk entry.
+
+    int size, strLen, extData;
+    String name;
+
+    //Data descriptor entry.
+
+    int data = 0;
     
     //Begin reading the file header.
 
-    long end = file.length(); while( file.getFilePointer() < end )
+    long end = file.length(); while( ( pos + buf ) < end )
     {
-      DTemp = new Descriptor( file ); des.add( DTemp ); DTemp.setEvent( this::zipInfo );
+      if( buf >= sigEnd )
+      {
+        pos += buf; file.seek( pos ); file.read(b); buf = 0;
+      }
 
-      //Example of reading and defining a value.
-
-      DTemp.LUINT32("Signature"); int sig = (int)DTemp.value;
-
-      //Old path and new path.
-
-      String[] path, opath;
+      sig = ( b[buf + 3] << 24 ) | ( b[buf + 2] << 16 ) | ( b[buf + 1] << 8 ) | b[buf];
 
       if( sig == 0x04034B50 )
       {
-        DTemp.LUINT16("Min Version");
-        DTemp.LUINT16("Flag"); int flag = (short)DTemp.value;
-        DTemp.LUINT16("Compression method");
-        DTemp.LUINT16("Last Modified (Time)");
-        DTemp.LUINT16("Last Modified (Date)");
-        DTemp.LUINT32("CRC-32");
-        DTemp.LUINT32("Compressed Size"); int size = (int)DTemp.value;
-        DTemp.LUINT32("Uncompressed Size");
-        DTemp.LUINT16("File name Length"); int flen = (short)DTemp.value;
-        DTemp.LUINT16("Data felid len"); int elen = (short)DTemp.value;
-        DTemp.String8("File name", flen ); String name = (String)DTemp.value;
-        DTemp.Other("Data Felid", elen );
+        data = 0; pkPos = buf + pos;
+
+        if( buf >= pkEnd )
+        {
+          pos += buf; file.seek( pos ); file.read( b ); buf = 0;
+        }
+
+        size = ( ( b[buf + 21] & 0xFF ) << 24 ) | ( ( b[buf + 20] & 0xFF ) << 16 ) | ( ( b[buf + 19] & 0xFF ) << 8 ) | ( b[buf + 18] & 0xFF );
+
+        strLen = ( ( b[buf + 27] & 0xFF ) << 8 ) | ( b[buf + 26] & 0xFF );
+        extData = ( ( b[buf + 29] & 0xFF ) << 8 ) | ( b[buf + 28] & 0xFF );
+
+        buf += 30;
+
+        if( ( strLen + buf ) >= b.length )
+        {
+          pos += buf; file.seek( pos ); file.read( b ); buf = 0;
+        }
+        
+        name = ""; for( int i = 0; i < strLen; name = name + ((char)b[buf + i++ ]) );
+
+        buf += strLen + extData;
 
         path = name.split("/");
 
@@ -63,25 +96,42 @@ public class ZIP extends Window.Window implements JDEventListener
 
         while( path.length > level ) { JDNode h = new JDNode( path[ level - 1 ], new long[]{ 0, ref } ); r.add( h ); r = h; level++; }
 
-        JDNode h = new JDNode( path[ path.length - 1 ], new long[]{ 0, ref++ } );
+        JDNode h = new JDNode( path[ path.length - 1 ], new long[]{ 2, pkPos } );
 
-        if( size > 0 ) { h.add( new JDNode("File Data.h", new long[]{ 1, file.getFilePointer(), file.getFilePointer() + size - 1 } ) ); }
+        if( size > 0 ) { h.add( new JDNode("File Data.h", new long[]{ 1, pos + buf, pos + buf + size - 1 } ) ); }
     
         r.add( h ); level = path.length; if( size == 0 ){ level += 1; r = h; }
         
         //opath = name.split("/"); We can path walk usually without having to compare the full path.
         
-        file.skipBytes( size );
+        buf += size; if( buf >= sigEnd )
+        {
+          pos += buf; file.seek( pos ); file.read( b ); buf = 0;
+        }
       }
+
+      //The data descriptor tells us the size of the compressed data after we have read it.
+
       else if( sig == 0x08074B50 )
       {
-        des.add( DTemp ); r.add( new JDNode( "Data Descriptor.h", new long[]{ 0, ref++ } ) );
+        r.add( new JDNode("File Data.h", new long[]{ 1, pos + buf - data, pos + buf - 1 } ) );
+        r.add( new JDNode( "Data info.h", new long[]{ 3, pos + buf } ) );
 
-        DTemp.LUINT32("CRC-32");
-        DTemp.LUINT32("Compressed Size");
-        DTemp.LUINT32("Uncompressed Size");
+        buf += 16;
       }
-      else { break; }
+
+      //The central directory.
+
+      else if( sig == 0x02014b50 ){ break; }
+
+      //The size of the riles compressed data is identified by the data descriptor after the files data.
+      //This happens when the win zip program does not know the size before hand.
+      //The size of the data we read before the data descriptor should match the size in the data descriptor.
+
+      else
+      {
+        buf++; data++;
+      }
     }
 
     //Set binary tree view, and enable IO system events.
@@ -94,7 +144,7 @@ public class ZIP extends Window.Window implements JDEventListener
 
     //Make it as if we clicked and opened the node.
 
-    open( new JDEvent( this, "", new long[]{ 0, 0 } ) );
+    //open( new JDEvent( this, "", new long[]{ 2, 0 } ) );
   }
 
   //This method is called when opening a new file format to get rid of variables and arrays needed by this format reader by
@@ -124,6 +174,64 @@ public class ZIP extends Window.Window implements JDEventListener
       ds.clear(); info("<html></html>");
 
       try { file.seek( e.getArg(1) ); Offset.setSelected( e.getArg(1), e.getArg(2) ); } catch( java.io.IOException er ) { }
+    }
+
+    //Load and set descriptor to node.
+
+    else if( e.getArg( 0 ) == 2 )
+    {
+      try
+      {
+        file.Events = false; file.seek( e.getArg(1) );
+
+        JDNode n = (JDNode)tree.getLastSelectedPathComponent();
+
+        DTemp = new Descriptor( file );
+
+        des.add( DTemp ); DTemp.setEvent( this::zipInfo );
+
+        n.setArgs( new long[]{ 0, ref++ });
+
+        DTemp.LUINT32("Signature");
+        DTemp.LUINT16("Min Version");
+        DTemp.LUINT16("Flag");
+        DTemp.LUINT16("Compression method");
+        DTemp.LUINT16("Last Modified (Time)");
+        DTemp.LUINT16("Last Modified (Date)");
+        DTemp.LUINT32("CRC-32");
+        DTemp.LUINT32("Compressed Size");
+        DTemp.LUINT32("Uncompressed Size");
+        DTemp.LUINT16("File name Length"); int flen = (short)DTemp.value;
+        DTemp.LUINT16("Data felid len"); int elen = (short)DTemp.value;
+        DTemp.String8("File name", flen );
+        DTemp.Other("Data Felid", elen );
+
+        file.Events = true;
+
+        ds.setDescriptor( DTemp );
+      }
+      catch(Exception er) {}
+    }
+    else if( e.getArg(0) == 3 )
+    {
+      try
+      {
+        file.Events = false;
+
+        JDNode n = (JDNode)tree.getLastSelectedPathComponent();
+
+        file.seek( e.getArg(1) ); DTemp = new Descriptor( file ); des.add( DTemp );
+
+        DTemp.LUINT32("Signature");
+        DTemp.LUINT32("CRC-32");
+        DTemp.LUINT32("Compressed Size");
+        DTemp.LUINT32("Uncompressed Size");
+
+        n.setArgs( new long[]{ 0, ref++ } ); file.Events = true;
+
+        ds.setDescriptor( DTemp );
+      }
+      catch( Exception er ){}
     }
   }
 
