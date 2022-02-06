@@ -169,20 +169,6 @@ public class ZIP extends Window.Window implements JDEventListener
     //Make it as if we clicked and opened the node.
 
     open( new JDEvent( this, "", new long[]{ 2, 0 } ) );
-
-    test((JDNode)root);
-  }
-
-  public void test( JDNode n )
-  {
-    int end = n.getChildCount();
-    JDNode n2;
-    for( int i = 0; i < end; i++ )
-    {
-      n2 = (JDNode)n.getChildAt(i);
-
-      System.out.println( n2.toString() );
-    }
   }
 
   //This method is called when opening a new file format to get rid of variables and arrays needed by this format reader by
