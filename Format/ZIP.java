@@ -26,7 +26,7 @@ public class ZIP extends Window.Window implements JDEventListener
 
     JDNode r = root; //The current path node.
 
-    int level = 1;
+    int level = 0, change = 0;
 
     //Parse zip in 4k buffer.
 
@@ -43,7 +43,8 @@ public class ZIP extends Window.Window implements JDEventListener
 
     //Old path and new path.
 
-    String[] path, opath;
+    String[] path, opath = new String[]{};
+    boolean exists = false;
 
     //Zip pk entry.
 
@@ -92,17 +93,40 @@ public class ZIP extends Window.Window implements JDEventListener
 
         path = name.split("/");
 
-        while( path.length < level ) { level--; r = (JDNode)r.getParent(); }
+        change = 0; for( int e = Math.min(path.length,opath.length); change < e; change++ )
+        {
+          if( !path[change].equals(opath[change]) ){ break; }
+        }
 
-        while( path.length > level ) { JDNode h = new JDNode( path[ level - 1 ], new long[]{ 0, ref } ); r.add( h ); r = h; level++; }
+        while( change < level ) { level--; r = (JDNode)r.getParent(); }
 
-        JDNode h = new JDNode( path[ path.length - 1 ], new long[]{ 2, pkPos } );
+        while( path.length > level )
+        {
+          //Check if node exists.
 
-        if( size > 0 ) { h.add( new JDNode("File Data.h", new long[]{ 1, pos + buf, pos + buf + size - 1 } ) ); }
-    
-        r.add( h ); level = path.length; if( size == 0 ){ level += 1; r = h; }
+          exists = false;
+          
+          try
+          {
+            for( int e = r.getChildCount(), el = 0; el < e; el++ )
+            {
+              if( path[level].equals(r.getChildAt(el).toString()))
+              {
+                exists = true; r = (JDNode)r.getChildAt(el);
+              }
+            }
+          } catch( Exception er ){}
+
+          //Node does not exist.
+
+          if(!exists) { JDNode h = new JDNode( path[ level ], new long[]{ 2, pkPos } ); r.add( h ); r = h; }
+
+          level++;
+        }
+
+        if( size > 0 ) { r.add( new JDNode("File Data.h", new long[]{ 1, pos + buf, pos + buf + size - 1 } ) ); }
         
-        //opath = name.split("/"); We can path walk usually without having to compare the full path.
+        opath = name.split("/");
         
         buf += size; if( buf >= sigEnd )
         {
@@ -145,6 +169,20 @@ public class ZIP extends Window.Window implements JDEventListener
     //Make it as if we clicked and opened the node.
 
     open( new JDEvent( this, "", new long[]{ 2, 0 } ) );
+
+    test((JDNode)root);
+  }
+
+  public void test( JDNode n )
+  {
+    int end = n.getChildCount();
+    JDNode n2;
+    for( int i = 0; i < end; i++ )
+    {
+      n2 = (JDNode)n.getChildAt(i);
+
+      System.out.println( n2.toString() );
+    }
   }
 
   //This method is called when opening a new file format to get rid of variables and arrays needed by this format reader by
