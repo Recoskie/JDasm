@@ -162,13 +162,15 @@ public class ZIP extends Window.Window implements JDEventListener
       
     ((DefaultTreeModel)tree.getModel()).setRoot(root); file.Events = true;
       
-    //Set the selected node.
-  
-    tree.setSelectionPath( new TreePath( ((DefaultMutableTreeNode)root.getFirstChild()).getPath() ) );
+    //Zip info.
 
-    //Make it as if we clicked and opened the node.
-
-    open( new JDEvent( this, "", new long[]{ 2, 0 } ) );
+    info("<html>The zip file format is used as a container for mobile, and java applications, and also Microsoft office documents as well as being useful for users to store files as a compressed zip file.<br /><br />" +
+      "Java uses the zip format to store application files as a single file as a runnable file called an java jar.<br /><br />" +
+      "Android APK applications are stored in zip files to save space, and to keep applications organized.<br /><br />" +
+      "Apple iPhone IPA applications are stored in zip files to also save space and to keep applications organized.<br /><br />" +
+      "Microsoft stores office document files into compressed zip files to save space and to keep pictures and models used in the office document organized as one file.<br /><br />" +
+      "You can open these files using a zip program if you like and decompress all the files stored in the Android APK, or IPA, or java JAR, or microsoft docx file.</html>"
+    );
   }
 
   //This method is called when opening a new file format to get rid of variables and arrays needed by this format reader by
@@ -228,7 +230,7 @@ public class ZIP extends Window.Window implements JDEventListener
         DTemp.LUINT16("File name Length"); int flen = (short)DTemp.value;
         DTemp.LUINT16("Data felid len"); int elen = (short)DTemp.value;
         DTemp.String8("File name", flen );
-        DTemp.Other("Data Felid", elen );
+        if( elen > 0 ) { DTemp.Other("Data Felid", elen ); }
 
         file.Events = true;
 
@@ -245,6 +247,8 @@ public class ZIP extends Window.Window implements JDEventListener
         JDNode n = (JDNode)tree.getLastSelectedPathComponent();
 
         file.seek( e.getArg(1) ); DTemp = new Descriptor( file ); des.add( DTemp );
+
+        DTemp.setEvent( this::dataInfo );
 
         DTemp.LUINT32("Signature");
         DTemp.LUINT32("CRC-32");
@@ -263,10 +267,51 @@ public class ZIP extends Window.Window implements JDEventListener
 
   private static final String[] zipInfo = new String[]
   {
-    "<html>This is the local file signature of a compressed zip file.</html>",
-    "<html>Version needed to extract (minimum).</html>",
-    "<html>General purpose bit flag. Detailed breakdown of this flag will be added soon.</html>",
-    "<html>Compression method; none = 0, DEFLATE = 8. A table of all formats will be added soon.</html>",
+    "<html>This is the file signature of a compressed zip file.</html>",
+    "<html>Version needed to extract (minimum). The version number is convert to an decimal value.<br /><br />" +
+    "in the case of version 122 it would mean 12.2v. In the case of 20 it means 2.0v.</html>",
+    "<html>The flag is meant to be viewed in binary. Each of the 16 binary digits if set one signifies an setting." +
+    "The table bellow shows what setting each digit implies.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Digit</td><td>Description</td></tr>" +
+    "<tr><td>0000000000001000</td><td>If this bit is set, the fields CRC-32, compressed size and uncompressed size are set to zero in the local header. The correct values are put in the data descriptor immediately following the compressed data.</td></tr>" +
+    "<tr><td>0000000000100000</td><td>If this bit is set, this indicates that the file is compressed patched data.</td></tr>" +
+    "<tr><td>0000000001000000</td><td>Strong encryption. If this bit is set, you MUST set the version needed to extract value to at least 50 and you MUST also set bit 0. If AES encryption is used, the version needed to extract value MUST be at least 51.</td></tr>" +
+    "<tr><td>0000100000000000</td><td>Language encoding flag (EFS).</td></tr>" +
+    "<tr><td>0010000000000000</td><td>Set when encrypting the Central Directory.</td></tr>" +
+    "</table></html>",
+    "<html>Compression method.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Value</td><td>Compression</td></tr>" +
+    "<tr><td>0</td><td>The file is stored (no compression).</td></tr>" +
+    "<tr><td>1</td><td>The file is Shrunk.</td></tr>" +
+    "<tr><td>2</td><td>The file is Reduced with compression factor 1.</td></tr>" +
+    "<tr><td>3</td><td>The file is Reduced with compression factor 2.</td></tr>" +
+    "<tr><td>4</td><td>The file is Reduced with compression factor 3.</td></tr>" +
+    "<tr><td>5</td><td>The file is Reduced with compression factor 4.</td></tr>" +
+    "<tr><td>6</td><td>The file is Imploded.</td></tr>" +
+    "<tr><td>7</td><td>Reserved for Tokenizing compression algorithm.</td></tr>" +
+    "<tr><td>8</td><td>The file is Deflated.</td></tr>" +
+    "<tr><td>9</td><td>Enhanced Deflating using Deflate64(tm).</td></tr>" +
+    "<tr><td>10</td><td>PKWARE Data Compression Library Imploding (old IBM TERSE).</td></tr>" +
+    "<tr><td>11</td><td>Reserved by PKWARE.</td></tr>" +
+    "<tr><td>12</td><td>File is compressed using BZIP2 algorithm.</td></tr>" +
+    "<tr><td>13</td><td>Reserved by PKWARE.</td></tr>" +
+    "<tr><td>14</td><td>LZMA.</td></tr>" +
+    "<tr><td>15</td><td>Reserved by PKWARE.</td></tr>" +
+    "<tr><td>16</td><td>IBM z/OS CMPSC Compression.</td></tr>" +
+    "<tr><td>17</td><td>Reserved by PKWARE.</td></tr>" +
+    "<tr><td>18</td><td>File is compressed using IBM TERSE (new).</td></tr>" +
+    "<tr><td>19</td><td>IBM LZ77 z Architecture.</td></tr>" +
+    "<tr><td>20</td><td>Deprecated (use method 93 for zstd).</td></tr>" +
+    "<tr><td>93</td><td>Zstandard (zstd) Compression.</td></tr>" +
+    "<tr><td>94</td><td>MP3 Compression.</td></tr>" +
+    "<tr><td>95</td><td>XZ Compression.</td></tr>" +
+    "<tr><td>96</td><td>JPEG variant.</td></tr>" +
+    "<tr><td>97</td><td>WavPack compressed data.</td></tr>" +
+    "<tr><td>98</td><td>PPMd version I, Rev 1.</td></tr>" +
+    "<tr><td>99</td><td>AE-x encryption marker (see APPENDIX E).</td></tr>" +
+    "</table></html>",
     "<html>File last modification time.</html>",
     "<html>File last modification date.</html>",
     "<html>CRC-32 of uncompressed data. This is the number of zeros that should exist in the binary file.<br /><br />" +
@@ -283,20 +328,46 @@ public class ZIP extends Window.Window implements JDEventListener
     "<html>Extra field. Usually a set of 2 byte pairs that add additional information about the file or entire.</html>"
   };
 
+  //Data descriptor.
+
+  private static final String[] dataInfo = new String[]
+  {
+    "<html>This is the data descriptor signature. Marks the end of a compressed file data.</html>",
+    "<html>CRC-32 of uncompressed data. This is the number of zeros that should exist in the binary file.<br /><br />" +
+    "If the CRC does not match the count of zeros in binary in the file we know there is something wrong.</html>",
+    "<html>Compressed size. This is the size of the data before this PK data signature.</html>",
+    "<html>Uncompressed file size. This is the file size after we decompress the file.</html>"
+  };
+
   public void zipInfo( int i )
   {
     if( i < 0 )
     {
-      info("<html>The zip file format is used as a container for mobile, and java applications, and also Microsoft office documents as well as being useful for users to store files as a compressed zip file.<br /><br />" +
-      "Java uses the zip format to store application files as a single file as a runnable file called an java jar.<br /><br />" +
-      "Android APK applications are stored in zip files to save space, and to keep applications organized.<br /><br />" +
-      "Apple iPhone IPA applications are stored in zip files to also save space and to keep applications organized.<br /><br />" +
-      "Microsoft stores office document files into compressed zip files to save space and to keep pictures and models used in the office document organized as one file.<br /><br />" +
-      "You can open these files using a zip program if you like and decompress all the files stored in the Android APK, or IPA, or java JAR, or microsoft docx file.</html>");
+      info("<html>All file in the zip begin with an PK header. The file compressed data is right after the PK header.<br /><br />" +
+      "The data descriptor signature identifies the end of the compressed file data in some cases.<br /><br />" +
+      "The data descriptor tells us how many bytes the compressed data is which should match the number of bytes we read after the PK header.<br /><br />" +
+      "Most of the time only PK signatures exist and the number of bytes for the compressed file is set in the PK header.<br /><br />" +
+      "The only time we do not set the compressed file size in the PK header is when we do not know the compressed file size till after the file was compressed.</html>");
     }
     else
     {
       info( zipInfo[ i ] );
+    }
+  }
+
+  public void dataInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info("<html>In the case that the data descriptor setting is set in the PK header then the size of the compressed file was not known.<br /><br />" +
+      "Instead the Data descriptor signature marks the end of the files data.<br /><br />" +
+      "The Data descriptor tells us how big the compressed file is which should match the number of bytes we read before encountering the data descriptor signature.<br /><br />" +
+      "The data descriptor also stores the files original size, and has an CRC count which is numbers of zero digits that should exist in the file once decompress.<br /><br />" +
+      "The CRC is very important as it can be used to know if the decompressed file matches the original.</html>");
+    }
+    else
+    {
+      info( dataInfo[ i ] );
     }
   }
 }
