@@ -164,10 +164,11 @@ public class ZIP extends Window.Window implements JDEventListener
       
     //Zip info.
 
-    info("<html>The zip file format is used as a container for mobile, and java applications, and also Microsoft office documents as well as being useful for users to store files as a compressed zip file.<br /><br />" +
+    info("<html>The zip file format is used as a container for mobile (android, iPhone) applications, and java applications, and also Microsoft office documents as well as being useful for users to store files as a compressed zip file.<br /><br />" +
       "Java uses the zip format to store application files as a single file as a runnable file called an java jar.<br /><br />" +
       "Android APK applications are stored in zip files to save space, and to keep applications organized.<br /><br />" +
       "Apple iPhone IPA applications are stored in zip files to also save space and to keep applications organized.<br /><br />" +
+      "Disassembling android and iPhone apps is supported by JDisassembly, but you will first need to decompress the application file.<br /><br />" +
       "Microsoft stores office document files into compressed zip files to save space and to keep pictures and models used in the office document organized as one file.<br /><br />" +
       "You can open these files using a zip program if you like and decompress all the files stored in the Android APK, or IPA, or java JAR, or microsoft docx file.</html>"
     );
@@ -267,7 +268,7 @@ public class ZIP extends Window.Window implements JDEventListener
 
   private static final String[] zipInfo = new String[]
   {
-    "<html>This is the file signature of a compressed zip file.</html>",
+    "<html>50 4B 03 04 is the start of a file signature in a compressed zip file.</html>",
     "<html>Version needed to extract (minimum). The version number is convert to an decimal value.<br /><br />" +
     "in the case of version 122 it would mean 12.2v. In the case of 20 it means 2.0v.</html>",
     "<html>The flag is meant to be viewed in binary. Each of the 16 binary digits if set one signifies an setting." +
@@ -335,7 +336,7 @@ public class ZIP extends Window.Window implements JDEventListener
     "<html>This is the data descriptor signature. Marks the end of a compressed file data.</html>",
     "<html>CRC-32 of uncompressed data. This is the number of zeros that should exist in the binary file.<br /><br />" +
     "If the CRC does not match the count of zeros in binary in the file we know there is something wrong.</html>",
-    "<html>Compressed size. This is the size of the data before this PK data signature.</html>",
+    "<html>Compressed size. This is the size of the data before this sdata signature.</html>",
     "<html>Uncompressed file size. This is the file size after we decompress the file.</html>"
   };
 
@@ -343,11 +344,13 @@ public class ZIP extends Window.Window implements JDEventListener
   {
     if( i < 0 )
     {
-      info("<html>All file in the zip begin with an PK header. The file compressed data is right after the PK header.<br /><br />" +
-      "The data descriptor signature identifies the end of the compressed file data in some cases.<br /><br />" +
-      "The data descriptor tells us how many bytes the compressed data is which should match the number of bytes we read after the PK header.<br /><br />" +
+      info("<html>All file in the zip begin with a PK signature. The file compressed data is right after the PK parameters.<br /><br />" +
+      "The next file signature is after the compressed file size parameter.<br /><br />" +
+      "In some cases a signature code (data descriptor) is used to identify the end of the compressed file data in some cases.<br /><br />" +
+      "The data descriptor tells us how many bytes the compressed data is which should match the number of bytes we read after the PK parameters.<br /><br />" +
       "Most of the time only PK signatures exist and the number of bytes for the compressed file is set in the PK header.<br /><br />" +
-      "The only time we do not set the compressed file size in the PK header is when we do not know the compressed file size till after the file was compressed.</html>");
+      "The only time we do not set the compressed file size in the PK header is when we do not know the compressed file size till after the file was compressed.<br /><br />" +
+      "The flag parameter can also be adjusted to signify that the data descriptor marks the end of the files data.</html>");
     }
     else
     {
