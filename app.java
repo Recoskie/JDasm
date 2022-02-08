@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.io.*;
+import java.util.zip.*;
 import java.awt.event.*;
 import RandomAccessFileV.*;
 import Window.*;
@@ -111,6 +112,15 @@ public class app extends Window implements ActionListener, DropTargetListener, J
   
   public void actionPerformed(ActionEvent e)
   {
+    //Open file within zip.
+  
+    if( e.getActionCommand().startsWith("ZOpen") )
+    {
+      String file = e.getActionCommand(); file = file.substring(5,file.length());
+
+      Reset(); open(new JDEvent( this, "", file.substring(file.lastIndexOf("."), file.length()), file, 1 )); return;
+    }
+
     //Basic file path commands.
     
     if( e.getActionCommand() == "B" ) { fc.back(); }
@@ -345,24 +355,60 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     {
       if( e.getArg(0) >= 0 )
       {
-        file = new RandomAccessFileV( e.getPath(), "r" );
-
-        //Check if user has write privilege.
-
-        try { file = new RandomAccessFileV( e.getPath(), "rw" ); } catch ( Exception er )
+        if( e.getArg(0) == 0 )
         {
-          //If not admin ask user if they wish to try to gain write privilege run as admin.
+          file = new RandomAccessFileV( e.getPath(), "r" );
 
-          if( !admin && JOptionPane.showConfirmDialog(null, "To write to this file, you will have to run as admin.\r\n\r\n" +
-          "Hit \"no\" if you want to open the file in \"read only\" mode.\r\n\r\n" +
-          "Open file as admin?", null, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+          //Check if user has write privilege.
+
+          try { file = new RandomAccessFileV( e.getPath(), "rw" ); } catch ( Exception er )
           {
-            if( Sys.promptAdmin("file " + e.getPath() ) ) { System.exit(0); }
+            //If not admin ask user if they wish to try to gain write privilege run as admin.
+
+            if( !admin && JOptionPane.showConfirmDialog(null, "To write to this file, you will have to run as admin.\r\n\r\n" +
+            "Hit \"no\" if you want to open the file in \"read only\" mode.\r\n\r\n" +
+            "Open file as admin?", null, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+            {
+              if( Sys.promptAdmin("file " + e.getPath() ) ) { System.exit(0); }
+            }
+
+            //If already running as admin file can only be read.
+
+            if( admin ) { JOptionPane.showMessageDialog(null, "File can only be read."); }
+          }
+        }
+      
+        //open zip.
+
+        else
+        {
+          String zfile = e.getID(), zip = fc.getFilePath() + fc.getFileName();
+
+          java.util.zip.ZipInputStream z = new ZipInputStream( new FileInputStream( zip ) );
+
+          java.util.zip.ZipEntry zd;
+        
+          boolean err = true;
+        
+          File f = File.createTempFile("random", ".tmp"); f.deleteOnExit();
+
+          byte[] buffer = new byte[4096];
+
+          while( ( zd = z.getNextEntry() ) != null )
+          {
+            if( zfile.equals(zd.getName() ) )
+            {
+              BufferedOutputStream data = new BufferedOutputStream( new FileOutputStream( f ), buffer.length);
+
+              int len; while ((len = z.read(buffer)) > 0) { data.write(buffer, 0, len); }
+
+              data.flush(); data.close(); file = new RandomAccessFileV(f, "r"); fc.setFileName(zfile);
+              
+              err = false; break;
+            }
           }
 
-          //If already running as admin file can only be read.
-
-          if( admin ) { JOptionPane.showMessageDialog(null, "File can only be read."); }
+          if( err ) { JOptionPane.showMessageDialog(null, "Cant open zip file!"); return; }
         }
       }
 

@@ -201,6 +201,17 @@ public class ZIP extends Window.Window implements JDEventListener
       ds.clear(); info("<html></html>");
 
       try { file.seek( e.getArg(1) ); Offset.setSelected( e.getArg(1), e.getArg(2) ); } catch( java.io.IOException er ) { }
+
+      if( javax.swing.JOptionPane.showConfirmDialog(null, "Would you like to open this file?", null, javax.swing.JOptionPane.YES_NO_OPTION) == javax.swing.JOptionPane.YES_OPTION )
+      {
+        if( main != null )
+        {
+          String[] paths = tree.getLeadSelectionPath().toString().split(", ");
+          String path = ""; for( int i = 1, end = paths.length - 1; i < end; path += paths[i++] + "/" );
+          path = path.substring(0,path.length()-1);
+          main.actionPerformed( new java.awt.event.ActionEvent(this, java.awt.event.ActionEvent.ACTION_PERFORMED, "ZOpen" + path ) );
+        }
+      }
     }
 
     //Load and set descriptor to node.

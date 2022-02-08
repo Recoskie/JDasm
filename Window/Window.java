@@ -72,13 +72,17 @@ public class Window
 
   public static JCellPane tools;
 
+  //keep reference to action listener incase we wish to invoke an command.
+
+  public static ActionListener main;
+
   //Additional info text.
 
   public static void info( String s ) { infoData.setText(s); }
 
   public static void createGUI(String w, ActionListener app, JDEventListener app1 )
   {
-    winFrame = new JFrame(w); winFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    winFrame = new JFrame(w); winFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); main = app;
 
     //Tool window.
 
