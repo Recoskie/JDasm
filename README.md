@@ -62,11 +62,13 @@ Supports Unix/Linux binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod
 
 Supports MacOS/iPhone binaries, and also MacOS/iPhone Universal binaries.
 
-Supports Decompiling Andoird APK application binaries.
+Supports Decompiling Mobile Andoird APK application binaries.
 
-Supports Decompiling iPhone IPA application binaries.
+Supports Decompiling Mobile iPhone IPA application binaries.
 
 As a note both android and iPhone store tire applications in zip files. You need to find the main application file to decompile it. The main binary to load is stored in a manifest file in the IPA, or APK.
+
+As a note iPhone uses MacOS format for the main binaries, and android uses ELF for libraries in the APK. Both are supported by this application.
 
 Supports .efi boot binaries and boot sector disassembly.
 
