@@ -168,9 +168,8 @@ public class ZIP extends Window.Window implements JDEventListener
       "Java uses the zip format to store application files as a single file as a runnable file called an java jar.<br /><br />" +
       "Android APK applications are stored in zip files to save space, and to keep applications organized.<br /><br />" +
       "Apple iPhone IPA applications are stored in zip files to also save space and to keep applications organized.<br /><br />" +
-      "Disassembling android and iPhone apps is supported by JDisassembly, but you will first need to decompress the application file.<br /><br />" +
-      "Microsoft stores office document files into compressed zip files to save space and to keep pictures and models used in the office document organized as one file.<br /><br />" +
-      "You can open these files using a zip program if you like and decompress all the files stored in the Android APK, or IPA, or java JAR, or microsoft docx file.</html>"
+      "Disassembling android and iPhone apps is supported by JDisassembly, but you will first need to find the application file in the IPA, or APK file.<br /><br />" +
+      "Microsoft stores office document files into compressed zip files to save space and to keep pictures and models used in the office document organized as one file.</html>"
     );
   }
 
