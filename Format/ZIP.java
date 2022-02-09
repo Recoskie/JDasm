@@ -164,6 +164,8 @@ public class ZIP extends Window.Window implements JDEventListener
       
     //Zip info.
 
+    ds.clear();
+
     info("<html>The zip file format is used as a container for mobile (android, iPhone) applications, and java applications, and also Microsoft office documents as well as being useful for users to store files as a compressed zip file.<br /><br />" +
       "Java uses the zip format to store application files as a single file as a runnable file called an java jar.<br /><br />" +
       "Android APK applications are stored in zip files to save space, and to keep applications organized.<br /><br />" +
