@@ -193,7 +193,7 @@ public class ELF extends Data implements JDEventListener
       new swingIO.tree.JDNode("Other Sections", 9) //Sections that are marked as straight data with no type.
     };
 
-    core.clear();
+    if( core != null ) { core.clear(); }
   }
 
   public void open( JDEvent e )

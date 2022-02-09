@@ -43,6 +43,10 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     false, false, false, false, false
   };
 
+  //We want to keep an reference to temp files so we can delete them on opening a new files.
+
+  private static File temp;
+
   //Buffer should be set to the length of the largest signature sequence.
 
   private byte[] Sig = new byte[4];
@@ -339,6 +343,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     if( bdBar.getMenuCount() > 2 ) { bdBar.remove(BootSector); }
 
     if( core != null ) { core.setEvent( this::Dis ); } disEnd = null;
+  
+    if( temp != null && temp.exists() ) { temp.delete(); }
   }
 
   /*************************************************************************************
@@ -390,7 +396,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
         
           boolean err = true;
         
-          File f = File.createTempFile("random", ".tmp"); f.deleteOnExit();
+          temp = File.createTempFile("random", ".tmp"); temp.deleteOnExit();
 
           byte[] buffer = new byte[4096];
 
@@ -398,11 +404,11 @@ public class app extends Window implements ActionListener, DropTargetListener, J
           {
             if( zfile.equals(zd.getName() ) )
             {
-              BufferedOutputStream data = new BufferedOutputStream( new FileOutputStream( f ), buffer.length);
+              BufferedOutputStream data = new BufferedOutputStream( new FileOutputStream( temp ), buffer.length);
 
               int len; while ((len = z.read(buffer)) > 0) { data.write(buffer, 0, len); }
 
-              data.flush(); data.close(); file = new RandomAccessFileV(f, "r"); fc.setFileName(zfile);
+              data.flush(); data.close(); file = new RandomAccessFileV(temp, "r"); fc.setFileName(zfile);
               
               err = false; break;
             }
@@ -536,7 +542,26 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     {
       Valid = true; for( int i2 = 0; i2 < Signature[i1].length && Valid; i2++ ) { Valid = Signature[i1][i2] == Sig[i2]; }
 
-      if( Valid ) { return( i1 ); }
+      if( Valid )
+      {
+        //Mac signature collides with the java signature. It is easy to tell the two apparat.
+
+        if( i1 == 4 )
+        {
+          try
+          {
+            file.Events = false; file.seek( 4 ); file.read(4); int check = file.toInt(); file.seek(0); file.Events = true;
+          
+            //The Oldest java version number starts at 45 and higher.
+            //In a MacOS universal binary there is no way we are going to store 45 or more binaries in one file.
+
+            if( check >= 45 ) { i1 = -1; }
+          }
+          catch (IOException e) { }
+        }
+
+        return( i1 );
+      }
     }
       
     return( -1 );
