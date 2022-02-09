@@ -122,7 +122,9 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     {
       String file = e.getActionCommand(); file = file.substring(5,file.length());
 
-      Reset(); open(new JDEvent( this, "", file.substring(file.lastIndexOf("."), file.length()), file, 1 )); return;
+      int ext = file.lastIndexOf(".");
+
+      open(new JDEvent( this, "", ext > 0 ? file.substring(ext, file.length()) : "", file, 1 )); return;
     }
 
     //Basic file path commands.
@@ -408,13 +410,15 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
               int len; while ((len = z.read(buffer)) > 0) { data.write(buffer, 0, len); }
 
-              data.flush(); data.close(); file = new RandomAccessFileV(temp, "r"); fc.setFileName(zfile);
+              data.flush(); data.close(); z.close(); file = new RandomAccessFileV(temp, "r"); fc.setFileName(zfile);
               
               err = false; break;
             }
           }
 
           if( err ) { JOptionPane.showMessageDialog(null, "Cant open zip file!"); return; }
+
+          Reset();
         }
       }
 
