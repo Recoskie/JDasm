@@ -66,11 +66,11 @@ Supports Decompiling Mobile Andoird APK application binaries.
 
 Supports Decompiling Mobile iPhone IPA application binaries.
 
-As a note both android and iPhone store tire applications in zip files. You need to find the main application file to decompile it. The main binary to load is stored in a manifest file in the IPA, or APK.
+iPhone uses MacOS (Mach-o) format, and android uses ELF for libraries in the APK.
 
-As a note iPhone uses MacOS format for the main binaries, and android uses ELF for libraries in the APK. Both are supported by this application.
+Android and iPhone store the applications in zip files. You need to find the main application file to decompile it. The main binary to load is stored in a manifest file in the IPA, or APK.
 
-Supports .efi boot binaries and boot sector disassembly.
+Supports .efi boot binaries and boot sector disassembly. You are able to decompile the boot process of firmware files in any os.
 
 ## Compression.
 
