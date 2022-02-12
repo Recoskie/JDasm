@@ -48,12 +48,16 @@ public class ZIP extends Window.Window implements JDEventListener
 
     //Zip pk entry.
 
-    int size, strLen, extData;
+    int size, strLen, extData, cLen;
     String name;
 
     //Data descriptor entry.
 
-    int data = 0;
+    int data = 0, dir = 1;
+
+    //Central directory.
+  
+    JDNode c = new JDNode("Central Directory", "dir");
     
     //Begin reading the file header.
 
@@ -87,7 +91,7 @@ public class ZIP extends Window.Window implements JDEventListener
           pos += buf; file.seek( pos ); file.read( b ); buf = 0;
         }
         
-        name = ""; for( int i = 0; i < strLen; name = name + ((char)b[buf + i++ ]) );
+        name = ""; for( int i = 0; i < strLen; name += ((char)b[ buf + i++ ]) );
 
         buf += strLen + extData;
 
@@ -124,21 +128,16 @@ public class ZIP extends Window.Window implements JDEventListener
           level++;
         }
 
-        if( size > 0 ) { r.add( new JDNode("File Data.h", new long[]{ 1, pos + buf, pos + buf + size - 1 } ) ); }
+        if( size > 0 ) { r.add( new JDNode( "File Data.h", new long[]{ 1, pos + buf, pos + buf + size - 1 } ) ); }
         
-        opath = name.split("/");
-        
-        buf += size; if( buf >= sigEnd )
-        {
-          pos += buf; file.seek( pos ); file.read( b ); buf = 0;
-        }
+        opath = name.split("/"); buf += size;
       }
 
       //The data descriptor tells us the size of the compressed data after we have read it.
 
       else if( sig == 0x08074B50 )
       {
-        r.add( new JDNode("File Data.h", new long[]{ 1, pos + buf - data, pos + buf - 1 } ) );
+        r.add( new JDNode( "File Data.h", new long[]{ 1, pos + buf - data, pos + buf - 1 } ) );
         r.add( new JDNode( "Data info.h", new long[]{ 3, pos + buf } ) );
 
         buf += 16;
@@ -146,9 +145,36 @@ public class ZIP extends Window.Window implements JDEventListener
 
       //The central directory.
 
-      else if( sig == 0x02014b50 ){ break; }
+      else if( sig == 0x02014B50 )
+      {
+        if( ( buf + 46 ) > b.length )
+        {
+          pos += buf; file.seek( pos ); file.read( b ); buf = 0;
+        }
 
-      //The size of the riles compressed data is identified by the data descriptor after the files data.
+        strLen = ( ( b[buf + 29] & 0xFF ) << 8 ) | ( b[buf + 28] & 0xFF );
+        extData = ( ( b[buf + 31] & 0xFF ) << 8 ) | ( b[buf + 30] & 0xFF );
+        cLen = ( ( b[buf + 33] & 0xFF ) << 8 ) | ( b[buf + 32] & 0xFF );
+
+        c.add( new JDNode( "Directory #" + (dir++) + ".h", new long[]{ 4, pos + buf } ) );
+
+        buf += 46 + strLen + extData + cLen;
+      }
+      else if( sig == 0x06054B50 )
+      {
+        if( ( buf + 22 ) > b.length )
+        {
+          pos += buf; file.seek( pos ); file.read( b ); buf = 0;
+        }
+
+        cLen = ( ( b[buf + 21] & 0xFF ) << 8 ) | ( b[buf + 20] & 0xFF );
+
+        c.add( new JDNode("Directory End.h", new long[]{ 5, pos + buf }) );
+
+        buf += cLen + 22;
+      }
+
+      //The size of the files compressed data is identified by the data descriptor after the files data.
       //This happens when the win zip program does not know the size before hand.
       //The size of the data we read before the data descriptor should match the size in the data descriptor.
 
@@ -157,6 +183,8 @@ public class ZIP extends Window.Window implements JDEventListener
         buf++; data++;
       }
     }
+
+    if( c.getChildCount() > 0 ){ root.add( c ); }
 
     //Set binary tree view, and enable IO system events.
       
@@ -188,6 +216,14 @@ public class ZIP extends Window.Window implements JDEventListener
 
     if( e.getID().equals("UInit") ) { Uninitialize(); }
 
+    //Data directory array.
+
+    else if( e.getID().equals("dir") ){ info("<html>The data directory Has a copy of each file signature in this file and the location to each file signature.<br /><br />" +
+    "The data directory has some additional attributes that can be used to add comments to files, and identify if files are encrypted.<br /><br />" +
+    "The data directory tells us which disk we are on, and allows us to do multi part zip files as well which is not included in the file signatures.<br /><br />" +
+    "It is recommend that we read the data directory first and locate the file signatures in the zip using the data directory offset to file signature attribute.<br /><br />" +
+    "This is because if we read only the file signatures we do not know if it is a multi-part file zip, or if a file is encrypted and compressed.</html>"); }
+
     //When the user clicks on the "File header.h" node we will receive the array arguments associated with the node.
 
     else if( e.getArg(0) == 0 )
@@ -217,62 +253,98 @@ public class ZIP extends Window.Window implements JDEventListener
 
     //Load and set descriptor to node.
 
-    else if( e.getArg( 0 ) == 2 )
+    else if( e.getArg( 0 ) >= 2 )
     {
       try
-      {
-        file.Events = false; file.seek( e.getArg(1) );
+      { 
+        file.Events = false; file.seek( e.getArg(1) ); DTemp = new Descriptor( file );
 
-        JDNode n = (JDNode)tree.getLastSelectedPathComponent();
+        if( e.getArg( 0 ) == 2 )
+        {
+          JDNode n = (JDNode)tree.getLastSelectedPathComponent(); des.add( DTemp );
+          
+          DTemp.setEvent( this::zipInfo ); n.setArgs( new long[]{ 0, ref++ });
 
-        DTemp = new Descriptor( file );
+          DTemp.Other("Signature", 4);
+          DTemp.LUINT16("Min Version");
+          DTemp.LUINT16("Flag");
+          DTemp.LUINT16("Compression method");
+          DTemp.LUINT16("Last Modified (Time)");
+          DTemp.LUINT16("Last Modified (Date)");
+          DTemp.LUINT32("CRC-32");
+          DTemp.LUINT32("Compressed Size");
+          DTemp.LUINT32("Uncompressed Size");
+          DTemp.LUINT16("File name Length"); int flen = (short)DTemp.value;
+          DTemp.LUINT16("Data felid len"); int elen = (short)DTemp.value;
+          DTemp.String8("File name", flen );
+          if( elen > 0 ) { DTemp.Other("Data Felid", elen ); }
+        }
+        else if( e.getArg(0) == 3 )
+        {
+          JDNode n = (JDNode)tree.getLastSelectedPathComponent(); des.add( DTemp );
 
-        des.add( DTemp ); DTemp.setEvent( this::zipInfo );
+          DTemp.setEvent( this::dataInfo ); n.setArgs( new long[]{ 0, ref++ } );
 
-        n.setArgs( new long[]{ 0, ref++ });
+          DTemp.Other("Signature", 4);
+          DTemp.LUINT32("CRC-32");
+          DTemp.LUINT32("Compressed Size");
+          DTemp.LUINT32("Uncompressed Size");
+        }
+    
+        //Load and set descriptor to node.
 
-        DTemp.LUINT32("Signature");
-        DTemp.LUINT16("Min Version");
-        DTemp.LUINT16("Flag");
-        DTemp.LUINT16("Compression method");
-        DTemp.LUINT16("Last Modified (Time)");
-        DTemp.LUINT16("Last Modified (Date)");
-        DTemp.LUINT32("CRC-32");
-        DTemp.LUINT32("Compressed Size");
-        DTemp.LUINT32("Uncompressed Size");
-        DTemp.LUINT16("File name Length"); int flen = (short)DTemp.value;
-        DTemp.LUINT16("Data felid len"); int elen = (short)DTemp.value;
-        DTemp.String8("File name", flen );
-        if( elen > 0 ) { DTemp.Other("Data Felid", elen ); }
+        else if( e.getArg( 0 ) == 4 )
+        {
+          JDNode n = (JDNode)tree.getLastSelectedPathComponent();
+    
+          des.add( DTemp ); DTemp.setEvent( this::dirInfo );
+    
+          n.setArgs( new long[]{ 0, ref++ });
+    
+          DTemp.Other("Signature", 4);
+          DTemp.LUINT16("Version used");
+          DTemp.LUINT16("Min Version");
+          DTemp.LUINT16("Flag");
+          DTemp.LUINT16("Compression method");
+          DTemp.LUINT16("Last Modified (Time)");
+          DTemp.LUINT16("Last Modified (Date)");
+          DTemp.LUINT32("CRC-32");
+          DTemp.LUINT32("Compressed Size");
+          DTemp.LUINT32("Uncompressed Size");
+          DTemp.LUINT16("File name Length"); int flen = (short)DTemp.value;
+          DTemp.LUINT16("Data felid len"); int elen = (short)DTemp.value;
+          DTemp.LUINT16("Comment len"); int clen = (short)DTemp.value;
+          DTemp.LUINT16("Disk Number");
+          DTemp.LUINT16("Internal attributes");
+          DTemp.LUINT32("External attributes");
+          DTemp.LUINT32("Offset");
+          DTemp.String8("File name", flen );
+          if( elen > 0 ) { DTemp.Other("Data Felid", elen ); }
+          if( clen > 0 ) { DTemp.String8("Comment", clen ); }
+        }
 
-        file.Events = true;
+        //End of zip directory.
 
-        ds.setDescriptor( DTemp );
+        else if( e.getArg( 0 ) == 5 )
+        {
+          JDNode n = (JDNode)tree.getLastSelectedPathComponent(); des.add( DTemp );
+          
+          /*DTemp.setEvent( this::endInfo );*/ n.setArgs( new long[]{ 0, ref++ });
+    
+          DTemp.Other("Signature", 4);
+          DTemp.LUINT16("Disk Number");
+          DTemp.LUINT16("Disks");
+          DTemp.LUINT16("Directory");
+          DTemp.LUINT16("Directories");
+          DTemp.LUINT32("Directory size");
+          DTemp.LUINT32("Directory offset");
+          DTemp.LUINT16("Comment size"); int clen = (short)DTemp.value;
+          if( clen > 0 ) { DTemp.String8("Comment", clen ); }
+        }
+
+        file.Events = true; ds.setDescriptor( DTemp );
       }
-      catch(Exception er) {}
-    }
-    else if( e.getArg(0) == 3 )
-    {
-      try
-      {
-        file.Events = false;
-
-        JDNode n = (JDNode)tree.getLastSelectedPathComponent();
-
-        file.seek( e.getArg(1) ); DTemp = new Descriptor( file ); des.add( DTemp );
-
-        DTemp.setEvent( this::dataInfo );
-
-        DTemp.LUINT32("Signature");
-        DTemp.LUINT32("CRC-32");
-        DTemp.LUINT32("Compressed Size");
-        DTemp.LUINT32("Uncompressed Size");
-
-        n.setArgs( new long[]{ 0, ref++ } ); file.Events = true;
-
-        ds.setDescriptor( DTemp );
-      }
-      catch( Exception er ){}
+      catch(Exception er) { }
     }
   }
 
@@ -281,6 +353,8 @@ public class ZIP extends Window.Window implements JDEventListener
   private static final String[] zipInfo = new String[]
   {
     "<html>50 4B 03 04 is the start of a file signature in a compressed zip file.</html>",
+    "<html>Version of zip used to create the file. The version number is convert to an decimal value.<br /><br />" +
+    "in the case of version 122 it would mean 12.2v. In the case of 20 it means 2.0v.</html>",
     "<html>Version needed to extract (minimum). The version number is convert to an decimal value.<br /><br />" +
     "in the case of version 122 it would mean 12.2v. In the case of 20 it means 2.0v.</html>",
     "<html>The flag is meant to be viewed in binary. Each of the 16 binary digits if set one signifies an setting." +
@@ -323,7 +397,7 @@ public class ZIP extends Window.Window implements JDEventListener
     "<tr><td>96</td><td>JPEG variant.</td></tr>" +
     "<tr><td>97</td><td>WavPack compressed data.</td></tr>" +
     "<tr><td>98</td><td>PPMd version I, Rev 1.</td></tr>" +
-    "<tr><td>99</td><td>AE-x encryption marker (see APPENDIX E).</td></tr>" +
+    "<tr><td>99</td><td>AE-x encryption marker.</td></tr>" +
     "</table></html>",
     "<html>File last modification time.</html>",
     "<html>File last modification date.</html>",
@@ -337,6 +411,11 @@ public class ZIP extends Window.Window implements JDEventListener
     "<html>Extra field length. The extra felid is useful for folder and file attributes and properties.<br /><br />" +
     "Some PK signatures have a zero size uncompressed as they only define attributes to a folder.<br /><br />" +
     "The extra data felid can also be used to extend the zip file format.</html>",
+    "<html>Comment length.</html>",
+    "<html>Disk Number.</html>",
+    "<html>Internal attributes.</html>",
+    "<html>External attributes.</html>",
+    "<html>File signature location.</html>",
     "<html>The zip file format uses the full path to the file then name of the file.</html>",
     "<html>Extra field. Usually a set of 2 byte pairs that add additional information about the file or entire.</html>"
   };
@@ -366,7 +445,7 @@ public class ZIP extends Window.Window implements JDEventListener
     }
     else
     {
-      info( zipInfo[ i ] );
+      info( zipInfo[ i > 0 ? ( i > 10 ? i + 6 : i + 1 ) : i ] );
     }
   }
 
@@ -383,6 +462,22 @@ public class ZIP extends Window.Window implements JDEventListener
     else
     {
       info( dataInfo[ i ] );
+    }
+  }
+
+  public void dirInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info("<html>The data directory Has a copy of each file signature in this file and the location to each file signature.<br /><br />" +
+      "The data directory has some additional attributes that can be used to add comments to files, and identify if files are encrypted.<br /><br />" +
+      "The data directory tells us which disk we are on, and allows us to do multi part zip files as well which is not included in the file signatures.<br /><br />" +
+      "It is recommend that we read the data directory first and locate the file signatures in the zip using the data directory.<br /><br />" +
+      "This is because if we read only the file signatures we do not know if it is a multi-part file zip, or if a file is encrypted and compressed.</html>");
+    }
+    else
+    {
+      info( zipInfo[ i ] );
     }
   }
 }
