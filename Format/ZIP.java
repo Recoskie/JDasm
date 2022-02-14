@@ -109,9 +109,9 @@ public class ZIP extends Window.Window implements JDEventListener
 
         extData += buf; for( ; buf < extData; buf += 2 )
         {
-          if( ( b[buf] & 0xFF ) == 0x10 && ( b[buf + 1] & 0xFF ) == 0x00 )
+          if( b[buf] == 1 && b[buf + 1] == 0 & ( ( ( b[buf+2] & 0xFF ) << 8 ) | ( b[buf + 3] & 0xFF ) ) >= 16 )
           {
-            buf += 10;
+            buf += 12;
 
             size = ( ( b[buf + 7] & 0xFF ) << 56 ) | ( ( b[buf + 6] & 0xFF ) << 48 ) | ( ( b[buf + 5] & 0xFF ) << 40 ) | ( ( b[buf + 4] & 0xFF ) << 32 ) |
             ( ( b[buf + 3] & 0xFF ) << 24 ) | ( ( b[buf + 2] & 0xFF ) << 16 ) | ( ( b[buf + 1] & 0xFF ) << 8 ) | ( b[buf] & 0xFF );
