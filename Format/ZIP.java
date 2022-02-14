@@ -187,6 +187,24 @@ public class ZIP extends Window.Window implements JDEventListener
 
         buf += 46 + strLen + extData + cLen;
       }
+      else if( sig == 0x06064B50 )
+      {
+        if( ( buf + 12 ) > b.length )
+        {
+          pos += buf; file.seek( pos ); file.read( b ); buf = 0;
+        }
+
+        extData = ( ( b[buf + 11] & 0xFF ) << 56 ) | ( ( b[buf + 10] & 0xFF ) << 48 ) | ( ( b[buf + 9] & 0xFF ) << 40 ) | ( ( b[buf + 8] & 0xFF ) << 32 ) |
+        ( ( b[buf + 7] & 0xFF ) << 24 ) | ( ( b[buf + 6] & 0xFF ) << 16 ) | ( ( b[buf + 5] & 0xFF ) << 8 ) | ( b[buf + 4] & 0xFF );
+        
+        buf += ( extData - 44 ) + 56; c.add( new JDNode("Directory End64.h", new long[]{ 6, pos + buf }) );
+      }
+      else if( sig == 0x07064B50 )
+      {
+        buf += 20;
+
+        c.add( new JDNode("Directory Loc64.h", new long[]{ 7, pos + buf }) );
+      }
       else if( sig == 0x06054B50 )
       {
         if( ( buf + 22 ) > b.length )
@@ -367,6 +385,20 @@ public class ZIP extends Window.Window implements JDEventListener
           DTemp.LUINT32("Directory offset");
           DTemp.LUINT16("Comment size"); int clen = (short)DTemp.value;
           if( clen > 0 ) { DTemp.String8("Comment", clen ); }
+        }
+
+        //End of zip directory 64.
+
+        else if( e.getArg( 0 ) == 6 )
+        {
+          
+        }
+
+        //zip directory location 64.
+
+        else if( e.getArg( 0 ) == 7 )
+        {
+                  
         }
 
         file.Events = true; ds.setDescriptor( DTemp );
