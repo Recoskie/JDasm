@@ -329,7 +329,7 @@ public class ZIP extends Window.Window implements JDEventListener
         {
           JDNode n = (JDNode)tree.getLastSelectedPathComponent(); des.add( DTemp );
           
-          /*DTemp.setEvent( this::endInfo );*/ n.setArgs( new long[]{ 0, ref++ });
+          DTemp.setEvent( this::endInfo ); n.setArgs( new long[]{ 0, ref++ });
     
           DTemp.Other("Signature", 4);
           DTemp.LUINT16("Disk Number");
@@ -348,11 +348,16 @@ public class ZIP extends Window.Window implements JDEventListener
     }
   }
 
+  //Multi pat file storage detail.
+
+  private static final String multiPartZip = "<br /><br />We should always start at disk 0 and decompress the data into the file then move to disk 1 and so on adding data to the file.<br /><br />" +
+  "This feature is only used in multi-part file storage.</html>";
+
   //The ZIP file header.
 
   private static final String[] zipInfo = new String[]
   {
-    "<html>50 4B 03 04 is the start of a file signature in a compressed zip file.</html>",
+    "<html>50 4B 03 04 is the start of a file (signature) in a compressed zip file.</html>",
     "<html>Version of zip used to create the file. The version number is convert to an decimal value.<br /><br />" +
     "in the case of version 122 it would mean 12.2v. In the case of 20 it means 2.0v.</html>",
     "<html>Version needed to extract (minimum). The version number is convert to an decimal value.<br /><br />" +
@@ -361,7 +366,7 @@ public class ZIP extends Window.Window implements JDEventListener
     "The table bellow shows what setting each digit implies.<br /><br />" +
     "<table border='1'>" +
     "<tr><td>Digit</td><td>Description</td></tr>" +
-    "<tr><td>0000000000001000</td><td>If this bit is set, the fields CRC-32, compressed size and uncompressed size are set to zero in the local header. The correct values are put in the data descriptor immediately following the compressed data.</td></tr>" +
+    "<tr><td>0000000000001000</td><td>If this bit is set, the fields CRC-32, compressed size and uncompressed size are set to zero in the local header. The correct values are put in the data descriptor after the compressed data.</td></tr>" +
     "<tr><td>0000000000100000</td><td>If this bit is set, this indicates that the file is compressed patched data.</td></tr>" +
     "<tr><td>0000000001000000</td><td>Strong encryption. If this bit is set, you MUST set the version needed to extract value to at least 50 and you MUST also set bit 0. If AES encryption is used, the version needed to extract value MUST be at least 51.</td></tr>" +
     "<tr><td>0000100000000000</td><td>Language encoding flag (EFS).</td></tr>" +
@@ -412,7 +417,7 @@ public class ZIP extends Window.Window implements JDEventListener
     "Some PK signatures have a zero size uncompressed as they only define attributes to a folder.<br /><br />" +
     "The extra data felid can also be used to extend the zip file format.</html>",
     "<html>Comment length.</html>",
-    "<html>Disk Number.</html>",
+    "<html>Disk Number." + multiPartZip,
     "<html>Internal attributes.</html>",
     "<html>External attributes.</html>",
     "<html>File signature location.</html>",
@@ -431,11 +436,24 @@ public class ZIP extends Window.Window implements JDEventListener
     "<html>Uncompressed file size. This is the file size after we decompress the file.</html>"
   };
 
+  private static final String[] endInfo = new String[]
+  {
+    "<html>End of central dir signature.</html>",
+    "<html>The current disk number." + multiPartZip,
+    "<html>Number of disk with the same central directory." + multiPartZip,
+    "<html>Total number of entries in the central directory on this disk." + multiPartZip,
+    "<html>Total number of entries in the central directory across all disks." + multiPartZip,
+    "<html>Size of the central directory in this file.</html>",
+    "<html>Offset to start location for the central directory in this file.</html>",
+    "<html>File user comment length.</html>",
+    "<html>File user comment.</html>"
+  };
+
   public void zipInfo( int i )
   {
     if( i < 0 )
     {
-      info("<html>All file in the zip begin with a PK signature. The file compressed data is right after the PK parameters.<br /><br />" +
+      info("<html>All files in the zip begin with a PK signature. The file compressed data is right after the PK parameters.<br /><br />" +
       "The next file signature is after the compressed file size parameter.<br /><br />" +
       "In some cases a signature code (data descriptor) is used to identify the end of the compressed file data in some cases.<br /><br />" +
       "The data descriptor tells us how many bytes the compressed data is which should match the number of bytes we read after the PK parameters.<br /><br />" +
@@ -475,9 +493,25 @@ public class ZIP extends Window.Window implements JDEventListener
       "It is recommend that we read the data directory first and locate the file signatures in the zip using the data directory.<br /><br />" +
       "This is because if we read only the file signatures we do not know if it is a multi-part file zip, or if a file is encrypted and compressed.</html>");
     }
+    else if( i == 0 )
+    {
+      info("<html>50 4B 01 02 is the start of a file signature in the central directory in an zip file.</html>");
+    }
     else
     {
       info( zipInfo[ i ] );
+    }
+  }
+
+  public void endInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info("<html>The end of zip may specify more than one zip file as a disk.<br /><br />" + multiPartZip);
+    }
+    else
+    {
+      info( endInfo[ i ] );
     }
   }
 }
