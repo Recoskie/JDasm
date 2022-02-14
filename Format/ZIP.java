@@ -488,10 +488,10 @@ public class ZIP extends Window.Window implements JDEventListener
     if( i < 0 )
     {
       info("<html>The data directory Has a copy of each file signature in this file and the location to each file signature.<br /><br />" +
-      "The data directory has some additional attributes that can be used to add comments to files, and identify if files are encrypted.<br /><br />" +
+      "The data directory has some additional attributes that can be used to add comments to files.<br /><br />" +
       "The data directory tells us which disk we are on, and allows us to do multi part zip files as well which is not included in the file signatures.<br /><br />" +
-      "It is recommend that we read the data directory first and locate the file signatures in the zip using the data directory.<br /><br />" +
-      "This is because if we read only the file signatures we do not know if it is a multi-part file zip, or if a file is encrypted and compressed.</html>");
+      "It is recommend that we read the central directory first and locate the file signatures using the offset given to the file signature.<br /><br />" +
+      "This is because if we read only the file signatures we do not know if it is a multi-part file zip, or if more than one file signature exists for the same file and only one is the latest version of the file.</html>");
     }
     else if( i == 0 )
     {

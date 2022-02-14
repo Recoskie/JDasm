@@ -28,19 +28,22 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     new byte[] { -50, -6, -19, -2 }, //32 Bit Mac/IOS binary.
     new byte[] { -49, -6, -19, -2 }, //64 Bit Mac/IOS binary.
     new byte[] { -54, -2, -70, -66 }, //Mac/IOS universal binary.
+    /*new byte[] { -54, -2, -70, -66 },*/ //Reserved for java class loader format plugin.
     new byte[] { 0x42, 0x4D }, //Bit map pictures.
     new byte[] { -1, -40 }, //JPEG start of image marker.
     new byte[] { 0x52, 0x49, 0x46, 0x46 }, //Multimedia RIFF file.
     new byte[] { 0x52, 0x46, 0x36, 0x34 }, //Multimedia RIFF/64 file.
-    new byte[] { 0x50, 0x4B, 0x03, 0x04 } //Compressed ZIP files.
+    new byte[] { 0x50, 0x4B, 0x03, 0x04 }, //Compressed ZIP files.
+    new byte[] { 0x50, 0x4B, 0x07, 0x08 }, //Compressed ZIP files (split).
+    new byte[] { 0x50, 0x4B, 0x05, 0x06 } //Compressed ZIP files (Empty).
   };
 
   //Depending on the file format we do not need a virtual address space.
 
   private static boolean SignatureV[] = new boolean[]
   {
-    true, true, true, true, true,
-    false, false, false, false, false
+    true, true, true, true, true, /*true,*/
+    false, false, false, false, false, false, false
   };
 
   //We want to keep an reference to temp files so we can delete them on opening a new files.
@@ -55,8 +58,9 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
   private String DecodeAPP[] = new String[]
   {
-    "Format.EXE", "Format.ELF", "Format.MAC", "Format.MAC", "Format.MAC",
-    "Format.BMP", "Format.JPEG", "Format.RIFF", "Format.RIFF", "Format.ZIP"
+    "Format.EXE", "Format.ELF", "Format.MAC", "Format.MAC", "Format.MAC", /*"Format.JAVA",*/
+    "Format.BMP", "Format.JPEG", "Format.RIFF", "Format.RIFF",
+    "Format.ZIP", "Format.ZIP", "Format.ZIP"
   };
 
   //By file extension.
