@@ -58,9 +58,9 @@ Supported formats.
 
 This application currently supports Microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx, .com, DOS, MS-DOS.
 
-Supports Unix/Linux binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod, .so
+Supports Unix/Linux (ELF) binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod, .so
 
-Supports MacOS/iPhone binaries, and also MacOS/iPhone Universal binaries.
+Supports MacOS/iPhone (Mach-o) binaries, and also MacOS/iPhone (Mach-o) Universal binaries.
 
 Supports Decompiling Mobile Andoird APK application binaries.
 
@@ -68,13 +68,13 @@ Supports Decompiling Mobile iPhone IPA application binaries.
 
 iPhone uses MacOS (Mach-o) format, and android uses ELF for libraries in the APK.
 
-Android and iPhone store the applications in zip files. You need to find the main application file to decompile it. The main binary to load is stored in a manifest file in the IPA, or APK.
+Android and iPhone store the applications in zip files. You need to find the main application file to decompile it.
 
 Supports .efi boot binaries and boot sector disassembly. You are able to decompile the boot process of firmware files in any os.
 
 ## Compression.
 
-Supports analyzing and editing ZIP files.
+Supports analyzing ZIP files.
 
 ## Picture formats.
 
