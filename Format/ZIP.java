@@ -82,9 +82,9 @@ public class ZIP extends Window.Window implements JDEventListener
           pos += buf; file.seek( pos ); file.read( b ); buf = 0;
         }
 
-        size = ( ( b[buf + 21] & 0xFF ) << 24 ) | ( ( b[buf + 20] & 0xFF ) << 16 ) | ( ( b[buf + 19] & 0xFF ) << 8 ) | ( b[buf + 18] & 0xFF );
+        size = ( ( ( b[buf + 21] & 0xFF ) << 24 ) | ( ( b[buf + 20] & 0xFF ) << 16 ) | ( ( b[buf + 19] & 0xFF ) << 8 ) | ( b[buf + 18] & 0xFF ) ) & 0xFFFFFFFFl;
 
-        if( size == 0xFFFFFFFFl ){ size = 0; }
+        if( size == 0xFFFFFFFFl ){ size = 0; } //This is not allowed. If this happens it is a ZIP64 signature.
 
         strLen = ( ( b[buf + 27] & 0xFF ) << 8 ) | ( b[buf + 26] & 0xFF );
         extData = ( ( b[buf + 29] & 0xFF ) << 8 ) | ( b[buf + 28] & 0xFF );
