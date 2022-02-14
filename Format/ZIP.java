@@ -98,11 +98,33 @@ public class ZIP extends Window.Window implements JDEventListener
         
         name = ""; for( int i = 0; i < strLen; name += ((char)b[ buf + i++ ]) );
 
-        buf += strLen + extData;
+        buf += strLen;
+
+        if( ( extData + buf ) >= b.length )
+        {
+          pos += buf; file.seek( pos ); file.read( b ); buf = 0;
+        }
+
+        //Check for zip64 compressed file size.
+
+        extData += buf; for( ; buf < extData; buf += 2 )
+        {
+          if( ( b[buf] & 0xFF ) == 0x10 && ( b[buf + 1] & 0xFF ) == 0x00 )
+          {
+            buf += 10;
+
+            size = ( ( b[buf + 7] & 0xFF ) << 56 ) | ( ( b[buf + 6] & 0xFF ) << 48 ) | ( ( b[buf + 5] & 0xFF ) << 40 ) | ( ( b[buf + 4] & 0xFF ) << 32 ) |
+            ( ( b[buf + 3] & 0xFF ) << 24 ) | ( ( b[buf + 2] & 0xFF ) << 16 ) | ( ( b[buf + 1] & 0xFF ) << 8 ) | ( b[buf] & 0xFF );
+
+            break;
+          }
+        }
+
+        buf = extData;
 
         path = name.split("/");
 
-        change = 0; for( int e = Math.min(path.length,opath.length); change < e; change++ )
+        change = 0; for( int e = path.length > opath.length ? opath.length : path.length ; change < e; change++ )
         {
           if( !path[change].equals(opath[change]) ){ break; }
         }
