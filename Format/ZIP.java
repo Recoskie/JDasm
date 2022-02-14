@@ -289,8 +289,7 @@ public class ZIP extends Window.Window implements JDEventListener
         if( main != null )
         {
           String[] paths = tree.getLeadSelectionPath().toString().split(", ");
-          String path = ""; for( int i = 1, end = paths.length - 1; i < end; path += paths[i++] + "/" );
-          path = path.substring(0,path.length()-1);
+          String path = ""; for( int i = 1, end = paths.length - 1; i < end; path += paths[i++] + ( i < end ? "/" : "" ) );
           main.actionPerformed( new java.awt.event.ActionEvent(this, java.awt.event.ActionEvent.ACTION_PERFORMED, "ZOpen" + path ) );
         }
       }
