@@ -390,7 +390,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
         else
         {
-          String zfile = e.getID(), zip = fc.getFilePath() + fc.getFileName();
+          String zfile = e.getID(), zip = file.getFilePath();
 
           java.util.zip.ZipInputStream z = new ZipInputStream( new FileInputStream( zip ) );
 
@@ -398,7 +398,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
         
           boolean err = true;
         
-          temp = File.createTempFile("random", ".tmp"); temp.deleteOnExit();
+          File temp2 = File.createTempFile("random", ".tmp"); temp2.deleteOnExit();
 
           byte[] buffer = new byte[4096];
 
@@ -406,11 +406,11 @@ public class app extends Window implements ActionListener, DropTargetListener, J
           {
             if( zfile.equals(zd.getName() ) )
             {
-              BufferedOutputStream data = new BufferedOutputStream( new FileOutputStream( temp ), buffer.length);
+              BufferedOutputStream data = new BufferedOutputStream( new FileOutputStream( temp2 ), buffer.length);
 
               int len; while ((len = z.read(buffer)) > 0) { data.write(buffer, 0, len); }
 
-              data.flush(); data.close(); z.close(); file = new RandomAccessFileV(temp, "r"); fc.setFileName(zfile);
+              data.flush(); data.close(); z.close();
               
               err = false; break;
             }
@@ -418,7 +418,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
           if( err ) { JOptionPane.showMessageDialog(null, "Cant open zip file!"); return; }
 
-          Reset();
+          Reset(); temp = temp2; file = new RandomAccessFileV(temp, "r"); fc.setFileName(zfile);
         }
       }
 
