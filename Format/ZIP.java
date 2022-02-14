@@ -48,7 +48,8 @@ public class ZIP extends Window.Window implements JDEventListener
 
     //Zip pk entry.
 
-    int size, strLen, extData, cLen;
+    long size = 0;
+    int strLen, extData, cLen;
     String name;
 
     //Data descriptor entry.
@@ -72,7 +73,9 @@ public class ZIP extends Window.Window implements JDEventListener
 
       if( sig == 0x04034B50 )
       {
-        data = 0; pkPos = buf + pos;
+        pkPos = buf + pos;
+
+        if( data > 0 ) { r.add( new JDNode( "File Data.h", new long[]{ 1, pkPos - data, pkPos - 1 } ) ); data = 0; }
 
         if( buf >= pkEnd )
         {
@@ -80,6 +83,8 @@ public class ZIP extends Window.Window implements JDEventListener
         }
 
         size = ( ( b[buf + 21] & 0xFF ) << 24 ) | ( ( b[buf + 20] & 0xFF ) << 16 ) | ( ( b[buf + 19] & 0xFF ) << 8 ) | ( b[buf + 18] & 0xFF );
+
+        if( size == 0xFFFFFFFFl ){ size = 0; }
 
         strLen = ( ( b[buf + 27] & 0xFF ) << 8 ) | ( b[buf + 26] & 0xFF );
         extData = ( ( b[buf + 29] & 0xFF ) << 8 ) | ( b[buf + 28] & 0xFF );
@@ -140,7 +145,7 @@ public class ZIP extends Window.Window implements JDEventListener
         r.add( new JDNode( "File Data.h", new long[]{ 1, pos + buf - data, pos + buf - 1 } ) );
         r.add( new JDNode( "Data info.h", new long[]{ 3, pos + buf } ) );
 
-        buf += 16;
+        buf += 16; data = 0;
       }
 
       //The central directory.

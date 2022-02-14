@@ -406,19 +406,23 @@ public class app extends Window implements ActionListener, DropTargetListener, J
 
           byte[] buffer = new byte[4096];
 
-          while( ( zd = z.getNextEntry() ) != null )
+          try
           {
-            if( zfile.equals(zd.getName() ) )
+            while( ( zd = z.getNextEntry() ) != null )
             {
-              BufferedOutputStream data = new BufferedOutputStream( new FileOutputStream( temp2 ), buffer.length);
+              if( zfile.equals(zd.getName() ) )
+              {
+                BufferedOutputStream data = new BufferedOutputStream( new FileOutputStream( temp2 ), buffer.length);
 
-              int len; while ((len = z.read(buffer)) > 0) { data.write(buffer, 0, len); }
+                int len; while ((len = z.read(buffer)) > 0) { data.write(buffer, 0, len); }
 
-              data.flush(); data.close(); z.close();
+                data.flush(); data.close(); z.close();
               
-              err = false; break;
+                err = false; break;
+              }
             }
           }
+          catch(java.util.zip.ZipException er) { JOptionPane.showMessageDialog(null, "Unsupported Compression Method."); return; }
 
           if( err ) { JOptionPane.showMessageDialog(null, "Cant open zip file!"); return; }
 
