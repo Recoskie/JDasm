@@ -132,10 +132,8 @@ public class ZIP extends Window.Window implements JDEventListener
 
           level++;
         }
-
-        if( size > 0 ) { r.add( new JDNode( "File Data.h", new long[]{ 1, pos + buf, pos + buf + size - 1 } ) ); }
         
-        opath = name.split("/"); buf += size;
+        opath = name.split("/"); buf += size; data += size;
       }
 
       //The data descriptor tells us the size of the compressed data after we have read it.
