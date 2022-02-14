@@ -152,6 +152,8 @@ public class ZIP extends Window.Window implements JDEventListener
 
       else if( sig == 0x02014B50 )
       {
+        if( data > 0 ) { r.add( new JDNode( "File Data.h", new long[]{ 1, pkPos - data, pkPos - 1 } ) ); data = 0; }
+
         if( ( buf + 46 ) > b.length )
         {
           pos += buf; file.seek( pos ); file.read( b ); buf = 0;
