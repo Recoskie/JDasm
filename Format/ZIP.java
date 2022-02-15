@@ -197,13 +197,11 @@ public class ZIP extends Window.Window implements JDEventListener
         extData = ( ( b[buf + 11] & 0xFF ) << 56 ) | ( ( b[buf + 10] & 0xFF ) << 48 ) | ( ( b[buf + 9] & 0xFF ) << 40 ) | ( ( b[buf + 8] & 0xFF ) << 32 ) |
         ( ( b[buf + 7] & 0xFF ) << 24 ) | ( ( b[buf + 6] & 0xFF ) << 16 ) | ( ( b[buf + 5] & 0xFF ) << 8 ) | ( b[buf + 4] & 0xFF );
         
-        buf += ( extData - 44 ) + 56; c.add( new JDNode("Directory End64.h", new long[]{ 6, pos + buf }) );
+        c.add( new JDNode("Directory End64.h", new long[]{ 6, pos + buf }) ); buf += ( extData - 44 ) + 56;
       }
       else if( sig == 0x07064B50 )
       {
-        buf += 20;
-
-        c.add( new JDNode("Directory Loc64.h", new long[]{ 7, pos + buf }) );
+        c.add( new JDNode("Directory Loc64.h", new long[]{ 7, pos + buf }) ); buf += 20;
       }
       else if( sig == 0x06054B50 )
       {
@@ -269,14 +267,11 @@ public class ZIP extends Window.Window implements JDEventListener
     "The data descriptor also stores the files original size, and has an CRC count which is numbers of zero digits that should exist in the file once decompress.<br /><br />" +
     "The CRC is very important as it can be used to know if the decompressed file matches the original.</html>"); }
 
-    //When the user clicks on the "File header.h" node we will receive the array arguments associated with the node.
+    //When the user clicks on the node we will receive the array arguments associated with the node.
 
-    else if( e.getArg(0) == 0 )
-    {
-      ds.setDescriptor( des.get( (int)e.getArg(1) ) );
-    }
+    else if( e.getArg(0) == 0 ) { ds.setDescriptor( des.get( (int)e.getArg(1) ) ); }
 
-    //Select bytes Offset.
+    //Select file data bytes.
 
     else if( e.getArg( 0 ) == 1 )
     {
@@ -301,13 +296,15 @@ public class ZIP extends Window.Window implements JDEventListener
     {
       try
       { 
-        file.Events = false; file.seek( e.getArg(1) ); DTemp = new Descriptor( file );
+        file.Events = false;
+        
+        JDNode n = (JDNode)tree.getLastSelectedPathComponent(); n.setArgs( new long[]{ 0, ref++ });
+        
+        file.seek( e.getArg(1) ); DTemp = new Descriptor( file ); des.add( DTemp );
 
         if( e.getArg( 0 ) == 2 )
         {
-          JDNode n = (JDNode)tree.getLastSelectedPathComponent(); des.add( DTemp );
-          
-          DTemp.setEvent( this::zipInfo ); n.setArgs( new long[]{ 0, ref++ });
+          DTemp.setEvent( this::zipInfo ); 
 
           DTemp.Other("Signature", 4);
           DTemp.LUINT16("Min Version");
@@ -325,9 +322,7 @@ public class ZIP extends Window.Window implements JDEventListener
         }
         else if( e.getArg(0) == 3 )
         {
-          JDNode n = (JDNode)tree.getLastSelectedPathComponent(); des.add( DTemp );
-
-          DTemp.setEvent( this::dataInfo ); n.setArgs( new long[]{ 0, ref++ } );
+          DTemp.setEvent( this::dataInfo );
 
           DTemp.Other("Signature", 4);
           DTemp.LUINT32("CRC-32");
@@ -339,11 +334,7 @@ public class ZIP extends Window.Window implements JDEventListener
 
         else if( e.getArg( 0 ) == 4 )
         {
-          JDNode n = (JDNode)tree.getLastSelectedPathComponent();
-    
-          des.add( DTemp ); DTemp.setEvent( this::dirInfo );
-    
-          n.setArgs( new long[]{ 0, ref++ });
+          DTemp.setEvent( this::dirInfo );
     
           DTemp.Other("Signature", 4);
           DTemp.LUINT16("Version used");
@@ -371,9 +362,7 @@ public class ZIP extends Window.Window implements JDEventListener
 
         else if( e.getArg( 0 ) == 5 )
         {
-          JDNode n = (JDNode)tree.getLastSelectedPathComponent(); des.add( DTemp );
-          
-          DTemp.setEvent( this::endInfo ); n.setArgs( new long[]{ 0, ref++ });
+          DTemp.setEvent( this::endInfo );
     
           DTemp.Other("Signature", 4);
           DTemp.LUINT16("Disk Number");
@@ -390,14 +379,27 @@ public class ZIP extends Window.Window implements JDEventListener
 
         else if( e.getArg( 0 ) == 6 )
         {
-          
+          DTemp.Other("Signature", 4);
+          DTemp.LUINT64("End 64 Size"); long end = (long)DTemp.value - 44;
+          DTemp.LUINT16("Version");
+          DTemp.LUINT16("Min Version");
+          DTemp.LUINT32("Disk Number");
+          DTemp.LUINT32("Disks");
+          DTemp.LUINT64("Directory");
+          DTemp.LUINT64("Directories");
+          DTemp.LUINT64("Directory size");
+          DTemp.LUINT64("Directory offset");
+          if( end > 0 ) { DTemp.Other("Extra Field", (int)end); }
         }
 
         //zip directory location 64.
 
         else if( e.getArg( 0 ) == 7 )
         {
-                  
+          DTemp.Other("Signature", 4);
+          DTemp.LUINT32("Disk Number");
+          DTemp.LUINT64("Dir End64 Offset");
+          DTemp.LUINT32("Disks");
         }
 
         file.Events = true; ds.setDescriptor( DTemp );
