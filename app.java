@@ -422,7 +422,7 @@ public class app extends Window implements ActionListener, DropTargetListener, J
               }
             }
           }
-          catch(java.util.zip.ZipException er) { JOptionPane.showMessageDialog(null, "Unsupported Compression Method."); return; }
+          catch(java.util.zip.ZipException er) { JOptionPane.showMessageDialog(null, er.toString().substring(28)); return; }
 
           if( err ) { JOptionPane.showMessageDialog(null, "Cant open zip file!"); return; }
 

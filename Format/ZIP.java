@@ -254,7 +254,8 @@ public class ZIP extends Window.Window implements JDEventListener
   {
     file.Events = false;
 
-    byte[] d = new byte[]{}; String out = "<html>Extra field. Usually a set of 2 byte pairs that add additional information about the file or entire.<br /><br />";
+    byte[] d = new byte[]{}; String out = "<html>Extra data field is a set of 2 byte pairs (code pair type) with a value that specifies the number of bytes to read.<br /><br />" +
+    "The extra data field adds additional information about the file or entire, or extends values.<br /><br />";
 
     out += "<table border='1'><tr><td>Description</td><td>Hex</td><td>Value</td></tr>";
 
