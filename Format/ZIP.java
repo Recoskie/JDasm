@@ -107,22 +107,19 @@ public class ZIP extends Window.Window implements JDEventListener
 
         //Check for zip64 compressed file size.
 
-        extData += buf; for( ; buf < extData; buf += 2 )
+        extData += buf; while( buf < extData )
         {
-          if( b[buf] == 1 && b[buf + 1] == 0 & ( ( ( b[buf+2] & 0xFF ) << 8 ) | ( b[buf + 3] & 0xFF ) ) >= 16 )
+          if( b[buf] == 1 && b[buf + 1] == 0 && ( ( ( b[buf+3] & 0xFF ) << 8 ) | ( b[buf + 2] & 0xFF ) ) >= 16 )
           {
-            buf += 12;
+            size = ( ( b[buf + 15] & 0xFF ) << 56 ) | ( ( b[buf + 14] & 0xFF ) << 48 ) | ( ( b[buf + 13] & 0xFF ) << 40 ) | ( ( b[buf + 12] & 0xFF ) << 32 ) |
+            ( ( b[buf + 11] & 0xFF ) << 24 ) | ( ( b[buf + 10] & 0xFF ) << 16 ) | ( ( b[buf + 9] & 0xFF ) << 8 ) | ( b[buf + 8] & 0xFF );
 
-            size = ( ( b[buf + 7] & 0xFF ) << 56 ) | ( ( b[buf + 6] & 0xFF ) << 48 ) | ( ( b[buf + 5] & 0xFF ) << 40 ) | ( ( b[buf + 4] & 0xFF ) << 32 ) |
-            ( ( b[buf + 3] & 0xFF ) << 24 ) | ( ( b[buf + 2] & 0xFF ) << 16 ) | ( ( b[buf + 1] & 0xFF ) << 8 ) | ( b[buf] & 0xFF );
-
-            break;
+            buf = extData;
           }
+          else { buf += ( ( ( b[buf + 3] & 0xFF ) << 8 ) | ( b[buf + 2] & 0xFF ) ) + 4; }
         }
 
-        buf = extData;
-
-        path = name.split("/");
+        buf = extData; path = name.split("/");
 
         change = 0; for( int e = path.length > opath.length ? opath.length : path.length ; change < e; change++ )
         {
@@ -266,7 +263,7 @@ public class ZIP extends Window.Window implements JDEventListener
     try { file.seek( Offset.selectPos() ); d = new byte[ (int)(Offset.selectEnd() - file.getFilePointer()) + 1 ]; file.read(d); } catch( java.io.IOException er ) { }
 
     //Analyze the data.
-    
+
     int pos = 0; int CMD = 0; String Hex = ""; long val = 0; while( pos < d.length )
     {
       CMD = ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
