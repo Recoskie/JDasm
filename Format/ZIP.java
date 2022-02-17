@@ -551,15 +551,15 @@ public class ZIP extends Window.Window implements JDEventListener
     "<html>File last modification date.</html>",
     "<html>CRC-32 of uncompressed data. This is the number of zeros that should exist in the binary file.<br /><br />" +
     "If the CRC does not match the count of zeros in binary in the file we know there is something wrong.</html>",
-    "<html>Compressed size. This is the size of the data after this PK signature.</html>",
-    "<html>Uncompressed file size. This is the file size after we decompress the file.<br /><br />" +
-    "In some cases this is 0 as it is a folder. The extra data field defines properties for the folder.<br /><br /" +
-    "Details for the breakdown of the extra data field will be added soon.</html>",
+    "<html>Compressed size. This is the size of the data after this PK signature.<br /><br />" +
+    "After the compressed data should be another PK signature.<br /><br />" +
+    "If the value is FF FF FF FF hex then the value is stored using a 64 bit number under the extra data field.</html>",
+    "<html>Uncompressed file size. This is the file size after we decompress the file. In some cases this is 0 as it is a folder.<br /><br />" +
+    "If the value is FF FF FF FF hex then the value is stored using a 64 bit number under the extra data field.</html>",
     "<html>File name length in bytes.</html>",
-    "<html>Extra field length. The extra felid is useful for folder and file attributes and properties.<br /><br />" +
-    "Some PK signatures have a zero size uncompressed as they only define attributes to a folder.<br /><br />" +
-    "The extra data felid can also be used to extend the zip file format.</html>",
-    "<html>Comment length.</html>",
+    "<html>Extra field length. The extra felid is useful for extending the file attributes and properties.<br /><br />" +
+    "The extra data felid is used to extend the zip file format.</html>",
+    "<html>Comment length in bytes.</html>",
     "<html>Disk Number." + multiPartZip,
     "<html>Internal attributes.</html>",
     "<html>External attributes.</html>",
