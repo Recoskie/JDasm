@@ -263,7 +263,7 @@ public class ZIP extends Window.Window implements JDEventListener
 
     //Analyze the data.
 
-    int pos = 0, end = d.length - 4; int CMD = 0; String Hex = ""; long val = 0; while( pos < end )
+    int pos = 0, end = d.length - 3; int CMD = 0; String Hex = ""; long val = 0; while( pos < end )
     {
       CMD = ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
       Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] );
@@ -375,9 +375,12 @@ public class ZIP extends Window.Window implements JDEventListener
 
         out += "<tr><td>Unknown data len.</td><td>" + Hex + "</td><td>" + size + "</td></tr>"; pos += 4;
 
-        Hex = ""; while( size > 0 ) { Hex += String.format("%1$02X", d[pos] ) + ( size > 1 ? " " : "" ); size -= 1; pos += 1; }
+        if( size > 0 )
+        {
+          Hex = ""; while( size > 0 ) { Hex += String.format("%1$02X", d[pos] ) + ( size > 1 ? " " : "" ); size -= 1; pos += 1; }
 
-        out += "<tr><td>Unknown data.</td><td>" + Hex + "</td><td>?</td></tr>";
+          out += "<tr><td>Unknown data.</td><td>" + Hex + "</td><td>?</td></tr>";
+        }
       }
     }
 
