@@ -251,6 +251,85 @@ public class ZIP extends Window.Window implements JDEventListener
 
   public void Uninitialize() { des.clear(); ref = 0; }
 
+  //Decode the extended data field information.
+
+  public void extendedData()
+  {
+    file.Events = false;
+
+    byte[] d = new byte[]{}; String out = "<html>Extra field. Usually a set of 2 byte pairs that add additional information about the file or entire.<br /><br />";
+
+    out += "<table border='1'><tr><td>Description</td><td>Hex</td><td>Value</td></tr>";
+
+    //Get the data.
+
+    try { file.seek( Offset.selectPos() ); d = new byte[ (int)(Offset.selectEnd() - file.getFilePointer()) + 1 ]; file.read(d); } catch( java.io.IOException er ) { }
+
+    //Analyze the data.
+
+    int pos = 0; int CMD = 0; String Hex = ""; long val = 0; while( pos < d.length )
+    {
+      CMD = ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
+      Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] );
+
+      if( CMD == 0x0001 )
+      {
+        out += "<tr><td>zip64 (0x" + String.format("%1$04X", CMD ) + ").</td><td>" + Hex + "</td><td>" + CMD + "</td></tr>";
+
+        int size = ( ( d[pos + 3] & 0xFF ) << 8 ) | ( d[pos + 2] & 0xFF ); size = size > 28 ? 0 : size;
+        Hex = String.format("%1$02X", d[pos + 2] ) + " " + String.format("%1$02X", d[pos + 3] );
+
+        out += "<tr><td>zip64 len.</td><td>" + Hex + "</td><td>" + ( size == 0 ? "Error (" + size + " > 28)" : size ) + "</td></tr>"; pos += 4;
+
+        if( size > 0 )
+        {
+          val = ( ( d[pos + 7] & 0xFF ) << 56 ) | ( ( d[pos + 6] & 0xFF ) << 48 ) | ( ( d[pos + 5] & 0xFF ) << 40 ) | ( ( d[pos + 4] & 0xFF ) << 32 ) |
+          ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
+          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] )
+          + " " + String.format("%1$02X", d[pos + 4] )+ " " + String.format("%1$02X", d[pos + 5] )+ " " + String.format("%1$02X", d[pos + 6] )+ " " + String.format("%1$02X", d[pos + 7] );
+
+          out += "<tr><td>Uncompressed file size.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 8; size -= 8;
+        }
+
+        if( size > 0 )
+        {
+          val = ( ( d[pos + 7] & 0xFF ) << 56 ) | ( ( d[pos + 6] & 0xFF ) << 48 ) | ( ( d[pos + 5] & 0xFF ) << 40 ) | ( ( d[pos + 4] & 0xFF ) << 32 ) |
+          ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
+          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] )
+          + " " + String.format("%1$02X", d[pos + 4] )+ " " + String.format("%1$02X", d[pos + 5] )+ " " + String.format("%1$02X", d[pos + 6] )+ " " + String.format("%1$02X", d[pos + 7] );
+
+          out += "<tr><td>Size of compressed data.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 8; size -= 8;
+        }
+
+        if( size > 0 )
+        {
+          val = ( ( d[pos + 7] & 0xFF ) << 56 ) | ( ( d[pos + 6] & 0xFF ) << 48 ) | ( ( d[pos + 5] & 0xFF ) << 40 ) | ( ( d[pos + 4] & 0xFF ) << 32 ) |
+          ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
+          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] )
+          + " " + String.format("%1$02X", d[pos + 4] )+ " " + String.format("%1$02X", d[pos + 5] )+ " " + String.format("%1$02X", d[pos + 6] )+ " " + String.format("%1$02X", d[pos + 7] );
+
+          out += "<tr><td>Offset to File signature.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 8; size -= 8;
+        }
+
+        if( size > 0 )
+        {
+          val = ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
+          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] );
+
+          out += "<tr><td>Offset to File signature.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 4; size -= 4;
+        }
+      }
+      else
+      {
+        out += "<tr><td>Unknown (0x" + String.format("%1$04X", CMD ) + ").</td><td>" + Hex + "</td><td>" + CMD + "</td></tr>"; pos += 2;
+      }
+    }
+
+    //Display the result.
+
+    file.Events = true; info( out + "</table></html>" );
+  }
+
   //This event is called when the user clicks on an tree node.
 
   public void open(JDEvent e)
@@ -485,8 +564,7 @@ public class ZIP extends Window.Window implements JDEventListener
     "<html>Internal attributes.</html>",
     "<html>External attributes.</html>",
     "<html>File signature location.</html>",
-    "<html>The zip file format uses the full path to the file then name of the file.</html>",
-    "<html>Extra field. Usually a set of 2 byte pairs that add additional information about the file or entire.</html>"
+    "<html>The zip file format uses the full path to the file then name of the file.</html>"
   };
 
   //Data descriptor.
@@ -527,6 +605,8 @@ public class ZIP extends Window.Window implements JDEventListener
 
   public void zipInfo( int i )
   {
+    i = i > 0 ? ( i > 10 ? i + 6 : i + 1 ) : i;
+
     if( i < 0 )
     {
       info("<html>All files in the zip begin with a PK signature. The file compressed data is right after the PK parameters.<br /><br />" +
@@ -537,9 +617,13 @@ public class ZIP extends Window.Window implements JDEventListener
       "The only time we do not set the compressed file size in the PK header is when we do not know the compressed file size till after the file was compressed.<br /><br />" +
       "The flag parameter can also be adjusted to signify that the data descriptor marks the end of the files data.</html>");
     }
+    else if( i == 18 )
+    {
+      extendedData();
+    }
     else
     {
-      info( zipInfo[ i > 0 ? ( i > 10 ? i + 6 : i + 1 ) : i ] );
+      info( zipInfo[ i ] );
     }
   }
 
@@ -572,6 +656,10 @@ public class ZIP extends Window.Window implements JDEventListener
     else if( i == 0 )
     {
       info("<html>50 4B 01 02 is the start of a file signature in the central directory in an zip file.</html>");
+    }
+    else if( i == 18 )
+    {
+      extendedData();
     }
     else
     {
