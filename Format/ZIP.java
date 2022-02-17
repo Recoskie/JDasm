@@ -276,10 +276,10 @@ public class ZIP extends Window.Window implements JDEventListener
       {
         out += "<tr><td>zip64 (0x" + String.format("%1$04X", CMD ) + ").</td><td>" + Hex + "</td><td>" + CMD + "</td></tr>";
 
-        int size = ( ( d[pos + 3] & 0xFF ) << 8 ) | ( d[pos + 2] & 0xFF ); size = size > 28 ? 0 : size;
+        int size = ( ( d[pos + 3] & 0xFF ) << 8 ) | ( d[pos + 2] & 0xFF );
         Hex = String.format("%1$02X", d[pos + 2] ) + " " + String.format("%1$02X", d[pos + 3] );
 
-        out += "<tr><td>zip64 len.</td><td>" + Hex + "</td><td>" + ( size == 0 ? "Error (" + size + " > 28)" : size ) + "</td></tr>"; pos += 4;
+        out += "<tr><td>zip64 len.</td><td>" + Hex + "</td><td>" + ( size > 28 ? "Error (" + size + " > 28)" : size ) + "</td></tr>"; size = size > 28 ? 0 : size; pos += 4;
 
         if( size > 0 )
         {
