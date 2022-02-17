@@ -107,19 +107,17 @@ public class ZIP extends Window.Window implements JDEventListener
 
         //Check for zip64 compressed file size.
 
-        extData += buf; while( buf < extData )
+        extData += buf - 4; while( buf < extData )
         {
           if( b[buf] == 1 && b[buf + 1] == 0 && ( ( ( b[buf+3] & 0xFF ) << 8 ) | ( b[buf + 2] & 0xFF ) ) >= 16 )
           {
             size = ( ( b[buf + 15] & 0xFF ) << 56 ) | ( ( b[buf + 14] & 0xFF ) << 48 ) | ( ( b[buf + 13] & 0xFF ) << 40 ) | ( ( b[buf + 12] & 0xFF ) << 32 ) |
-            ( ( b[buf + 11] & 0xFF ) << 24 ) | ( ( b[buf + 10] & 0xFF ) << 16 ) | ( ( b[buf + 9] & 0xFF ) << 8 ) | ( b[buf + 8] & 0xFF );
-
-            buf = extData;
+            ( ( b[buf + 11] & 0xFF ) << 24 ) | ( ( b[buf + 10] & 0xFF ) << 16 ) | ( ( b[buf + 9] & 0xFF ) << 8 ) | ( b[buf + 8] & 0xFF ); buf = extData;
           }
           else { buf += ( ( ( b[buf + 3] & 0xFF ) << 8 ) | ( b[buf + 2] & 0xFF ) ) + 4; }
         }
 
-        buf = extData; path = name.split("/");
+        buf = extData + 4; path = name.split("/");
 
         change = 0; for( int e = path.length > opath.length ? opath.length : path.length ; change < e; change++ )
         {
@@ -265,7 +263,7 @@ public class ZIP extends Window.Window implements JDEventListener
 
     //Analyze the data.
 
-    int pos = 0; int CMD = 0; String Hex = ""; long val = 0; while( pos < d.length )
+    int pos = 0, end = d.length - 4; int CMD = 0; String Hex = ""; long val = 0; while( pos < end )
     {
       CMD = ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
       Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] );
@@ -361,6 +359,14 @@ public class ZIP extends Window.Window implements JDEventListener
           out += "<tr><td>Offset to File signature.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 4; size -= 4;
         }
       }
+      else if( CMD == 0x0000 )
+      {
+        while( CMD == 0x0000 && pos < d.length )
+        {
+          out += "<tr><td>Padding (0x0000).</td><td>" + String.format("%1$02X", CMD & 0xFF ) + "</td><td>Unused.</td></tr>";
+          CMD = d[pos++];
+        }
+      }
       else
       {
         out += "<tr><td>Unknown (0x" + String.format("%1$04X", CMD ) + ").</td><td>" + Hex + "</td><td>" + CMD + "</td></tr>";
@@ -373,6 +379,12 @@ public class ZIP extends Window.Window implements JDEventListener
 
         out += "<tr><td>Unknown data.</td><td>" + Hex + "</td><td>?</td></tr>";
       }
+    }
+
+    if( pos < d.length )
+    {
+      Hex = ""; int size = d.length - pos; while( size > 0 ) { Hex += String.format("%1$02X", d[pos] ) + ( size > 1 ? " " : "" ); size -= 1; pos += 1; }
+      out += "<tr><td>Bad Data.</td><td>" + Hex + "</td><td>?</td></tr>";
     }
 
     //Display the result.
