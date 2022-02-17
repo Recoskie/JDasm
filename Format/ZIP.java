@@ -379,6 +379,8 @@ public class ZIP extends Window.Window implements JDEventListener
 
         else if( e.getArg( 0 ) == 6 )
         {
+          DTemp.setEvent( this::end64Info );
+
           DTemp.Other("Signature", 4);
           DTemp.LUINT64("End 64 Size"); long end = (long)DTemp.value - 44;
           DTemp.LUINT16("Version");
@@ -399,7 +401,7 @@ public class ZIP extends Window.Window implements JDEventListener
           DTemp.setEvent( this::loc64Info );
 
           DTemp.Other("Signature", 4);
-          DTemp.LUINT32("Disk Number");
+          DTemp.LUINT32("Disks 64");
           DTemp.LUINT64("Dir End64 Offset");
           DTemp.LUINT32("Disks");
         }
@@ -502,13 +504,17 @@ public class ZIP extends Window.Window implements JDEventListener
   {
     "<html>Zip64 end of central dir locator signature.</html>",
     "<html>Total number of disks that use zip 64 signatures." + multiPartZip,
-    "<html>The offset to the zip64 end of central directory record.</html>",
+    "<html>The offset to the zip64 end of central directory record. If this does not match the location the signature was read then there is most likely file corruption.</html>",
     "<html>Total number of disks that this zip file data is split into." + multiPartZip
   };
 
   private static final String[] endInfo = new String[]
   {
     "<html>End of central dir signature.</html>",
+    "<html>The size of this signature.<br /><br />" +
+    "If this is set larger than 44 bytes then the rest of the bytes after the signature are used as an extended data failed.<br /><br />" +
+    "The extended data field is reserved for future use.</html>",
+    zipInfo[1], zipInfo[2],
     "<html>The current disk number." + multiPartZip,
     "<html>Number of disk with the same central directory." + multiPartZip,
     "<html>Total number of entries in the central directory on this disk." + multiPartZip,
@@ -577,12 +583,24 @@ public class ZIP extends Window.Window implements JDEventListener
   {
     if( i < 0 )
     {
-      info("<html>This is used as the location to the directory end 64 signature. It is used to check for errors while reading.<br /><br />" +
+      info("<html>This is used as the location to the directory end 64 signature. It is not needed, but is used to check for errors while reading.<br /><br />" +
       "If existent and the Directory end 64 signature that was read does not match the offset then there is most likely data corruption.</html>");
     }
     else
     {
       info( loc64Info[i] );
+    }
+  }
+
+  public void end64Info( int i )
+  {
+    if( i < 0 )
+    {
+      info("<html>The end of zip may specify more than one zip file as a disk." + multiPartZip);
+    }
+    else
+    {
+      info( i < 10 ? endInfo[i] : "<html>The extra data field is reserved for future use.</html>" );
     }
   }
 
@@ -594,7 +612,7 @@ public class ZIP extends Window.Window implements JDEventListener
     }
     else
     {
-      info( endInfo[ i ] );
+      info( endInfo[ i > 0 ? i + 3 : i ] );
     }
   }
 }
