@@ -266,13 +266,57 @@ public class ZIP extends Window.Window implements JDEventListener
     try { file.seek( Offset.selectPos() ); d = new byte[ (int)(Offset.selectEnd() - file.getFilePointer()) + 1 ]; file.read(d); } catch( java.io.IOException er ) { }
 
     //Analyze the data.
-
+    
     int pos = 0; int CMD = 0; String Hex = ""; long val = 0; while( pos < d.length )
     {
       CMD = ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
       Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] );
 
-      if( CMD == 0x0001 )
+      //The unix time date stamp.
+
+      if( CMD == 0x5455 )
+      {
+        out += "<tr><td>Unix Time Date stamps (0x" + String.format("%1$04X", CMD ) + ").</td><td>" + Hex + "</td><td>" + CMD + "</td></tr>";
+
+        int size = ( ( d[pos + 3] & 0xFF ) << 8 ) | ( d[pos + 2] & 0xFF ); Hex = String.format("%1$02X", d[pos + 2] ) + " " + String.format("%1$02X", d[pos + 3] );
+
+        out += "<tr><td>Time stamp len.</td><td>" + Hex + "</td><td>" + ( size > 28 ? "Error (" + size + " > 13)" : size ) + "</td></tr>"; size = size > 13 ? 0 : size; pos += 4;
+
+        if( size > 0 )
+        {
+          val = d[pos] & 0xFF; Hex = String.format("%1$02X", d[pos] );
+
+          out += "<tr><td>Flag settings.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 1; size -= 1;
+        }
+
+        if( size > 0 )
+        {
+          val = ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
+          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] );
+
+          out += "<tr><td>Last Modification.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 4; size -= 4;
+        }
+
+        if( size > 0 )
+        {
+          val = ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
+          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] );
+
+          out += "<tr><td>Last accessed.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 4; size -= 4;
+        }
+
+        if( size > 0 )
+        {
+          val = ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
+          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] );
+
+          out += "<tr><td>Creation time.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 4; size -= 4;
+        }
+      }
+
+      //Compressed file attributes as 64 bit fields.
+
+      else if( CMD == 0x0001 )
       {
         out += "<tr><td>zip64 (0x" + String.format("%1$04X", CMD ) + ").</td><td>" + Hex + "</td><td>" + CMD + "</td></tr>";
 
@@ -321,7 +365,15 @@ public class ZIP extends Window.Window implements JDEventListener
       }
       else
       {
-        out += "<tr><td>Unknown (0x" + String.format("%1$04X", CMD ) + ").</td><td>" + Hex + "</td><td>" + CMD + "</td></tr>"; pos += 2;
+        out += "<tr><td>Unknown (0x" + String.format("%1$04X", CMD ) + ").</td><td>" + Hex + "</td><td>" + CMD + "</td></tr>";
+
+        int size = ( ( d[pos + 3] & 0xFF ) << 8 ) | ( d[pos + 2] & 0xFF ); Hex = String.format("%1$02X", d[pos + 2] ) + " " + String.format("%1$02X", d[pos + 3] );
+
+        out += "<tr><td>Unknown data len.</td><td>" + Hex + "</td><td>" + size + "</td></tr>"; pos += 4;
+
+        Hex = ""; while( size > 0 ) { Hex += String.format("%1$02X", d[pos] ) + ( size > 1 ? " " : "" ); size -= 1; pos += 1; }
+
+        out += "<tr><td>Unknown data.</td><td>" + Hex + "</td><td>?</td></tr>";
       }
     }
 
@@ -557,7 +609,7 @@ public class ZIP extends Window.Window implements JDEventListener
     "<html>Uncompressed file size. This is the file size after we decompress the file. In some cases this is 0 as it is a folder.<br /><br />" +
     "If the value is FF FF FF FF hex then the value is stored using a 64 bit number under the extra data field.</html>",
     "<html>File name length in bytes.</html>",
-    "<html>Extra field length. The extra felid is useful for extending the file attributes and properties.<br /><br />" +
+    "<html>Extra field length in bytes. The extra felid is useful for extending the file attributes and properties.<br /><br />" +
     "The extra data felid is used to extend the zip file format.</html>",
     "<html>Comment length in bytes.</html>",
     "<html>Disk Number." + multiPartZip,
