@@ -50,7 +50,7 @@ public class ZIP extends Window.Window implements JDEventListener
 
     long size = 0;
     int strLen, extData, cLen;
-    String name;
+    byte[] bn; String name;
 
     //Data descriptor entry.
 
@@ -96,7 +96,7 @@ public class ZIP extends Window.Window implements JDEventListener
           pos += buf; file.seek( pos ); file.read( b ); buf = 0;
         }
         
-        name = ""; for( int i = 0; i < strLen; name += ((char)b[ buf + i++ ]) );
+        bn = new byte[strLen]; for( int i = 0; i < strLen; bn[i] = b[ buf + i++ ] ); name = new String( bn, java.nio.charset.StandardCharsets.UTF_8 );
 
         buf += strLen;
 
@@ -396,6 +396,8 @@ public class ZIP extends Window.Window implements JDEventListener
 
         else if( e.getArg( 0 ) == 7 )
         {
+          DTemp.setEvent( this::loc64Info );
+
           DTemp.Other("Signature", 4);
           DTemp.LUINT32("Disk Number");
           DTemp.LUINT64("Dir End64 Offset");
@@ -496,6 +498,14 @@ public class ZIP extends Window.Window implements JDEventListener
     "<html>Uncompressed file size. This is the file size after we decompress the file.</html>"
   };
 
+  private static final String[] loc64Info = new String[]
+  {
+    "<html>Zip64 end of central dir locator signature.</html>",
+    "<html>Total number of disks that use zip 64 signatures." + multiPartZip,
+    "<html>The offset to the zip64 end of central directory record.</html>",
+    "<html>Total number of disks that this zip file data is split into." + multiPartZip
+  };
+
   private static final String[] endInfo = new String[]
   {
     "<html>End of central dir signature.</html>",
@@ -560,6 +570,19 @@ public class ZIP extends Window.Window implements JDEventListener
     else
     {
       info( zipInfo[ i ] );
+    }
+  }
+
+  public void loc64Info( int i )
+  {
+    if( i < 0 )
+    {
+      info("<html>This is used as the location to the directory end 64 signature. It is used to check for errors while reading.<br /><br />" +
+      "If existent and the Directory end 64 signature that was read does not match the offset then there is most likely data corruption.</html>");
+    }
+    else
+    {
+      info( loc64Info[i] );
     }
   }
 
