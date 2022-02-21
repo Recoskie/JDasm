@@ -9,7 +9,7 @@ import java.awt.dnd.*;
 import java.awt.datatransfer.DataFlavor;
 import core.x86.*;
 
-public class app extends Window implements ActionListener, DropTargetListener, JDEventListener
+public class app extends Window implements ActionListener, DropTargetListener, WindowStateListener, JDEventListener
 {
   //Application is not Administrator by default.
 
@@ -86,6 +86,8 @@ public class app extends Window implements ActionListener, DropTargetListener, J
     //Create GUI.
 
     createGUI("JDisassembly", this, this); new DropTarget(winFrame, DnDConstants.ACTION_LINK, this, true);
+
+    winFrame.addWindowStateListener( this );
 
     //Display GUI.
     
@@ -483,8 +485,6 @@ public class app extends Window implements ActionListener, DropTargetListener, J
       //Adjust the window.
 
       if( winFrame.getExtendedState() != JFrame.MAXIMIZED_BOTH ) { winFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); }
-      
-      tools.update(); tools.rowMaximize(0);
     }
 
     //Failed to read file, or disk.
@@ -601,6 +601,16 @@ public class app extends Window implements ActionListener, DropTargetListener, J
       else { dtde.rejectDrag(); }
     }
     catch( Exception e ) { dtde.rejectDrag(); }
+  }
+
+  //When window is maximized we want to shrink the bottom row and maximize the binary tree and detailed output.
+
+  public void windowStateChanged(WindowEvent e)
+  {
+    if ((e.getNewState() & java.awt.Frame.MAXIMIZED_BOTH) == java.awt.Frame.MAXIMIZED_BOTH)
+    {
+      tools.update(); tools.rowMaximize(0);
+    }
   }
 
   //Open file.
