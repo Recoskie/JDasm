@@ -8,7 +8,7 @@ public class Data extends Window.Window
 
   //This integer is used to keep track of the descriptors added to the list adn set to a node on the open event.
 
-  public static int ref = 0;
+  public static int ref = 0, paths = 0;
 
   //A temporary descriptor holder that is used when reading data and adding descriptor to the list.
 
@@ -17,7 +17,7 @@ public class Data extends Window.Window
   //In the case of a universal binary we must unload a binary before loading in another.
 
   public static swingIO.tree.JDNode App = null;
-  public static swingIO.tree.JDNode[] rPath = new swingIO.tree.JDNode[2];
+  public static java.util.ArrayList<swingIO.tree.JDNode> rPath = new java.util.ArrayList<swingIO.tree.JDNode>();
 
   //The selected application base address.
 
@@ -42,4 +42,8 @@ public class Data extends Window.Window
   //The machine core type.
 
   public static int coreType = 0;
+
+  //Method call pointers.
+
+  public static long[] ptr, lazy_ptr;
 }

@@ -40,7 +40,7 @@ public class MAC extends Data implements JDEventListener
     open( new JDEvent( this, "", new long[]{ 0x4000000000000000L, 0 } ) );
   }
 
-  public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; App = null; rPath = new swingIO.tree.JDNode[2]; }
+  public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; App = null; rPath.clear(); paths = 0; }
 
   public void open(JDEvent e)
   {
@@ -60,8 +60,9 @@ public class MAC extends Data implements JDEventListener
 
       if( arg == 5 )
       {
-        tree.setSelectionPath( new TreePath( rPath[(int)e.getArg(1)].getPath() ) );
-        tree.expandPath(tree.getLeadSelectionPath());
+        tree.setSelectionPath( new TreePath( rPath.get((int)e.getArg(1)).getPath() ) );
+        tree.expandPath(tree.getLeadSelectionPath()); tree.scrollPathToVisible(tree.getLeadSelectionPath().getParentPath());
+        open( new JDEvent( this, "", ((JDNode)tree.getLastSelectedPathComponent()).getArgs() ) ); return;
       }
 
       //Begin disassembling the program.

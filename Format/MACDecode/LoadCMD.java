@@ -5,6 +5,8 @@ import swingIO.tree.*;
 
 public class LoadCMD extends Data
 {
+  private static long bind = -1, lazyBind = -1;
+
   public void load(JDNode root) throws java.io.IOException
   {
     //Remove the dummy node.
@@ -93,7 +95,7 @@ public class LoadCMD extends Data
 
           file.addV(offset, vSize, address, vSize);
 
-          t.add( new JDNode( "Goto Data.h", new long[] { -3, address, address + vSize - 1 } ) );
+          t.add( new JDNode( "Goto Data.h", new long[] { 0x8000000000000003L, address, address + vSize - 1 } ) );
 
           DTemp.LUINT32("Alignment");
           DTemp.LUINT32("Relocations Offset");
@@ -108,12 +110,58 @@ public class LoadCMD extends Data
 
           if( ( flag & 0x80000000 ) != 0 )
           {
-            code.add( new JDNode( name + "." + segName + "().h", new long[]{ 0x8000000000000004L, address, vSize } ) );
+            JDNode c = new JDNode("Disassemble.h", new long[]{ 0x8000000000000004L, address, vSize } ); rPath.add( c );
+            t.add( c ); code.add( new JDNode( name + "." + segName + "().h", new long[]{ 0x8000000000000005L, paths++ } ) );
           }
 
           //Sections we want to be able to navigate too.
 
-          flag &= 0xFF; if( flag == 6 ) { rPath[0] = t; } else if( flag == 7 ) { rPath[1] = t; }
+          flag &= 0xFF; if( flag == 6 )
+          {
+            rPath.add( t ); bind = paths++;
+
+            long tpos = file.getFilePointer(); file.seek( offset );
+            
+            Descriptor de = new Descriptor( file ); de.setEvent( this::blank );
+
+            if( is64bit )
+            {
+              int e = (int)vSize >> 3; ptr = new long[ e ];
+              for( int p = 0; p < e; de.LUINT64("Method call location"), ptr[p++] = (long)de.value );
+            }
+            else
+            {
+              int e = (int)vSize >> 2; ptr = new long[ e ];
+              for( int p = 0; p < e; de.LUINT64("Method call location"), ptr[p++] = (long)de.value );
+            }
+
+            t.add( new JDNode("View Pointers.h", new long[]{ 0, ref++ } ) ); des.add( de );
+
+            file.seek( tpos );
+          }
+          else if( flag == 7 )
+          {
+            rPath.add( t ); lazyBind = paths++;
+
+            long tpos = file.getFilePointer(); file.seek( offset );
+            
+            Descriptor de = new Descriptor( file ); de.setEvent( this::blank );
+
+            if( is64bit )
+            {
+              int e = (int)vSize >> 3; lazy_ptr = new long[ e ];
+              for( int p = 0; p < e; de.LUINT64("Method call location"), lazy_ptr[p++] = (long)de.value );
+            }
+            else
+            {
+              int e = (int)vSize >> 2; lazy_ptr = new long[ e ];
+              for( int p = 0; p < e; de.LUINT64("Method call location"), lazy_ptr[p++] = (long)de.value );
+            }
+
+            t.add( new JDNode("View Pointers.h", new long[]{ 0, ref++ } ) ); des.add( de );
+
+            file.seek( tpos );
+          }
 
           n2.add( t );
         }
@@ -333,7 +381,7 @@ public class LoadCMD extends Data
         {
           tm = new JDNode("bind", new long[]{ 0xC000000000000102L, boff, boff + bsize - 1 } );
 
-          if( rPath[0] != null ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, 0 } ) ); }
+          if( bind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, bind } ) ); }
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 3, boff, boff + bsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 3, boff, boff + bsize } ) );
@@ -353,7 +401,7 @@ public class LoadCMD extends Data
         {
           tm = new JDNode("lazy bind", new long[]{ 0xC000000000000102L, lboff, lboff + lbsize - 1 } );
 
-          if( rPath[1] != null ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, 1 } ) ); }
+          if( lazyBind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, lazyBind } ) ); }
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 3, lboff, lboff + lbsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 3, lboff, boff + lbsize } ) );
