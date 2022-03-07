@@ -17,6 +17,7 @@ public class Data extends Window.Window
   //In the case of a universal binary we must unload a binary before loading in another.
 
   public static swingIO.tree.JDNode App = null;
+  public static swingIO.tree.JDNode[] rPath = new swingIO.tree.JDNode[2];
 
   //The selected application base address.
 

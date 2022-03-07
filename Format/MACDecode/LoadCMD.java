@@ -66,9 +66,7 @@ public class LoadCMD extends Data
         
         DTemp.setEvent( this::segInfo ); des.add( DTemp );
 
-        if( oSize > 0 ) { n2.add( new JDNode( name + " (Data).h", new long[] { -3, address, address + vSize - 1 } ) ); }
-
-        JDNode t;
+        if( oSize > 0 ) { n2.add( new JDNode( name + " (Data).h", new long[] { 0x8000000000000003L, address, address + vSize - 1 } ) ); }
 
         for( int i2 = 0; i2 < sect; i2++ )
         {
@@ -76,7 +74,7 @@ public class LoadCMD extends Data
 
           DTemp.String8("Section Name", 16); segName = (String)DTemp.value;
           
-          t = new JDNode( DTemp.value + "", new long[] { 0, ref++ } );
+          JDNode t = new JDNode( DTemp.value + "", new long[] { 0, ref++ } );
 
           DTemp.String8("Segment Name", 16);
 
@@ -110,8 +108,12 @@ public class LoadCMD extends Data
 
           if( ( flag & 0x80000000 ) != 0 )
           {
-            code.add( new JDNode( name + "." + segName + "().h", new long[]{ -4, address, vSize } ) );
+            code.add( new JDNode( name + "." + segName + "().h", new long[]{ 0x8000000000000004L, address, vSize } ) );
           }
+
+          //Sections we want to be able to navigate too.
+
+          flag &= 0xFF; if( flag == 6 ) { rPath[0] = t; } else if( flag == 7 ) { rPath[1] = t; }
 
           n2.add( t );
         }
@@ -132,7 +134,7 @@ public class LoadCMD extends Data
         
         JDNode n2 = new JDNode( "Symbol Table", new long[]{ 0, ref++ } ); root.add( n2 );
       
-        n2.add( new JDNode( "String table.h", new long[]{ -2, strOff, strOff + strSize - 1 } ) );
+        n2.add( new JDNode( "String table.h", new long[]{ 0x8000000000000002L, strOff, strOff + strSize - 1 } ) );
 
         JDNode n3 = new JDNode( "Symbols", new long[]{ 0, ref++ } ); n2.add( n3 );
         
@@ -152,7 +154,7 @@ public class LoadCMD extends Data
 
           DTemp.Array("Symbol #" + i2 + "", is64bit ? 16 : 12 );
           DTemp.LUINT32("Name"); int name = (int)DTemp.value;
-          DTemp.UINT8("Type"); int type = (byte)DTemp.value; 
+          DTemp.UINT8("Type"); int type = (byte)DTemp.value;
           DTemp.UINT8("NSect"); int NSect = (byte)DTemp.value;
           DTemp.LUINT16("DSect");
 
@@ -218,12 +220,12 @@ public class LoadCMD extends Data
 
         JDNode n1 = new JDNode( "Link Edit info", new long[]{ 0, ref++ } );
       
-        if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ -2, coff, coff + csize * 4 - 1 } ) ); }
-        if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ -2, moff, moff + msize * 4 - 1 } ) ); }
-        if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ -2, roff, roff + rsize * 4 - 1 } ) ); }
-        if( indsize > 0 ) { n1.add( new JDNode("Indirect Sym.h", new long[]{ -2, indoff, indoff + indsize * 4 - 1 } ) ); }
-        if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ -2, extoff, extoff + extsize * 4 - 1 } ) ); }
-        if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ -2, loff, loff + lsize * 4 - 1 } ) ); }
+        if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + csize * 4 - 1 } ) ); }
+        if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + msize * 4 - 1 } ) ); }
+        if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + rsize * 4 - 1 } ) ); }
+        if( indsize > 0 ) { n1.add( new JDNode("Indirect Sym.h", new long[]{ 0x8000000000000002L, indoff, indoff + indsize * 4 - 1 } ) ); }
+        if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ 0x8000000000000002L, extoff, extoff + extsize * 4 - 1 } ) ); }
+        if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ 0x8000000000000002L, loff, loff + lsize * 4 - 1 } ) ); }
 
         root.add( n1 );
       }
@@ -301,7 +303,7 @@ public class LoadCMD extends Data
         else if( cmd == 0x33 ) { n1 = new JDNode( "Exports", new long[]{ 0, ref++ } ); }
         else { n1 = new JDNode( "Chained Fixups", new long[]{ 0, ref++ } ); }
 
-        n1.add( new JDNode("sect.h", new long[]{ -2, off, off + s - 1 } ) );
+        n1.add( new JDNode("sect.h", new long[]{ 0x8000000000000002L, off, off + s - 1 } ) );
 
         root.add( n1 );
       }
@@ -323,13 +325,41 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::blank ); des.add( DTemp );
 
-        JDNode n1 = new JDNode( "Link info", new long[]{ 0, ref++ } );
+        JDNode n1 = new JDNode( "Link library setup", new long[]{ 0x4000000000000000L, ref++ } ), tm;
 
-        if( rsize > 0 ){ n1.add( new JDNode("rebase.h", new long[]{ -2, roff, roff + rsize - 1 } ) ); }
-        if( bsize > 0 ){ n1.add( new JDNode("bind.h", new long[]{ -2, boff, boff + bsize - 1 } ) ); }
-        if( wbsize > 0 ){ n1.add( new JDNode("weak bind.h", new long[]{ -2, wboff, wboff + wbsize - 1 } ) ); }
-        if( lbsize > 0 ){ n1.add( new JDNode("lazy bind.h", new long[]{ -2, lboff, lboff + lbsize - 1 } ) ); }
-        if( esize > 0 ){ n1.add( new JDNode("export.h", new long[]{ -2, eoff, eoff + esize - 1 } ) ); }
+        if( rsize > 0 ){ n1.add( new JDNode("rebase.h", new long[]{ 0x8000000000000002L, roff, roff + rsize } ) ); }
+        
+        if( bsize > 0 )
+        {
+          tm = new JDNode("bind", new long[]{ 0xC000000000000102L, boff, boff + bsize - 1 } );
+
+          if( rPath[0] != null ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, 0 } ) ); }
+
+          tm.add( new JDNode( "Opcodes.h", new long[]{ 3, boff, boff + bsize } ) );
+          tm.add( new JDNode( "Actions.h", new long[]{ 3, boff, boff + bsize } ) );
+          n1.add( tm );
+        }
+        
+        if( wbsize > 0 )
+        {
+          tm = new JDNode("bind", new long[]{ 0xC000000000000102L, wboff, wboff + wbsize - 1 } );
+
+          tm.add( new JDNode( "Opcodes.h", new long[]{ 3, wboff, wboff + wbsize } ) );
+          tm.add( new JDNode( "Actions.h", new long[]{ 3, wboff, wboff + wbsize } ) );
+          n1.add( tm );
+        }
+
+        if( lbsize > 0 )
+        {
+          tm = new JDNode("lazy bind", new long[]{ 0xC000000000000102L, lboff, lboff + lbsize - 1 } );
+
+          if( rPath[1] != null ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, 1 } ) ); }
+
+          tm.add( new JDNode( "Opcodes.h", new long[]{ 3, lboff, lboff + lbsize } ) );
+          tm.add( new JDNode( "Actions.h", new long[]{ 3, lboff, boff + lbsize } ) );
+          n1.add( tm );
+        }
+        if( esize > 0 ){ n1.add( new JDNode("export.h", new long[]{ 0x8000000000000002L, eoff, eoff + esize - 1 } ) ); }
 
         root.add( n1 );
       }
@@ -397,7 +427,7 @@ public class LoadCMD extends Data
 
     //The programs main entry point.
 
-    if( main != 0 ) { App.add( new JDNode("Program Start (Machine Code).h", new long[]{ -4, main } ) ); }
+    if( main != 0 ) { App.add( new JDNode("Program Start (Machine Code).h", new long[]{ 0x8000000000000004L, main } ) ); }
   }
 
   private static final String offsets = "<br /><br />If this is a universal binary then the offset is added to the start of the application in this file.";

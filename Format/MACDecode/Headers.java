@@ -33,7 +33,7 @@ public class Headers extends Data
         DTemp.UINT32("CPU Sub Type");
         DTemp.UINT32("File Offset");
     
-        Apps = new JDNode("App #" + i + "", new long[] { 1, (int)DTemp.value } ); Apps.add( new JDNode("") );
+        Apps = new JDNode("App #" + i + "", new long[] { 0x4000000000000001L, (int)DTemp.value } ); Apps.add( new JDNode("") );
     
         n.add( Apps );
     
@@ -97,7 +97,7 @@ public class Headers extends Data
       else { coreLoaded = false; }
     }
 
-    des.add( DTemp ); n.setArgs( new long[]{ 0, ref++ } );
+    des.add( DTemp ); n.setArgs( new long[]{ 0x4000000000000000L, ref++ } );
 
     return( n );
   }
@@ -260,7 +260,6 @@ public class Headers extends Data
   {
     if( i < 0 )
     {
-      tree.expandPath( tree.getSelectionPath() );
       info("<html>The MacOS header identifies the type of core the machine code binary is intended to run on.<br /><br />" +
       "It also specifies the number of loading commands to map and load the binary into memory.</html>"); return;
     }
@@ -297,7 +296,6 @@ public class Headers extends Data
   {
     if( i < 0 )
     {
-      tree.expandPath( tree.getSelectionPath() );
       info("<html>The MacOS header identifies the type of core the machine code binary is intended to run on.<br /><br />" +
       "It also specifies the number of loading commands to map and load the binary into memory.</html>");
     }

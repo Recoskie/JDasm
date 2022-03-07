@@ -15,6 +15,7 @@ public class MAC extends Data implements JDEventListener
 
   private static Headers header = new Headers();
   private static LoadCMD commands = new LoadCMD();
+  private static linkEdit ledit = new linkEdit();
   
   public MAC() throws java.io.IOException
   {
@@ -36,20 +37,36 @@ public class MAC extends Data implements JDEventListener
 
     //Make it as if we clicked and opened the node.
 
-    open( new JDEvent( this, "", new long[]{ 0, 0 } ) );
+    open( new JDEvent( this, "", new long[]{ 0x4000000000000000L, 0 } ) );
   }
 
-  public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; App = null; }
+  public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; App = null; rPath = new swingIO.tree.JDNode[2]; }
 
   public void open(JDEvent e)
   {
+    long val = e.getArg(0);
+
+    boolean cmd = ( val & 0x8000000000000000L ) != 0, expandNode = ( val & 0x4000000000000000L ) != 0;
+
+    int arg = (int)val, CMDinfo = ( arg >> 8 ) & 0xFF; arg &= 0xFF;
+
     if( e.getID().equals("UInit") ) { Uninitialize(); }
 
-    else if( e.getArg(0) < 0 )
+    else if( cmd )
     {
+      ds.clear();
+
+      //Navigate to an node.
+
+      if( arg == 5 )
+      {
+        tree.setSelectionPath( new TreePath( rPath[(int)e.getArg(1)].getPath() ) );
+        tree.expandPath(tree.getLeadSelectionPath());
+      }
+
       //Begin disassembling the program.
 
-      if( e.getArg(0) == -4 )
+      else if( arg == 4 )
       {
         if( coreLoaded )
         {
@@ -72,14 +89,14 @@ public class MAC extends Data implements JDEventListener
           
           info("<html>The processor core architecture type has not been added to JDisassembly yet.</html>");
         }
-      }
 
+        return;
+      }
+      
       //Select bytes in virtual space.
 
-      if( e.getArg( 0 ) == -3 )
+      else if( arg == 3 )
       {
-        ds.clear(); info("<html></html>");
-
         try
         {
           file.seekV( e.getArg(1) );
@@ -88,31 +105,24 @@ public class MAC extends Data implements JDEventListener
         }
         catch( java.io.IOException er ) { }
       }
-
+      
       //Select bytes Offset.
-
-      else if( e.getArg( 0 ) == -2 )
+      
+      else if( arg == 2 )
       {
-        ds.clear(); info("<html></html>");
-
-        if( tree.getLastSelectedPathComponent().toString().equals("Load Commands") )
-        {
-          tree.expandPath( tree.getSelectionPath() );
-        
-          info("The load commands tell us what each section of the binary is and where to put sections into virtual address space.");
-        }
-
         try { file.seek( e.getArg(1) ); Offset.setSelected( e.getArg(1), e.getArg(2) ); } catch( java.io.IOException er ) { }
       }
+
+      info( MInfo[CMDinfo] );
     }
 
     //Command 0 sets a descriptor for a section of data in the binary tree.
 
-    else if( e.getArg( 0 ) == 0 ) { ds.setDescriptor( des.get( (int)e.getArg( 1 ) ) ); }
+    else if( arg == 0 ) { ds.setDescriptor( des.get( (int)e.getArg( 1 ) ) ); }
 
     //Open application header within universal binaries.
 
-    else if( e.getArg( 0 ) == 1 )
+    else if( arg == 1 )
     {
       ds.clear(); info("<html></html>");
 
@@ -141,5 +151,30 @@ public class MAC extends Data implements JDEventListener
         file.Events = true; tree.setSelectionPath( new TreePath( App.getPath() ) ); tree.expandPath( new TreePath( App.getPath() ) );
       }
     }
+
+    //Open compressed link edit info (rebase).
+
+    else if( arg == 2 ) { ledit.rebase( e.getArg(1), e.getArg(2) ); }
+  
+    //Open compressed link edit info (bind).
+
+    else if( arg == 3 ) { ledit.bind( e.getArg(1), e.getArg(2) ); }
+
+    //Expand node on click.
+
+    if( expandNode ) { tree.expandPath(tree.getLeadSelectionPath()); }
   }
+
+  //Some nodes should require a small exploration as they carry out an command like selecting bytes.
+  //Thus the commands do not have an descriptor describing the data.
+
+  private static final String[] MInfo = new String[]
+  {
+    "<html></html>",
+    "<html>The binding information uses opcodes which tells us which method to locate in the export section of another binary which we set to the location of each pointer.<br /><br />" +
+    "The pointers are not stored in with the link information section. There are two sections loaded into RAM using load commands that have a flag setting of 6 (Bind pointers), 7 (Lazy bind pointers).<br /><br />" +
+    "The locations are the positions in memory of which the program will call the method.<br /><br />" +
+    "The pointers node takes you to the load command for the pointers, and the opcodes node shows how to read the method names linked to per pointer." +
+    "The actions node shows the information without the opcodes and the address at which the method is called in the program from the pointers section.</html>"
+  };
 }
