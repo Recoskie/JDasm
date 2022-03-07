@@ -19,7 +19,7 @@ public class LoadCMD extends Data
 
     //WE should divide sections by data.
 
-    JDNode code = new JDNode( "Code Sections" );
+    JDNode code = new JDNode( "Code Sections", new long[]{ 0xC0000000000000FFL } );
 
     int cmd = 0, size = 0;
 
@@ -132,7 +132,7 @@ public class LoadCMD extends Data
             else
             {
               int e = (int)vSize >> 2; ptr = new long[ e ];
-              for( int p = 0; p < e; de.LUINT64("Method call location"), ptr[p++] = (long)de.value );
+              for( int p = 0; p < e; de.LUINT32("Method call location"), ptr[p++] = (int)de.value );
             }
 
             t.add( new JDNode("View Pointers.h", new long[]{ 0, ref++ } ) ); des.add( de );
@@ -155,7 +155,7 @@ public class LoadCMD extends Data
             else
             {
               int e = (int)vSize >> 2; lazy_ptr = new long[ e ];
-              for( int p = 0; p < e; de.LUINT64("Method call location"), lazy_ptr[p++] = (long)de.value );
+              for( int p = 0; p < e; de.LUINT32("Method call location"), lazy_ptr[p++] = (int)de.value );
             }
 
             t.add( new JDNode("View Pointers.h", new long[]{ 0, ref++ } ) ); des.add( de );
