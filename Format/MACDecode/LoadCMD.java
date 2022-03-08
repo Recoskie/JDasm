@@ -874,8 +874,8 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>This is a binary we wish to load. Every binary has a symbol table that gives parts of the program names by locations.<br /><br />" +
-      "Not all symbols locate to a section of code. There is a command called \"link info\" that defines which symbols are exportable and which ones need to be binded to another binary.<br /><br />" +
-      "The symbols that need to be binded are a jump or call operation which are to be set to the location of a exportable method from another binary. We call these jumps and calls studs.<br /><br />" +
+      "Not all symbols locate to a section of code. There is a command called \"link library setup\" that defines which symbols are exportable and which ones need to be binded to another binary.<br /><br />" +
+      "The symbols that need to be binded are a jump or call operation which are to be set to the location of a exportable method from another binary. We call these jumps and calls stubs.<br /><br />" +
       "It is the dynamic linkers job to make sure our symbols that need to be binded locate to the exportable symbols when the processor hits the call and jump instructions that read the value.</html>" );
     }
     else
@@ -937,7 +937,9 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>The symbols define the method calls and function calls in a mac binary.</html>" );
+      info( "<html>The symbols define the method calls and function calls in a mac binary, exportable methods, and data.<br /><br />" +
+      "The section \"link info\" organizes the simbols by symbol number in this list.<br /><br />" +
+      "The fifth simbol index would mean the fifth simbol index in this list.</html>" );
     }
     else
     {
@@ -973,7 +975,7 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>The studs section of a mach binary is a bunch of jump instuctions that read the pointers and jump to the location set in the pointers.<br /><br />" +
+      info( "<html>The stubs section of a mach binary is a bunch of jump instuctions that read the pointers and jump to the location set in the pointers.<br /><br />" +
       "This is the non lazy pointers meaning they must be set before the program starts otherwize we will jump to address 0 when the program hits the jump instuction to call a method.<br /><br />" +
       "The pointers are set using the link library setup command. It tells us which method to look for in an export section of another mach binary and we set the pointer location and move to the next pointer one at a time.</html>" );
     }
@@ -987,9 +989,9 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>The studs section of a mach binary is a bunch of jump instuctions that read the pointers and jump to the location set in the pointers.<br /><br />" +
-      "This is the lazy pointers meaning they locate to a section called helper sutds that sets the pointer and calls the method. Any other section that then read this pointer to call the method then locates to the method.<br /><br />" +
-      "The non lazy pointers genrally are set 0 so they do not locate anwhere in the porgram so they must be set before the prgram starts. The pointers are set using the link library setup command.</html>" );
+      info( "<html>The stubs section of a mach binary is a bunch of jump instuctions that read the pointers and jump to the location set in the pointers.<br /><br />" +
+      "This is the lazy pointers meaning they locate to a section called helper sutds that sets the pointer and calls the method. Any other section that then read this pointer call the method whout going to the stub helper.<br /><br />" +
+      "The non lazy pointers genrally are set 0 so they do not locate anywhere in the porgram so they must be set before the program starts. The pointers are set using the link library setup command.</html>" );
     }
     else
     {

@@ -175,7 +175,7 @@ public class MAC extends Data implements JDEventListener
     "<html>The binding information uses opcodes which tells us which method to locate in the export section of another binary which we set to the location of each pointer.<br /><br />" +
     "The pointers are not stored in with the link information section. There are two sections loaded into RAM using load commands that have a flag setting of 6 (Bind pointers), 7 (Lazy bind pointers).<br /><br />" +
     "The locations are the positions in memory of which the program will call the method.<br /><br />" +
-    "The pointers node takes you to the load command for the pointers, and the opcodes node shows how to read the method names linked to per pointer." +
+    "The pointers node takes you to the load command for the pointers, and the opcodes node shows how to read the method names linked to per pointer.<br /><br />" +
     "The actions node shows the information without the opcodes and the address at which the method is called in the program from the pointers section.</html>"
   };
 }
