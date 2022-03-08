@@ -6,6 +6,10 @@ import swingIO.tree.*;
 public class LoadCMD extends Data
 {
   private static long bind = -1, lazyBind = -1;
+  
+  //Method call pointers.
+
+  private static long[] ptr, lazy_ptr;
 
   public void load(JDNode root) throws java.io.IOException
   {
@@ -120,19 +124,19 @@ public class LoadCMD extends Data
           {
             rPath.add( t ); bind = paths++;
 
-            long tpos = file.getFilePointer(); file.seek( offset );
+            long tpos = file.getFilePointer(); file.seekV( address );
             
-            Descriptor de = new Descriptor( file ); de.setEvent( this::blank );
+            Descriptor de = new Descriptor( file, true ); de.setEvent( this::blank );
 
             if( is64bit )
             {
               int e = (int)vSize >> 3; ptr = new long[ e ];
-              for( int p = 0; p < e; de.LUINT64("Method call location"), ptr[p++] = (long)de.value );
+              for( int p = 0; p < e; ptr[p++] = file.getVirtualPointer(), de.LUINT64("Method call location") );
             }
             else
             {
               int e = (int)vSize >> 2; ptr = new long[ e ];
-              for( int p = 0; p < e; de.LUINT32("Method call location"), ptr[p++] = (int)de.value );
+              for( int p = 0; p < e; ptr[p++] = file.getVirtualPointer(), de.LUINT32("Method call location") );
             }
 
             t.add( new JDNode("View Pointers.h", new long[]{ 0, ref++ } ) ); des.add( de );
@@ -143,19 +147,19 @@ public class LoadCMD extends Data
           {
             rPath.add( t ); lazyBind = paths++;
 
-            long tpos = file.getFilePointer(); file.seek( offset );
+            long tpos = file.getFilePointer(); file.seekV( address );
             
-            Descriptor de = new Descriptor( file ); de.setEvent( this::blank );
+            Descriptor de = new Descriptor( file, true ); de.setEvent( this::blank );
 
             if( is64bit )
             {
               int e = (int)vSize >> 3; lazy_ptr = new long[ e ];
-              for( int p = 0; p < e; de.LUINT64("Method call location"), lazy_ptr[p++] = (long)de.value );
+              for( int p = 0; p < e; lazy_ptr[p++] = file.getVirtualPointer(), de.LUINT64("Method call location") );
             }
             else
             {
               int e = (int)vSize >> 2; lazy_ptr = new long[ e ];
-              for( int p = 0; p < e; de.LUINT32("Method call location"), lazy_ptr[p++] = (int)de.value );
+              for( int p = 0; p < e; lazy_ptr[p++] = file.getVirtualPointer(), de.LUINT32("Method call location") );
             }
 
             t.add( new JDNode("View Pointers.h", new long[]{ 0, ref++ } ) ); des.add( de );
@@ -386,6 +390,20 @@ public class LoadCMD extends Data
           tm.add( new JDNode( "Opcodes.h", new long[]{ 3, boff, boff + bsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 3, boff, boff + bsize } ) );
           n1.add( tm );
+        
+          //Bind the pointers.
+
+          if( core != null )
+          {
+            long tloc = file.getFilePointer(); String[] syms = linkEdit.bindSyms( boff, boff + bsize );
+          
+            for( int func = 0; func < ptr.length; func++ )
+            {
+              core.mapped_pos.add(ptr[func]); core.mapped_pos.add(ptr[func] + 8); core.mapped_loc.add( syms[func] );
+            }
+          
+            file.seek( tloc );
+          }
         }
         
         if( wbsize > 0 )
@@ -406,6 +424,20 @@ public class LoadCMD extends Data
           tm.add( new JDNode( "Opcodes.h", new long[]{ 3, lboff, lboff + lbsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 3, lboff, boff + lbsize } ) );
           n1.add( tm );
+        
+          //Bind the lazy pointers.
+
+          if( core != null )
+          {
+            long tloc = file.getFilePointer(); String[] syms = linkEdit.bindSyms( lboff, lboff + lbsize );
+                   
+            for( int func = 0; func < lazy_ptr.length; func++ )
+            {
+              core.mapped_pos.add(lazy_ptr[func]); core.mapped_pos.add(lazy_ptr[func] + 8); core.mapped_loc.add( syms[func] );
+            }
+                   
+            file.seek( tloc );
+          }
         }
         if( esize > 0 ){ n1.add( new JDNode("export.h", new long[]{ 0x8000000000000002L, eoff, eoff + esize - 1 } ) ); }
 

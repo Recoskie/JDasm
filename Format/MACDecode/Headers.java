@@ -90,7 +90,7 @@ public class Headers extends Data
       {
         if( core == null || core.type() != 0 ) { core = new X86( file ); } else { core.setTarget( file ); }
             
-        core.setBit( is64bit ? X86.x86_64 : X86.x86_32 );
+        core.setBit( is64bit ? X86.x86_64 : X86.x86_32 ); core.setAddressMode( true );
                           
         core.setEvent( this::Dis ); coreLoaded = true;
       }

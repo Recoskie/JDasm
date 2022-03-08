@@ -65,6 +65,32 @@ public class linkEdit extends Data
     info("<html>Decoding of the link edit bind information.<br /><br />" + out + "</table></html>");
   }
 
+  public static String[] bindSyms( long pos, long end )
+  {
+    java.util.ArrayList<String> syms = new java.util.ArrayList<String>();
+
+    byte[] d = new byte[(int)(end - pos)];
+    
+    try { file.seek( pos ); file.read(d); } catch( java.io.IOException er ) {}
+
+    int Pos = 0, End = (int)(end - pos);
+
+    String name = "";
+
+    while( Pos < End )
+    {
+      if( d[Pos] == 0x40 )
+      {
+        Pos += 1; while( d[Pos] != 0x00 ) { name += (char)d[Pos]; Pos += 1; }
+        syms.add(name); name = "";
+      }
+
+      Pos += 1;
+    }
+
+    return( syms.toArray( new String[ syms.size() ] ) );
+  }
+
   public void export( long pos, long end )
   {
     /*byte[] d = new byte[(int)(end - pos)];

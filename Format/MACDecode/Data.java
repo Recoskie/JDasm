@@ -42,8 +42,4 @@ public class Data extends Window.Window
   //The machine core type.
 
   public static int coreType = 0;
-
-  //Method call pointers.
-
-  public static long[] ptr, lazy_ptr;
 }
