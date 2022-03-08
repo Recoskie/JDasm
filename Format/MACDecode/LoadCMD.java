@@ -61,7 +61,7 @@ public class LoadCMD extends Data
           DTemp.LUINT32("Length"); oSize = (int)DTemp.value;
         }
 
-        file.addV( offset, oSize, address, vSize );
+        file.addV( offset, oSize, address, vSize ); segment.add( address );
 
         DTemp.LUINT32("maxvprot");
         DTemp.LUINT32("minvprot");
@@ -395,11 +395,11 @@ public class LoadCMD extends Data
 
           if( core != null )
           {
-            long tloc = file.getFilePointer(); String[] syms = linkEdit.bindSyms( boff, boff + bsize );
+            long tloc = file.getFilePointer(); bind[] syms = linkEdit.bindSyms( boff, boff + bsize );
           
-            for( int func = 0; func < ptr.length; func++ )
+            for( int func = 0; func < syms.length; func++ )
             {
-              core.mapped_pos.add(ptr[func]); core.mapped_pos.add(ptr[func] + ( is64bit ? 8 : 4 ) ); core.mapped_loc.add( syms[func] );
+              core.mapped_pos.add(syms[func].loc); core.mapped_pos.add(syms[func].loc + ( is64bit ? 8 : 4 ) ); core.mapped_loc.add( syms[func].name );
             }
           
             file.seek( tloc );
@@ -413,6 +413,20 @@ public class LoadCMD extends Data
           tm.add( new JDNode( "Opcodes.h", new long[]{ 3, wboff, wboff + wbsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 3, wboff, wboff + wbsize } ) );
           n1.add( tm );
+
+          //Bind the weak pointers.
+
+          if( core != null )
+          {
+            long tloc = file.getFilePointer(); bind[] syms = linkEdit.bindSyms( lboff, lboff + lbsize );
+                             
+            for( int func = 0; func < syms.length; func++ )
+            {
+              core.mapped_pos.add(syms[func].loc); core.mapped_pos.add(syms[func].loc + ( is64bit ? 8 : 4 ) ); core.mapped_loc.add( syms[func].name );
+            }
+                             
+            file.seek( tloc );
+          }
         }
 
         if( lbsize > 0 )
@@ -429,11 +443,11 @@ public class LoadCMD extends Data
 
           if( core != null )
           {
-            long tloc = file.getFilePointer(); String[] syms = linkEdit.bindSyms( lboff, lboff + lbsize );
+            long tloc = file.getFilePointer(); bind[] syms = linkEdit.bindSyms( lboff, lboff + lbsize );
                    
-            for( int func = 0; func < lazy_ptr.length; func++ )
+            for( int func = 0; func < syms.length; func++ )
             {
-              core.mapped_pos.add(lazy_ptr[func]); core.mapped_pos.add(lazy_ptr[func] + ( is64bit ? 8 : 4 ) ); core.mapped_loc.add( syms[func] );
+              core.mapped_pos.add(syms[func].loc); core.mapped_pos.add(syms[func].loc + ( is64bit ? 8 : 4 ) ); core.mapped_loc.add( syms[func].name );
             }
                    
             file.seek( tloc );

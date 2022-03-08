@@ -119,7 +119,7 @@ public class MAC extends Data implements JDEventListener
 
     //Command 0 sets a descriptor for a section of data in the binary tree.
 
-    else if( arg == 0 ) { ds.setDescriptor( des.get( (int)e.getArg( 1 ) ) ); }
+    else if( arg == 0 ) { try{ ds.setDescriptor( des.get( (int)e.getArg( 1 ) ) ); } catch( Exception er ){} }
 
     //Open application header within universal binaries.
 
