@@ -126,7 +126,7 @@ public class LoadCMD extends Data
 
             long tpos = file.getFilePointer(); file.seekV( address );
             
-            Descriptor de = new Descriptor( file, true ); de.setEvent( this::blank );
+            Descriptor de = new Descriptor( file, true ); de.setEvent( this::pointerInfo );
 
             if( is64bit )
             {
@@ -149,7 +149,7 @@ public class LoadCMD extends Data
 
             long tpos = file.getFilePointer(); file.seekV( address );
             
-            Descriptor de = new Descriptor( file, true ); de.setEvent( this::blank );
+            Descriptor de = new Descriptor( file, true ); de.setEvent( this::lpointerInfo );
 
             if( is64bit )
             {
@@ -399,7 +399,7 @@ public class LoadCMD extends Data
           
             for( int func = 0; func < ptr.length; func++ )
             {
-              core.mapped_pos.add(ptr[func]); core.mapped_pos.add(ptr[func] + 8); core.mapped_loc.add( syms[func] );
+              core.mapped_pos.add(ptr[func]); core.mapped_pos.add(ptr[func] + ( is64bit ? 8 : 4 ) ); core.mapped_loc.add( syms[func] );
             }
           
             file.seek( tloc );
@@ -433,7 +433,7 @@ public class LoadCMD extends Data
                    
             for( int func = 0; func < lazy_ptr.length; func++ )
             {
-              core.mapped_pos.add(lazy_ptr[func]); core.mapped_pos.add(lazy_ptr[func] + 8); core.mapped_loc.add( syms[func] );
+              core.mapped_pos.add(lazy_ptr[func]); core.mapped_pos.add(lazy_ptr[func] + ( is64bit ? 8 : 4 ) ); core.mapped_loc.add( syms[func] );
             }
                    
             file.seek( tloc );
@@ -500,6 +500,10 @@ public class LoadCMD extends Data
         root.add( new JDNode( "CMD #" + i + ".h", new long[]{ 0, ref++ } ) );
       }
     }
+
+    //Once we bind the methods we no longer need to keep track of the pointers.
+
+    ptr = null; lazy_ptr = null;
 
     //Sections that only machine code.
 
@@ -962,6 +966,34 @@ public class LoadCMD extends Data
     else
     {
       info( startInfo[i] );
+    }
+  }
+
+  private void pointerInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>The studs section of a mach binary is a bunch of jump instuctions that read the pointers and jump to the location set in the pointers.<br /><br />" +
+      "This is the non lazy pointers meaning they must be set before the program starts otherwize we will jump to address 0 when the program hits the jump instuction to call a method.<br /><br />" +
+      "The pointers are set using the link library setup command. It tells us which method to look for in an export section of another mach binary and we set the pointer location and move to the next pointer one at a time.</html>" );
+    }
+    else
+    {
+      info( "<html>Location is read by a jump instuction as the location to a function or method from another binary see the link library setup command.</html>" );
+    }
+  }
+
+  private void lpointerInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>The studs section of a mach binary is a bunch of jump instuctions that read the pointers and jump to the location set in the pointers.<br /><br />" +
+      "This is the lazy pointers meaning they locate to a section called helper sutds that sets the pointer and calls the method. Any other section that then read this pointer to call the method then locates to the method.<br /><br />" +
+      "The non lazy pointers genrally are set 0 so they do not locate anwhere in the porgram so they must be set before the prgram starts. The pointers are set using the link library setup command.</html>" );
+    }
+    else
+    {
+      info( "<html>Location is read by a jump instuction as the location to a function or method from another binary see the link library setup command.</html>" );
     }
   }
 
