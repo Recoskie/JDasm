@@ -270,7 +270,7 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::blank ); des.add( DTemp );
 
-        JDNode n1 = new JDNode( "Link Edit info", new long[]{ 0, ref++ } );
+        JDNode n1 = new JDNode( "Symbol info", new long[]{ 0, ref++ } );
       
         if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + csize * 4 - 1 } ) ); }
         if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + msize * 4 - 1 } ) ); }
@@ -938,7 +938,7 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>The symbols define the method calls and function calls in a mac binary, exportable methods, and data.<br /><br />" +
-      "The section \"link info\" organizes the simbols by symbol number in this list.<br /><br />" +
+      "The section \"Symbol info\" organizes the simbols by symbol number in this list.<br /><br />" +
       "The fifth simbol index would mean the fifth simbol index in this list.</html>" );
     }
     else
