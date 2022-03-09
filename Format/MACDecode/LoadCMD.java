@@ -6,10 +6,6 @@ import swingIO.tree.*;
 public class LoadCMD extends Data
 {
   private static long bind = -1, lazyBind = -1;
-  
-  //Method call pointers.
-
-  private static long[] ptr, lazy_ptr;
 
   public void load(JDNode root) throws java.io.IOException
   {
@@ -120,52 +116,7 @@ public class LoadCMD extends Data
 
           //Sections we want to be able to navigate too.
 
-          flag &= 0xFF; if( flag == 6 )
-          {
-            rPath.add( t ); bind = paths++;
-
-            long tpos = file.getFilePointer(); file.seekV( address );
-            
-            Descriptor de = new Descriptor( file, true ); de.setEvent( this::pointerInfo );
-
-            if( is64bit )
-            {
-              int e = (int)vSize >> 3; ptr = new long[ e ];
-              for( int p = 0; p < e; ptr[p++] = file.getVirtualPointer(), de.LUINT64("Method call location") );
-            }
-            else
-            {
-              int e = (int)vSize >> 2; ptr = new long[ e ];
-              for( int p = 0; p < e; ptr[p++] = file.getVirtualPointer(), de.LUINT32("Method call location") );
-            }
-
-            t.add( new JDNode("View Pointers.h", new long[]{ 0, ref++ } ) ); des.add( de );
-
-            file.seek( tpos );
-          }
-          else if( flag == 7 )
-          {
-            rPath.add( t ); lazyBind = paths++;
-
-            long tpos = file.getFilePointer(); file.seekV( address );
-            
-            Descriptor de = new Descriptor( file, true ); de.setEvent( this::lpointerInfo );
-
-            if( is64bit )
-            {
-              int e = (int)vSize >> 3; lazy_ptr = new long[ e ];
-              for( int p = 0; p < e; lazy_ptr[p++] = file.getVirtualPointer(), de.LUINT64("Method call location") );
-            }
-            else
-            {
-              int e = (int)vSize >> 2; lazy_ptr = new long[ e ];
-              for( int p = 0; p < e; lazy_ptr[p++] = file.getVirtualPointer(), de.LUINT32("Method call location") );
-            }
-
-            t.add( new JDNode("View Pointers.h", new long[]{ 0, ref++ } ) ); des.add( de );
-
-            file.seek( tpos );
-          }
+          flag &= 0xFF; if( flag == 6 ) { rPath.add( t ); bind = paths++; } else if( flag == 7 ) { rPath.add( t ); lazyBind = paths++; }
 
           n2.add( t );
         }
@@ -388,7 +339,7 @@ public class LoadCMD extends Data
           if( bind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, bind } ) ); }
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 3, boff, boff + bsize } ) );
-          tm.add( new JDNode( "Actions.h", new long[]{ 3, boff, boff + bsize } ) );
+          tm.add( new JDNode( "Actions.h", new long[]{ 4, boff, boff + bsize } ) );
           n1.add( tm );
         
           //Bind the pointers.
@@ -411,7 +362,7 @@ public class LoadCMD extends Data
           tm = new JDNode("bind", new long[]{ 0xC000000000000102L, wboff, wboff + wbsize - 1 } );
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 3, wboff, wboff + wbsize } ) );
-          tm.add( new JDNode( "Actions.h", new long[]{ 3, wboff, wboff + wbsize } ) );
+          tm.add( new JDNode( "Actions.h", new long[]{ 4, wboff, wboff + wbsize } ) );
           n1.add( tm );
 
           //Bind the weak pointers.
@@ -436,7 +387,7 @@ public class LoadCMD extends Data
           if( lazyBind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, lazyBind } ) ); }
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 3, lboff, lboff + lbsize } ) );
-          tm.add( new JDNode( "Actions.h", new long[]{ 3, lboff, boff + lbsize } ) );
+          tm.add( new JDNode( "Actions.h", new long[]{ 4, lboff, lboff + lbsize } ) );
           n1.add( tm );
         
           //Bind the lazy pointers.
@@ -514,10 +465,6 @@ public class LoadCMD extends Data
         root.add( new JDNode( "CMD #" + i + ".h", new long[]{ 0, ref++ } ) );
       }
     }
-
-    //Once we bind the methods we no longer need to keep track of the pointers.
-
-    ptr = null; lazy_ptr = null;
 
     //Sections that only machine code.
 
@@ -982,34 +929,6 @@ public class LoadCMD extends Data
     else
     {
       info( startInfo[i] );
-    }
-  }
-
-  private void pointerInfo( int i )
-  {
-    if( i < 0 )
-    {
-      info( "<html>The stubs section of a mach binary is a bunch of jump instuctions that read the pointers and jump to the location set in the pointers.<br /><br />" +
-      "This is the non lazy pointers meaning they must be set before the program starts otherwize we will jump to address 0 when the program hits the jump instuction to call a method.<br /><br />" +
-      "The pointers are set using the link library setup command. It tells us which method to look for in an export section of another mach binary and we set the pointer location and move to the next pointer one at a time.</html>" );
-    }
-    else
-    {
-      info( "<html>Location is read by a jump instuction as the location to a function or method from another binary see the link library setup command.</html>" );
-    }
-  }
-
-  private void lpointerInfo( int i )
-  {
-    if( i < 0 )
-    {
-      info( "<html>The stubs section of a mach binary is a bunch of jump instuctions that read the pointers and jump to the location set in the pointers.<br /><br />" +
-      "This is the lazy pointers meaning they locate to a section called helper sutds that sets the pointer and calls the method. Any other section that then read this pointer call the method whout going to the stub helper.<br /><br />" +
-      "The non lazy pointers genrally are set 0 so they do not locate anywhere in the porgram so they must be set before the program starts. The pointers are set using the link library setup command.</html>" );
-    }
-    else
-    {
-      info( "<html>Location is read by a jump instuction as the location to a function or method from another binary see the link library setup command.</html>" );
     }
   }
 

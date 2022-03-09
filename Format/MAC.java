@@ -40,7 +40,7 @@ public class MAC extends Data implements JDEventListener
     open( new JDEvent( this, "", new long[]{ 0x4000000000000000L, 0 } ) );
   }
 
-  public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; App = null; rPath.clear(); paths = 0; }
+  public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; App = null; rPath.clear(); segment.clear(); paths = 0; }
 
   public void open(JDEvent e)
   {
@@ -160,6 +160,22 @@ public class MAC extends Data implements JDEventListener
     //Open compressed link edit info (bind).
 
     else if( arg == 3 ) { ledit.bind( e.getArg(1), e.getArg(2) ); }
+
+    //Display the binding actions.
+
+    else if( arg == 4 )
+    {
+      file.Events = false; bind[] b = ledit.bindSyms( e.getArg(1), e.getArg(2) ); file.Events = true;
+
+      try { file.seek( e.getArg(1) ); Offset.setSelected( e.getArg(1), e.getArg(2) ); } catch( java.io.IOException er ) { }
+
+      String out = "<table border='1'><tr><td>Set address.</td><td>Export method.</td></tr>";
+
+      if( is64bit ) { for( int i = 0; i < b.length; i++ ) { out += "<tr><td>" + String.format( "%1$016X", b[i].loc ) + "</td><td>" + b[i].name + "</td></tr>"; } }
+      else { for( int i = 0; i < b.length; i++ ) { out += "<tr><td>" + String.format( "%1$08X", b[i].loc ) + "</td><td>" + b[i].name + "</td></tr>"; } }
+
+      info( out + "</table>" );
+    }
 
     //Expand node on click.
 

@@ -75,53 +75,56 @@ public class linkEdit extends Data
     
     try { file.seek( pos ); file.read(d); } catch( java.io.IOException er ) {}
 
-    int Pos = 0, End = (int)(end - pos);
+    int Pos = 0, End = d.length;
 
     String name = "";
-    long loc = 0;
-    long offset = 0;
+    long loc = 0, offset = 0;
     int opcode = 0, arg = 0, bpos = 0;
 
-    while( Pos < End )
+    try
     {
-      opcode = d[Pos] & 0xF0; arg = d[Pos] & 0x0F;
-
-      //The name of the method to look up in the export of another binary.
-
-      if( opcode == 0x40 ) { Pos += 1; while( d[Pos] != 0x00 ) { name += (char)d[Pos]; Pos += 1; } }
-
-      //The segment that the method call happens.
-
-      else if( opcode == 0x70 )
+      while( Pos < End )
       {
-        Pos += 1; loc = segment.get( arg );
+        opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0;
 
-        //The offset within the segment the pointer is at.
-        //The lower 7 bits is combined as the number value as long as bit 8 is set.
-        //This allows variable in length encoding of a number.
+        //The name of the method to look up in the export of another binary.
 
-        while( d[Pos] < 0 ) { offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+        if( opcode == 0x40 ) { Pos += 1; while( d[Pos] != 0x00 ) { name += (char)d[Pos]; Pos += 1; } }
 
-        loc += offset; offset = 0;
+        //The segment that the method call happens.
+
+        else if( opcode == 0x70 )
+        {
+          Pos += 1; loc = segment.get( arg );
+
+          //The offset within the segment the pointer is at.
+          //The lower 7 bits is combined as the number value as long as bit 8 is set.
+          //This allows variable in length encoding of a number.
+
+          while( d[Pos] < 0 ) { offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+
+          loc += offset; offset = 0;
+        }
+
+        //Bind the method.
+
+        else if( opcode == 0x90 )
+        {
+          syms.add( new bind( loc, name ) );
+
+          //After every bind we add the location by the size of the pointer.
+
+          loc += is64bit ? 8 : 4; name = "";
+        }
+
+        //Reset everything.
+
+        else if( opcode == 0x00 ) { loc = 0; name = ""; }
+
+        Pos += 1;
       }
-
-      //Bind the method.
-
-      else if( opcode == 0x90 )
-      {
-        syms.add( new bind( loc, name ) );
-
-        //After every bind we add the location by the size of the pointer.
-
-        loc += is64bit ? 8 : 4; name = "";
-      }
-
-      //Reset everything.
-
-      else if( opcode == 0x00 ) { loc = 0; name = ""; }
-
-      Pos += 1;
     }
+    catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
 
     return( syms.toArray( new bind[ syms.size() ] ) );
   }
