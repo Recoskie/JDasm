@@ -34,11 +34,11 @@ public class linkEdit extends Data
 
     int Pos = 0, End = d.length;
 
-    String name = "", hex = "", bind_type = "";
+    String name = "", hex = "", bind_type = "pointer";
     long loc = 0, offset = 0;
     int opcode = 0, arg = 0, bpos = 0, flag = 0;
 
-    int bindType = 0;
+    int bindType = 1;
 
     try
     {
@@ -52,7 +52,7 @@ public class linkEdit extends Data
         {
           flag = arg;
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Symbol name</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>"; Pos += 1;
-          Pos += 1; while( d[Pos] != 0x00 ) { hex += String.format("%1$02X", d[Pos] ) + " "; name += (char)d[Pos]; Pos += 1; }
+          Pos += 1; while( d[Pos] != 0x00 ) { hex += String.format("%1$02X", d[Pos] ) + " "; name += (char)d[Pos]; Pos += 1; } hex += String.format("%1$02X", d[Pos] );
           out += "<tr><td>" + hex + "</td><td>Symbol name</td><td>" + name + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>"; hex = "";
         }
 
@@ -108,7 +108,7 @@ public class linkEdit extends Data
 
         else if( opcode == 0x00 )
         {
-          loc = 0; name = ""; flag = 0; bind_type = "???"; bindType = 0;
+          loc = 0; name = ""; flag = 0; bind_type = "pointer"; bindType = 1;
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Reset.</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
         else
@@ -125,7 +125,7 @@ public class linkEdit extends Data
 
     info("<html>Each two hex digits is one opcode. The first hex digit is the opcode and the last hex digit is used as an 0 to 15 value.<br /><br />" +
     "<table border='1'><tr><td>Opcode</td><td>Description</td></tr>" +
-    "<tr><td>47</td><td>Sets the name for the current method. The last hex digit is 7 meaning we set the flag settings to 7.</td></tr>" +
+    "<tr><td>47</td><td>Sets the name for the current method. The last hex digit is 7 meaning we set the flag settings to 7. The end of the name is signified by the first byte that is 00.</td></tr>" +
     "<tr><td>51</td><td>Sets the location type. The last hex digit is used as 1 to 3 value (pointer = 1, relative = 2, or absolute = 3).<br />" +
     "Pointer means a location that is read and used as the location to the method in the program.<br />" +
     "Relative means a location that is read and added to from the current location in the code to call the method.<br />" +
