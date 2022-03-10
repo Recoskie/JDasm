@@ -57,14 +57,14 @@ public class LoadCMD extends Data
           DTemp.LUINT32("Length"); oSize = (int)DTemp.value;
         }
 
-        file.addV( offset, oSize, address, vSize ); segment.add( address );
-
         DTemp.LUINT32("maxvprot");
         DTemp.LUINT32("minvprot");
         DTemp.LUINT32("Number of sections"); int sect = (int)DTemp.value;
         DTemp.LUINT32("flags");
 
-        JDNode n2 = new JDNode( name + ( oSize > 0 ? "" : ".h" ), new long[] { 0, ref++ } );
+        JDNode n2 = new JDNode( name + " (Seg=" + segment.size() + ")" + ( oSize > 0 ? "" : ".h" ), new long[] { 0, ref++ } );
+
+        file.addV( offset, oSize, address, vSize ); segment.add( address );
         
         DTemp.setEvent( this::segInfo ); des.add( DTemp );
 
@@ -775,6 +775,7 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>Load a section of the program into RAM memory. Sections generally have standard segment name for their use.<br /><br />" +
+      "Segment data locations can be referenced by name, or segment load command number. The first segment load command starts at 0 and we increment upward per segment load command.<br /><br />" +
       "<table border='1'>" +
       "<tr><td>__PAGEZERO</td><td>Fills the area the program is going to load into RAM memory with zeros.</td></tr>" +
       "<tr><td>__TEXT</td><td>The tradition UNIX text segment. Contains machine code, and data types or strings.</td></tr>" +

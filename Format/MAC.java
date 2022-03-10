@@ -155,16 +155,18 @@ public class MAC extends Data implements JDEventListener
 
     //Open compressed link edit info (rebase).
 
-    else if( arg == 2 ) { ledit.rebase( e.getArg(1), e.getArg(2) ); }
+    else if( arg == 2 ) { ds.clear(); ledit.rebase( e.getArg(1), e.getArg(2) ); }
   
     //Open compressed link edit info (bind).
 
-    else if( arg == 3 ) { ledit.bind( e.getArg(1), e.getArg(2) ); }
+    else if( arg == 3 ) { ds.clear(); ledit.bind( e.getArg(1), e.getArg(2) ); }
 
     //Display the binding actions.
 
     else if( arg == 4 )
     {
+      ds.clear();
+
       file.Events = false; bind[] b = ledit.bindSyms( e.getArg(1), e.getArg(2) ); file.Events = true;
 
       try { file.seek( e.getArg(1) ); Offset.setSelected( e.getArg(1), e.getArg(2) ); } catch( java.io.IOException er ) { }
@@ -188,10 +190,11 @@ public class MAC extends Data implements JDEventListener
   private static final String[] MInfo = new String[]
   {
     "<html></html>",
-    "<html>The binding information uses opcodes which tells us which method to locate in the export section of another binary which we set to the location of each pointer.<br /><br />" +
-    "The pointers are not stored in with the link information section. There are two sections loaded into RAM using load commands that have a flag setting of 6 (Bind pointers), 7 (Lazy bind pointers).<br /><br />" +
-    "The locations are the positions in memory of which the program will call the method.<br /><br />" +
-    "The pointers node takes you to the load command for the pointers, and the opcodes node shows how to read the method names linked to per pointer.<br /><br />" +
-    "The actions node shows the information without the opcodes and the address at which the method is called in the program from the pointers section.</html>"
+    "<html>The binding information uses opcodes which tells us which method to locate in the export section of another binary.<br /><br />" +
+    "The opcodes also specify which segment number in the program and offset to write the location of the method.<br /><br />" +
+    "The pointers are usually stored in two sections loaded into RAM using load commands that have a flag setting of 6 (Bind pointers), 7 (Lazy bind pointers).<br /><br />" +
+    "The locations are read by a jump instruction which will call the method to the export method.<br /><br />" +
+    "The pointers node takes you to the load command for the pointers by flag setting, and the opcodes node shows how to read the method names and location information to set each pointer.<br /><br />" +
+    "The actions node shows the information without the opcodes and shows only the address that is set to the export method of another binary.</html>"
   };
 }
