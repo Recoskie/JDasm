@@ -105,7 +105,15 @@ public class linkEdit extends Data
 
     file.Events = true;
 
-    info("<html>Decoding of the link edit bind information.<br /><br />" + out + "</table></html>");
+    info("<html>Each two hex digits is one opcode. The first hex digit is the opcode and the last hex digit is used as an 0 to 15 value.<br /><br />" +
+    "<table border='1'><tr><td>Opcode</td><td>Description</td></tr>" +
+    "<tr><td>47</td><td>Sets the name for the current method. The last hex digit is 7 meaning we set the flag settings to 7.</td></tr>" +
+    "<tr><td>72</td><td>Sets the location to segment load command 2. The last hex digit is which segment in virtual space. Following this opcode is the offset that the pointer is at in the segment.</td></tr>" +
+    "<tr><td>90</td><td>Use the current location, and set it to the location of the current set method name. After this opcode we add 4 to the location for 32 bit binaries, or add 8 to the current location in 64 bit binaries.</td></tr>" +
+    "<tr><td>00</td><td>Resets the currently location, and name to noting.</td></tr>" +
+    "</table>" +
+    "<br /><br />Lets read the opcodes and show what locations must be set to which methods.<br /><br />" +
+    out + "</table></html>");
   }
 
   //Fully bind and decode the method calls.
