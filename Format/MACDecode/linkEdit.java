@@ -30,35 +30,78 @@ public class linkEdit extends Data
     
     try { file.seek( pos ); Offset.setSelected( pos, end ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
 
-    String out = "<table border='1'><tr><td>Hex</td><td>Description.</td><td>Value</td></tr>";
+    String out = "<table border='1'><tr><td>Hex</td><td>Description</td><td>Value</td><td>Current location</td><td>Current name</td></tr>";
 
-    //out += "<tr><td></td><td></td><td></td></tr>";
+    int Pos = 0, End = d.length;
 
-    int Pos = 0, End = (int)(end - pos);
+    String name = "", hex = "";
+    long loc = 0, offset = 0;
+    int opcode = 0, arg = 0, bpos = 0;
 
-    while( Pos < End )
+    try
     {
-      if( d[Pos] == 0x40 )
+      while( Pos < End )
       {
-        out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Symbol name</td><td>Opcode</td></tr>"; Pos += 1;
-    
-        String name = "", hex = "";
-    
-        while( d[Pos] != 0x00 ) { hex += String.format("%1$02X", d[Pos] ) + " "; name += (char)d[Pos]; Pos += 1; }
+        opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0;
 
-        hex += String.format("%1$02X", d[Pos] ); Pos += 1;
+        //The name of the method to look up in the export of another binary.
 
-        out += "<tr><td>" + hex + "</td><td>Symbol name</td><td>" + name + "</td></tr>";
-      }
-      else if( d[Pos] == 0x00 )
-      {
-        out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Reset.</td><td>Opcode</td></tr>"; Pos += 1;
-      }
-      else
-      {
-        out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Unknown Opcode.</td><td>?</td></tr>"; Pos += 1;
+        if( opcode == 0x40 )
+        {
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Symbol name</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td></tr>"; Pos += 1;
+          Pos += 1; while( d[Pos] != 0x00 ) { hex += String.format("%1$02X", d[Pos] ) + " "; name += (char)d[Pos]; Pos += 1; }
+          out += "<tr><td>" + hex + "</td><td>Symbol name</td><td>" + name + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td></tr>"; hex = "";
+        }
+
+        //The segment that the method call happens.
+
+        else if( opcode == 0x70 )
+        {
+          loc = segment.get( arg );
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set loc to segment " + arg + "</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td></tr>";
+          Pos += 1;
+
+          //The offset within the segment the pointer is at.
+          //The lower 7 bits is combined as the number value as long as bit 8 is set.
+          //This allows variable in length encoding of a number.
+
+          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
+
+          loc += offset;
+
+          out += "<tr><td>" + hex + "</td><td>Offset in segment " + offset + "</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td></tr>";
+
+          offset = 0; hex = "";
+        }
+
+        //Bind the method.
+
+        else if( opcode == 0x90 )
+        {
+          //After every bind we add the location by the size of the pointer.
+
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td></tr>";
+
+          loc += is64bit ? 8 : 4; name = "";
+        }
+
+        //Reset everything.
+
+        else if( d[Pos] == 0x00 )
+        {
+          loc = 0; name = "";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Reset.</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td></tr>";
+        }
+        else
+        {
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Unknown Opcode.</td><td>?</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td></tr>";
+        }
+
+        Pos += 1;
       }
     }
+    catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
 
     file.Events = true;
 
