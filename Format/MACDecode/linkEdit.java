@@ -61,6 +61,20 @@ public class linkEdit extends Data
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set dylid(" + arg + ")</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
 
+        //Set dyld ordinal by number.
+
+        else if( opcode == 0x20 )
+        {
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set dylid.</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          
+          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
+
+          out += "<tr><td>" + hex + "</td><td>dyld(" + offset + ")</td><td>dyld = " + offset + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+
+          offset = 0; hex = "";
+        }
+
         //The name of the method to look up in the export of another binary.
 
         else if( opcode == 0x40 )
@@ -79,6 +93,19 @@ public class linkEdit extends Data
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Bind loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
 
+        //Sets the addend.
+
+        else if( opcode == 0x60 )
+        {
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set addend</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          
+          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
+
+          out += "<tr><td>" + hex + "</td><td>Addend(" + offset + ")</td><td>Addend = " + offset + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+
+          offset = 0; hex = "";
+        }
 
         //The segment that the method call happens.
 
@@ -86,13 +113,8 @@ public class linkEdit extends Data
         {
           loc = segment.get( arg );
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set loc to segment " + arg + "</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          Pos += 1;
-
-          //The offset within the segment the pointer is at.
-          //The lower 7 bits is combined as the number value as long as bit 8 is set.
-          //This allows variable in length encoding of a number.
-
-          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          
+          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
 
           loc += offset;
@@ -107,13 +129,8 @@ public class linkEdit extends Data
         else if( opcode == 0x80 )
         {
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Add loc to offset</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          Pos += 1;
-
-          //The offset within the segment the pointer is at.
-          //The lower 7 bits is combined as the number value as long as bit 8 is set.
-          //This allows variable in length encoding of a number.
-
-          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          
+          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
 
           loc += offset;
@@ -166,16 +183,15 @@ public class linkEdit extends Data
         else if( opcode == 0xC0 )
         {
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Number of Binds plus skip</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          Pos += 1;
-
-          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          
+          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
 
           out += "<tr><td>" + hex + "</td><td>Number of binds plus skip offset " + offset + "</td><td>Count = " + offset + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          long count = offset; offset = 0; hex = ""; Pos += 1;
-
-          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          long count = offset; offset = 0; hex = "";
+          
+          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
 
           out += "<tr><td>" + hex + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
@@ -217,7 +233,9 @@ public class linkEdit extends Data
     "Additionally use the last hex digit and multiply it by 8 for 64 bit binaries, or 4 for 32 bit and add it to current location.</td></tr>" +
     "<tr><td>C?</td><td>Read a number for count, and a number for skip. Bind the method to the current location, then add skip to location and repeat till count number of times.<br />" +
     "In some cases we want to bind the same method to different locations evenly spaced apart number of times.</td></tr>" +
-    "<tr><td>1?</td><td>Sets dylid ordinal index to. The last hex digit is used 0 to 15 ordinal.</td></tr>" +
+    "<tr><td>6?</td><td>Sets the addend to the number read after the opcode.</td></tr>" +
+    "<tr><td>1?</td><td>Sets dylid ordinal index. The last hex digit is used 0 to 15 ordinal.</td></tr>" +
+    "<tr><td>2?</td><td>Sets dylid ordinal index to the number read after the opcode.</td></tr>" +
     "<tr><td>0?</td><td>Set all current values to noting (Reset).</td></tr>" +
     "</table><br />" +
     "Each number that is read uses after an opcode uses an variable in length number encoding called ulib128.<br />" +
@@ -253,6 +271,13 @@ public class linkEdit extends Data
         //The name of the method to look up in the export of another binary.
 
         if( opcode == 0x40 ) { name = ""; Pos += 1; while( d[Pos] != 0x00 ) { name += (char)d[Pos]; Pos += 1; } }
+
+        //Set addend, or dyld ordinal.
+
+        else if( opcode == 0x20 || opcode == 0x60 )
+        {
+          Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0; offset = 0;
+        }
 
         //The segment that the method call happens.
 
