@@ -36,7 +36,7 @@ public class linkEdit extends Data
 
     String name = "", hex = "", bind_type = "pointer";
     long loc = 0, offset = 0;
-    int opcode = 0, arg = 0, bpos = 0, flag = 0;
+    int opcode = 0, arg = 0, bpos = 0, flag = 0, ptr_size = is64bit ? 8 : 4;
 
     int bindType = 1;
 
@@ -50,7 +50,7 @@ public class linkEdit extends Data
 
         if( opcode == 0x40 )
         {
-          flag = arg;
+          name = ""; flag = arg;
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Symbol name</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>"; Pos += 1;
           Pos += 1; while( d[Pos] != 0x00 ) { hex += String.format("%1$02X", d[Pos] ) + " "; name += (char)d[Pos]; Pos += 1; } hex += String.format("%1$02X", d[Pos] );
           out += "<tr><td>" + hex + "</td><td>Symbol name</td><td>" + name + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>"; hex = "";
@@ -73,7 +73,28 @@ public class linkEdit extends Data
 
           loc += offset;
 
-          out += "<tr><td>" + hex + "</td><td>Offset in segment " + offset + "</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex + "</td><td>loc + " + offset + "</td><td>offset = " + offset + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+
+          offset = 0; hex = "";
+        }
+
+        //Add the current location by an offset.
+
+        else if( opcode == 0x80 )
+        {
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Add loc to offset</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          Pos += 1;
+
+          //The offset within the segment the pointer is at.
+          //The lower 7 bits is combined as the number value as long as bit 8 is set.
+          //This allows variable in length encoding of a number.
+
+          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
+
+          loc += offset;
+
+          out += "<tr><td>" + hex + "</td><td>Loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
           offset = 0; hex = "";
         }
@@ -84,9 +105,60 @@ public class linkEdit extends Data
         {
           //After every bind we add the location by the size of the pointer.
 
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + " + ptr_size + ")</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          loc += is64bit ? 8 : 4; name = "";
+          loc += ptr_size;
+        }
+      
+        //Bind and add loc by offset.
+
+        else if( opcode == 0xA0 )
+        {
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + " + ptr_size + ")</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+
+          Pos += 1; loc += ptr_size;
+
+          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
+
+          out += "<tr><td>" + hex + "</td><td>loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+
+          loc += offset; offset = 0; hex = "";
+        }
+
+        //Bind the method.
+
+        else if( opcode == 0xB0 )
+        {
+          //After every bind we add the location by the size of the pointer.
+
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location scale = " + arg + "</td><td>Opcode (loc + " + ptr_size + " * scale + " + ptr_size + ")</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+
+          arg += 1; loc += ( ptr_size ) * arg;
+        }
+
+        //Bind method number of times plus skip.
+
+        else if( opcode == 0xC0 )
+        {
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Number of Binds plus skip</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          Pos += 1;
+
+          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
+
+          out += "<tr><td>" + hex + "</td><td>Number of binds plus skip offset" + offset + "</td><td>Count = " + offset + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+
+          long count = offset; offset = 0; hex = ""; Pos += 1;
+
+          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
+
+          out += "<tr><td>" + hex + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+
+          loc += ( offset + ptr_size ) * count;
+
+          offset = 0; hex = "";
         }
 
         //Set dyld ordinal.
@@ -96,7 +168,7 @@ public class linkEdit extends Data
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set dylid(" + arg + ")</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
 
-        //Set binding type imm.
+        //Set binding type.
 
         else if( opcode == 0x50 )
         {
@@ -153,7 +225,7 @@ public class linkEdit extends Data
 
     String name = "";
     long loc = 0, offset = 0;
-    int opcode = 0, arg = 0, bpos = 0;
+    int opcode = 0, arg = 0, bpos = 0, ptr_size = is64bit ? 8 : 4;
 
     try
     {
@@ -163,19 +235,19 @@ public class linkEdit extends Data
 
         //The name of the method to look up in the export of another binary.
 
-        if( opcode == 0x40 ) { Pos += 1; while( d[Pos] != 0x00 ) { name += (char)d[Pos]; Pos += 1; } }
+        if( opcode == 0x40 ) { name = ""; Pos += 1; while( d[Pos] != 0x00 ) { name += (char)d[Pos]; Pos += 1; } }
 
         //The segment that the method call happens.
 
-        else if( opcode == 0x70 )
+        else if( opcode == 0x70 || opcode == 0x80 )
         {
-          Pos += 1; loc = segment.get( arg );
+          Pos += 1; if( opcode == 0x70 ) { loc = segment.get( arg ); }
 
           //The offset within the segment the pointer is at.
           //The lower 7 bits is combined as the number value as long as bit 8 is set.
           //This allows variable in length encoding of a number.
 
-          while( d[Pos] < 0 ) { offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+          while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
 
           loc += offset; offset = 0;
         }
@@ -188,7 +260,58 @@ public class linkEdit extends Data
 
           //After every bind we add the location by the size of the pointer.
 
-          loc += is64bit ? 8 : 4; name = "";
+          loc += ptr_size;
+        }
+
+        //Bind and add loc by offset.
+
+        else if( opcode == 0xA0 )
+        {
+          Pos += 1; syms.add( new bind( loc, name ) );
+
+          //After every bind we add the location by the size of the pointer.
+
+          while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+
+          loc += offset + ( ptr_size ); offset = 0;
+        }
+
+        //Bind the method with an scaled pointer.
+
+        else if( opcode == 0xB0 )
+        {
+          syms.add( new bind( loc, name ) );
+
+          //After every bind we add the location by the size of the pointer.
+
+          arg += 1; loc += ( ptr_size ) * arg;
+        }
+
+        //Bind the method skip and times.
+
+        else if( opcode == 0xC0 )
+        {
+          //After every bind we add the location by the size of the pointer.
+
+          Pos += 1;
+
+          //count.
+
+          while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+
+          long count = offset; offset = 0; Pos += 1;
+
+          //bytes to Skip.
+
+          while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+
+          for( int i = 0; i < count; i++ )
+          {
+            syms.add( new bind( loc, name ) );
+            loc += offset + ( ptr_size );
+          }
+            
+          offset = 0;
         }
 
         //Reset everything.

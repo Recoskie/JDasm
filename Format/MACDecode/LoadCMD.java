@@ -359,7 +359,7 @@ public class LoadCMD extends Data
         
         if( wbsize > 0 )
         {
-          tm = new JDNode("bind", new long[]{ 0xC000000000000102L, wboff, wboff + wbsize - 1 } );
+          tm = new JDNode("week bind", new long[]{ 0xC000000000000102L, wboff, wboff + wbsize - 1 } );
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 3, wboff, wboff + wbsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 4, wboff, wboff + wbsize } ) );
