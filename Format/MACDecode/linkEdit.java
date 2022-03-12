@@ -46,15 +46,39 @@ public class linkEdit extends Data
       {
         opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0;
 
+        //Reset everything.
+
+        if( opcode == 0x00 )
+        {
+          loc = 0; name = ""; flag = 0; bind_type = "pointer"; bindType = 1;
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Reset.</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+        }
+
+        //Set dyld ordinal.
+
+        else if( opcode == 0x10 )
+        {
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set dylid(" + arg + ")</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+        }
+
         //The name of the method to look up in the export of another binary.
 
-        if( opcode == 0x40 )
+        else if( opcode == 0x40 )
         {
           name = ""; flag = arg;
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Symbol name</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>"; Pos += 1;
           Pos += 1; while( d[Pos] != 0x00 ) { hex += String.format("%1$02X", d[Pos] ) + " "; name += (char)d[Pos]; Pos += 1; } hex += String.format("%1$02X", d[Pos] );
           out += "<tr><td>" + hex + "</td><td>Symbol name</td><td>" + name + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>"; hex = "";
         }
+
+        //Set binding type.
+
+        else if( opcode == 0x50 )
+        {
+          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; }
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Bind loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+        }
+
 
         //The segment that the method call happens.
 
@@ -147,7 +171,7 @@ public class linkEdit extends Data
           while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
 
-          out += "<tr><td>" + hex + "</td><td>Number of binds plus skip offset" + offset + "</td><td>Count = " + offset + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex + "</td><td>Number of binds plus skip offset " + offset + "</td><td>Count = " + offset + "</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
           long count = offset; offset = 0; hex = ""; Pos += 1;
 
@@ -161,28 +185,8 @@ public class linkEdit extends Data
           offset = 0; hex = "";
         }
 
-        //Set dyld ordinal.
+        //Highly unlikely that there is an unknown opcode.
 
-        else if( opcode == 0x10 )
-        {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set dylid(" + arg + ")</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-        }
-
-        //Set binding type.
-
-        else if( opcode == 0x50 )
-        {
-          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; }
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Bind loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-        }
-
-        //Reset everything.
-
-        else if( opcode == 0x00 )
-        {
-          loc = 0; name = ""; flag = 0; bind_type = "pointer"; bindType = 1;
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Reset.</td><td>Opcode</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-        }
         else
         {
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Unknown Opcode.</td><td>?</td><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
@@ -202,11 +206,20 @@ public class linkEdit extends Data
     "Pointer means a location that is read and used as the location to the method in the program.<br />" +
     "Relative means a location that is read and added to from the current location in the code to call the method.<br />" +
     "Absolute means a location that must locate directly to the method.</td></tr>" +
-    "<tr><td>72</td><td>Sets the location to the address location of a segment load command data. The last hex digit is which segment. Following this opcode is the offset that the location is at in the segment.</td></tr>" +
-    "<tr><td>90</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type. After this opcode we add 4 to the location for 32 bit binaries, or add 8 to the current location in 64 bit binaries.</td></tr>" +
+    "<tr><td>72</td><td>Sets the location to the address location of a segment load command data. The last hex digit is which segment (int this case 2).<br />" +
+    "Following this opcode is the offset that the location is at in the segment.</td></tr>" +
+    "<tr><td>80</td><td>Read an number and add it to the currently set location.</td></tr>" +
+    "<tr><td>90</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.</td></tr>" +
+    "<tr><td>A0</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.<br />" +
+    "Additionally read the number after the bind opcode and add it to current location.</td></tr>" +
+    "<tr><td>B7</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.<br />" +
+    "Additionally use the last hex digit in this case 7 and multiply it by 8 for 64 bit binaries, or 4 for 32 bit and add it to current location.</td></tr>" +
+    "<tr><td>C0</td><td>Read a number for count, and a number for skip. Bind the method to the current location, then add skip to location till count number of times.<br />" +
+    "In some cases we want to bind the same method to different locations evenly spaced apart number of times.</td></tr>" +
     "<tr><td>19</td><td>Sets dylid ordinal index to 9. The last hex digit is used 0 to 15 ordinal.</td></tr>" +
     "<tr><td>00</td><td>Set all current values to noting (Reset).</td></tr>" +
     "</table>" +
+    "<br />After each bind a method (opcodes 90 to C0) we add 4 to the location for 32 bit binaries, or add 8 to the current location in 64 bit binaries. As that is the size of the address.<br /><br />" +
     "<br />Lets read the opcodes and show what locations must be set to which methods.<br /><br />" +
     out + "</table></html>");
   }
