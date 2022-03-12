@@ -201,26 +201,30 @@ public class linkEdit extends Data
 
     info("<html>Each two hex digits is one opcode. The first hex digit is the opcode and the last hex digit is used as an 0 to 15 value.<br /><br />" +
     "<table border='1'><tr><td>Opcode</td><td>Description</td></tr>" +
-    "<tr><td>47</td><td>Sets the name for the current method. The last hex digit is 7 meaning we set the flag settings to 7. The end of the name is signified by the first byte that is 00.</td></tr>" +
-    "<tr><td>51</td><td>Sets the location type. The last hex digit is used as 1 to 3 value (pointer = 1, relative = 2, or absolute = 3).<br />" +
+    "<tr><td>4?</td><td>Sets the name for the current method. The last hex digit is the flag setting, for example 47 set the flag settings to 7.<br />" +
+    "The end of the name is signified by the first value that is 00.</td></tr>" +
+    "<tr><td>5?</td><td>Sets the location type. The last hex digit is used as 1 to 3 value (pointer = 1, relative = 2, or absolute = 3).<br />" +
     "Pointer means a location that is read and used as the location to the method in the program.<br />" +
     "Relative means a location that is read and added to from the current location in the code to call the method.<br />" +
     "Absolute means a location that must locate directly to the method.</td></tr>" +
-    "<tr><td>72</td><td>Sets the location to the address location of a segment load command data. The last hex digit is which segment (int this case 2).<br />" +
-    "Following this opcode is the offset that the location is at in the segment.</td></tr>" +
-    "<tr><td>80</td><td>Read an number and add it to the currently set location.</td></tr>" +
-    "<tr><td>90</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.</td></tr>" +
-    "<tr><td>A0</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.<br />" +
-    "Additionally read the number after the bind opcode and add it to current location.</td></tr>" +
-    "<tr><td>B7</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.<br />" +
-    "Additionally use the last hex digit in this case 7 and multiply it by 8 for 64 bit binaries, or 4 for 32 bit and add it to current location.</td></tr>" +
-    "<tr><td>C0</td><td>Read a number for count, and a number for skip. Bind the method to the current location, then add skip to location till count number of times.<br />" +
+    "<tr><td>7?</td><td>Sets the location to the address location of a segment load command data. The last hex digit is which segment, for example 72 would mean Seg=2.<br />" +
+    "Following this opcode is a number that is added to the location in the segment.</td></tr>" +
+    "<tr><td>8?</td><td>Read an number and add it to the currently set location.</td></tr>" +
+    "<tr><td>9?</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.</td></tr>" +
+    "<tr><td>A?</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.<br />" +
+    "Additionally read a number and add it to current location.</td></tr>" +
+    "<tr><td>B?</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.<br />" +
+    "Additionally use the last hex digit and multiply it by 8 for 64 bit binaries, or 4 for 32 bit and add it to current location.</td></tr>" +
+    "<tr><td>C?</td><td>Read a number for count, and a number for skip. Bind the method to the current location, then add skip to location and repeat till count number of times.<br />" +
     "In some cases we want to bind the same method to different locations evenly spaced apart number of times.</td></tr>" +
-    "<tr><td>19</td><td>Sets dylid ordinal index to 9. The last hex digit is used 0 to 15 ordinal.</td></tr>" +
-    "<tr><td>00</td><td>Set all current values to noting (Reset).</td></tr>" +
-    "</table>" +
-    "<br />After each bind a method (opcodes 90 to C0) we add 4 to the location for 32 bit binaries, or add 8 to the current location in 64 bit binaries. As that is the size of the address.<br /><br />" +
-    "<br />Lets read the opcodes and show what locations must be set to which methods.<br /><br />" +
+    "<tr><td>1?</td><td>Sets dylid ordinal index to. The last hex digit is used 0 to 15 ordinal.</td></tr>" +
+    "<tr><td>0?</td><td>Set all current values to noting (Reset).</td></tr>" +
+    "</table><br />" +
+    "Each number that is read uses after an opcode uses an variable in length number encoding called ulib128.<br />" +
+    "The first 7 binary digits are the value, and if the last binary digit is set one then we read the next value as the next 7 binary digits for the number.<br />" +
+    "The last 7 binary digits for the number should end with a value that is smaller than 80 hex as the last binary digit should be zero.<br /><br />" +
+    "After each bind opcodes 9? to C? we add 4 to the location for 32 bit binaries, or add 8 to the current location in 64 bit binaries. As that is the size of the address.<br /><br />" +
+    "Lets read the opcodes and show what locations must be set to which methods.<br /><br />" +
     out + "</table></html>");
   }
 
@@ -254,77 +258,62 @@ public class linkEdit extends Data
 
         else if( opcode == 0x70 || opcode == 0x80 )
         {
-          Pos += 1; if( opcode == 0x70 ) { loc = segment.get( arg ); }
+          if( opcode == 0x70 ) { loc = segment.get( arg ); }
 
-          //The offset within the segment the pointer is at.
-          //The lower 7 bits is combined as the number value as long as bit 8 is set.
-          //This allows variable in length encoding of a number.
-
-          while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+          Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
 
           loc += offset; offset = 0;
         }
 
-        //Bind the method.
+        //Bind the method opcodes.
 
-        else if( opcode == 0x90 )
+        else if( opcode >= 0x90 && opcode <= 0xC0 )
         {
-          syms.add( new bind( loc, name ) );
+          //Bind the method.
+
+          if( opcode == 0x90 ) { syms.add( new bind( loc, name ) ); }
+
+          //Bind and add loc by offset.
+
+          else if( opcode == 0xA0 )
+          {
+            syms.add( new bind( loc, name ) );
+
+            //After every bind we add the location by the size of the pointer.
+
+            Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+
+            loc += offset; offset = 0;
+          }
+
+          //Bind the method with an scaled pointer.
+
+          else if( opcode == 0xB0 ) { syms.add( new bind( loc, name ) ); loc += ptr_size * arg; }
+
+          //Bind the method skip bytes till count times.
+
+          else if( opcode == 0xC0 )
+          {
+            //count.
+
+            Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+
+            long count = offset - 1; offset = 0;
+
+            //bytes to Skip.
+
+            Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+
+            //Bind the method while skipping bytes.
+
+            for( int i = 0; i < count; i++ ) { syms.add( new bind( loc, name ) ); loc += offset + ptr_size; }
+
+            if( count >= 0 ) { syms.add( new bind( loc, name ) ); loc += offset; } offset = 0;
+          }
 
           //After every bind we add the location by the size of the pointer.
 
           loc += ptr_size;
-        }
-
-        //Bind and add loc by offset.
-
-        else if( opcode == 0xA0 )
-        {
-          Pos += 1; syms.add( new bind( loc, name ) );
-
-          //After every bind we add the location by the size of the pointer.
-
-          while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
-
-          loc += offset + ( ptr_size ); offset = 0;
-        }
-
-        //Bind the method with an scaled pointer.
-
-        else if( opcode == 0xB0 )
-        {
-          syms.add( new bind( loc, name ) );
-
-          //After every bind we add the location by the size of the pointer.
-
-          arg += 1; loc += ( ptr_size ) * arg;
-        }
-
-        //Bind the method skip and times.
-
-        else if( opcode == 0xC0 )
-        {
-          //After every bind we add the location by the size of the pointer.
-
-          Pos += 1;
-
-          //count.
-
-          while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
-
-          long count = offset; offset = 0; Pos += 1;
-
-          //bytes to Skip.
-
-          while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
-
-          for( int i = 0; i < count; i++ )
-          {
-            syms.add( new bind( loc, name ) );
-            loc += offset + ( ptr_size );
-          }
-            
-          offset = 0;
         }
 
         //Reset everything.
