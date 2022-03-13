@@ -215,27 +215,30 @@ public class linkEdit extends Data
 
     file.Events = true;
 
-    info("<html>Each two hex digits is one opcode. The first hex digit is the opcode and the last hex digit is used as an 0 to 15 value.<br /><br />" +
+    info("<html>The first hex digit is the opcode and the last hex digit is used as an 0 to 15 value.<br /><br />" +
     "<table border='1'><tr><td>Opcode</td><td>Description</td></tr>" +
-    "<tr><td>4?</td><td>Sets the name for the current method. The last hex digit is the flag setting, for example 47 set the flag settings to 7.<br />" +
-    "The end of the name is signified by the first value that is 00.</td></tr>" +
-    "<tr><td>5?</td><td>Sets the location type. The last hex digit is used as 1 to 3 value (pointer = 1, relative = 2, or absolute = 3).<br />" +
+    "<tr><td>4?</td><td>Sets the name for the current method. The last ? hex digit is the flag setting, for example 47 set the flag settings to 7.<br />" +
+    "Flag setting 8 means the method is week imported.<br />Flag setting 1 means the method is non week imported.<br />" +
+    "The end of the name after the opcode is signified by the first value that is 00.</td></tr>" +
+    "<tr><td>5?</td><td>Sets the location type. The last ? hex digit is used as 1 to 3 value (pointer = 1, relative = 2, or absolute = 3).<br />" +
     "Pointer means a location that is read and used as the location to the method in the program.<br />" +
     "Relative means a location that is read and added to from the current location in the code to call the method.<br />" +
     "Absolute means a location that must locate directly to the method.</td></tr>" +
-    "<tr><td>7?</td><td>Sets the location to the address location of a segment load command data. The last hex digit is which segment, for example 72 would mean Seg=2.<br />" +
-    "Following this opcode is a number that is added to the location in the segment.</td></tr>" +
-    "<tr><td>8?</td><td>Read an number and add it to the currently set location.</td></tr>" +
+    "<tr><td>7?</td><td>Sets the location to the address location of a segment load command data. The last ? hex digit is which segment, for example 72 would mean Seg=2.<br />" +
+    "After this opcode is a number that is added to the location in the segment.</td></tr>" +
+    "<tr><td>8?</td><td>Read an number after this opcode and add it to the currently set location.</td></tr>" +
     "<tr><td>9?</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.</td></tr>" +
     "<tr><td>A?</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.<br />" +
-    "Additionally read a number and add it to current location.</td></tr>" +
+    "Additionally read a number after this opcode and add it to current location.</td></tr>" +
     "<tr><td>B?</td><td>Use the current location, and set it to the location of the current set method name in respect to the current binding type.<br />" +
-    "Additionally use the last hex digit and multiply it by 8 for 64 bit binaries, or 4 for 32 bit and add it to current location.</td></tr>" +
-    "<tr><td>C?</td><td>Read a number for count, and a number for skip. Bind the method to the current location, then add skip to location and repeat till count number of times.<br />" +
+    "Additionally use the last ? hex digit and multiply it by 8 for 64 bit binaries, or 4 for 32 bit and add it to current location.</td></tr>" +
+    "<tr><td>C?</td><td>Read a number for count, and a number for skip after this opcode. Bind the method to the current location, then add skip to location and repeat till count number of times.<br />" +
     "In some cases we want to bind the same method to different locations evenly spaced apart number of times.</td></tr>" +
     "<tr><td>6?</td><td>Sets the addend to the number read after the opcode.</td></tr>" +
-    "<tr><td>1?</td><td>Sets dylid ordinal index. The last hex digit is used 0 to 15 ordinal.</td></tr>" +
+    "<tr><td>1?</td><td>Sets dylid ordinal index. The last ? hex digit is used as 0 to 15 ordinal.</td></tr>" +
     "<tr><td>2?</td><td>Sets dylid ordinal index to the number read after the opcode.</td></tr>" +
+    "<tr><td>3?</td><td>Sets where to lookup the method names when binding. The last ? hex digit is the lookup type.<br />" +
+    "0 = Default lookup.<br />E = Current binary export list.<br />D = Flat lookup.<br />C = Week lookup.</td></tr>" +
     "<tr><td>0?</td><td>Set all current values to noting (Reset).</td></tr>" +
     "</table><br />" +
     "Each number that is read uses after an opcode uses an variable in length number encoding called ulib128.<br />" +
