@@ -38,7 +38,7 @@ public class linkEdit extends Data
 
     String name = "", hex = "", bind_type = "pointer";
     long loc = 0, offset = 0; //Location is 64 bit's.
-    int opcode = 0, arg = 0, bpos = 0, flag = 0, ptr_size = is64bit ? 8 : 4;
+    int opcode = 0, arg = 0, bpos = 0, flag = 0;
 
     int bindType = 1;
 
@@ -148,18 +148,18 @@ public class linkEdit extends Data
         {
           //After every bind we add the location by the size of the pointer.
 
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + " + ptr_size + ")</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          loc += ptr_size;
+          loc += 8;
         }
       
         //Bind and add loc by offset.
 
         else if( opcode == 0xA0 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + " + ptr_size + ")</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          Pos += 1; loc += ptr_size;
+          Pos += 1; loc += 8;
 
           while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
@@ -175,9 +175,9 @@ public class linkEdit extends Data
         {
           //After every bind we add the location by the size of the pointer.
 
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location scale = " + arg + "</td><td>Opcode (loc + " + ptr_size + " * scale + " + ptr_size + ")</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location scale = " + arg + "</td><td>Opcode (loc + 8 * scale + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          arg += 1; loc += ( ptr_size ) * arg;
+          arg += 1; loc += arg << 3;
         }
 
         //Bind method number of times plus skip.
@@ -198,7 +198,7 @@ public class linkEdit extends Data
 
           out += "<tr><td>" + hex + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          loc += ( offset + ptr_size ) * count;
+          loc += ( offset + 8 ) * count;
 
           offset = 0; hex = "";
         }
@@ -234,7 +234,7 @@ public class linkEdit extends Data
 
     String name = "", hex = "", bind_type = "pointer";
     int loc = 0, offset = 0; //32 bit locations.
-    int opcode = 0, arg = 0, bpos = 0, flag = 0, ptr_size = is64bit ? 8 : 4;
+    int opcode = 0, arg = 0, bpos = 0, flag = 0;
 
     int bindType = 1;
 
@@ -344,18 +344,18 @@ public class linkEdit extends Data
         {
           //After every bind we add the location by the size of the pointer.
 
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + " + ptr_size + ")</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + 4)</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          loc += ptr_size;
+          loc += 4;
         }
       
         //Bind and add loc by offset.
 
         else if( opcode == 0xA0 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + " + ptr_size + ")</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + 4)</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          Pos += 1; loc += ptr_size;
+          Pos += 1; loc += 4;
 
           while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
@@ -371,9 +371,9 @@ public class linkEdit extends Data
         {
           //After every bind we add the location by the size of the pointer.
 
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location scale = " + arg + "</td><td>Opcode (loc + " + ptr_size + " * scale + " + ptr_size + ")</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location scale = " + arg + "</td><td>Opcode (loc + 4 * scale + 4)</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          arg += 1; loc += ( ptr_size ) * arg;
+          arg += 1; loc += arg << 2;
         }
 
         //Bind method number of times plus skip.
@@ -394,7 +394,7 @@ public class linkEdit extends Data
 
           out += "<tr><td>" + hex + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          loc += ( offset + ptr_size ) * count;
+          loc += ( offset + 4 ) * count;
 
           offset = 0; hex = "";
         }
