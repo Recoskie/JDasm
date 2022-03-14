@@ -102,7 +102,7 @@ public class Headers extends Data
     return( n );
   }
 
-  private static final String Singatures = "<html>The MacOS binary format uses two signature types.<br /><br />" +
+  private static final String Signatures = "<html>The MacOS binary format uses two signature types.<br /><br />" +
   "<table border='1'>" +
   "<tr><td>Hex Value</td><td>Binary Type</td></tr>" +
   "<tr><td>CE FA ED FE</td><td>32 bit binary application.</td></tr>" +
@@ -194,7 +194,7 @@ public class Headers extends Data
 
   private static final String[] MacHeaderInfo = new String[]
   {
-    Singatures,
+    Signatures,
     CPU_type1 + "The first two hex digits is the CPU type.<br /><br />" +
     "The last two hex digits are 01 for 64 bit, and 02 for 32 bit version of the core.<br /><br />" + CPU_type2,
     "<html>The CPU sub type is used to specify features the core should have support for as the code is optimized for a particular core or newer.<br /><br />" +
@@ -231,12 +231,12 @@ public class Headers extends Data
     "<tr><td>00000000000000000000000001000000</td><td>The shared library init routine is to be run lazily via catching memory faults to its writeable segments (obsolete).</td></tr>" +
     "<tr><td>00000000000000000000000010000000</td><td>The image is using two-level name space bindings.</td></tr>" +
     "<tr><td>00000000000000000000000100000000</td><td>The executable is forcing all images to use flat name space bindings.</td></tr>" +
-    "<tr><td>00000000000000000000001000000000</td><td>This umbrella guarantees no multiple defintions of symbols in its sub-images so the two-level namespace hints can always be used.</td></tr>" +
+    "<tr><td>00000000000000000000001000000000</td><td>This umbrella guarantees no multiple definitions of symbols in its sub-images so the two-level namespace hints can always be used.</td></tr>" +
     "<tr><td>00000000000000000000010000000000</td><td>Do not have dyld notify the prebinding agent about this executable.</td></tr>" +
     "<tr><td>00000000000000000000100000000000</td><td>The binary is not prebound but can have its prebinding redone. only used when MH_PREBOUND is not set.</td></tr>" +
     "<tr><td>00000000000000000001000000000000</td><td>Indicates that this binary binds to all two-level namespace modules of its dependent libraries.</td></tr>" +
     "<tr><td>00000000000000000010000000000000</td><td>Safe to divide up the sections into sub-sections via symbols for dead code stripping.</td></tr>" +
-    "<tr><td>00000000000000000100000000000000</td><td>The binary has been canonicalized via the unprebind operation.</td></tr>" +
+    "<tr><td>00000000000000000100000000000000</td><td>The binary has been canonicalized via the un-prebind operation.</td></tr>" +
     "<tr><td>00000000000000001000000000000000</td><td>The final linked image contains external weak symbols.</td></tr>" +
     "<tr><td>00000000000000010000000000000000</td><td>The final linked image uses weak symbols.</td></tr>" +
     "<tr><td>00000000000000100000000000000000</td><td>When this bit is set, all stacks in the task will be given stack execution privilege.</td></tr>" +
@@ -280,7 +280,7 @@ public class Headers extends Data
 
   private static final String[] UMacHeaderInfo = new String[]
   {
-    Singatures,
+    Signatures,
     "<html>Number of binaries in the universal binary.</html>",
     "<html>Binary application information.</html>",
     CPU_type1 + "The last two hex digits is the CPU type.<br /><br />" +

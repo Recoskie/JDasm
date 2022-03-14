@@ -845,7 +845,8 @@ public class LoadCMD extends Data
       info( "<html>This is a binary we wish to load. Every binary has a symbol table that gives parts of the program names by locations.<br /><br />" +
       "Not all symbols locate to a section of code. There is a command called \"link library setup\" that defines which symbols are exportable and which ones need to be binded to another binary.<br /><br />" +
       "The symbols that need to be binded are a jump or call operation which are to be set to the location of a exportable method from another binary. We call these jumps and calls stubs.<br /><br />" +
-      "It is the dynamic linkers job to make sure our symbols that need to be binded locate to the exportable symbols when the processor hits the call and jump instructions that read the value.</html>" );
+      "It is the dynamic linkers job to make sure our symbols that need to be binded locate to the exportable symbols when the processor hits the call and jump instructions that read the value.<br /><br />" +
+      "Additional each export section is combined into one large list that can be used to lookup the address location of a symbol method name. Each symbol must have a unique name no duplicate names across link libraries.</html>" );
     }
     else
     {

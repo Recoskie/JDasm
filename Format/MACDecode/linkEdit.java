@@ -614,7 +614,7 @@ public class linkEdit extends Data
 
           out += "<tr><td>" + hex + "</td><td>Times = " + offset + "</td><td>Adjust loc times = " + offset + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
 
-          loc += offset << 2;
+          loc += offset << 2; offset = 0; hex = "";
         }
 
         else if( opcode == 0x70 )
@@ -730,9 +730,9 @@ public class linkEdit extends Data
 
         else if( opcode == 0x40 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>loc scale = " + arg + "</td><td>Opcode (loc + 4 * scale)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>loc scale = " + arg + "</td><td>Opcode (loc + 8 * scale)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
 
-          loc += arg << 2;
+          loc += arg << 3;
         }
 
         else if( opcode == 0x50 )
@@ -751,7 +751,7 @@ public class linkEdit extends Data
 
           out += "<tr><td>" + hex + "</td><td>Times = " + offset + "</td><td>Adjust loc times = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
 
-          loc += offset << 2;
+          loc += offset << 3; offset = 0; hex = "";
         }
 
         else if( opcode == 0x70 )
@@ -784,7 +784,7 @@ public class linkEdit extends Data
 
           out += "<tr><td>" + hex + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
 
-          loc += ( offset + 4 ) * count;
+          loc += ( offset + 8 ) * count;
 
           offset = 0; hex = "";
         }
@@ -850,13 +850,13 @@ public class linkEdit extends Data
           loc += offset; offset = 0;
         }
 
-        else if( opcode == 0x40 ) { loc += arg << 2; }
+        else if( opcode == 0x40 ) { loc += is64bit ? arg << 3 : arg << 2; }
 
         else if( opcode >= 0x50 && opcode <= 0x80 )
         {
           if( !is64bit ){ loc &= 0x00000000FFFFFFFFL; }
 
-          long count = arg; offset = 0;
+          long count = opcode == 0x70 ? 1 : arg; offset = 0;
 
           if( opcode == 0x60 || opcode == 0x80 )
           {
@@ -865,16 +865,14 @@ public class linkEdit extends Data
             count = offset; offset = 0;
           }
 
-          if ( opcode == 0x80 )
+          if ( opcode == 0x70 || opcode == 0x80 )
           {
             Pos += 1; while( d[Pos] < 0 ) { offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
           }
 
-          if( opcode == 0x70 ) { count = 1; }
-
           for( int times = 0; times < count; times++ )
           {
-            out += "<tr><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>"; loc += offset + ptr_size;
+            out += "<tr><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + " = " + Integer.toHexString(opcode).toUpperCase()+ "</td><td>" + bind_type + "</td></tr>"; loc += offset + ptr_size;
           }
 
           offset = 0;
