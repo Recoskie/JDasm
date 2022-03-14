@@ -558,7 +558,7 @@ public class linkEdit extends Data
 
         else if( opcode == 0x10 )
         {
-          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } //else { bind_type = "???"; }
+          bindType = arg; if( bindType == 1 ) { bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; }
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Bind loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
         }
 
@@ -607,7 +607,7 @@ public class linkEdit extends Data
 
         else if( opcode == 0x60 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Adjust loc times/td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Adjust loc times</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
           
           Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
@@ -619,7 +619,7 @@ public class linkEdit extends Data
 
         else if( opcode == 0x70 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Adjust loc/td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Adjust loc</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
           
           Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
@@ -695,7 +695,7 @@ public class linkEdit extends Data
 
         else if( opcode == 0x10 )
         {
-          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } //else { bind_type = "???"; }
+          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; }
           out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Bind loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
         }
 
@@ -744,7 +744,7 @@ public class linkEdit extends Data
 
         else if( opcode == 0x60 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Adjust loc times/td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Adjust loc times</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
           
           Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
@@ -756,7 +756,7 @@ public class linkEdit extends Data
 
         else if( opcode == 0x70 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Adjust loc/td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Adjust loc</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
           
           Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
@@ -812,7 +812,7 @@ public class linkEdit extends Data
 
     String bind_type = "pointer";
     long loc = 0, offset = 0;
-    int opcode = 0, arg = 0, bpos = 0, ptr_size = is64bit ? 4 : 8;
+    int opcode = 0, arg = 0, bpos = 0, ptr_size = is64bit ? 8 : 4;
 
     int bindType = 1;
 
@@ -831,7 +831,7 @@ public class linkEdit extends Data
 
         else if( opcode == 0x10 )
         {
-          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } //else { bind_type = "???"; }
+          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; }
         }
 
         else if( opcode == 0x20 )
@@ -874,7 +874,7 @@ public class linkEdit extends Data
 
           for( int times = 0; times < count; times++ )
           {
-            out += "<tr><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>"; loc += offset + ptr_size;
+            out += "<tr><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>"; loc += offset + ptr_size;
           }
 
           offset = 0;
