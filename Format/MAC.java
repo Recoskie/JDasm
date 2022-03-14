@@ -155,15 +155,19 @@ public class MAC extends Data implements JDEventListener
 
     //Open compressed link edit info (rebase).
 
-    else if( arg == 2 ) { ds.clear(); ledit.rebase( e.getArg(1), e.getArg(2) ); }
+    else if( arg == 2 ) { ds.clear(); if( is64bit ){ ledit.rebase64( e.getArg(1), e.getArg(2) ); } else { ledit.rebase32( e.getArg(1), e.getArg(2) ); } }
+
+    //Display rebase actions.
+
+    else if( arg == 3 ) { ds.clear(); ledit.rebase(  e.getArg(1), e.getArg(2) ); }
   
     //Open compressed link edit info (bind).
 
-    else if( arg == 3 ) { ds.clear(); if( is64bit ){ ledit.bind64( e.getArg(1), e.getArg(2) ); } else { ledit.bind32( e.getArg(1), e.getArg(2) ); } }
+    else if( arg == 4 ) { ds.clear(); if( is64bit ){ ledit.bind64( e.getArg(1), e.getArg(2) ); } else { ledit.bind32( e.getArg(1), e.getArg(2) ); } }
 
     //Display the binding actions.
 
-    else if( arg == 4 )
+    else if( arg == 5 )
     {
       ds.clear();
 

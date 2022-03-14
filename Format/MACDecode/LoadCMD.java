@@ -330,7 +330,14 @@ public class LoadCMD extends Data
 
         JDNode n1 = new JDNode( "Link library setup", new long[]{ 0x4000000000000000L, ref++ } ), tm;
 
-        if( rsize > 0 ){ n1.add( new JDNode("rebase.h", new long[]{ 0x8000000000000002L, roff, roff + rsize } ) ); }
+        if( rsize > 0 )
+        {
+          tm =  new JDNode("rebase", new long[]{ 0xC000000000000002L, roff, roff + rsize } );
+
+          tm.add( new JDNode( "Opcodes.h", new long[]{ 2, roff, roff + rsize } ) );
+          tm.add( new JDNode( "Actions.h", new long[]{ 3, roff, roff + rsize } ) );
+          n1.add( tm );
+        }
         
         if( bsize > 0 )
         {
@@ -338,8 +345,8 @@ public class LoadCMD extends Data
 
           if( bind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, bind } ) ); }
 
-          tm.add( new JDNode( "Opcodes.h", new long[]{ 3, boff, boff + bsize } ) );
-          tm.add( new JDNode( "Actions.h", new long[]{ 4, boff, boff + bsize } ) );
+          tm.add( new JDNode( "Opcodes.h", new long[]{ 4, boff, boff + bsize } ) );
+          tm.add( new JDNode( "Actions.h", new long[]{ 5, boff, boff + bsize } ) );
           n1.add( tm );
         
           //Bind the pointers.
@@ -361,8 +368,8 @@ public class LoadCMD extends Data
         {
           tm = new JDNode("week bind", new long[]{ 0xC000000000000102L, wboff, wboff + wbsize - 1 } );
 
-          tm.add( new JDNode( "Opcodes.h", new long[]{ 3, wboff, wboff + wbsize } ) );
-          tm.add( new JDNode( "Actions.h", new long[]{ 4, wboff, wboff + wbsize } ) );
+          tm.add( new JDNode( "Opcodes.h", new long[]{ 4, wboff, wboff + wbsize } ) );
+          tm.add( new JDNode( "Actions.h", new long[]{ 5, wboff, wboff + wbsize } ) );
           n1.add( tm );
 
           //Bind the weak pointers.
@@ -386,8 +393,8 @@ public class LoadCMD extends Data
 
           if( lazyBind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, lazyBind } ) ); }
 
-          tm.add( new JDNode( "Opcodes.h", new long[]{ 3, lboff, lboff + lbsize } ) );
-          tm.add( new JDNode( "Actions.h", new long[]{ 4, lboff, lboff + lbsize } ) );
+          tm.add( new JDNode( "Opcodes.h", new long[]{ 4, lboff, lboff + lbsize } ) );
+          tm.add( new JDNode( "Actions.h", new long[]{ 5, lboff, lboff + lbsize } ) );
           n1.add( tm );
         
           //Bind the lazy pointers.
