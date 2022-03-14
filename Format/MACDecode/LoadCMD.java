@@ -332,7 +332,7 @@ public class LoadCMD extends Data
 
         if( rsize > 0 )
         {
-          tm =  new JDNode("rebase", new long[]{ 0xC000000000000002L, roff, roff + rsize } );
+          tm =  new JDNode("rebase", new long[]{ 0xC000000000000002L, roff, roff + rsize - 1 } );
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 2, roff, roff + rsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 3, roff, roff + rsize } ) );

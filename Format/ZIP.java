@@ -405,11 +405,7 @@ public class ZIP extends Window.Window implements JDEventListener
 
     //Data directory array.
 
-    else if( e.getID().equals("dir") ){ info("<html>In the case that the data descriptor setting is set in the PK header then the size of the compressed file was not known.<br /><br />" +
-    "Instead the Data descriptor signature marks the end of the files data.<br /><br />" +
-    "The Data descriptor tells us how big the compressed file is which should match the number of bytes we read before encountering the data descriptor signature.<br /><br />" +
-    "The data descriptor also stores the files original size, and has an CRC count which is numbers of zero digits that should exist in the file once decompress.<br /><br />" +
-    "The CRC is very important as it can be used to know if the decompressed file matches the original.</html>"); }
+    else if( e.getID().equals("dir") ){ info( cDir ); }
 
     //When the user clicks on the node we will receive the array arguments associated with the node.
 
@@ -560,6 +556,14 @@ public class ZIP extends Window.Window implements JDEventListener
 
   private static final String multiPartZip = "<br /><br />We should always start at disk 0 and decompress the data into the file then move to disk 1 and so on adding data to the file.<br /><br />" +
   "This feature is only used in multi-part file storage.</html>";
+
+  //Central directory.
+
+  private static final String cDir = "<html>The central directory Has a copy of each file signature in this file and the location to each file signature.<br /><br />" +
+  "The central directory has some additional attributes that can be used to add comments to files.<br /><br />" +
+  "The central directory tells us which disk we are on, and allows us to do multi part zip files as well which is not included in the file signatures.<br /><br />" +
+  "It is recommend that we read the central directory first and locate the file signatures using the offset given to the file signature.<br /><br />" +
+  "This is because if we read only the file signatures we do not know if it is a multi-part file zip, or if more than one file signature exists for the same file and only one is the latest version of the file.</html>";
 
   //The ZIP file header.
 
@@ -712,11 +716,7 @@ public class ZIP extends Window.Window implements JDEventListener
   {
     if( i < 0 )
     {
-      info("<html>The data directory Has a copy of each file signature in this file and the location to each file signature.<br /><br />" +
-      "The data directory has some additional attributes that can be used to add comments to files.<br /><br />" +
-      "The data directory tells us which disk we are on, and allows us to do multi part zip files as well which is not included in the file signatures.<br /><br />" +
-      "It is recommend that we read the central directory first and locate the file signatures using the offset given to the file signature.<br /><br />" +
-      "This is because if we read only the file signatures we do not know if it is a multi-part file zip, or if more than one file signature exists for the same file and only one is the latest version of the file.</html>");
+      info( cDir );
     }
     else if( i == 0 )
     {
