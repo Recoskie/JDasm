@@ -632,7 +632,7 @@ public class linkEdit extends Data
   {
     byte[] d = new byte[(int)(end - pos)];
     
-    try { file.seek( pos ); Offset.setSelected( pos, end ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
+    try { file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
 
     String out = "<html>Decoding of the link edit rebase information.<br /><br />" +
     "<table border='1'><tr><td>Hex</td><td>Description</td><td>Value</td><td>Current location</td><td>Current bind type</td></tr>";
@@ -651,11 +651,9 @@ public class linkEdit extends Data
       {
         opcodeh = String.format("%1$02X", d[Pos] ); opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0; bloc = loc; adj = opcode >= 0x50 && opcode <= 0x80 ? 8 : 0; count = opcode != 0x50 ? 1 : arg;
 
-        if( opcode == 0x00 ) { loc = 0; bind_type = "pointer"; }
+        if( opcode == 0x00 ) { loc = 0; bind_type = "pointer"; } else if( opcode == 0x40 ) { offset = arg << 3; }
 
         else if( opcode == 0x10 ) { bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; } }
-
-        else if( opcode == 0x40 ) { offset = arg << 3; }
 
         if( opcode == 0x60 || opcode == 0x80 )
         {
@@ -714,7 +712,7 @@ public class linkEdit extends Data
   {
     byte[] d = new byte[(int)(end - pos)];
     
-    try { file.seek( pos ); Offset.setSelected( pos, end ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
+    try { file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
 
     String out = "<html>Decoding of the link edit rebase information.<br /><br />" +
     "<table border='1'><tr><td>Adjust location</td><td>type</td></tr>";
@@ -723,66 +721,43 @@ public class linkEdit extends Data
 
     String bind_type = "pointer";
     long loc = 0, offset = 0;
-    int opcode = 0, arg = 0, bpos = 0, ptr_size = is64bit ? 8 : 4;
+    int opcode = 0, arg = 0, bpos = 0, count = 0, ptr_size = is64bit ? 8 : 4;
 
-    int bindType = 1;
+    int bindType = 1; boolean adj = false;
 
     try
     {
       while( Pos < End )
       {
-        opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0;
+        opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0; adj = opcode >= 0x50 && opcode <= 0x80; count = opcode != 0x50 ? 1 : arg;
 
-        //Reset.
+        if( opcode == 0x00 ) { loc = 0; bind_type = "pointer"; } else if( opcode == 0x40 ) { offset = is64bit ? arg << 3 : arg << 2; }
 
-        if( opcode == 0x00 )
+        else if( opcode == 0x10 ) { bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; } }
+
+        if( opcode == 0x60 || opcode == 0x80 )
         {
-          loc = 0; bind_type = "pointer"; bindType = 1;
+          Pos += 1; count = 0; while( d[Pos] < 0 ) { count |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } count |= d[Pos] << bpos; bpos = 0;
         }
 
-        else if( opcode == 0x10 )
-        {
-          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; }
-        }
-
-        else if( opcode == 0x20 || opcode == 0x30 )
+        if ( opcode == 0x70 || opcode == 0x80 || opcode == 0x20 || opcode == 0x30 )
         {
           if( opcode == 0x20 ) { loc = segment.get( arg ); }
 
-          Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
-
-          loc += offset; offset = 0;
+          Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= (long)d[Pos] << bpos; bpos = 0;
         }
 
-        else if( opcode == 0x40 ) { loc += is64bit ? arg << 3 : arg << 2; }
-
-        else if( opcode >= 0x50 && opcode <= 0x80 )
+        if( adj )
         {
           if( !is64bit ){ loc &= 0x00000000FFFFFFFFL; }
-
-          long count = opcode == 0x70 ? 1 : arg; offset = 0;
-
-          if( opcode == 0x60 || opcode == 0x80 )
-          {
-            Pos += 1; while( d[Pos] < 0 ) { offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
-
-            count = offset; offset = 0;
-          }
-
-          if ( opcode == 0x70 || opcode == 0x80 )
-          {
-            Pos += 1; while( d[Pos] < 0 ) { offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
-          }
 
           for( int times = 0; times < count; times++ )
           {
             out += "<tr><td>" + String.format(is64bit ? "%1$016X" : "%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>"; loc += offset + ptr_size;
           }
+        } else { loc += offset; }
 
-          offset = 0;
-        }
-
-        Pos += 1;
+        offset = 0; Pos += 1;
       }
     }
     catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
