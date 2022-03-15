@@ -537,8 +537,8 @@ public class linkEdit extends Data
     int Pos = 0, End = d.length;
 
     String bind_type = "pointer", opcodeh = "", hex1 = "", hex2 = "";;
-    int loc = 0, offset = 0;
-    int opcode = 0, arg = 0, bpos = 0;
+    int loc = 0, bloc = 0, offset = 0;
+    int opcode = 0, arg = 0, bpos = 0, count = 0;
 
     int bindType = 1;
 
@@ -546,7 +546,7 @@ public class linkEdit extends Data
     {
       while( Pos < End )
       {
-        opcodeh = String.format("%1$02X", d[Pos] ); opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0;
+        opcodeh = String.format("%1$02X", d[Pos] ); opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0; bloc = 0;
 
         //Reset.
 
@@ -579,7 +579,7 @@ public class linkEdit extends Data
 
         else if( opcode >= 0x50 && opcode <= 0x80 )
         {
-          long count = opcode == 0x70 ? 1 : arg; offset = 0;
+          count = opcode == 0x70 ? 1 : arg; offset = 0;
 
           if( opcode == 0x60 || opcode == 0x80 )
           {
@@ -595,27 +595,27 @@ public class linkEdit extends Data
             hex2 += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
           }
 
-          loc += ( offset + 4 ) * count;
+          loc += ( offset + 4 ) * count; loc -= 4;
 
           if( opcode == 0x50 ) { out += "<tr><td>" + opcodeh + "</td><td>Adjust loc times = " + arg + "</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>"; }
           else if( opcode == 0x60 )
           {
-            out += "<tr><td>" + opcodeh + "</td><td>Adjust loc times</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";  
+            out += "<tr><td>" + opcodeh + "</td><td>Adjust loc times</td><td>Opcode</td><td>" + String.format("%1$08X", bloc) + "</td><td>" + bind_type + "</td></tr>";  
             out += "<tr><td>" + hex1 + "</td><td>Times = " + count + "</td><td>Adjust loc times = " + count + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
           }
           else if( opcode == 0x70 )
           {
-            out += "<tr><td>" + opcodeh + "</td><td>Adjust loc</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
+            out += "<tr><td>" + opcodeh + "</td><td>Adjust loc</td><td>Opcode</td><td>" + String.format("%1$08X", bloc) + "</td><td>" + bind_type + "</td></tr>";
             out += "<tr><td>" + hex2 + "</td><td>Add Loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
           }
           else if( opcode == 0x80 )
           {
-            out += "<tr><td>" + opcodeh + "</td><td>Number of adjusts plus skip</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
-            out += "<tr><td>" + hex1 + "</td><td>Number of adjusts plus skip offset " + offset + "</td><td>Count = " + offset + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
+            out += "<tr><td>" + opcodeh + "</td><td>Number of adjusts plus skip</td><td>Opcode</td><td>" + String.format("%1$08X", bloc) + "</td><td>" + bind_type + "</td></tr>";
+            out += "<tr><td>" + hex1 + "</td><td>Number of adjusts plus skip offset " + offset + "</td><td>Count = " + offset + "</td><td>" + String.format("%1$08X", bloc) + "</td><td>" + bind_type + "</td></tr>";
             out += "<tr><td>" + hex2 + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + bind_type + "</td></tr>";
           }
 
-          offset = 0; hex1 = ""; hex2 = "";
+          loc += 4; offset = 0; hex1 = ""; hex2 = "";
         }
 
         Pos += 1;
@@ -640,8 +640,8 @@ public class linkEdit extends Data
     int Pos = 0, End = d.length;
 
     String bind_type = "pointer", opcodeh = "", hex1 = "", hex2 = "";;
-    long loc = 0, offset = 0;
-    int opcode = 0, arg = 0, bpos = 0;
+    long loc = 0, bloc = 0, offset = 0;
+    int opcode = 0, arg = 0, bpos = 0, count = 0, adj = 0;
 
     int bindType = 1;
 
@@ -649,79 +649,58 @@ public class linkEdit extends Data
     {
       while( Pos < End )
       {
-        opcodeh = String.format("%1$02X", d[Pos] ); opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0;
+        opcodeh = String.format("%1$02X", d[Pos] ); opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0; bloc = loc; adj = opcode >= 0x50 && opcode <= 0x80 ? 8 : 0; count = opcode != 0x50 ? 1 : arg;
 
-        //Reset.
+        if( opcode == 0x00 ) { loc = 0; bind_type = "pointer"; }
 
-        if( opcode == 0x00 )
+        else if( opcode == 0x10 ) { bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; } }
+
+        else if( opcode == 0x40 ) { offset = arg << 3; }
+
+        if( opcode == 0x60 || opcode == 0x80 )
         {
-          loc = 0; bind_type = "pointer"; bindType = 1;
-          out += "<tr><td>" + opcodeh + "</td><td>Reset.</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
+          Pos += 1; count = 0; while( d[Pos] < 0 ) { hex1 += String.format("%1$02X", d[Pos] ) + " "; count |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          hex1 += String.format("%1$02X", d[Pos] ) + " "; count |= d[Pos] << bpos; bpos = 0;
         }
 
-        else if( opcode == 0x10 )
+        if ( opcode == 0x70 || opcode == 0x80 || opcode == 0x20 || opcode == 0x30 )
         {
-          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; }
-          out += "<tr><td>" + opcodeh + "</td><td>Set loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
-        }
-
-        else if( opcode == 0x20 || opcode == 0x30 )
-        {
-          if( opcode == 0x20 ) { loc = segment.get( arg ); out += "<tr><td>" + opcodeh + "</td><td>Set loc to segment " + arg + "</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>"; }
-          else { out += "<tr><td>" + opcodeh + "</td><td>Add loc to offset</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>"; }
+          if( opcode == 0x20 ) { bloc = loc = segment.get( arg ); }
 
           Pos += 1; while( d[Pos] < 0 ) { hex2 += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
           hex2 += String.format("%1$02X", d[Pos] ) + " "; offset |= (long)d[Pos] << bpos; bpos = 0;
-
-          loc += offset; out += "<tr><td>" + hex2 + "</td><td>Offset</td><td>loc + " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
-          
-          offset = 0;
         }
 
-        else if( opcode == 0x40 ) { loc += arg << 3; out += "<tr><td>" + opcodeh + "</td><td>loc scale = " + arg + "</td><td>Opcode (loc + 8 * scale)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>"; }
+        loc += ( offset + adj ) * count; loc -= adj;
 
-        else if( opcode >= 0x50 && opcode <= 0x80 )
+        if( opcode == 0x00 ){ out += "<tr><td>" + opcodeh + "</td><td>Reset.</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>"; }
+        if( opcode == 0x10 ){ out += "<tr><td>" + opcodeh + "</td><td>Set loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>"; }
+        if( opcode == 0x20 )
         {
-          long count = opcode == 0x70 ? 1 : arg; offset = 0;
-
-          if( opcode == 0x60 || opcode == 0x80 )
-          {
-            Pos += 1; while( d[Pos] < 0 ) { hex1 += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-            hex1 += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-            count = (int)offset; offset = 0;
-          }
-
-          if ( opcode == 0x70 || opcode == 0x80 )
-          {
-            Pos += 1; while( d[Pos] < 0 ) { hex2 += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-            hex2 += String.format("%1$02X", d[Pos] ) + " "; offset |= (long)d[Pos] << bpos; bpos = 0;
-          }
-
-          loc += ( offset + 8 ) * count;
-
-          if( opcode == 0x50 ) { out += "<tr><td>" + opcodeh + "</td><td>Adjust loc times = " + arg + "</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>"; }
-          else if( opcode == 0x60 )
-          {
-            out += "<tr><td>" + opcodeh + "</td><td>Adjust loc times</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";  
-            out += "<tr><td>" + hex1 + "</td><td>Times = " + count + "</td><td>Adjust loc times = " + count + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
-          }
-          else if( opcode == 0x70 )
-          {
-            out += "<tr><td>" + opcodeh + "</td><td>Adjust loc</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
-            out += "<tr><td>" + hex2 + "</td><td>Add Loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
-          }
-          else if( opcode == 0x80 )
-          {
-            out += "<tr><td>" + opcodeh + "</td><td>Number of adjusts plus skip</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
-            out += "<tr><td>" + hex1 + "</td><td>Number of adjusts plus skip offset " + offset + "</td><td>Count = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
-            out += "<tr><td>" + hex2 + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
-          }
-
-          offset = 0; hex1 = ""; hex2 = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Set loc to segment " + arg + "</td><td>Opcode</td><td>" + String.format("%1$016X", bloc) + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>Offset</td><td>loc + " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
+        }
+        else if( opcode == 0x30 ) { out += "<tr><td>" + opcodeh + "</td><td>Add loc to offset</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>"; }
+        else if( opcode == 0x40 ) { out += "<tr><td>" + opcodeh + "</td><td>loc scale = " + arg + "</td><td>Opcode (loc + 8 * scale)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>"; }
+        else if( opcode == 0x50 ) { out += "<tr><td>" + opcodeh + "</td><td>Adjust loc times = " + arg + "</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>"; }
+        else if( opcode == 0x60 )
+        {
+          out += "<tr><td>" + opcodeh + "</td><td>Adjust loc times</td><td>Opcode</td><td>" + String.format("%1$016X", bloc) + "</td><td>" + bind_type + "</td></tr>";  
+          out += "<tr><td>" + hex1 + "</td><td>Times = " + count + "</td><td>Adjust loc times = " + count + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
+        }
+        else if( opcode == 0x70 )
+        {
+          out += "<tr><td>" + opcodeh + "</td><td>Adjust loc</td><td>Opcode</td><td>" + String.format("%1$016X", bloc) + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>Add Loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
+        }
+        else if( opcode == 0x80 )
+        {
+          out += "<tr><td>" + opcodeh + "</td><td>Number of adjusts plus skip</td><td>Opcode</td><td>" + String.format("%1$016X", bloc) + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex1 + "</td><td>Number of adjusts plus skip offset " + offset + "</td><td>Count = " + offset + "</td><td>" + String.format("%1$016X", bloc) + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>Skip " + offset + "</td><td>" + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + bind_type + "</td></tr>";
         }
 
-        Pos += 1;
+        loc += adj; offset = 0; hex1 = ""; hex2 = ""; Pos += 1;
       }
     }
     catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
