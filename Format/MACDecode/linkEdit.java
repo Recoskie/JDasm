@@ -14,188 +14,108 @@ public class linkEdit extends Data
 
     int Pos = 0, End = d.length;
 
-    String name = "", hex = "", bind_type = "pointer";
-    long loc = 0, offset = 0; //Location is 64 bit's.
-    int opcode = 0, arg = 0, bpos = 0, flag = 0;
+    String bind_type = "pointer", opcodeh = "", hex1 = "", hex2 = "", name ="";
+    long loc = 0, bloc = 0, offset = 0;
+    int opcode = 0, arg = 0, bpos = 0, count = 0, adj = 0;
 
-    int bindType = 1;
+    int bindType = 1, flag = 0;
 
     try
     {
       while( Pos < End )
       {
-        opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0;
+        opcodeh = String.format("%1$02X", d[Pos] ); opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0; adj = opcode >= 0x90 && opcode <= 0xC0 ? 8 : 0; count = opcode == 0x20 || opcode == 0x60 ? 0 : 1;
 
-        //Reset everything.
+        if( opcode == 0x00 ) { loc = 0; flag = 0; bind_type = "pointer"; bindType = 1; name = ""; } else if( opcode == 0xB0 ) { offset = arg << 3; }
+
+        else if( opcode == 0x50 ) { bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; } }
+
+        else if( opcode == 0x40 ) { name = ""; flag = arg; Pos += 1; while( d[Pos] != 0x00 ) { hex1 += String.format("%1$02X", d[Pos] ) + " "; name += (char)d[Pos]; Pos += 1; } hex1 += String.format("%1$02X", d[Pos] ); }
+
+        else if ( opcode == 0x20 || opcode == 0x60 || opcode == 0x70 || opcode == 0x80 || opcode == 0xA0 || opcode == 0xC0 )
+        {
+          if( opcode == 0x70 ) { bloc = loc = segment.get( arg ); }
+
+          if( opcode == 0xC0 )
+          {
+            Pos += 1; count = 0; while( d[Pos] < 0 ) { hex1 += String.format("%1$02X", d[Pos] ) + " "; count |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+            hex1 += String.format("%1$02X", d[Pos] ) + " "; count |= d[Pos] << bpos; bpos = 0;
+          }
+
+          Pos += 1; while( d[Pos] < 0 ) { hex2 += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          hex2 += String.format("%1$02X", d[Pos] ) + " "; offset |= (long)d[Pos] << bpos; bpos = 0;
+        }
+
+        loc += ( offset + adj ) * count; loc -= adj;
 
         if( opcode == 0x00 )
         {
-          loc = 0; name = ""; flag = 0; bind_type = "pointer"; bindType = 1;
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Reset.</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + opcodeh + "</td><td>Reset.</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Set dyld ordinal.
-
         else if( opcode == 0x10 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set dylid(" + arg + ")</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + opcodeh + "</td><td>Set dylid(" + arg + ")</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Set dyld ordinal by number.
-
         else if( opcode == 0x20 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set dylid.</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          out += "<tr><td>" + hex + "</td><td>dyld(" + offset + ")</td><td>dyld = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          offset = 0; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Set dylid.</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>dyld(" + offset + ")</td><td>dyld = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //The name of the method to look up in the export of another binary.
-
         else if( opcode == 0x40 )
         {
-          name = ""; flag = arg;
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Symbol name</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>"; Pos += 1;
-          Pos += 1; while( d[Pos] != 0x00 ) { hex += String.format("%1$02X", d[Pos] ) + " "; name += (char)d[Pos]; Pos += 1; } hex += String.format("%1$02X", d[Pos] );
-          out += "<tr><td>" + hex + "</td><td>Symbol name</td><td>" + name + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>"; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Set Symbol name</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex1 + "</td><td>Symbol name</td><td>" + name + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Set binding type.
-
         else if( opcode == 0x50 )
         {
-          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; }
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Bind loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + opcodeh + "</td><td>Set Bind loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Sets the addend.
-
         else if( opcode == 0x60 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set addend</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
+          out += "<tr><td>" + opcodeh + "</td><td>Set addend</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>Addend(" + offset + ")</td><td>Addend = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          out += "<tr><td>" + hex + "</td><td>Addend(" + offset + ")</td><td>Addend = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          offset = 0; hex = "";
         }
-
-        //The segment that the method call happens.
-
         else if( opcode == 0x70 )
         {
-          loc = segment.get( arg );
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set loc to segment " + arg + "</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          loc += offset;
-
-          out += "<tr><td>" + hex + "</td><td>loc + " + offset + "</td><td>offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          offset = 0; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Set loc to segment " + arg + "</td><td>Opcode</td><td>" + String.format("%1$016X", bloc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>loc + " + offset + "</td><td>offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Add the current location by an offset.
-
         else if( opcode == 0x80 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Add loc to offset</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          loc += offset;
-
-          out += "<tr><td>" + hex + "</td><td>Loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          offset = 0; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Add loc to offset</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>Loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Bind the method.
-
         else if( opcode == 0x90 )
         {
-          //After every bind we add the location by the size of the pointer.
-
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          loc += 8;
+          out += "<tr><td>" + opcodeh + "</td><td>Bind method to location</td><td>Opcode (loc + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-      
-        //Bind and add loc by offset.
-
         else if( opcode == 0xA0 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          Pos += 1; loc += 8;
-
-          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          out += "<tr><td>" + hex + "</td><td>loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          loc += offset; offset = 0; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Bind method to location</td><td>Opcode (loc + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Bind the method.
-
         else if( opcode == 0xB0 )
         {
-          //After every bind we add the location by the size of the pointer.
-
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location scale = " + arg + "</td><td>Opcode (loc + 8 * scale + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          arg += 1; loc += arg << 3;
+          out += "<tr><td>" + opcodeh + "</td><td>Bind method to location scale = " + arg + "</td><td>Opcode (loc + 8 * scale + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Bind method number of times plus skip.
-
         else if( opcode == 0xC0 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Number of Binds plus skip</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          out += "<tr><td>" + hex + "</td><td>Number of binds plus skip offset " + offset + "</td><td>Count = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          long count = offset; offset = 0; hex = "";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          out += "<tr><td>" + hex + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          loc += ( offset + 8 ) * count;
-
-          offset = 0; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Number of Binds plus skip</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex1 + "</td><td>Number of binds plus skip offset " + offset + "</td><td>Count = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Highly unlikely that there is an unknown opcode.
-
         else
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Unknown Opcode.</td><td>?</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + opcodeh + "</td><td>Unknown Opcode.</td><td>?</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
 
-        Pos += 1;
+        loc += adj; offset = 0; hex1 = ""; hex2 = ""; Pos += 1;
       }
     }
     catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
 
-    file.Events = true;
-
-    info(out + "</table></html>");
+    file.Events = true; info(out + "</table></html>");
   }
 
   //32 bit locations
@@ -210,188 +130,108 @@ public class linkEdit extends Data
 
     int Pos = 0, End = d.length;
 
-    String name = "", hex = "", bind_type = "pointer";
-    int loc = 0, offset = 0; //32 bit locations.
-    int opcode = 0, arg = 0, bpos = 0, flag = 0;
+    String bind_type = "pointer", opcodeh = "", hex1 = "", hex2 = "", name ="";
+    int loc = 0, bloc = 0, offset = 0;
+    int opcode = 0, arg = 0, bpos = 0, count = 0, adj = 0;
 
-    int bindType = 1;
+    int bindType = 1, flag = 0;
 
     try
     {
       while( Pos < End )
       {
-        opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0;
+        opcodeh = String.format("%1$02X", d[Pos] ); opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0; adj = opcode >= 0x90 && opcode <= 0xC0 ? 8 : 0; count = opcode == 0x20 || opcode == 0x60 ? 0 : 1;
 
-        //Reset everything.
+        if( opcode == 0x00 ) { loc = 0; flag = 0; bind_type = "pointer"; bindType = 1; name = ""; } else if( opcode == 0xB0 ) { offset = arg << 3; }
+
+        else if( opcode == 0x50 ) { bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; } }
+
+        else if( opcode == 0x40 ) { name = ""; flag = arg; Pos += 1; while( d[Pos] != 0x00 ) { hex1 += String.format("%1$02X", d[Pos] ) + " "; name += (char)d[Pos]; Pos += 1; } hex1 += String.format("%1$02X", d[Pos] ); }
+
+        else if ( opcode == 0x20 || opcode == 0x60 || opcode == 0x70 || opcode == 0x80 || opcode == 0xA0 || opcode == 0xC0 )
+        {
+          if( opcode == 0x70 ) { bloc = loc = (int)( segment.get( arg ) & 0x00000000FFFFFFFFL ); }
+
+          if( opcode == 0xC0 )
+          {
+            Pos += 1; count = 0; while( d[Pos] < 0 ) { hex1 += String.format("%1$02X", d[Pos] ) + " "; count |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+            hex1 += String.format("%1$02X", d[Pos] ) + " "; count |= d[Pos] << bpos; bpos = 0;
+          }
+
+          Pos += 1; while( d[Pos] < 0 ) { hex2 += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
+          hex2 += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
+        }
+
+        loc += ( offset + adj ) * count; loc -= adj;
 
         if( opcode == 0x00 )
         {
-          loc = 0; name = ""; flag = 0; bind_type = "pointer"; bindType = 1;
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Reset.</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + opcodeh + "</td><td>Reset.</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Set dyld ordinal.
-
         else if( opcode == 0x10 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set dylid(" + arg + ")</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + opcodeh + "</td><td>Set dylid(" + arg + ")</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Set dyld ordinal by number.
-
         else if( opcode == 0x20 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set dylid.</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          out += "<tr><td>" + hex + "</td><td>dyld(" + offset + ")</td><td>dyld = " + offset + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          offset = 0; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Set dylid.</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>dyld(" + offset + ")</td><td>dyld = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //The name of the method to look up in the export of another binary.
-
         else if( opcode == 0x40 )
         {
-          name = ""; flag = arg;
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Symbol name</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>"; Pos += 1;
-          Pos += 1; while( d[Pos] != 0x00 ) { hex += String.format("%1$02X", d[Pos] ) + " "; name += (char)d[Pos]; Pos += 1; } hex += String.format("%1$02X", d[Pos] );
-          out += "<tr><td>" + hex + "</td><td>Symbol name</td><td>" + name + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>"; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Set Symbol name</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex1 + "</td><td>Symbol name</td><td>" + name + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Set binding type.
-
         else if( opcode == 0x50 )
         {
-          bindType = arg; if( bindType == 1 ){ bind_type = "pointer"; } else if( bindType == 2 ) { bind_type = "relative"; } else if( bindType == 3 ) { bind_type = "absolute"; } else { bind_type = "???"; }
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set Bind loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + opcodeh + "</td><td>Set Bind loc type " + bindType + ".</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Sets the addend.
-
         else if( opcode == 0x60 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set addend</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
+          out += "<tr><td>" + opcodeh + "</td><td>Set addend</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>Addend(" + offset + ")</td><td>Addend = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
 
-          out += "<tr><td>" + hex + "</td><td>Addend(" + offset + ")</td><td>Addend = " + offset + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          offset = 0; hex = "";
         }
-
-        //The segment that the method call happens.
-
         else if( opcode == 0x70 )
         {
-          loc = (int)( segment.get( arg ) & 0xFFFFFFFF );
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Set loc to segment " + arg + "</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          loc += offset;
-
-          out += "<tr><td>" + hex + "</td><td>loc + " + offset + "</td><td>offset = " + offset + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          offset = 0; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Set loc to segment " + arg + "</td><td>Opcode</td><td>" + String.format("%1$016X", bloc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>loc + " + offset + "</td><td>offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Add the current location by an offset.
-
         else if( opcode == 0x80 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Add loc to offset</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          loc += offset;
-
-          out += "<tr><td>" + hex + "</td><td>Loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          offset = 0; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Add loc to offset</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>Loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Bind the method.
-
         else if( opcode == 0x90 )
         {
-          //After every bind we add the location by the size of the pointer.
-
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + 4)</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          loc += 4;
+          out += "<tr><td>" + opcodeh + "</td><td>Bind method to location</td><td>Opcode (loc + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-      
-        //Bind and add loc by offset.
-
         else if( opcode == 0xA0 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location</td><td>Opcode (loc + 4)</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          Pos += 1; loc += 4;
-
-          while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          out += "<tr><td>" + hex + "</td><td>loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          loc += offset; offset = 0; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Bind method to location</td><td>Opcode (loc + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>loc + " + offset + "</td><td>Offset = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Bind the method.
-
         else if( opcode == 0xB0 )
         {
-          //After every bind we add the location by the size of the pointer.
-
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Bind method to location scale = " + arg + "</td><td>Opcode (loc + 4 * scale + 4)</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          arg += 1; loc += arg << 2;
+          out += "<tr><td>" + opcodeh + "</td><td>Bind method to location scale = " + arg + "</td><td>Opcode (loc + 8 * scale + 8)</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Bind method number of times plus skip.
-
         else if( opcode == 0xC0 )
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Number of Binds plus skip</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          out += "<tr><td>" + hex + "</td><td>Number of binds plus skip offset " + offset + "</td><td>Count = " + offset + "</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          long count = offset; offset = 0; hex = "";
-          
-          Pos += 1; while( d[Pos] < 0 ) { hex += String.format("%1$02X", d[Pos] ) + " "; offset |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } 
-          hex += String.format("%1$02X", d[Pos] ) + " "; offset |= d[Pos] << bpos; bpos = 0;
-
-          out += "<tr><td>" + hex + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-
-          loc += ( offset + 4 ) * count;
-
-          offset = 0; hex = "";
+          out += "<tr><td>" + opcodeh + "</td><td>Number of Binds plus skip</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex1 + "</td><td>Number of binds plus skip offset " + offset + "</td><td>Count = " + offset + "</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>Skip " + offset + "</td><td>Opcode</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
-
-        //Highly unlikely that there is an unknown opcode.
-
         else
         {
-          out += "<tr><td>" + String.format("%1$02X", d[Pos] ) + "</td><td>Unknown Opcode.</td><td>?</td><td>" + String.format("%1$08X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + opcodeh + "</td><td>Unknown Opcode.</td><td>?</td><td>" + String.format("%1$016X", loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
 
-        Pos += 1;
+        loc += adj; offset = 0; hex1 = ""; hex2 = ""; Pos += 1;
       }
     }
     catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
 
-    file.Events = true;
-
-    info(out + "</table></html>");
+    file.Events = true; info(out + "</table></html>");
   }
 
   //Fully bind and decode the method calls.
@@ -402,102 +242,47 @@ public class linkEdit extends Data
 
     byte[] d = new byte[(int)(end - pos)];
     
-    try { file.seek( pos ); file.read(d); } catch( java.io.IOException er ) {}
+    try { file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.read(d); } catch( java.io.IOException er ) {}
 
     int Pos = 0, End = d.length;
 
     String name = "";
+
     long loc = 0, offset = 0;
-    int opcode = 0, arg = 0, bpos = 0, ptr_size = is64bit ? 8 : 4;
+    int opcode = 0, arg = 0, bpos = 0, count = 1, ptr_size = is64bit ? 8 : 4;
+
+    boolean adj = false;
 
     try
     {
       while( Pos < End )
       {
-        opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0;
+        opcode = d[Pos]; arg = opcode & 0x0F; opcode &= 0xF0; adj = opcode >= 0x90 && opcode <= 0xC0;
 
-        //The name of the method to look up in the export of another binary.
+        if( opcode == 0x00 ) { loc = 0; } else if( opcode == 0xB0 ) { offset = arg << 3; }
 
-        if( opcode == 0x40 ) { name = ""; Pos += 1; while( d[Pos] != 0x00 ) { name += (char)d[Pos]; Pos += 1; } }
+        else if( opcode == 0x40 ) { name = ""; Pos += 1; while( d[Pos] != 0x00 ) { name += (char)d[Pos]; Pos += 1; } }
 
-        //Set addend, or dyld ordinal.
-
-        else if( opcode == 0x20 || opcode == 0x60 )
-        {
-          Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0; offset = 0;
-        }
-
-        //The segment that the method call happens.
-
-        else if( opcode == 0x70 || opcode == 0x80 )
+        else if ( opcode == 0x20 || opcode == 0x60 || opcode == 0x70 || opcode == 0x80 || opcode == 0xA0 || opcode == 0xC0 )
         {
           if( opcode == 0x70 ) { loc = segment.get( arg ); }
 
-          Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
+          if( opcode == 0xC0 ) { Pos += 1; count = 0; while( d[Pos] < 0 ) { count |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } count |= d[Pos] << bpos; bpos = 0; }
 
-          loc += offset; offset = 0;
+          Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= (long)d[Pos] << bpos; bpos = 0;
         }
 
-        //Bind the method opcodes.
-
-        else if( opcode >= 0x90 && opcode <= 0xC0 )
+        if( adj )
         {
-          //if 32 bit we must use the lower 32 bit's of the 64 bit number.
-
           if( !is64bit ){ loc &= 0x00000000FFFFFFFFL; }
 
-          //Bind the method.
+          for( int times = 0; times < count; times++ ) { syms.add( new bind( loc, name ) ); loc += offset + ptr_size; }
 
-          if( opcode == 0x90 ) { syms.add( new bind( loc, name ) ); }
-
-          //Bind and add loc by offset.
-
-          else if( opcode == 0xA0 )
-          {
-            syms.add( new bind( loc, name ) );
-
-            //After every bind we add the location by the size of the pointer.
-
-            Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
-
-            loc += offset; offset = 0;
-          }
-
-          //Bind the method with an scaled pointer.
-
-          else if( opcode == 0xB0 ) { syms.add( new bind( loc, name ) ); loc += ptr_size * arg; }
-
-          //Bind the method skip bytes till count times.
-
-          else if( opcode == 0xC0 )
-          {
-            //count.
-
-            Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
-
-            long count = offset - 1; offset = 0;
-
-            //bytes to Skip.
-
-            Pos += 1; while( d[Pos] < 0 ) { offset |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } offset |= d[Pos] << bpos; bpos = 0;
-
-            //Bind the method while skipping bytes.
-
-            for( int i = 0; i < count; i++ ) { syms.add( new bind( loc, name ) ); loc += offset + ptr_size; }
-
-            if( count >= 0 ) { syms.add( new bind( loc, name ) ); loc += offset; } offset = 0;
-          }
-
-          //After every bind we add the location by the size of the pointer.
-
-          loc += ptr_size;
+          count = 1;
         }
+        else if( opcode != 0x20 || opcode != 0x60 ) { loc += offset; }
 
-        //Reset everything.
-
-        else if( opcode == 0x00 ) { loc = 0; name = ""; }
-
-        Pos += 1;
+        offset = 0; Pos += 1;
       }
     }
     catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
