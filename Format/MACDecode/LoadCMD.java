@@ -326,7 +326,7 @@ public class LoadCMD extends Data
         DTemp.LUINT32("export offset"); int eoff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("export size"); int esize = (int)DTemp.value;
 
-        DTemp.setEvent( this::blank ); des.add( DTemp );
+        DTemp.setEvent( this::dynLoaderInfo ); des.add( DTemp );
 
         JDNode n1 = new JDNode( "Link library setup", new long[]{ 0x4000000000000000L, ref++ } ), tm;
 
@@ -744,6 +744,21 @@ public class LoadCMD extends Data
     "<html>" + Str + " This tells us the binary to start loading. The dynamic linker links the symbols into our programs symbols.</html>"
   };
 
+  private static final String[] dynLoaderInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>rebase offset</html>",
+    "<html>rebase size</html>",
+    "<html>bind offset</html>",
+    "<html>bind size</html>",
+    "<html>weak bind offset</html>",
+    "<html>weak bind size</html>",
+    "<html>lazy bind offset</html>",
+    "<html>lazy bind size</html>",
+    "<html>export offset</html>",
+    "<html>export size</html>"
+  };
+
   private static final String[] sourceVerInfo = new String[]
   {
     cmdType, cmdSize,
@@ -851,6 +866,27 @@ public class LoadCMD extends Data
     else
     {
       info( dynlInfo[i] );
+    }
+  }
+
+  private void dynLoaderInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>This section sets the address location to export method locations in another binary. The rebase section is used once before reading the Binding sections.<br /><br />" +
+      "A mac binary uses a number that locates to a method in memory. The locations are stored as a list of numbers. The mac program loads a number from the pointer section and uses it as the location to the method call.<br /><br />" +
+      "The bind section is used once to tell us which locations to set to a method from another file export section. The lazy bind section does not need to be read before the program starts.<br /><br />" +
+      "The rebase section is used if the program is not placed at its per calculated address space in load commands as the address is used by another program.<br /><br />" +
+      "The rebase section adjusts the locations in the lazy bind section as they locate to a pre-calculated position in a section usually named \"__stub_helper\" which calls the method \"dyld_stub_binder()\".<br /><br />" +
+      "The method sets the location to the pointer the first time the lazy function is called. Any method call to the same lazy pointer in other parts of machine code then locates straight to the method.<br /><br />" +
+      "The lazy bind section only loads methods in as they are needed by locating to a small code in stud helper, and the bind section are locations that must be set before the program starts like \"dyld_stub_binder()\".<br /><br />" +
+      "The section called \"__stubs\" reads the location of a pointer and uses the read number as the location to the method. This way, the programs machine code never has to be touched in setting the locations to methods in another program.<br /><br />" +
+      "The export section defines a method name and location to where the machine code starts for the method in the binary. We must define which binaries we want to link using the link dynamic library commands.<br /><br />" + 
+      "Additionally, each export section is combined into one large list that can be used to look up the address location of a symbol method name. Each symbol must have a unique name no duplicate names across link libraries.</html>" );
+    }
+    else
+    {
+      info( dynLoaderInfo[i] );
     }
   }
 
