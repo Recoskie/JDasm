@@ -332,7 +332,7 @@ public class LoadCMD extends Data
 
         if( rsize > 0 )
         {
-          tm =  new JDNode("rebase", new long[]{ 0xC000000000000002L, roff, roff + rsize - 1 } );
+          tm =  new JDNode("rebase", new long[]{ 0xC000000000000102L, roff, roff + rsize - 1 } );
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 2, roff, roff + rsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 3, roff, roff + rsize } ) );
@@ -341,7 +341,7 @@ public class LoadCMD extends Data
         
         if( bsize > 0 )
         {
-          tm = new JDNode("bind", new long[]{ 0xC000000000000102L, boff, boff + bsize - 1 } );
+          tm = new JDNode("bind", new long[]{ 0xC000000000000202L, boff, boff + bsize - 1 } );
 
           if( bind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, bind } ) ); }
 
@@ -366,7 +366,7 @@ public class LoadCMD extends Data
         
         if( wbsize > 0 )
         {
-          tm = new JDNode("week bind", new long[]{ 0xC000000000000102L, wboff, wboff + wbsize - 1 } );
+          tm = new JDNode("week bind", new long[]{ 0xC000000000000202L, wboff, wboff + wbsize - 1 } );
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 4, wboff, wboff + wbsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 5, wboff, wboff + wbsize } ) );
@@ -389,7 +389,7 @@ public class LoadCMD extends Data
 
         if( lbsize > 0 )
         {
-          tm = new JDNode("lazy bind", new long[]{ 0xC000000000000102L, lboff, lboff + lbsize - 1 } );
+          tm = new JDNode("lazy bind", new long[]{ 0xC000000000000202L, lboff, lboff + lbsize - 1 } );
 
           if( lazyBind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, lazyBind } ) ); }
 
@@ -876,7 +876,7 @@ public class LoadCMD extends Data
       info( "<html>This section sets the address location to export method locations in another binary. The rebase section is used once before reading the Binding sections.<br /><br />" +
       "A mac binary uses a number that locates to a method in memory. The locations are stored as a list of numbers. The mac program loads a number from the pointer section and uses it as the location to the method call.<br /><br />" +
       "The bind section is used once to tell us which locations to set to a method from another file export section. The lazy bind section does not need to be read before the program starts.<br /><br />" +
-      "The rebase section is used if the program is not placed at its per calculated address space in load commands as the address is used by another program.<br /><br />" +
+      "The rebase section is used if the program is not placed at its pre-calculated address space in load commands as the address is used by another program.<br /><br />" +
       "The rebase section adjusts the locations in the lazy bind section as they locate to a pre-calculated position in a section usually named \"__stub_helper\" which calls the method \"dyld_stub_binder()\".<br /><br />" +
       "The method sets the location to the pointer the first time the lazy function is called. Any method call to the same lazy pointer in other parts of machine code then locates straight to the method.<br /><br />" +
       "The lazy bind section only loads methods in as they are needed by locating to a small code in stud helper, and the bind section are locations that must be set before the program starts like \"dyld_stub_binder()\".<br /><br />" +

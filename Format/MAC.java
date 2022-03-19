@@ -159,7 +159,7 @@ public class MAC extends Data implements JDEventListener
 
     //Display rebase actions.
 
-    else if( arg == 3 ) { ds.clear(); ledit.rebase(  e.getArg(1), e.getArg(2) ); }
+    else if( arg == 3 ) { ds.clear(); ledit.rebase( e.getArg(1), e.getArg(2) ); }
   
     //Open compressed link edit info (bind).
 
@@ -194,6 +194,11 @@ public class MAC extends Data implements JDEventListener
   private static final String[] MInfo = new String[]
   {
     "<html></html>",
+    "<html>The rebase information is only used if the load commands for the application use an existing address for another program.<br /><br />" +
+    "If the program is added to an offset of 50 bytes then the address locations must be added by 50 bytes.<br /><br />" +
+    "The rebase information usually only adjusts the lazy pointers. The lazy pointers run an code in the binary to set the pointer to the proper method, and do the first call to function.<br /><br />" +
+    "The next time the pointer is read it then locates right to the method without running code in the \"__stub_helper\" which calls the method \"dyld_stub_binder()\".<br /><br />" +
+    "The non lazy pointers do not locate anywhere in the code and are set before the program starts, for example the method \"dyld_stub_binder()\" must be set or lazy pointers will not work.</html>",
     "<html>The binding information uses opcodes which tells us which method to locate in the export section of another binary.<br /><br />" +
     "The opcodes also specify which segment number in the program and offset to write the location of the method.<br /><br />" +
     "The pointers are usually stored in two sections loaded into RAM using load commands that have a flag setting of 6 (Bind pointers), 7 (Lazy bind pointers).<br /><br />" +
