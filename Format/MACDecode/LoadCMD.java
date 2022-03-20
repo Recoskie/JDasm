@@ -873,16 +873,19 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>This section sets the address location to export method locations in another binary. The rebase section is used once before reading the Binding sections.<br /><br />" +
-      "A mac binary uses a number that locates to a method in memory. The locations are stored as a list of numbers. The mac program loads a number from the pointer section and uses it as the location to the method call.<br /><br />" +
-      "The bind section is used once to tell us which locations to set to a method from another file export section. The lazy bind section does not need to be read before the program starts.<br /><br />" +
-      "The rebase section is used if the program is not placed at its pre-calculated address space in load commands as the address is used by another program.<br /><br />" +
+      info( "<html>How the dyld linker work. First we must define which binaries we want to link using the link dynamic library commands.<br /><br />" +
+      "The export section defines a method name and location to where the machine code starts for the method in the binary.<br /><br />" +
+      "Additionally, each export section is combined into one large list that can be used to look up the address location of a function/method name. Each function/method must have a unique name no duplicate names across link libraries." +
+      "The mac programs machine code loads a number from a section called a pointer list and uses it as the location to call the function/method.<br /><br />" +
+      "The section usually named \"__stubs\" reads the location of a pointer and uses the read number as the location to the method.<br /><br />" +
+      "This way, the programs machine code never has to be touched in setting the locations to methods in another program.<br /><br />" +
+      "The bind section tells us which locations to set to a method from another binary file export section.<br /><br />" +
+      "The lazy bind section does not need each method set to the export method of another binary as the pointers locate to a section usually named \"__stub_helper\" which calls the method \"dyld_stub_binder()\".<br /><br />." +
+      "\"dyld_stub_binder()\" sets the location to the pointer, and calls the method. Any method call to the same lazy pointer in other parts of machine code then locates straight to the method.<br /><br />" +
+      "The lazy bind section only loads methods in as they are needed by locating to a small code in stud helper. The bind section must include \"dyld_stub_binder()\" as it is needed before the program starts.<br /><br />" +
+      "The rebase section is used if the program is not placed at its pre-calculated address locations defined in the load command as it is occupied by another program.<br /><br />" +
       "The rebase section adjusts the locations in the lazy bind section as they locate to a pre-calculated position in a section usually named \"__stub_helper\" which calls the method \"dyld_stub_binder()\".<br /><br />" +
-      "The method sets the location to the pointer the first time the lazy function is called. Any method call to the same lazy pointer in other parts of machine code then locates straight to the method.<br /><br />" +
-      "The lazy bind section only loads methods in as they are needed by locating to a small code in stud helper, and the bind section are locations that must be set before the program starts like \"dyld_stub_binder()\".<br /><br />" +
-      "The section called \"__stubs\" reads the location of a pointer and uses the read number as the location to the method. This way, the programs machine code never has to be touched in setting the locations to methods in another program.<br /><br />" +
-      "The export section defines a method name and location to where the machine code starts for the method in the binary. We must define which binaries we want to link using the link dynamic library commands.<br /><br />" + 
-      "Additionally, each export section is combined into one large list that can be used to look up the address location of a symbol method name. Each symbol must have a unique name no duplicate names across link libraries.</html>" );
+      "If the program is offset by 50 bytes then every lazy pointer must be added by 50 to match the original position of the stud helper machine code instructions location.</html>" );
     }
     else
     {
