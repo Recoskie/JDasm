@@ -200,8 +200,7 @@ public class linkEdit extends Data
     
     try { file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
 
-    String out = "<html>Decoding of the link edit rebase information.<br /><br />" +
-    "<table border='1'><tr><td>Hex</td><td>Description</td><td>Value</td><td>Current location</td><td>Current bind type</td></tr>";
+    String out = rebase + "<table border='1'><tr><td>Hex</td><td>Description</td><td>Value</td><td>Current location</td><td>Current bind type</td></tr>";
 
     int Pos = 0, End = d.length;
 
@@ -329,9 +328,29 @@ public class linkEdit extends Data
     file.Events = true; info(out + "</table></html>");
   }
 
-  private static final String ulib128 = "Each number that is read uses after an opcode uses an variable in length number encoding called ulib128.<br />" +
+  private static final String ulib128 = "Each number that is read after an opcode uses an variable in length number encoding called ulib128.<br />" +
   "The first 7 binary digits are the value, and if the last binary digit is set one then we read the next value as the next 7 binary digits for the number.<br />" +
   "The last 7 binary digits for the number should end with a value that is smaller than 80 hex as the last binary digit should be zero.<br /><br />";
+
+  private static final String rebase = "<html>The first hex digit is the opcode and the last hex digit is used as an 0 to 15 value.<br /><br />" +
+  "<table border='1'><tr><td>Opcode</td><td>Description</td></tr>" +
+  "<tr><td>2?</td><td>Sets the location to the address location of a segment load command data. The last ? hex digit is which segment, for example 27 would mean Seg=7.<br />" +
+  "After this opcode is a number that is added to the location in the segment.</td></tr>" +
+  "<tr><td>1?</td><td>Sets the location type. The last ? hex digit is used as 1 to 3 value (pointer = 1, relative = 2, or absolute = 3).<br />" +
+  "Pointer means a location that is read and used as the location to the method in the program.<br />" +
+  "Relative means a location that is read and added to from the current location in the code to call the method.<br />" +
+  "Absolute means a location that must locate directly to the method.</td></tr>" +
+  "<tr><td>3?</td><td>Read an number after this opcode and add it to the currently set location.</td></tr>" +
+  "<tr><td>4?</td><td>Use the last ? hex digit and multiply it by 8 for 64 bit binaries, or 4 for 32 bit and add it to current location.</td></tr>" +
+  "<tr><td>5?</td><td>Use the last ? hex digit as 0 to 15 number of addresses to adjust.</td></tr>" +
+  "<tr><td>7?</td><td>adjust an single location at current set address location.</td></tr>" +
+  "<tr><td>6?</td><td>Read a number after this opcode for number of addresses to adjust.</td></tr>" +
+  "<tr><td>8?</td><td>Read a number for count, and a number for skip after this opcode. Count is number of addresses to adjust.<br />" +
+  "After each adjustment we add skip. Is useful when we wish to adjust addresses evenly spaced apart.</td></tr>" +
+  "<tr><td>0?</td><td>Set all current values to noting (Reset).</td></tr>" +
+  "</table><br />" + ulib128 +
+  "Each adjust (opcodes 5? to 8?) in 32-bit binaries is plus 4 bytes to the current location, and is plus 8 to the current location in 64-bit binaries.<br /><br />" +
+  "Let's read the opcodes and show what locations must be adjusted if the program is offset from its defined precalculated addresses.<br /><br />";
 
   private static final String binding = "<html>The first hex digit is the opcode and the last hex digit is used as an 0 to 15 value.<br /><br />" +
   "<table border='1'><tr><td>Opcode</td><td>Description</td></tr>" +
@@ -359,6 +378,6 @@ public class linkEdit extends Data
   "0 = Default lookup.<br />E = Current binary export list.<br />D = Flat lookup.<br />C = Week lookup.</td></tr>" +
   "<tr><td>0?</td><td>Set all current values to noting (Reset).</td></tr>" +
   "</table><br />" + ulib128 +
-  "After each bind opcodes 9? to C? we add 4 to the location for 32 bit binaries, or add 8 to the current location in 64 bit binaries. As that is the size of the address.<br /><br />" +
-  "Lets read the opcodes and show what locations must be set to which methods.<br /><br />";
+  "After each bind opcodes 9? to C? we add 4 to the location for 32-bit binaries or add 8 to the current location in 64-bit binaries. As that is the size of the address.<br /><br />" +
+  "Let's read the opcodes and show what locations must be set to which methods.<br /><br />";
 }
