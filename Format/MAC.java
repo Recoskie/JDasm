@@ -183,6 +183,18 @@ public class MAC extends Data implements JDEventListener
       info( out + "</table>" );
     }
 
+    //Open compressed link edit info (export).
+
+    else if( arg == 6 ) { ds.clear(); ledit.export( e.getArg(1), e.getArg(2), (JDNode)tree.getLastSelectedPathComponent() ); }
+
+    //Decode an export node.
+
+    else if( arg == 7 ) { ds.clear(); ledit.export( e.getArg(1), (JDNode)tree.getLastSelectedPathComponent() ); }
+
+    //Optional info.
+
+    if( CMDinfo != 0 ) { info( MInfo[CMDinfo] ); }
+
     //Expand node on click.
 
     if( expandNode ) { tree.expandPath(tree.getLeadSelectionPath()); }
@@ -204,6 +216,7 @@ public class MAC extends Data implements JDEventListener
     "The pointers are usually stored in two sections loaded into RAM using load commands that have a flag setting of 6 (Bind pointers), 7 (Lazy bind pointers).<br /><br />" +
     "The locations are read by a jump instruction which will call the method to the export method.<br /><br />" +
     "The pointers node takes you to the load command for the pointers by flag setting, and the opcodes node shows how to read the method names and location information to set each pointer.<br /><br />" +
-    "The actions node shows the information without the opcodes and shows only the address that is set to the export method of another binary.</html>"
+    "The actions node shows the information without the opcodes and shows only the address that is set to the export method of another binary.</html>",
+    "<html>The Export section defines which locations that a function/method starts by name. The location is the position at which machine code starts for the method call.</html>"
   };
 }

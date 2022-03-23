@@ -311,7 +311,7 @@ public class LoadCMD extends Data
         root.add( n1 );
       }
 
-      //Compressed link information. Note this section is easy to read and uses opcodes for the type of rebase, or symbol bind.
+      //The linking and method call setup information.
 
       else if( cmd == 0x22 )
       {
@@ -411,7 +411,8 @@ public class LoadCMD extends Data
             file.seek( tloc );
           }
         }
-        if( esize > 0 ){ n1.add( new JDNode("export.h", new long[]{ 0x8000000000000002L, eoff, eoff + esize - 1 } ) ); }
+        
+        if( esize > 0 ) { tm =  new JDNode("Export", new long[]{ 0x4000000000000306L, eoff, eoff + esize - 1 } ); tm.add( new JDNode( "dummy" ) ); n1.add( tm ); }
 
         root.add( n1 );
       }
@@ -804,7 +805,7 @@ public class LoadCMD extends Data
       "<tr><td>__DATA</td><td>The real initialized data section. Data that should be loaded before program starts.</td></tr>" +
       "<tr><td>__OBJC</td><td>Objective-C runtime segment.</td></tr>" +
       "<tr><td>__ICON</td><td>The icon segment.</td></tr>" +
-      "<tr><td>__LINKEDIT</td><td>The segment containing all structs.</td></tr>" +
+      "<tr><td>__LINKEDIT</td><td>Contains raw data used by the dynamic linker: symbol/string/relocation table entries.</td></tr>" +
       "<tr><td>__UNIXSTACK</td><td>The unix stack segment.</td></tr>" +
       "<tr><td>__IMPORT</td><td>The segment for the self (dyld).</td></tr>" +
       "</table></html>" );

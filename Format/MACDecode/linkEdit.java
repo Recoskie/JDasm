@@ -1,8 +1,10 @@
 package Format.MACDecode;
 
+import swingIO.tree.JDNode;
+
 public class linkEdit extends Data
 {
-  //64 bit locations.
+  //Show full decoding of the method binding information.
 
   public void bindInfo( long pos, long end )
   {
@@ -174,25 +176,61 @@ public class linkEdit extends Data
     return( syms.toArray( new bind[ syms.size() ] ) );
   }
 
-  public void export( long pos, long end )
+  //The export section is not structured by opcodes like the other sections. Instead it is broken up into nodes that forum the method name.
+
+  private class node { String name = ""; int loc = 0; public node( String Name, int Loc ) { name = Name; loc = Loc; } }
+
+  public void export( long pos, long end, JDNode n )
   {
-    /*byte[] d = new byte[(int)(end - pos)];
+    n.removeAllChildren(); ((JDNode)n).setArgs( new long[]{0xC000000000000300L} ); JDNode t;
+
+    java.util.ArrayList<node> Nodes = new java.util.ArrayList<node>(); node nd;
     
-    try { file.seek( pos ); Offset.setSelected( pos, end ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
+    byte[] d = new byte[(int)(end - pos)];
+    
+    try { file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
 
-    String out = "<table border='1'><tr><td>Hex</td><td>Description.</td><td>Value</td></tr>";
+    int term = 0, nodes = 0, curNode = 0, numNodes = 0, Pos = 0;
 
-    end -= pos; pos = 0;
+    String name = "", pfx = ""; long eLoc = 0; int bpos = 0;
 
-    while( pos < end )
+    while( curNode <= numNodes )
     {
-      
+      term = d[Pos++] & 0xFF; if( term > 0 )
+      {
+        Pos += 1; //Flags.
+        eLoc = 0; while( d[Pos] < 0 ) { eLoc |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } eLoc |= d[Pos++] << bpos; bpos = 0; //Location
+        
+        t = new JDNode( name, 0xC000000000000000L ); eLoc = file.toVirtual( eLoc );
+        t.add(new JDNode("Location.h", new long[]{ 0xC000000000000002L, eLoc, eLoc } ) );
+        t.add(new JDNode("Disassemble.h", new long[]{ 0xC000000000000004L, eLoc } ) );
+        n.add( t );
+      }
+
+      nodes = d[Pos++] & 0xFF; numNodes += nodes;
+
+      for( int i = 0; i < nodes; i++ )
+      {
+        pfx = ""; while( d[Pos] != 0x00 ) { pfx += (char)d[Pos]; Pos += 1; } Pos += 1;
+        eLoc = 0; while( d[Pos] < 0 ) { eLoc |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } eLoc |= d[Pos++] << bpos; bpos = 0;
+
+        Nodes.add( new node( name + pfx, (int)eLoc ) );
+      }
+
+      if( curNode < numNodes ) { nd = Nodes.get( curNode ); name = nd.name; Pos = nd.loc; } curNode++;
     }
-
-    file.Events = true;
-
-    info("<html>Decoding of the link edit export information.<br /><br />" + out + "</table></html>");*/
+    
+    Nodes.clear(); file.Events = true;
   }
+
+  //Show the decoding of an single Export node.
+
+  public void export( long pos, swingIO.tree.JDNode n )
+  {
+    
+  }
+
+  //Show full decoding of the rebase information.
 
   public void rebaseInfo( long pos, long end )
   {
@@ -271,6 +309,8 @@ public class linkEdit extends Data
     file.Events = true; info(out + "</table></html>");
   }
 
+  //Show decoding of only the rebase actions being carried out.
+
   public void rebase( long pos, long end )
   {
     byte[] d = new byte[(int)(end - pos)];
@@ -327,6 +367,8 @@ public class linkEdit extends Data
 
     file.Events = true; info(out + "</table></html>");
   }
+
+  //Descriptions on what everything is.
 
   private static final String ulib128 = "Each number that is read after an opcode uses an variable in length number encoding called ulib128.<br />" +
   "The first 7 binary digits are the value, and if the last binary digit is set one then we read the next value as the next 7 binary digits for the number.<br />" +
