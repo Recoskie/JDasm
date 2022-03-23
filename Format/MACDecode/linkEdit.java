@@ -10,7 +10,7 @@ public class linkEdit extends Data
   {
     byte[] d = new byte[(int)(end - pos)];
     
-    try { file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
+    try { file.seek( pos ); file.Events = false; file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.read(d); } catch( java.io.IOException er ) {}
 
     String out = binding + "<table border='1'><tr><td>Hex</td><td>Description</td><td>Value</td><td>Current location</td><td>Current name</td><td>Current Flags</td><td>Current bind type</td></tr>";
 
@@ -188,7 +188,7 @@ public class linkEdit extends Data
     
     byte[] d = new byte[(int)(end - pos)];
     
-    try { file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
+    try { file.seek( pos ); file.Events = false; file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.read(d); } catch( java.io.IOException er ) {}
 
     int term = 0, nodes = 0, curNode = 0, numNodes = 0, Pos = 0;
 
@@ -315,7 +315,7 @@ public class linkEdit extends Data
   {
     byte[] d = new byte[(int)(end - pos)];
     
-    try { file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
+    try { file.seek( pos ); file.Events = false; file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
 
     String out = "<html>Decoding of the link edit rebase information.<br /><br />" +
     "<table border='1'><tr><td>Adjust location</td><td>type</td></tr>";
