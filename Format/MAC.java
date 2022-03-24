@@ -48,7 +48,7 @@ public class MAC extends Data implements JDEventListener
 
     boolean cmd = ( val & 0x8000000000000000L ) != 0, expandNode = ( val & 0x4000000000000000L ) != 0;
 
-    int arg = (int)val, CMDinfo = ( arg >> 8 ) & 0xFF; arg &= 0xFF;
+    int arg = (int)val, CMDinfo = ( ( arg >> 8 ) & 0xFF ) - 1; arg &= 0xFF;
 
     if( e.getID().equals("UInit") ) { Uninitialize(); }
 
@@ -114,7 +114,7 @@ public class MAC extends Data implements JDEventListener
         try { file.seek( e.getArg(1) ); Offset.setSelected( e.getArg(1), e.getArg(2) ); } catch( java.io.IOException er ) { }
       }
 
-      info( MInfo[CMDinfo] );
+      if( CMDinfo < 0 ) { info( "<html></html>" ); }
     }
 
     //Command 0 sets a descriptor for a section of data in the binary tree.
@@ -193,7 +193,7 @@ public class MAC extends Data implements JDEventListener
 
     //Optional info.
 
-    if( CMDinfo != 0 ) { info( MInfo[CMDinfo] ); }
+    if( CMDinfo > 0 ) { info( MInfo[CMDinfo] ); }
 
     //Expand node on click.
 
@@ -205,7 +205,6 @@ public class MAC extends Data implements JDEventListener
 
   private static final String[] MInfo = new String[]
   {
-    "<html></html>",
     "<html>The rebase information is only used if the load commands for the application use an existing address for another program.<br /><br />" +
     "If the program is added to an offset of 50 bytes then the address locations must be added by 50 bytes.<br /><br />" +
     "The rebase information usually only adjusts the lazy pointers. The lazy pointers run an code in the binary to set the pointer to the proper method, and do the first call to function.<br /><br />" +
@@ -217,6 +216,7 @@ public class MAC extends Data implements JDEventListener
     "The locations are read by a jump instruction which will call the method to the export method.<br /><br />" +
     "The pointers node takes you to the load command for the pointers by flag setting, and the opcodes node shows how to read the method names and location information to set each pointer.<br /><br />" +
     "The actions node shows the information without the opcodes and shows only the address that is set to the export method of another binary.</html>",
-    "<html>The Export section defines which locations that a function/method starts by name. The location is the position at which machine code starts for the method call.</html>"
+    "<html>The Export section defines which locations that a function/method starts by name. The location is the position at which machine code starts for the method call.</html>",
+    "<html>This section shows how the export section is read.</html>"
   };
 }

@@ -178,13 +178,15 @@ public class linkEdit extends Data
 
   //The export section is not structured by opcodes like the other sections. Instead it is broken up into nodes that forum the method name.
 
-  private class node { String name = ""; int loc = 0; public node( String Name, int Loc ) { name = Name; loc = Loc; } }
+  private class node { String name = ""; int loc = 0; JDNode n; public node( String Name, int Loc, JDNode N ) { name = Name; loc = Loc; n = N; } }
 
   public void export( long pos, long end, JDNode n )
   {
     n.removeAllChildren(); ((JDNode)n).setArgs( new long[]{0xC000000000000300L} ); JDNode t;
 
-    java.util.ArrayList<node> Nodes = new java.util.ArrayList<node>(); node nd;
+    java.util.ArrayList<node> Nodes = new java.util.ArrayList<node>();
+
+    JDNode test = new JDNode("Decoding", 0x4000000000000400L); n.add( test ); node nd = new node("",0,test);
     
     byte[] d = new byte[(int)(end - pos)];
     
@@ -201,12 +203,11 @@ public class linkEdit extends Data
         term = d[Pos++] & 0xFF; if( term > 0 )
         {
           Pos += 1; //Flags.
-          eLoc = 0; while( d[Pos] < 0 ) { eLoc |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } eLoc |= (long)d[Pos++] << bpos; bpos = 0; //Location
+          eLoc = 0; while( d[Pos] < 0 ) { eLoc |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } eLoc |= (long)d[Pos++] << bpos; eLoc += base; bpos = 0; //Location
         
-          t = new JDNode( name, 0xC000000000000000L ); eLoc = file.toVirtual( eLoc + base );
-          t.add(new JDNode("Location.h", new long[]{ 0xC000000000000003L, eLoc, eLoc } ) );
-          t.add(new JDNode("Disassemble.h", new long[]{ 0xC000000000000004L, eLoc } ) );
-          n.add( t );
+          t = new JDNode( name, 0xC000000000000000L ); t.add(new JDNode("Location.h", new long[]{ 0xC000000000000002L, eLoc, eLoc } ) );
+          t.add(new JDNode("Disassemble.h", new long[]{ 0xC000000000000004L, file.toVirtual( eLoc ) } ) ); n.add( t );
+          nd.n.setUserObject(name + ".h");
         }
 
         nodes = d[Pos++] & 0xFF; numNodes += nodes;
@@ -216,12 +217,12 @@ public class linkEdit extends Data
           pfx = ""; while( d[Pos] != 0x00 ) { pfx += (char)d[Pos]; Pos += 1; } Pos += 1;
           eLoc = 0; while( d[Pos] < 0 ) { eLoc |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } eLoc |= d[Pos++] << bpos; bpos = 0;
 
-          Nodes.add( new node( name + pfx, (int)eLoc ) );
+          JDNode temp = new JDNode(name + pfx, new long[]{ 0x4000000000000007L, pos + eLoc }); Nodes.add( new node( name + pfx, (int)eLoc, temp ) ); test.add( temp );
         }
 
-        if( curNode < numNodes ) { nd = Nodes.get( curNode ); name = nd.name; Pos = nd.loc; } curNode++;
+        if( curNode < numNodes ) { nd = Nodes.get( curNode ); name = nd.name; Pos = nd.loc; test = nd.n; } curNode++;
       }
-    } catch( Exception er ) { } //Incase read out of bounds because of bad export information. This way we still load what we can.
+    } catch( Exception er ) { er.printStackTrace(); } //Incase we read out of bounds because of bad export information. This way we still load what we can.
     
     Nodes.clear(); file.Events = true;
   }
@@ -230,7 +231,9 @@ public class linkEdit extends Data
 
   public void export( long pos )
   {
-    
+    String out = export;
+
+    info( export );
   }
 
   //Show full decoding of the rebase information.
@@ -373,8 +376,7 @@ public class linkEdit extends Data
 
   //Descriptions on what everything is.
 
-  private static final String ulib128 = "Each number that is read after an opcode uses an variable in length number encoding called ulib128.<br />" +
-  "The first 7 binary digits are the value, and if the last binary digit is set one then we read the next value as the next 7 binary digits for the number.<br />" +
+  private static final String ulib128 = "The first 7 binary digits are the value, and if the last binary digit is set one then we read the next value as the next 7 binary digits for the number.<br />" +
   "The last 7 binary digits for the number should end with a value that is smaller than 80 hex as the last binary digit should be zero.<br /><br />";
 
   private static final String rebase = "<html>The first hex digit is the opcode and the last hex digit is used as an 0 to 15 value.<br /><br />" +
@@ -393,7 +395,7 @@ public class linkEdit extends Data
   "<tr><td>8?</td><td>Read a number for count, and a number for skip after this opcode. Count is number of addresses to adjust.<br />" +
   "After each adjustment we add skip. Is useful when we wish to adjust addresses evenly spaced apart.</td></tr>" +
   "<tr><td>0?</td><td>Set all current values to noting (Reset).</td></tr>" +
-  "</table><br />" + ulib128 +
+  "</table><br />Each number that is read after an opcode uses an variable in length number encoding called ulib128.<br />" + ulib128 +
   "Each adjust (opcodes 5? to 8?) in 32-bit binaries is plus 4 bytes to the current location, and is plus 8 to the current location in 64-bit binaries.<br /><br />" +
   "Let's read the opcodes and show what locations must be adjusted if the program is offset from its defined precalculated addresses.<br /><br />";
 
@@ -422,7 +424,13 @@ public class linkEdit extends Data
   "<tr><td>3?</td><td>Sets where to lookup the method names when binding. The last ? hex digit is the lookup type.<br />" +
   "0 = Default lookup.<br />E = Current binary export list.<br />D = Flat lookup.<br />C = Week lookup.</td></tr>" +
   "<tr><td>0?</td><td>Set all current values to noting (Reset).</td></tr>" +
-  "</table><br />" + ulib128 +
+  "</table><br />Each number that is read after an opcode uses an variable in length number encoding called ulib128.<br />" + ulib128 +
   "After each bind opcodes 9? to C? we add 4 to the location for 32-bit binaries or add 8 to the current location in 64-bit binaries. As that is the size of the address.<br /><br />" +
   "Let's read the opcodes and show what locations must be set to which methods.<br /><br />";
+
+  private static final String export = "<html>Unlike rebase and binding information which use opcodes to define information, the export section uses names that are broken into parts.<br /><br />" +
+  "At the start of each node has value for terminal size that if set other than 0 sets the location of the current built up name. After the terminal node is another value for number of nodes.<br /><br />" +
+  "Each node is a small set of text followed by a value that is 00 that represents the end of the text, and then an offset that locates to another section with the same structure.<br /><br />" +
+  "Each location uses an variable in length number encoding called ulib128.<br />" + ulib128 +
+  "Each location for each child node is an offset within the export section, and the terminal node is an offset in the file for the exact location of the method or data.<br /><br />";
 }
