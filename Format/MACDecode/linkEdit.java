@@ -222,7 +222,7 @@ public class linkEdit extends Data
 
         if( curNode < numNodes ) { nd = Nodes.get( curNode ); name = nd.name; Pos = nd.loc; test = nd.n; } curNode++;
       }
-    } catch( Exception er ) { er.printStackTrace(); } //Incase we read out of bounds because of bad export information. This way we still load what we can.
+    } catch( Exception er ) { } //Incase we read out of bounds because of bad export information. This way we still load what we can.
     
     Nodes.clear(); file.Events = true;
   }
@@ -231,9 +231,41 @@ public class linkEdit extends Data
 
   public void export( long pos )
   {
-    String out = export;
+    String out = export + "<table border='1'><tr><td>Description</td><td>Hex</td><td>Value</td></tr>", pfx = "", hex = "";
 
-    info( export );
+    int b = 0, bpos = 0, size = 0;
+    long eLoc = 0;
+
+    try
+    {
+      file.seek( pos ); file.Events = false; file.seek( pos );
+
+      b = file.read(); out += "<tr><td>Terminal size</td><td>" + String.format("%1$02X", b ) + "</td><td>" + b + "</td></tr>";
+
+      if( b > 0 )
+      {
+        b = file.read(); out += "<tr><td>FLAGS</td><td>" + String.format("%1$02X", b ) + "</td><td>" + b + "</td></tr>";
+        eLoc = 0; while( ( b = file.read() ) >= 0x80 ) { hex += String.format("%1$02X", b ) + " "; eLoc |= ( (long)b & 0x7F ) << bpos; bpos += 7; }
+        hex += String.format("%1$02X", b ); eLoc |= (long)b << bpos; bpos = 0;
+        out += "<tr><td>Node Data Location</td><td>" + hex + "</td><td>" + eLoc + "</td></tr>"; hex = "";
+      }
+
+      size = file.read(); out += "<tr><td>Cur node name + Child nodes</td><td>" + String.format("%1$02X", size ) + "</td><td>" + size + "</td></tr>";
+
+      for( int i = 0; i < size; i++ )
+      {
+        pfx = ""; while( ( b = file.read() ) != 0x00 ) { hex += String.format("%1$02X", b ) + " "; pfx += (char)b; } hex += String.format("%1$02X", b );
+        out += "<tr><td>Add text to cur node.</td><td>" + hex + "</td><td>" + pfx + "</td></tr>"; hex = "";
+        eLoc = 0; while( ( b = file.read() ) >= 0x80 ) { hex += String.format("%1$02X", b ) + " "; eLoc |= ( (long)b & 0x7F ) << bpos; bpos += 7; }
+        hex += String.format("%1$02X", b ); eLoc |= (long)b << bpos; bpos = 0;
+        out += "<tr><td>Offset to terminal + nodes.</td><td>" + hex + "</td><td>" + eLoc + "</td></tr>"; hex = "";
+      }
+
+      Offset.setSelected( pos, file.getFilePointer() - 1 );
+    }
+    catch( java.io.IOException er ) {}
+
+    file.Events = true; info( out + "</table></html>" );
   }
 
   //Show full decoding of the rebase information.
@@ -429,8 +461,9 @@ public class linkEdit extends Data
   "Let's read the opcodes and show what locations must be set to which methods.<br /><br />";
 
   private static final String export = "<html>Unlike rebase and binding information which use opcodes to define information, the export section uses names that are broken into parts.<br /><br />" +
-  "At the start of each node has value for terminal size that if set other than 0 sets the location of the current built up name. After the terminal node is another value for number of nodes.<br /><br />" +
+  "We start by reading one value for terminal size that if set other than 0 sets the location of the current built up name. After the terminal node is another value for number of nodes.<br /><br />" +
   "Each node is a small set of text followed by a value that is 00 that represents the end of the text, and then an offset that locates to another section with the same structure.<br /><br />" +
+  "This allows us to build the method names in parts and to define the location of a method or data in the smallest space possible.<br /><br />" +
   "Each location uses an variable in length number encoding called ulib128.<br />" + ulib128 +
   "Each location for each child node is an offset within the export section, and the terminal node is an offset in the file for the exact location of the method or data.<br /><br />";
 }
