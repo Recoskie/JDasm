@@ -461,7 +461,7 @@ public class linkEdit extends Data
   "Let's read the opcodes and show what locations must be set to which methods.<br /><br />";
 
   private static final String export = "<html>Unlike rebase and binding information which use opcodes to define information, the export section uses names that are broken into parts.<br /><br />" +
-  "We start by reading one value for terminal size that if set other than 0 sets the location of the current built up name. After the terminal node is another value for number of nodes.<br /><br />" +
+  "We start by reading one value for terminal size. If terminal size is set other than 0, then it sets the location of the current built up name. After the terminal node is another value for number of nodes.<br /><br />" +
   "Each node is a small set of text followed by a value that is 00 that represents the end of the text, and then an offset that locates to another section with the same structure.<br /><br />" +
   "This allows us to build the method names in parts and to define the location of a method or data in the smallest space possible.<br /><br />" +
   "Each location uses an variable in length number encoding called ulib128.<br />" + ulib128 +
