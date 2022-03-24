@@ -27,7 +27,7 @@ Even though it is an AMD core, it still runs the same x86 machine code as an Int
 
 <br />
 
-A processor that is <strong>architecture x86</strong> means it runs x86 machine code natively without translation. This means binary software wrote in the '80s still runs on any modern x86 core made by any company.
+A processor that is <strong>architecture x86</strong> means it runs x86 machine code natively without translation. This means binary software wrote in the '80s still runs on any modern x86 core made by any company today.
 
 <br />
 

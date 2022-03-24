@@ -190,42 +190,45 @@ public class linkEdit extends Data
     
     try { file.seek( pos ); file.Events = false; file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.read(d); } catch( java.io.IOException er ) {}
 
-    int term = 0, nodes = 0, curNode = 0, numNodes = 0, Pos = 0;
+    int term = 0, nodes = 0, curNode = 0, numNodes = 0, Pos = 0, bpos = 0;
 
-    String name = "", pfx = ""; long eLoc = 0; int bpos = 0;
+    String name = "", pfx = ""; long eLoc = 0;
 
-    while( curNode <= numNodes )
+    try
     {
-      term = d[Pos++] & 0xFF; if( term > 0 )
+      while( curNode <= numNodes )
       {
-        Pos += 1; //Flags.
-        eLoc = 0; while( d[Pos] < 0 ) { eLoc |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } eLoc |= d[Pos++] << bpos; bpos = 0; //Location
+        term = d[Pos++] & 0xFF; if( term > 0 )
+        {
+          Pos += 1; //Flags.
+          eLoc = 0; while( d[Pos] < 0 ) { eLoc |= ( (long)d[Pos++] & 0x7F ) << bpos; bpos += 7; } eLoc |= (long)d[Pos++] << bpos; bpos = 0; //Location
         
-        t = new JDNode( name, 0xC000000000000000L ); eLoc = file.toVirtual( eLoc );
-        t.add(new JDNode("Location.h", new long[]{ 0xC000000000000002L, eLoc, eLoc } ) );
-        t.add(new JDNode("Disassemble.h", new long[]{ 0xC000000000000004L, eLoc } ) );
-        n.add( t );
+          t = new JDNode( name, 0xC000000000000000L ); eLoc = file.toVirtual( eLoc + base );
+          t.add(new JDNode("Location.h", new long[]{ 0xC000000000000003L, eLoc, eLoc } ) );
+          t.add(new JDNode("Disassemble.h", new long[]{ 0xC000000000000004L, eLoc } ) );
+          n.add( t );
+        }
+
+        nodes = d[Pos++] & 0xFF; numNodes += nodes;
+
+        for( int i = 0; i < nodes; i++ )
+        {
+          pfx = ""; while( d[Pos] != 0x00 ) { pfx += (char)d[Pos]; Pos += 1; } Pos += 1;
+          eLoc = 0; while( d[Pos] < 0 ) { eLoc |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } eLoc |= d[Pos++] << bpos; bpos = 0;
+
+          Nodes.add( new node( name + pfx, (int)eLoc ) );
+        }
+
+        if( curNode < numNodes ) { nd = Nodes.get( curNode ); name = nd.name; Pos = nd.loc; } curNode++;
       }
-
-      nodes = d[Pos++] & 0xFF; numNodes += nodes;
-
-      for( int i = 0; i < nodes; i++ )
-      {
-        pfx = ""; while( d[Pos] != 0x00 ) { pfx += (char)d[Pos]; Pos += 1; } Pos += 1;
-        eLoc = 0; while( d[Pos] < 0 ) { eLoc |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } eLoc |= d[Pos++] << bpos; bpos = 0;
-
-        Nodes.add( new node( name + pfx, (int)eLoc ) );
-      }
-
-      if( curNode < numNodes ) { nd = Nodes.get( curNode ); name = nd.name; Pos = nd.loc; } curNode++;
-    }
+    } catch( Exception er ) { } //Incase read out of bounds because of bad export information. This way we still load what we can.
     
     Nodes.clear(); file.Events = true;
   }
 
   //Show the decoding of an single Export node.
 
-  public void export( long pos, swingIO.tree.JDNode n )
+  public void export( long pos )
   {
     
   }

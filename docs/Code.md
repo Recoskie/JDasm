@@ -55,6 +55,10 @@ In java it is called <strong>java byte codes</strong>. As loading, a new part in
 
 <br />
 
+In the case of an emulator, it only changes the instruction encoding if it does not match the CPU architecture type in your system, or we can interpret each instruction in code which is very slow.
+
+<br />
+
 The advantage of this is that you can change the byte code commands into different processor instructions.
 
 <br />
@@ -68,10 +72,6 @@ The JIT compiler or interpreter is built-in pre-compiled binary code to run fast
 <br />
 
 However, if you use the JIT compiler or interpreter as the base of your operating system for loading applications, that is dumb and a bit slower on performance.
-
-<br />
-
-These are your android systems and SUN microsystems OS (Solar OS).
 
 <br />
 

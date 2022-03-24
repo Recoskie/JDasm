@@ -65,7 +65,11 @@ Each hex digit is four binary digits. So every two digits are eight binary digit
 
 <br />
 
-Eight binary digits are called a byte. All memory devices operate in bytes, CD ROMs, blue rays, DVD, Solid-state drives, RAM, and floppy disks. It is a memory standard.
+Eight binary digits are called a byte. All memory devices operate in bytes, CD ROMs, blue rays, DVD, Solid-state drives, RAM, and floppy disks. Even video game cartages: GameBoy color cartages, Nintendo DS cartages, switch cartages, game disks (playstation, wii).
+
+<br />
+
+It is a memory standard.
 
 <br />
 
@@ -160,13 +164,17 @@ Every position of memory is in bytes, no matter what you are using to store the 
 
 However, terms like a petabyte of memory are rarely used. You will, however, hear sizes like this when talking supercomputers.
 
+<br />
+
+When it comes to video game cartages and roms we can dump all the byte data into a file on an computer. Thus emulators are designed to read the roms and play them.
+
 <h1 id="dTypes" style="clear:left;"><hr />Data types.</h1>
 
-Data types are limited and are the same across all systems. Even different system architecture types use the same data types. They are your building blocks for creating new picture formats, creating Disk drive formats such as FAT32, NTFS, or creating something new.
+Data types are limited and are the same across all systems (game boy color to PC). Even different system architecture types use the same data types. They are your building blocks for creating new picture formats, creating Disk drive formats such as FAT32, NTFS, or creating something new, or just writing software on the platform in general.
 
 <br />
 
-The processor must be able to do arithmetic operations with the standard primitive data types to work with file formats.
+The processor must be able to do arithmetic operations with the standard primitive data types to work with file formats, or even an LCD display in an handheld.
 
 <br />
 
@@ -178,7 +186,7 @@ Clicking a data type limits the hex editor to edit the bytes that make the data 
 
 <h2>Data Length.</h2>
 
-Processors are designed to read bytes of data, which is the standard unit of memory in all systems. The read byte then can be used with various binary operations.
+Processors are designed to read bytes of data, which is the standard unit of memory in all systems, and consoles. The read byte then can be used with various binary operations.
 
 <br />
 
@@ -186,11 +194,11 @@ Originally two bytes created a "word". Thus two words created a "double word" sh
 
 <br />
 
-These are the original names given to bytes. And their lengths. We could Read 2 bytes that form a Word just as two letters make a word in English, which we can add as a 16-bit number.
+These are the original names given to bytes, and their lengths. We could Read 2 bytes that form a Word just as two letters make a word in English, which we can add as a 16-bit number.
 
 <br />
 
-Today these words are no longer used. Except for in-machine code translation. As the original meaning is used when reading data by CPU.
+Today these words are no longer used. Except for in-machine code translation of a video game rom, or binary. As the original meaning is used when reading data by CPU.
 
 <br />
 
@@ -210,11 +218,15 @@ IT also does not matter if you have an ARM core, X86 core, or embedded core. The
 
 <br />
 
-A byte is still a byte of memory no matter what the system architecture is. The lengths of data are also still in word size. Thus integers are still the same.
+We will cover processor instruction sets in another document, for now we will talk about the data types which are the same no matter which platform you design software for.
 
 <br />
 
-The processor must be able to do arithmetic and operations with the standard primitive data types. In order to work with file formats. The standard data types are the building blocks for all format types.
+A byte is still a byte of memory no matter what the system cpu architecture is. The lengths of data are also still in word size. Thus integers are still the same.
+
+<br />
+
+The processor must be able to do arithmetic and operations with the standard primitive data types. In order to work with file formats. The standard data types are the building blocks for all format types, and external hardware.
 
 <br />
 
@@ -937,6 +949,10 @@ Both wave audio files, and bitmaps require very little effort to play/display, o
 
 <br />
 
+Both phones, game systems, tables, and PC deal with external hardware which only understands these basic formats and are generally hardware independent.
+
+<br />
+
 Some of the basic things we can computationally do with the standard hardware formats graphics/audio.
 
 <br />
@@ -970,3 +986,15 @@ Thus some picture programs will not let you edit GIF pictures in Red, Green, Blu
 <br />
 
 Unless you change the format to say Bit map, then make changes, then save to GIF. A GIF picture also does not lose any color data and is lossless.
+
+<br />
+
+It can be very slow doing everything one step at a time on the CPU, so it becomes apparent it is faster creating hardware with some of the code.
+
+<br />
+
+The only thing requiring any knowhow across systems is if the system has hardware accelerated function built in for audio, or graphics, thus getting all hardware operation codes right can be tricky in building a game console emulator.
+
+<br />
+
+Modern game consoles can even keep runnable code that can be updated by system update and games can use the code when needed from the game making it even harder to emulate modern game consoles even though the basic formats never change.

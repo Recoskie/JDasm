@@ -189,7 +189,7 @@ public class MAC extends Data implements JDEventListener
 
     //Decode an export node.
 
-    else if( arg == 7 ) { ds.clear(); ledit.export( e.getArg(1), (JDNode)tree.getLastSelectedPathComponent() ); }
+    else if( arg == 7 ) { ds.clear(); ledit.export( e.getArg(1) ); }
 
     //Optional info.
 
