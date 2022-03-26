@@ -10,6 +10,10 @@ public class Data extends Window.Window
 
   public static java.util.ArrayList<Long> segment = new java.util.ArrayList<Long>();
 
+  //We must keep track of sections in each segment in the mac binary.
+
+  public static java.util.ArrayList<Long> sections = new java.util.ArrayList<Long>();
+
   //This integer is used to keep track of the descriptors added to the list adn set to a node on the open event.
 
   public static int ref = 0, paths = 0;

@@ -76,7 +76,7 @@ public class LoadCMD extends Data
 
           DTemp.String8("Section Name", 16); segName = (String)DTemp.value;
           
-          JDNode t = new JDNode( DTemp.value + "", new long[] { 0, ref++ } );
+          JDNode t = new JDNode( DTemp.value + " (Sect=" + ( sections.size() + 1 ) + ")", new long[] { 0, ref++ } );
 
           DTemp.String8("Segment Name", 16);
 
@@ -93,7 +93,7 @@ public class LoadCMD extends Data
 
           DTemp.LUINT32("Offset"); offset = base + (int)DTemp.value;
 
-          file.addV(offset, vSize, address, vSize);
+          file.addV(offset, vSize, address, vSize); sections.add( address );
 
           t.add( new JDNode( "Goto Data.h", new long[] { 0x8000000000000003L, address, address + vSize - 1 } ) );
 
@@ -158,8 +158,8 @@ public class LoadCMD extends Data
           DTemp.Array("Symbol #" + i2 + "", is64bit ? 16 : 12 );
           DTemp.LUINT32("Name"); int name = (int)DTemp.value;
           DTemp.UINT8("Type"); int type = (byte)DTemp.value;
-          DTemp.UINT8("NSect"); int NSect = (byte)DTemp.value;
-          DTemp.LUINT16("DSect");
+          DTemp.UINT8("Section Number"); int NSect = (byte)DTemp.value;
+          DTemp.LUINT16("Data info");
 
           if( is64bit ) { DTemp.LUINT64("Symbol offset"); } else { DTemp.LUINT32("Symbol offset"); }
 
@@ -173,17 +173,13 @@ public class LoadCMD extends Data
 
             string.String8("Symbol name", (byte)0x00 );
 
-            n3.add( new JDNode( string.value + ( id > 0 ? " #" + id + "" : "" ) + ".h", new long[]{ 0, ref++ }) );
+            n3.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
 
             des.add( string ); file.seek( t2 );
           }
-          else if( id > 0 )
-          {
-            n3.add( new JDNode("Symbol #" + id + ".h") );
-          }
           else
           {
-            n3.add( new JDNode( "null.h" ) );
+            n3.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
           }
         }
 
@@ -677,7 +673,7 @@ public class LoadCMD extends Data
     "<tr><td>0000-110-0</td><td>Symbol prebound undefined.</td></tr>" +
     "<tr><td>0000-111-0</td><td>Symbol does not use the section value.</td></tr>" +
     "</table></html>",
-    "<html>An integer specifying the segment number of the section that this symbol can be found in.</html>",
+    "<html>An integer specifying the section number that this symbol can be found in.</html>",
     "<html>The DSect value setting describes additional information about the type of symbol this is.<br /><br />" +
     "This value is broken into tow sections. First is the flag setting. Any of the binary digits that are set one correspond to the following settings.<br /><br />" +
     "<table border='1'>"+
@@ -829,6 +825,7 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>This is a section. It labels a section within the loaded data segment.<br /><br />" +
+      "Sections can be referenced by segment then section name, or by section number. The first section number is 1 and we increment upward per sectionn across load command.<br /><br />" +
       "<table border='1'>" +
       "<tr><td>__text</td><td>Contains the processor instructions of the program.</td></tr>" +
       "<tr><td>__fvmlib_init0</td><td>the fvmlib initialization section</td></tr>" +
