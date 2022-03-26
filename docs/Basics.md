@@ -170,7 +170,7 @@ When it comes to video game cartages and roms we can dump all the byte data into
 
 <h1 id="dTypes" style="clear:left;"><hr />Data types.</h1>
 
-Data types are limited and are the same across all systems (game boy color to PC). Even different system architecture types use the same data types. They are your building blocks for creating new picture formats, creating Disk drive formats such as FAT32, NTFS, or creating something new, or just writing software on the platform in general.
+Data types are limited and are the same across all systems (game boy color to PC). Even different system architecture types use the same data types. They are your building blocks for creating new picture formats, creating Disk drive formats such as FAT32, NTFS, or creating something new, or just writing software on the platform, or console in general.
 
 <br />
 
@@ -937,7 +937,7 @@ The wave audio format does not have to convert format as it is wrote in raw PCM 
 
 <br />
 
-You can learn more about digital audio and the wave audio format viable <a href="http://www.topherlee.com/software/pcm-tut-wavformat.html">link</a>.
+You can learn more about digital audio and the wave audio format viable <a href="http://www.topherlee.com/software/pcm-tut-wavformat.html" target="_blank">link</a>.
 
 <br />
 
