@@ -182,11 +182,11 @@ public class linkEdit extends Data
 
   public void export( long pos, long end, JDNode n )
   {
-    n.removeAllChildren(); ((JDNode)n).setArgs( new long[]{0xC000000000000300L} ); JDNode t;
+    n.removeAllChildren(); ((JDNode)n).setArgs( new long[]{0xC000000000000302L, pos, end - 1 } ); JDNode t;
 
     java.util.ArrayList<node> Nodes = new java.util.ArrayList<node>();
 
-    JDNode test = new JDNode("Decoding", 0x4000000000000400L); n.add( test ); node nd = new node("",0,test);
+    JDNode dec = new JDNode("Decoding", 0x4000000000000400L), temp; n.add( dec ); node nd = new node( "", 0, dec );
     
     byte[] d = new byte[(int)(end - pos)];
     
@@ -207,7 +207,7 @@ public class linkEdit extends Data
         
           t = new JDNode( name, 0xC000000000000000L ); t.add(new JDNode("Location.h", new long[]{ 0xC000000000000002L, eLoc, eLoc } ) );
           t.add(new JDNode("Disassemble.h", new long[]{ 0xC000000000000004L, file.toVirtual( eLoc ) } ) ); n.add( t );
-          nd.n.setUserObject(name + ".h");
+          nd.n.add(new JDNode("Terminal.h", new long[]{ 0x4000000000000007L, pos + nd.loc } ) );;
         }
 
         nodes = d[Pos++] & 0xFF; numNodes += nodes;
@@ -216,11 +216,10 @@ public class linkEdit extends Data
         {
           pfx = ""; while( d[Pos] != 0x00 ) { pfx += (char)d[Pos]; Pos += 1; } Pos += 1;
           eLoc = 0; while( d[Pos] < 0 ) { eLoc |= ( d[Pos++] & 0x7F ) << bpos; bpos += 7; } eLoc |= d[Pos++] << bpos; bpos = 0;
-
-          JDNode temp = new JDNode(name + pfx, new long[]{ 0x4000000000000007L, pos + eLoc }); Nodes.add( new node( name + pfx, (int)eLoc, temp ) ); test.add( temp );
+          temp = new JDNode(name + pfx, new long[]{ 0x4000000000000007L, pos + nd.loc }); Nodes.add( new node( name + pfx, (int)eLoc, temp ) ); dec.add( temp );
         }
 
-        if( curNode < numNodes ) { nd = Nodes.get( curNode ); name = nd.name; Pos = nd.loc; test = nd.n; } curNode++;
+        if( curNode < numNodes ) { nd = Nodes.get( curNode ); name = nd.name; Pos = nd.loc; dec = nd.n; } curNode++;
       }
     } catch( Exception er ) { } //Incase we read out of bounds because of bad export information. This way we still load what we can.
     
@@ -255,7 +254,7 @@ public class linkEdit extends Data
       for( int i = 0; i < size; i++ )
       {
         pfx = ""; while( ( b = file.read() ) != 0x00 ) { hex += String.format("%1$02X", b ) + " "; pfx += (char)b; } hex += String.format("%1$02X", b );
-        out += "<tr><td>Add text to cur node.</td><td>" + hex + "</td><td>" + pfx + "</td></tr>"; hex = "";
+        out += "<tr><td>Add text to parent node.</td><td>" + hex + "</td><td>" + pfx + "</td></tr>"; hex = "";
         eLoc = 0; while( ( b = file.read() ) >= 0x80 ) { hex += String.format("%1$02X", b ) + " "; eLoc |= ( (long)b & 0x7F ) << bpos; bpos += 7; }
         hex += String.format("%1$02X", b ); eLoc |= (long)b << bpos; bpos = 0;
         out += "<tr><td>Offset to terminal + nodes.</td><td>" + hex + "</td><td>" + eLoc + "</td></tr>"; hex = "";
@@ -324,7 +323,7 @@ public class linkEdit extends Data
         else if( opcode == 0x50 ) { out += "<tr><td>" + opcodeh + "</td><td>Adjust loc times = " + arg + "</td><td>Opcode</td><td>" + String.format(fmt, loc) + "</td><td>" + bind_type + "</td></tr>"; }
         else if( opcode == 0x60 )
         {
-          out += "<tr><td>" + opcodeh + "</td><td>Adjust loc times</td><td>Opcode</td><td>" + String.format(fmt, bloc) + "</td><td>" + bind_type + "</td></tr>";  
+          out += "<tr><td>" + opcodeh + "</td><td>Adjust loc times</td><td>Opcode</td><td>" + String.format(fmt, bloc) + "</td><td>" + bind_type + "</td></tr>";
           out += "<tr><td>" + hex1 + "</td><td>Times = " + count + "</td><td>Adjust loc times = " + count + "</td><td>" + String.format(fmt, loc) + "</td><td>" + bind_type + "</td></tr>";
         }
         else if( opcode == 0x70 )
