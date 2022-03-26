@@ -559,6 +559,16 @@ public class LoadCMD extends Data
     cmdType, cmdSize, "<html>The commands values and parameters.</html>"
   };
 
+  private static final String vmPort = "This controls the virtual memory access permissions in the CPU to prevent programs from doing whatever they want while running.<br /><br />" +
+  "The flag settings are intended to be viewed in binary. Each setting that is active is a binary digit that is set 1. The following bits are used for the sections attributes.<br /><br />" +
+  "<table border='1'>" +
+  "<tr><td>00000000000000000000000000000001</td><td>The section allows the CPU to read bytes in RAM in this section (Read setting).</td></tr>" +
+  "<tr><td>00000000000000000000000000000010</td><td>The section allows the CPU to write bytes in RAM to this section (Write setting).</td></tr>" +
+  "<tr><td>00000000000000000000000000000100</td><td>The section allows the CPU to start running code (Execute setting).</td></tr>" +
+  "</table><br />" +
+  "The settings must be set properly for each section of the program when loaded to memory otherwise the program will crash as the CPU, and RAM mem has the feature built in.<br /><br />" +
+  "Manually changing or setting these bits can enable or disable hardware based security while program is running.";
+
   private static final String[] segInfo = new String[]
   {
     cmdType, cmdSize,
@@ -569,8 +579,8 @@ public class LoadCMD extends Data
     "<html>The number of bytes to read from the file to be placed at the RAM address.<br /><br />" +
     "If this is smaller than the number of bytes to place in RAM for this Segment then the rest are 00 byte filled.<br /><br />" +
     "The segment named PAGEZERO generally creates a large space of 0 for where the program is going be loaded.</html>",
-    "<html>Maximum virtual memory protection.</html>",
-    "<html>Initial virtual memory protection.</html>",
+    "<html>Maximum virtual memory protection.<br /><br />" + vmPort + "</html>",
+    "<html>Initial virtual memory protection.<br /><br />" + vmPort + "</html>",
     "<html>Number of sections that this segment is broken into.</html>",
     "<html>The flag setting should be viewed in binary. Each binary digit that is set 1 in value is a setting that is active.<br /><br />" +
     "The Table bellow shows what each setting is for this section.<br /><br />" +
@@ -647,7 +657,7 @@ public class LoadCMD extends Data
   private static final String[] symsInfo = new String[]
   {
     "<html>Array element for defining one symbol.</html>",
-    "<html>The name value is added to the file position for the string table. If this value is 0 then the symbol has no name." + offsets + "</html>",
+    "<html>The name value is added to the file position for the string table. If this value is 0 then the symbol has no name.</html>",
     "<html>This value is broken into tow sections. First is the flag setting. Any of the binary digits that are set one correspond to the following settings.<br /><br />" +
     "<table border='1'>" +
     "<tr><td>Digit</td><td>Setting</td></tr>" +
@@ -667,9 +677,7 @@ public class LoadCMD extends Data
     "<tr><td>0000-110-0</td><td>Symbol prebound undefined.</td></tr>" +
     "<tr><td>0000-111-0</td><td>Symbol does not use the section value.</td></tr>" +
     "</table></html>",
-    "<html>An integer specifying the number of the section that this symbol can be found in.<br  /><br />" +
-    "If the type setting of the symbol is set to use no section, then this value is used as the symbols number name.<br /><br />" +
-    "An symbol can be both referenced by a name, or by a number. If the symbol is set to use no name and this value is set also set to 0 then it means that the symbol is null (Non existent).</html>",
+    "<html>An integer specifying the segment number of the section that this symbol can be found in.</html>",
     "<html>The DSect value setting describes additional information about the type of symbol this is.<br /><br />" +
     "This value is broken into tow sections. First is the flag setting. Any of the binary digits that are set one correspond to the following settings.<br /><br />" +
     "<table border='1'>"+
