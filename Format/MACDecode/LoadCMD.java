@@ -673,8 +673,9 @@ public class LoadCMD extends Data
     "<tr><td>0000-110-0</td><td>Symbol prebound undefined.</td></tr>" +
     "<tr><td>0000-111-0</td><td>Symbol does not use the section value.</td></tr>" +
     "</table></html>",
-    "<html>An integer specifying the section number that this symbol can be found in.</html>",
-    "<html>The DSect value setting describes additional information about the type of symbol this is.<br /><br />" +
+    "<html>An integer specifying the section number that this symbol can be found in.<br /><br />" +
+    "Section numbers start at 1 so an value of 0 means no section.</html>",
+    "<html>The data info value setting describes additional information about the type of symbol this is.<br /><br />" +
     "This value is broken into tow sections. First is the flag setting. Any of the binary digits that are set one correspond to the following settings.<br /><br />" +
     "<table border='1'>"+
     "<tr><td>Digit</td><td>Setting</td></tr>" +
@@ -826,6 +827,7 @@ public class LoadCMD extends Data
     {
       info( "<html>This is a section. It labels a section within the loaded data segment.<br /><br />" +
       "Sections can be referenced by segment then section name, or by section number. The first section number is 1 and we increment upward per sectionn across load command.<br /><br />" +
+      "By starting at section 1 allows us to use section number 0 as no section. This is important if we want to define somthing, but is not in an section.<br /><br />" +
       "<table border='1'>" +
       "<tr><td>__text</td><td>Contains the processor instructions of the program.</td></tr>" +
       "<tr><td>__fvmlib_init0</td><td>the fvmlib initialization section</td></tr>" +
