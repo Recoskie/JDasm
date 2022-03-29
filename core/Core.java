@@ -52,6 +52,10 @@ public interface Core
 
   public void clean( long start, long end );
 
+  //Clears the address map completely.
+
+  public void resetMap();
+
   //Core bit mode.
 
   public void setBit( int mode );

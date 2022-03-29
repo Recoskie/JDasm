@@ -420,6 +420,50 @@ public class X86 extends X86Types implements core.Core
   public void setTarget( RandomAccessFileV d ){ data = d; }
 
   /*-------------------------------------------------------------------------------------------------------------------------
+  Simple location mapping, for method calls, And data.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  private int Pointer = 0; //The size of the pointer Read by ModR/M.
+  private boolean rel = false; //Restive positions such as loops and jumps.
+
+  //Changes the address mapping type.
+
+  private static boolean AddressMode = false;
+
+  public void setAddressMode(boolean a) { AddressMode = a; }
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Navigate to a mapped location.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  public java.util.function.BiConsumer<Long,Boolean> Event = this::stud;
+  private long cSize = 0;
+
+  public void stud( long loc, boolean crawl ) { }
+
+  public void disLoc( long loc, boolean crawl )
+  {
+    if( crawl )
+    {
+      Event.accept( Crawl.get( (int)loc ), crawl );
+    }
+    else
+    {
+      cSize = Linear.get( (int)( ( loc << 1 ) + 1 ) ); Event.accept( Linear.get( (int)loc << 1 ), crawl );
+    }
+  }
+
+  public void setLoc( long loc ) throws java.io.IOException { data.seekV( loc ); }
+
+  public long codeSize(){ return( cSize ); }
+
+  public void setEvent( java.util.function.BiConsumer<Long,Boolean> e ) { Event = e; }
+
+  public void clear() { Crawl.clear(); Linear.clear(); code.clear(); data_off.clear(); }
+
+  public void resetMap(){ mapped_pos.clear(); mapped_loc.clear(); this.clear(); }
+
+  /*-------------------------------------------------------------------------------------------------------------------------
   The processor core type.
   -------------------------------------------------------------------------------------------------------------------------*/
 
@@ -779,48 +823,6 @@ public class X86 extends X86Types implements core.Core
 
     return( ( new int[]{ S3, S2, S1, S0 } )[ SizeAttrSelect ] );
   }
-
-  /*-------------------------------------------------------------------------------------------------------------------------
-  Simple location mapping, for method calls, And data.
-  -------------------------------------------------------------------------------------------------------------------------*/
-
-  private int Pointer = 0; //The size of the pointer Read by ModR/M.
-  private boolean rel = false; //Restive positions such as loops and jumps.
-
-  //Changes the address mapping type.
-
-  private static boolean AddressMode = false;
-
-  public void setAddressMode(boolean a) { AddressMode = a; }
-
-  /*-------------------------------------------------------------------------------------------------------------------------
-  Navigate to a mapped location.
-  -------------------------------------------------------------------------------------------------------------------------*/
-
-  public java.util.function.BiConsumer<Long,Boolean> Event = this::stud;
-  private long cSize = 0;
-
-  public void stud( long loc, boolean crawl ) { }
-
-  public void disLoc( long loc, boolean crawl )
-  {
-    if( crawl )
-    {
-      Event.accept( Crawl.get( (int)loc ), crawl );
-    }
-    else
-    {
-      cSize = Linear.get( (int)( ( loc << 1 ) + 1 ) ); Event.accept( Linear.get( (int)loc << 1 ), crawl );
-    }
-  }
-
-  public void setLoc( long loc ) throws java.io.IOException { data.seekV( loc ); }
-
-  public long codeSize(){ return( cSize ); }
-
-  public void setEvent( java.util.function.BiConsumer<Long,Boolean> e ) { Event = e; }
-
-  public void clear() { Crawl.clear(); Linear.clear(); code.clear(); data_off.clear(); }
 
   /*-------------------------------------------------------------------------------------------------------------------------
   When input type is value 0 decode the immediate input regularly to it's size setting for accumulator Arithmetic, and IO.

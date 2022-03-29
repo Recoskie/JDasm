@@ -5,9 +5,6 @@ import swingIO.tree.*;
 
 public class LoadCMD extends Data
 {
-  private static long bind = -1, lazyBind = -1;
-  private static int ordinal = 1;
-
   public void load(JDNode root) throws java.io.IOException
   {
     //Remove the dummy node.
@@ -16,13 +13,13 @@ public class LoadCMD extends Data
 
     //Program start address.
 
-    long main = 0;
+    long main = 0, bind = -1, lazyBind = -1;
 
     //WE should divide sections by data.
 
     JDNode code = new JDNode( "Code Sections", new long[]{ 0xC0000000000000FFL } );
 
-    int cmd = 0, size = 0;
+    int cmd = 0, size = 0, ordinal = 1;
 
     for( int i = 0; i < loadCMD; i++ )
     {

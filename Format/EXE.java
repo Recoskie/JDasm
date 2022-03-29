@@ -186,7 +186,7 @@ public class EXE extends Data implements JDEventListener
 
     DataDir = null; DataDirUsed = null; DLL = null; FDLL = null; DLLName = null; DLLTable = null;
 
-    core.mapped_loc.clear(); core.mapped_pos.clear();
+    core.resetMap();
   }
 
   //Change What To Display Based on what the user clicks on.
