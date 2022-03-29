@@ -6,6 +6,7 @@ import swingIO.tree.*;
 public class LoadCMD extends Data
 {
   private static long bind = -1, lazyBind = -1;
+  private static int ordinal = 1;
 
   public void load(JDNode root) throws java.io.IOException
   {
@@ -244,7 +245,7 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::dynlInfo ); des.add( DTemp );
       
-        root.add( new JDNode( "Load link library.h", new long[]{ 0, ref++ } ) );
+        root.add( new JDNode( "Load link library (Ordinal=" + ordinal++ + ").h", new long[]{ 0, ref++ } ) );
       }
 
       //Load a dynamic linker.
@@ -804,6 +805,7 @@ public class LoadCMD extends Data
     {
       info( "<html>Load a section of the program into RAM memory. Sections generally have standard segment name for their use.<br /><br />" +
       "Segment data locations can be referenced by name, or segment load command number. The first segment load command starts at 0 and we increment upward per segment load command.<br /><br />" +
+      "The link library section, if there is one uses the segment number as the location to a pointer plus an defined offset in the section.<br /><br />" +
       "<table border='1'>" +
       "<tr><td>__PAGEZERO</td><td>Fills the area the program is going to load into RAM memory with zeros.</td></tr>" +
       "<tr><td>__TEXT</td><td>The tradition UNIX text segment. Contains machine code, and data types or strings.</td></tr>" +
@@ -826,8 +828,10 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>This is a section. It labels a section within the loaded data segment.<br /><br />" +
-      "Sections can be referenced by segment then section name, or by section number. The first section number is 1 and we increment upward per sectionn across load command.<br /><br />" +
-      "By starting at section 1 allows us to use section number 0 as no section. This is important if we want to define somthing, but is not in an section.<br /><br />" +
+      "Sections can be referenced by segment num/name then section name, or by only section number. The first section number is 1 and we increment upward per section across load command.<br /><br />" +
+      "By starting at section 1 allows us to use section number 0 as no section. This is important if we want to define a callable method, but know it is not part of the pragram.<br /><br />" +
+      "Instead we use the symbol table to deine the method name and which link library the method can be found in using the library load command number (ordinal).<br /><br />" +
+      "The symbol table uses section numbers to tell us which part of the program the symbol can be found if not set 0.<br /><br />" +
       "<table border='1'>" +
       "<tr><td>__text</td><td>Contains the processor instructions of the program.</td></tr>" +
       "<tr><td>__fvmlib_init0</td><td>the fvmlib initialization section</td></tr>" +
@@ -867,9 +871,10 @@ public class LoadCMD extends Data
     {
       info( "<html>This is a binary we wish to load. Every binary has a symbol table that gives parts of the program names by locations.<br /><br />" +
       "Not all symbols locate to a section of code. There is a command called \"link library setup\" that defines which symbols are exportable and which ones need to be binded to another binary.<br /><br />" +
-      "The symbols that need to be binded are a jump or call operation which are to be set to the location of a exportable method from another binary. We call these jumps and calls stubs.<br /><br />" +
+      "The symbols that need to be binded are a jump or call operation which are to be set to the location of an exportable method from another binary. We call these jumps and calls stubs.<br /><br />" +
       "It is the dynamic linkers job to make sure our symbols that need to be binded locate to the exportable symbols when the processor hits the call and jump instructions that read the value.<br /><br />" +
-      "Additional each export section is combined into one large list that can be used to lookup the address location of a symbol method name. Each symbol must have a unique name no duplicate names across link libraries.</html>" );
+      "Additional each export section is combined into one large list that can be used to lookup the address location of a symbol method name. Each symbol must have a unique name no duplicate names across link libraries.<br /><br />" +
+      "The ordinals speed up the lookup as it gives us where to start reading the list. If not found we start from the start of the list to ordinal, and return an import error if it is not anywhere to be found in the list.</html>" );
     }
     else
     {
@@ -881,10 +886,12 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>How the dyld linker work. First we must define which binaries we want to link using the load link library commands.<br /><br />" +
+      info( "<html>How the dyld linker work. First, we must define which binaries we want to link using the load link library commands.<br /><br />" +
       "The export section defines a method name and location to where the machine code starts for the method in the binary.<br /><br />" +
+      "Each link library we load is given a number starting from 1 incrementing upward. This ordinal number is used to specify which link library the method is in.<br /><br />" +
       "Additionally, each export section is combined into one large list that can be used to look up the address location of a function/method name.<br /><br />" +
-      "Each function/method must have a unique name no duplicate names across link libraries.<br /><br />" +
+      "The ordinal speeds the lookup process by telling the linker where to start looking in the list. Each function/method must have a unique name no duplicate names across link libraries unless it is defined as a week method.<br /><br />" +
+      "A week method in the week bind section can be replaced by another method if existent in another link library giving us some flexibility to customize method calls.<br /><br />" +
       "The mac programs machine code loads a number from a section called a pointer list and uses it as the location to call the function/method.<br /><br />" +
       "The section usually named \"__stubs\" reads the location of a pointer and uses the read number as the location to the method.<br /><br />" +
       "This way, the programs machine code never has to be touched in setting the locations to methods in another program.<br /><br />" +
