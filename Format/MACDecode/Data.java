@@ -14,6 +14,14 @@ public class Data extends Window.Window
 
   public static java.util.ArrayList<Long> sections = new java.util.ArrayList<Long>();
 
+  //Symbols.
+
+  public static java.util.ArrayList<Syms> syms = new java.util.ArrayList<Syms>();
+
+  //Sections for pointers and jump table that we map the indirect symbols into.
+
+  public static java.util.ArrayList<Pointers> ptr = new java.util.ArrayList<Pointers>();
+
   //This integer is used to keep track of the descriptors added to the list adn set to a node on the open event.
 
   public static int ref = 0, paths = 0;

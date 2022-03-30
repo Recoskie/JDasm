@@ -14,6 +14,7 @@ public class LoadCMD extends Data
     //Program start address.
 
     long main = 0, bind = -1, lazyBind = -1;
+    boolean mapped = false;
 
     //WE should divide sections by data.
 
@@ -100,7 +101,7 @@ public class LoadCMD extends Data
           DTemp.LUINT32("Relocations");
           DTemp.LUINT32("flags"); int flag = (int)DTemp.value;
           DTemp.LUINT32("Reserved");
-          DTemp.LUINT32("Reserved");
+          DTemp.LUINT32("Reserved"); int stud_size = (int)DTemp.value;
           
           if( is64bit ) { DTemp.LUINT32("Reserved"); }
 
@@ -114,7 +115,20 @@ public class LoadCMD extends Data
 
           //Sections we want to be able to navigate too.
 
-          flag &= 0xFF; if( flag == 6 ) { rPath.add( t ); bind = paths++; } else if( flag == 7 ) { rPath.add( t ); lazyBind = paths++; }
+          flag &= 0xFF;
+          
+          if( flag == 6 )
+          {
+            rPath.add( t ); bind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4) );
+          }
+          else if( flag == 7 )
+          {
+            rPath.add( t ); lazyBind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4) );
+          }
+          else if( flag == 8 )
+          {
+            ptr.add( new Pointers(address, vSize, stud_size) );
+          }
 
           n2.add( t );
         }
@@ -152,16 +166,18 @@ public class LoadCMD extends Data
         long t1 = file.getFilePointer(), t2 = 0;
 
         file.seek(off); DTemp = new Descriptor( file ); DTemp.setEvent( this::symsInfo ); des.add( DTemp );
+
+        int name, type, DInfo; long loc;
       
         for( int i2 = 0; i2 < len; i2++ )
         {
           DTemp.Array("Symbol #" + i2 + "", is64bit ? 16 : 12 );
-          DTemp.LUINT32("Name"); int name = (int)DTemp.value;
-          DTemp.UINT8("Type"); int type = (byte)DTemp.value;
+          DTemp.LUINT32("Name"); name = (int)DTemp.value;
+          DTemp.UINT8("Type"); type = (byte)DTemp.value;
           DTemp.UINT8("Section Number");
-          DTemp.LUINT16("Data info"); int DInfo = (Short)DTemp.value & 0xFFFF;
+          DTemp.LUINT16("Data info"); DInfo = (Short)DTemp.value & 0xFFFF;
 
-          if( is64bit ) { DTemp.LUINT64("Symbol offset"); } else { DTemp.LUINT32("Symbol offset"); }
+          if( is64bit ) { DTemp.LUINT64("Symbol offset"); loc = (long)DTemp.value; } else { DTemp.LUINT32("Symbol offset"); loc = (int)DTemp.value & 0x00000000FFFFFFFFL; }
           
           if( name != 0 )
           {
@@ -190,11 +206,30 @@ public class LoadCMD extends Data
               n3.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
             }
 
-            des.add( string ); file.seek( t2 );
+            des.add( string ); file.seek( t2 ); syms.add( new Syms( string.value + "", loc, type, DInfo ) );
           }
           else
           {
-            n3.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+            //Categorize the symbols.
+
+            if( ( DInfo & 0xFF00 ) != 0 )
+            {
+              Ordinals.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+            }
+            else if( ( type & 0xE0 ) != 0 )
+            {
+              Debug.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+            }
+            else if( ( type & 0x01 ) != 0 )
+            {
+              External.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+            }
+            else
+            {
+              n3.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+            }
+            
+            syms.add( new Syms( "No Name", loc, type, DInfo ) );
           }
         }
 
@@ -236,12 +271,45 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::blank ); des.add( DTemp );
 
-        JDNode n1 = new JDNode( "Symbol info", new long[]{ 0, ref++ } );
+        JDNode n1 = new JDNode( "Symbol info", new long[]{ 0x4000000000000000L, ref++ } );
       
         if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + csize * 4 - 1 } ) ); }
         if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + msize * 4 - 1 } ) ); }
         if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + rsize * 4 - 1 } ) ); }
-        if( indsize > 0 ) { n1.add( new JDNode("Indirect Sym.h", new long[]{ 0x8000000000000002L, indoff, indoff + indsize * 4 - 1 } ) ); }
+        if( indsize > 0 )
+        {
+          long t2 = file.getFilePointer(); file.seek( indoff );
+
+          Descriptor Decode = new Descriptor( file ); Decode.setEvent( this::blank ); des.add( Decode );
+
+          JDNode t = new JDNode("Indirect Sym", new long[]{ 0x4000000000000000L, ref++ } );
+
+          int sym = 0;
+
+          String name = "";
+
+          int Pointer = 0;
+          Pointers p = ptr.get( Pointer );
+          long Pos = p.loc;
+
+          for( int i2 = 0; i2 < indsize; i2++ )
+          {
+            Decode.LUINT32("Sym number"); sym = (int)Decode.value; name = ( ( sym & 0xC0000000 ) == 0 ) ? syms.get( sym ).name + "" : "";
+            
+            if( !name.equals("") ) { t.add( new JDNode( name + ".h" ) ); }
+
+            //If the function calls and methods are not already mapped, then we can start mapping them here old style.
+
+            if( !mapped )
+            {
+              core.mapped_pos.add(Pos); Pos += p.ptr_size; core.mapped_pos.add( Pos ); core.mapped_loc.add( name );
+
+              if( Pos >= p.size && ( Pointer + 1 ) < ptr.size() ){ Pointer += 1; p = ptr.get( Pointer ); Pos = p.loc; }
+            }
+          }
+
+          n1.add( t ); file.seek( t2 ); mapped = true;
+        }
         if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ 0x8000000000000002L, extoff, extoff + extsize * 4 - 1 } ) ); }
         if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ 0x8000000000000002L, loff, loff + lsize * 4 - 1 } ) ); }
 
@@ -429,7 +497,7 @@ public class LoadCMD extends Data
         
         if( esize > 0 ) { tm =  new JDNode("Export", new long[]{ 0x4000000000000306L, eoff, eoff + esize - 1 } ); tm.add( new JDNode( "dummy" ) ); n1.add( tm ); }
 
-        root.add( n1 );
+        root.add( n1 ); mapped = true;
       }
 
       //Minimum OS version. Specifying platform and tools.
@@ -1004,7 +1072,7 @@ public class LoadCMD extends Data
       "A symbol with an ordinal set in data info other than 0 means it is a method in a library load command with an ordinal number.<br /><br />" +
       "Symbols that are of an ordinal type have a location of 0, and a section number of 0 meaning no section along the load commands.<br /><br />" +
       "If we examine the symbol table in the linked library we will find the symbol defined as an external symbol with its position in the library.<br /><br />" +
-      "We set the ordinal symbol to the location of the external symbol in the other binary. The rest of the function/method linker is carried out by the \"symbol info\" section.<br /><br />" +
+      "We set the ordinal symbol to the location of the external symbol. The rest of the function/method linker is carried out by the \"symbol info\" section.<br /><br />" +
       "A debug symbol is put in its own category as it is used to define positions in the code relative to the original source code lines, so some symbols may have no names.<br /><br />" +
       "External symbols that are readable from other binary files in this binary are stored into an external list.<br /><br />" +
       "A full detailed breakdown of a symbol's type setting and data info can be viewed by clicking on the data fields in the symbol array.</html>" );
