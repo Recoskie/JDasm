@@ -133,11 +133,17 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::symInfo ); des.add( DTemp );
         
-        JDNode n2 = new JDNode( "Symbol Table", new long[]{ 0, ref++ } ); root.add( n2 );
+        JDNode n2 = new JDNode( "Symbol Table", new long[]{ 0x4000000000000000L, ref++ } ); root.add( n2 );
       
         n2.add( new JDNode( "String table.h", new long[]{ 0x8000000000000002L, strOff, strOff + strSize - 1 } ) );
 
-        JDNode n3 = new JDNode( "Symbols", new long[]{ 0, ref++ } ); n2.add( n3 );
+        JDNode n3 = new JDNode( "Symbols", new long[]{ 0x4000000000000000L, ref++ } ); n2.add( n3 );
+
+        JDNode Debug = new JDNode( "Debug", new long[]{ 0x4000000000000000L } );
+
+        JDNode Ordinals = new JDNode( "Ordinals", new long[]{ 0x4000000000000000L } );
+
+        JDNode External = new JDNode( "External", new long[]{ 0x4000000000000000L } );
         
         //Begin reading all the symbols.
         
@@ -146,22 +152,16 @@ public class LoadCMD extends Data
         long t1 = file.getFilePointer(), t2 = 0;
 
         file.seek(off); DTemp = new Descriptor( file ); DTemp.setEvent( this::symsInfo ); des.add( DTemp );
-
-        int id;
       
         for( int i2 = 0; i2 < len; i2++ )
         {
-          id = 0;
-
           DTemp.Array("Symbol #" + i2 + "", is64bit ? 16 : 12 );
           DTemp.LUINT32("Name"); int name = (int)DTemp.value;
           DTemp.UINT8("Type"); int type = (byte)DTemp.value;
-          DTemp.UINT8("Section Number"); int NSect = (byte)DTemp.value;
-          DTemp.LUINT16("Data info");
+          DTemp.UINT8("Section Number");
+          DTemp.LUINT16("Data info"); int DInfo = (Short)DTemp.value & 0xFFFF;
 
           if( is64bit ) { DTemp.LUINT64("Symbol offset"); } else { DTemp.LUINT32("Symbol offset"); }
-
-          if( ( type & 0x0E ) == 0x0E ) { id = NSect; }
           
           if( name != 0 )
           {
@@ -169,9 +169,26 @@ public class LoadCMD extends Data
 
             string = new Descriptor( file ); string.setEvent( this::blank );
 
-            string.String8("Symbol name", (byte)0x00 );
+            string.String8("Symbol name", (byte)0x00 ); if( string.value.equals("") ) { string.value = "No Name"; }
 
-            n3.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+            //Categorize the symbols.
+
+            if( ( DInfo & 0xFF00 ) != 0 )
+            {
+              Ordinals.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+            }
+            else if( ( type & 0xE0 ) != 0 )
+            {
+              Debug.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+            }
+            else if( ( type & 0x01 ) != 0 )
+            {
+              External.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+            }
+            else
+            {
+              n3.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+            }
 
             des.add( string ); file.seek( t2 );
           }
@@ -180,6 +197,10 @@ public class LoadCMD extends Data
             n3.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
           }
         }
+
+        if( External.getChildCount() > 0 ) { n3.insert( External, 0 ); }
+        if( Ordinals.getChildCount() > 0 ) { n3.insert( Ordinals, 0 ); }
+        if( Debug.getChildCount() > 0 ) { n3.insert( Debug, 0 ); }
 
         file.seek( t1 );
       }
@@ -655,44 +676,47 @@ public class LoadCMD extends Data
     "<html>This value is broken into tow sections. First is the flag setting. Any of the binary digits that are set one correspond to the following settings.<br /><br />" +
     "<table border='1'>" +
     "<tr><td>Digit</td><td>Setting</td></tr>" +
-    "<tr><td>10000000</td><td>Symbolic debugging entry.</td></tr>" +
-    "<tr><td>01000000</td><td>Symbolic debugging entry.</td></tr>" +
-    "<tr><td>00100000</td><td>Symbolic debugging entry.</td></tr>" +
+    "<tr><td>xxx00000</td><td>Combination for symbolic debugging entry type.</td></tr>" +
     "<tr><td>00010000</td><td>Private external symbol.</td></tr>" +
+    "<tr><td>0000xxx0</td><td>Combination for the type setting.</td></tr>" +
     "<tr><td>00000001</td><td>External symbol.</td></tr>" +
-    "<tr><td>0000xxx0</td><td>The digits marked x here are used as a combination for the type setting.</td></tr>" +
     "</table><br /><br />" +
-    "The type setting uses the three digits marked as x in the above table as the type setting combination. The hyphens are used to separate the tree bits for the type setting.<br /><br />" +
+    "The type setting uses the three digits marked as x in the above table as the type setting combination. The hyphens are used to separate the three bits for the type setting.<br /><br />" +
     "<table border='1'>" +
     "<tr><td>Combination</td><td>Setting</td></tr>" +
     "<tr><td>0000-000-0</td><td>Symbol undefined.</td></tr>" +
     "<tr><td>0000-001-0</td><td>Symbol absolute.</td></tr>" +
     "<tr><td>0000-101-0</td><td>Symbol indirect.</td></tr>" +
     "<tr><td>0000-110-0</td><td>Symbol prebound undefined.</td></tr>" +
-    "<tr><td>0000-111-0</td><td>Symbol does not use the section value.</td></tr>" +
+    "<tr><td>0000-111-0</td><td>Symbol defined in section number.</td></tr>" +
     "</table></html>",
     "<html>An integer specifying the section number that this symbol can be found in.<br /><br />" +
-    "Section numbers start at 1 so an value of 0 means no section.</html>",
+    "Section numbers start at 1 so an value of 0 means no section. This means the symbol may be a method name in another file.<br /><br />" +
+    "If this symbol is an method in another file then the Data info felid will tell us which load link library command by ordinal.</html>",
     "<html>The data info value setting describes additional information about the type of symbol this is.<br /><br />" +
-    "This value is broken into tow sections. First is the flag setting. Any of the binary digits that are set one correspond to the following settings.<br /><br />" +
+    "The Last 2 hex digits is the library ordinal. As we load link libraries we label them starting from library 1 to nth library as ordinals.<br /><br />" +
+    "If the symbol is not part of any section and section number is set 0, but has an non zero ordinal then it is a method name in a link library.<br /><br />" +
+    "An data info section with the last 2 hex digits set 03 07 would mean ordinal 07. We ignore the first 2 hex digits.<br /><br />" +
+    "The first 2 hex digits are used as 4 optional settings, and a 4 bit combination code. An digit that is set one corresponds to the following settings.<br /><br />" +
     "<table border='1'>"+
     "<tr><td>Digit</td><td>Setting</td></tr>" +
-    "<tr><td>0000000000010000</td><td>Must be set for any defined symbol that is referenced by dynamic-loader.</td></tr>" +
-    "<tr><td>0000000000100000</td><td>Used by the dynamic linker at runtime.</td></tr>" +
-    "<tr><td>0000000001000000</td><td>If the dynamic linker cannot find a definition for this symbol, it sets the address of this symbol to 0.</td></tr>" +
-    "<tr><td>0000000010000000</td><td>If the static linker or the dynamic linker finds another definition for this symbol, the definition is ignored.</td></tr>" +
-    "<tr><td>000000000000xxxx</td><td>The digits marked as x here are used for the symbol type information. See the next table for type information.</td></tr>" +
+    "<tr><td>0001-xxxx</td><td>Must be set for any defined symbol that is referenced by dynamic-loader.</td></tr>" +
+    "<tr><td>0010-xxxx</td><td>Used by the dynamic linker at runtime.</td></tr>" +
+    "<tr><td>0100-xxxx</td><td>If the dynamic linker cannot find a definition for this symbol, it sets the address of this symbol to 0.</td></tr>" +
+    "<tr><td>1000-xxxx</td><td>If the static linker or the dynamic linker finds another definition for this symbol, the definition is ignored.</td></tr>" +
     "</table><br />" +
-    "The last four binary digits are used as a combination for the symbol type which are separated by a hyphen.<br /><br />" +
+    "The last four binary digits are used as a combination for the symbol function/method call type which are separated by a hyphen.<br /><br />" +
+    "These settings are used to define the type of function/method call that this symbol defines by ordinal.<br /><br />" +
     "<table border='1'>" +
     "<tr><td>Value</td><td>Description</td></tr>" +
-    "<tr><td>000000000000-0000</td><td>This symbol is a reference to an external symbol.</td></tr>" +
-    "<tr><td>000000000000-0001</td><td>This symbol is a reference to an external function call.</td></tr>" +
-    "<tr><td>000000000000-0010</td><td>This symbol is defined in this library/program.</td></tr>" +
-    "<tr><td>000000000000-0011</td><td>This symbol is defined in this module and is visible only to library/program within this shared library.</td></tr>" +
-    "<tr><td>000000000000-0100</td><td>This symbol is defined in another module in this file, and is visible only to libraries/programs within this shared library.</td></tr>" +
-    "<tr><td>000000000000-0101</td><td>This symbol is defined in another module in this file, is a lazy (function) symbol, and is visible only to libraries/programs within this shared library.</td></tr>" +
-    "</table></html>",
+    "<tr><td>xxxx-0000</td><td>Non Lazy loaded pointer method call.</td></tr>" +
+    "<tr><td>xxxx-0001</td><td>Lazy loaded pointer method call.</td></tr>" +
+    "<tr><td>xxxx-0010</td><td>Method call defined in this library/program.</td></tr>" +
+    "<tr><td>xxxx-0011</td><td>Private Method call defined in this library/program.</td></tr>" +
+    "<tr><td>xxxx-0100</td><td>Private Non Lazy loaded pointer method call.</td></tr>" +
+    "<tr><td>xxxx-0101</td><td>Private Lazy loaded pointer method call.</td></tr>" +
+    "</table><br />" +
+    "A Pointer is a value that is read by the program to call a method from another binary file. Private means other programs are not meant to be able to read or call the methods other than the binary it's self.</html>",
     "<html>The address location that the symbol is at.</html>",
   };
 
@@ -883,7 +907,7 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>How the dyld linker work. First, we must define which binaries we want to link using the load link library commands.<br /><br />" +
+      info( "<html>How the modern dylid linker works. First, we must define which binaries we want to link using the load link library commands.<br /><br />" +
       "The export section defines a method name and location to where the machine code starts for the method in the binary.<br /><br />" +
       "Each link library we load is given a number starting from 1 incrementing upward. This ordinal number is used to specify which link library the method is in.<br /><br />" +
       "Additionally, each export section is combined into one large list that can be used to look up the address location of a function/method name.<br /><br />" +
@@ -960,8 +984,11 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>The symbols define the method calls and function calls in a mac binary, exportable methods, and data.<br /><br />" +
-      "The section \"Symbol info\" organizes the simbols by symbol number in this list.<br /><br />" +
-      "The fifth simbol index would mean the fifth simbol index in this list.</html>" );
+      "A Mach binary uses a list of numbers called a pointer list for the location to a method call. The machine code in the binary reads the number set in the list and calls the method.<br /><br />" +
+      "This way the binary or machine code never has to be modified. The section \"Symbol info\" organizes the symbols by symbol number in this list that locate to the method in the order the pointer list is in.<br /><br />" +
+      "The only time we load in link library methods using the symbol table is if there is no \"Link library setup\" section that uses the modern dylid linker format.<br /><br />" +
+      "A modern Mach binary may keep only the debug symbols such as line numbers relative to machine code position, and locations of variable names.<br /><br />" +
+      "Some Mach binaries may include everything in the symbol table to maintain backwards compatibility.</html>" );
     }
     else
     {
@@ -973,7 +1000,14 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>This is the symbol array.</html>" );
+      info( "<html>This is the symbol array. The symbol type and data info are divided into subfolders here.<br /><br />" +
+      "A symbol with an ordinal set in data info other than 0 means it is a method in a library load command with an ordinal number.<br /><br />" +
+      "Symbols that are of an ordinal type have a location of 0, and a section number of 0 meaning no section along the load commands.<br /><br />" +
+      "If we examine the symbol table in the linked library we will find the symbol defined as an external symbol with its position in the library.<br /><br />" +
+      "We set the ordinal symbol to the location of the external symbol in the other binary. The rest of the function/method linker is carried out by the \"symbol info\" section.<br /><br />" +
+      "A debug symbol is put in its own category as it is used to define positions in the code relative to the original source code lines, so some symbols may have no names.<br /><br />" +
+      "External symbols that are readable from other binary files in this binary are stored into an external list.<br /><br />" +
+      "A full detailed breakdown of a symbol's type setting and data info can be viewed by clicking on the data fields in the symbol array.</html>" );
     }
     else
     {

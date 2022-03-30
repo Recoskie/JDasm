@@ -40,7 +40,7 @@ public class MAC extends Data implements JDEventListener
     open( new JDEvent( this, "", new long[]{ 0x4000000000000000L, 0 } ) );
   }
 
-  public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; App = null; rPath.clear(); segment.clear(); sections.clear(); core.resetMap(); paths = 0; }
+  public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; App = null; rPath.clear(); segment.clear(); sections.clear(); if( core != null ) { core.resetMap(); } paths = 0; }
 
   public void open(JDEvent e)
   {
