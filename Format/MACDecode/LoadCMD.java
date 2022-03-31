@@ -568,6 +568,15 @@ public class LoadCMD extends Data
       }
     }
 
+    //Load in data symbols.
+
+    Syms s = syms.get(0); for( int i = 0, e = syms.size(); i < e; s = syms.get( i++ ) )
+    {
+      if( !s.name.equals("") && s.loc != 0 ){ core.mapped_pos.add(s.loc); core.mapped_pos.add(s.loc + 1); core.mapped_loc.add( s.name ); }
+    }
+
+    syms.clear();
+
     //Sections that only machine code.
 
     if( code.getChildCount() > 0 ) { App.add( code ); }
