@@ -56,12 +56,12 @@ public class linkEdit extends Data
         }
         else if( opcode == 0x10 )
         {
-          out += "<tr><td>" + opcodeh + "</td><td>Set dylid(" + arg + ")</td><td>Opcode</td><td>" + String.format(fmt, loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + opcodeh + "</td><td>Set library ordinal = " + arg + "</td><td>Opcode</td><td>" + String.format(fmt, loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
         else if( opcode == 0x20 )
         {
-          out += "<tr><td>" + opcodeh + "</td><td>Set dylid.</td><td>Opcode</td><td>" + String.format(fmt, loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
-          out += "<tr><td>" + hex2 + "</td><td>dyld(" + offset + ")</td><td>dyld = " + offset + "</td><td>" + String.format(fmt, loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + opcodeh + "</td><td>Set library ordinal.</td><td>Opcode</td><td>" + String.format(fmt, loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
+          out += "<tr><td>" + hex2 + "</td><td>Set library ordinal = " + offset + "</td><td>dyld = " + offset + "</td><td>" + String.format(fmt, loc) + "</td><td>" + name + "</td><td>" + flag + "</td><td>" + bind_type + "</td></tr>";
         }
         else if( opcode == 0x40 )
         {
@@ -450,13 +450,14 @@ public class linkEdit extends Data
   "<tr><td>C?</td><td>Read a number for count, and a number for skip after this opcode. Bind the method to the current location, then add skip to location and repeat till count number of times.<br />" +
   "In some cases we want to bind the same method to different locations evenly spaced apart number of times.</td></tr>" +
   "<tr><td>6?</td><td>Sets the addend to the number read after the opcode.</td></tr>" +
-  "<tr><td>1?</td><td>Sets dylid ordinal index. The last ? hex digit is used as 0 to 15 ordinal.</td></tr>" +
-  "<tr><td>2?</td><td>Sets dylid ordinal index to the number read after the opcode.</td></tr>" +
+  "<tr><td>1?</td><td>Sets dyld ordinal index. The last ? hex digit is used as 0 to 15 ordinal.</td></tr>" +
+  "<tr><td>2?</td><td>Sets dyld ordinal index to the number read after the opcode.</td></tr>" +
   "<tr><td>3?</td><td>Sets where to lookup the method names when binding. The last ? hex digit is the lookup type.<br />" +
   "0 = Default lookup.<br />E = Current binary export list.<br />D = Flat lookup.<br />C = Week lookup.</td></tr>" +
   "<tr><td>0?</td><td>Set all current values to noting (Reset).</td></tr>" +
   "</table><br />Each number that is read after an opcode uses an variable in length number encoding called ulib128.<br />" + ulib128 +
   "After each bind opcodes 9? to C? we add 4 to the location for 32-bit binaries or add 8 to the current location in 64-bit binaries. As that is the size of the address.<br /><br />" +
+  "The ordinal tells us which link library as each link library we load in is given a ordinal number starting at 1 and up.<br /><br />" +
   "Let's read the opcodes and show what locations must be set to which methods.<br /><br />";
 
   private static final String export = "<html>Unlike rebase and binding information which use opcodes to define information, the export section uses names that are broken into parts.<br /><br />" +

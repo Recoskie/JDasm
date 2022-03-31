@@ -158,6 +158,8 @@ public class LoadCMD extends Data
         JDNode Ordinals = new JDNode( "Ordinals", new long[]{ 0x4000000000000000L } );
 
         JDNode External = new JDNode( "External", new long[]{ 0x4000000000000000L } );
+
+        JDNode ExternalP = new JDNode( "External Private", new long[]{ 0x4000000000000000L } );
         
         //Begin reading all the symbols.
         
@@ -201,6 +203,10 @@ public class LoadCMD extends Data
             {
               External.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
             }
+            else if( ( type & 0x10 ) != 0 )
+            {
+              ExternalP.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+            }
             else
             {
               n3.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
@@ -224,6 +230,10 @@ public class LoadCMD extends Data
             {
               External.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
             }
+            else if( ( type & 0x10 ) != 0 )
+            {
+              ExternalP.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+            }
             else
             {
               n3.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
@@ -233,6 +243,7 @@ public class LoadCMD extends Data
           }
         }
 
+        if( ExternalP.getChildCount() > 0 ) { n3.insert( ExternalP, 0 ); }
         if( External.getChildCount() > 0 ) { n3.insert( External, 0 ); }
         if( Ordinals.getChildCount() > 0 ) { n3.insert( Ordinals, 0 ); }
         if( Debug.getChildCount() > 0 ) { n3.insert( Debug, 0 ); }
@@ -894,7 +905,7 @@ public class LoadCMD extends Data
     {
       info( "<html>Load a section of the program into RAM memory. Sections generally have standard segment name for their use.<br /><br />" +
       "Segment data locations can be referenced by name, or segment load command number. The first segment load command starts at 0 and we increment upward per segment load command.<br /><br />" +
-      "The link library section, if there is one uses the segment number as the location to a pointer plus an defined offset in the section.<br /><br />" +
+      "The link library section, if there is one uses the segment number as the location to a pointer plus an defined offset.<br /><br />" +
       "<table border='1'>" +
       "<tr><td>__PAGEZERO</td><td>Fills the area the program is going to load into RAM memory with zeros.</td></tr>" +
       "<tr><td>__TEXT</td><td>The tradition UNIX text segment. Contains machine code, and data types or strings.</td></tr>" +
@@ -917,9 +928,9 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>This is a section. It labels a section within the loaded data segment.<br /><br />" +
-      "Sections can be referenced by segment num/name then section name, or by only section number. The first section number is 1 and we increment upward per section across load command.<br /><br />" +
+      "Sections can be referenced by segment num/name, then section name, or only by section number. The first section number is 1 and we increment upward per section across load command.<br /><br />" +
       "By starting at section 1 allows us to use section number 0 as no section. This is important if we want to define a callable method, but know it is not part of the pragram.<br /><br />" +
-      "Instead we use the symbol table to deine the method name and which link library the method can be found in using the library load command number (ordinal).<br /><br />" +
+      "Instead we use the symbol table to define the method name and which link library the method can be found in using the library load command number (ordinal).<br /><br />" +
       "The symbol table uses section numbers to tell us which part of the program the symbol can be found if not set 0.<br /><br />" +
       "<table border='1'>" +
       "<tr><td>__text</td><td>Contains the processor instructions of the program.</td></tr>" +
@@ -959,11 +970,12 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>This is a binary we wish to load. Every binary has a symbol table that gives parts of the program names by locations.<br /><br />" +
-      "Not all symbols locate to a section of code. There is a command called \"link library setup\" that defines which symbols are exportable and which ones need to be binded to another binary.<br /><br />" +
-      "The symbols that need to be binded are a jump or call operation which are to be set to the location of an exportable method from another binary. We call these jumps and calls stubs.<br /><br />" +
-      "It is the dynamic linkers job to make sure our symbols that need to be binded locate to the exportable symbols when the processor hits the call and jump instructions that read the value.<br /><br />" +
-      "Additional each export section is combined into one large list that can be used to lookup the address location of a symbol method name. Each symbol must have a unique name no duplicate names across link libraries.<br /><br />" +
-      "The ordinals speed up the lookup as it gives us where to start reading the list. If not found we start from the start of the list to ordinal, and return an import error if it is not anywhere to be found in the list.</html>" );
+      "Not all symbols locate to a section of code, and are defined by type. We can define symbols that use a library ordinal to spefiy which binary the external symbol can be found in.<br /><br />" +
+      "The symbol types are explained in detail in the symbol table. Additionaly mondern Mach binariyes use a new command called \"link library setup\".<br /><br />" +
+      "The command \"link library setup\" section should be used to setup methods/functions if present instead of the symbol table.<br /><br />" +
+      "A Mach binary may inculde both sets of information to maintain compatibility to older systems.<br /><br />" +
+      "The symbols that need to be set are a jump or call operation which are to be set to the location of an exportable method from another binary. We call these jumps and calls stubs.<br /><br />" +
+      "It is the dynamic linkers job to make sure our symbols that need to be binded locate to the exportable symbols when the processor hits the call and jump instructions that read the value.</html>" );
     }
     else
     {
@@ -975,22 +987,22 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>How the modern dylid linker works. First, we must define which binaries we want to link using the load link library commands.<br /><br />" +
+      info( "<html>How the modern dyld linker works. First, we must define which binaries we want to link using the load link library commands.<br /><br />" +
       "The export section defines a method name and location to where the machine code starts for the method in the binary.<br /><br />" +
-      "Each link library we load is given a number starting from 1 incrementing upward. This ordinal number is used to specify which link library the method is in.<br /><br />" +
+      "Each link library we load is given a number starting from 1 incrementing upward. The ordinal number is used to specify which link library the method is in.<br /><br />" +
       "Additionally, each export section is combined into one large list that can be used to look up the address location of a function/method name.<br /><br />" +
-      "The ordinal speeds the lookup process by telling the linker where to start looking in the list. Each function/method must have a unique name no duplicate names across link libraries unless it is defined as a week method.<br /><br />" +
+      "The ordinal speeds the lookup process by telling the linker where to start looking in the list.<br /><br />" +
       "A week method in the week bind section can be replaced by another method if existent in another link library giving us some flexibility to customize method calls.<br /><br />" +
       "The mac programs machine code loads a number from a section called a pointer list and uses it as the location to call the function/method.<br /><br />" +
       "The section usually named \"__stubs\" reads the location of a pointer and uses the read number as the location to the method.<br /><br />" +
       "This way, the programs machine code never has to be touched in setting the locations to methods in another program.<br /><br />" +
       "The bind section tells us which locations to set to a method from another binary file export section.<br /><br />" +
       "The lazy bind section does not need each method set to the export method of another binary as the pointers locate to a section usually named \"__stub_helper\" which calls the method \"dyld_stub_binder()\".<br /><br />" +
-      "\"dyld_stub_binder()\" sets the location to the pointer, and calls the method. Any method call to the same lazy pointer in other parts of machine code then locates straight to the method.<br /><br />" +
+      "\"dyld_stub_binder()\" sets the location to the pointer, and calls the method. Any method/function call to the same lazy pointer in other parts of machine code then locates straight to the method.<br /><br />" +
       "The lazy bind section only loads methods in as they are needed by locating to a small code in stud helper. The bind section must include \"dyld_stub_binder()\" as it is needed before the program starts.<br /><br />" +
       "The rebase section is used if the program is not placed at its pre-calculated address locations defined in the section load commands as it is occupied by another program.<br /><br />" +
       "The rebase section adjusts the locations in the lazy bind section as they locate to a pre-calculated position in a section usually named \"__stub_helper\" which calls the method \"dyld_stub_binder()\".<br /><br />" +
-      "If the program is offset by 50 bytes then every lazy pointer must be added by 50 to match the original position of the stud helper machine code instructions location.</html>" );
+      "If the program is offset by 50 bytes then every lazy pointer must be added by 50 to match the original position of the stud helper machine code instruction location.</html>" );
     }
     else
     {
@@ -1054,7 +1066,7 @@ public class LoadCMD extends Data
       info( "<html>The symbols define the method calls and function calls in a mac binary, exportable methods, and data.<br /><br />" +
       "A Mach binary uses a list of numbers called a pointer list for the location to a method call. The machine code in the binary reads the number set in the list and calls the method.<br /><br />" +
       "This way the binary or machine code never has to be modified. The section \"Symbol info\" organizes the symbols by symbol number in this list that locate to the method in the order the pointer list is in.<br /><br />" +
-      "The only time we load in link library methods using the symbol table is if there is no \"Link library setup\" section that uses the modern dylid linker format.<br /><br />" +
+      "The only time we load in link library methods using the symbol table is if there is no \"Link library setup\" section that uses the modern dyld linker format.<br /><br />" +
       "A modern Mach binary may keep only the debug symbols such as line numbers relative to machine code position, and locations of variable names.<br /><br />" +
       "Some Mach binaries may include everything in the symbol table to maintain backwards compatibility.</html>" );
     }
