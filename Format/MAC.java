@@ -155,33 +155,19 @@ public class MAC extends Data implements JDEventListener
 
     //Open compressed link edit info (rebase).
 
-    else if( arg == 2 ) { ds.clear(); ledit.rebaseInfo( e.getArg(1), e.getArg(2) ); }
+    else if( arg == 2 ) { ds.clear(); info( ledit.rebaseInfo( e.getArg(1), e.getArg(2) ) ); }
 
     //Display rebase actions.
 
-    else if( arg == 3 ) { ds.clear(); ledit.rebase( e.getArg(1), e.getArg(2) ); }
+    else if( arg == 3 ) { ds.clear(); info( ledit.rebase( e.getArg(1), e.getArg(2) ) ); }
   
-    //Open compressed link edit info (bind).
+    //Show detailed decoding of the compressed link edit info (bind).
 
-    else if( arg == 4 ) { ds.clear(); ledit.bindInfo( e.getArg(1), e.getArg(2) ); }
+    else if( arg == 4 ) { ds.clear(); info( ledit.bindInfo( e.getArg(1), e.getArg(2) ) ); }
 
     //Display the binding actions.
 
-    else if( arg == 5 )
-    {
-      ds.clear();
-
-      file.Events = false; bind[] b = ledit.bindSyms( e.getArg(1), e.getArg(2) ); file.Events = true;
-
-      try { file.seek( e.getArg(1) ); Offset.setSelected( e.getArg(1), e.getArg(2) ); } catch( java.io.IOException er ) { }
-
-      String out = "<table border='1'><tr><td>Set address.</td><td>Export method.</td></tr>";
-
-      if( is64bit ) { for( int i = 0; i < b.length; i++ ) { out += "<tr><td>" + String.format( "%1$016X", b[i].loc ) + "</td><td>" + b[i].name + "</td></tr>"; } }
-      else { for( int i = 0; i < b.length; i++ ) { out += "<tr><td>" + String.format( "%1$08X", b[i].loc ) + "</td><td>" + b[i].name + "</td></tr>"; } }
-
-      info( out + "</table>" );
-    }
+    else if( arg == 5 ) { ds.clear(); info( ledit.bindSyms( e.getArg(1), e.getArg(2), false ) ); }
 
     //Open compressed link edit info (export).
 
@@ -189,7 +175,7 @@ public class MAC extends Data implements JDEventListener
 
     //Decode an export node.
 
-    else if( arg == 7 ) { ds.clear(); ledit.export( e.getArg(1) ); }
+    else if( arg == 7 ) { ds.clear(); info( ledit.export( e.getArg(1) ) ); }
 
     //Optional info.
 

@@ -13,7 +13,7 @@ public class LoadCMD extends Data
 
     //Program start address.
 
-    long main = 0, bind = -1, lazyBind = -1;
+    long main = 0, bind = -1, lazyBind = -1, studs = -1;
     boolean mapped = false;
 
     //WE should divide sections by data.
@@ -117,18 +117,9 @@ public class LoadCMD extends Data
 
           flag &= 0xFF;
           
-          if( flag == 6 )
-          {
-            rPath.add( t ); bind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4) );
-          }
-          else if( flag == 7 )
-          {
-            rPath.add( t ); lazyBind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4) );
-          }
-          else if( flag == 8 )
-          {
-            ptr.add( new Pointers(address, vSize, stud_size) );
-          }
+          if( flag == 6 ) { rPath.add( t ); bind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4) ); }
+          else if( flag == 7 ) { rPath.add( t ); lazyBind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4) ); }
+          else if( flag == 8 ) { rPath.add( t ); studs = paths++; ptr.add( new Pointers(address, vSize, stud_size) ); }
 
           n2.add( t );
         }
@@ -445,17 +436,7 @@ public class LoadCMD extends Data
         
           //Bind the pointers.
 
-          if( core != null )
-          {
-            long tloc = file.getFilePointer(); bind[] syms = linkEdit.bindSyms( boff, boff + bsize );
-          
-            for( int func = 0; func < syms.length; func++ )
-            {
-              core.mapped_pos.add(syms[func].loc); core.mapped_pos.add(syms[func].loc + ( is64bit ? 8 : 4 ) ); core.mapped_loc.add( syms[func].name );
-            }
-          
-            file.seek( tloc );
-          }
+          if( core != null ) { long tloc = file.getFilePointer(); linkEdit.bindSyms( boff, boff + bsize, true ); file.seek( tloc ); }
         }
         
         if( wbsize > 0 )
@@ -468,17 +449,7 @@ public class LoadCMD extends Data
 
           //Bind the weak pointers.
 
-          if( core != null )
-          {
-            long tloc = file.getFilePointer(); bind[] syms = linkEdit.bindSyms( lboff, lboff + lbsize );
-                             
-            for( int func = 0; func < syms.length; func++ )
-            {
-              core.mapped_pos.add(syms[func].loc); core.mapped_pos.add(syms[func].loc + ( is64bit ? 8 : 4 ) ); core.mapped_loc.add( syms[func].name );
-            }
-                             
-            file.seek( tloc );
-          }
+          if( core != null ) { long tloc = file.getFilePointer(); linkEdit.bindSyms( lboff, lboff + lbsize, true ); file.seek( tloc ); }
         }
 
         if( lbsize > 0 )
@@ -493,17 +464,7 @@ public class LoadCMD extends Data
         
           //Bind the lazy pointers.
 
-          if( core != null )
-          {
-            long tloc = file.getFilePointer(); bind[] syms = linkEdit.bindSyms( lboff, lboff + lbsize );
-                   
-            for( int func = 0; func < syms.length; func++ )
-            {
-              core.mapped_pos.add(syms[func].loc); core.mapped_pos.add(syms[func].loc + ( is64bit ? 8 : 4 ) ); core.mapped_loc.add( syms[func].name );
-            }
-                   
-            file.seek( tloc );
-          }
+          if( core != null ) { long tloc = file.getFilePointer(); linkEdit.bindSyms( lboff, lboff + lbsize, true ); file.seek( tloc ); }
         }
         
         if( esize > 0 ) { tm =  new JDNode("Export", new long[]{ 0x4000000000000306L, eoff, eoff + esize - 1 } ); tm.add( new JDNode( "dummy" ) ); n1.add( tm ); }

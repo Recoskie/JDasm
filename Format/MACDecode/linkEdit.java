@@ -6,7 +6,7 @@ public class linkEdit extends Data
 {
   //Show full decoding of the method binding information.
 
-  public void bindInfo( long pos, long end )
+  public String bindInfo( long pos, long end )
   {
     byte[] d = new byte[(int)(end - pos)];
     
@@ -117,22 +117,22 @@ public class linkEdit extends Data
     }
     catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
 
-    file.Events = true; info(out + "</table></html>");
+    file.Events = true; return(out + "</table></html>");
   }
 
-  //Fully bind and decode the method calls.
+  //Fully bind and decode the method calls, or only return actions as string.
 
-  public static bind[] bindSyms( long pos, long end )
+  public static String bindSyms( long pos, long end, boolean bind )
   {
-    java.util.ArrayList<bind> syms = new java.util.ArrayList<bind>();
-
     byte[] d = new byte[(int)(end - pos)];
     
-    try { file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.read(d); } catch( java.io.IOException er ) {}
+    try { file.seek( pos ); if(!bind) { file.Events = false; file.seek( pos ); Offset.setSelected( pos, end - 1 ); } file.read(d); } catch( java.io.IOException er ) {}
 
     int Pos = 0, End = d.length;
 
-    String name = "";
+    String name = "", out = "", fmt = "";
+
+    if( !bind ){ out = "<table border='1'><tr><td>Set address.</td><td>Export method.</td></tr>"; fmt = is64bit ? "%1$016X" : "%1$08X"; }
 
     long loc = 0, offset = 0;
     int opcode = 0, arg = 0, bpos = 0, count = 1, ptr_size = is64bit ? 8 : 4;
@@ -162,7 +162,16 @@ public class linkEdit extends Data
         {
           if( !is64bit ){ loc &= 0x00000000FFFFFFFFL; }
 
-          for( int times = 0; times < count; times++ ) { syms.add( new bind( loc, name ) ); loc += offset + ptr_size; }
+          for( int times = 0; times < count; times++ )
+          {
+            if( bind )
+            {
+              core.mapped_pos.add( loc ); core.mapped_pos.add( loc + ptr_size ); core.mapped_loc.add( name );
+            }
+            else { out += "<tr><td>" + String.format( fmt, loc ) + "</td><td>" + name + "</td></tr>"; }
+            
+            loc += offset + ptr_size;
+          }
 
           count = 1;
         }
@@ -173,7 +182,7 @@ public class linkEdit extends Data
     }
     catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
 
-    return( syms.toArray( new bind[ syms.size() ] ) );
+    return( out + ( (file.Events = !bind) ? "</table>" : "" ) );
   }
 
   //The export section is not structured by opcodes like the other sections. Instead it is broken up into nodes that forum the method name.
@@ -228,7 +237,7 @@ public class linkEdit extends Data
 
   //Show the decoding of an single Export node.
 
-  public void export( long pos )
+  public String export( long pos )
   {
     String out = export + "<table border='1'><tr><td>Description</td><td>Hex</td><td>Value</td></tr>", pfx = "", hex = "";
 
@@ -264,12 +273,12 @@ public class linkEdit extends Data
     }
     catch( java.io.IOException er ) {}
 
-    file.Events = true; info( out + "</table></html>" );
+    file.Events = true; return( out + "</table></html>" );
   }
 
   //Show full decoding of the rebase information.
 
-  public void rebaseInfo( long pos, long end )
+  public String rebaseInfo( long pos, long end )
   {
     byte[] d = new byte[(int)(end - pos)];
     
@@ -343,16 +352,16 @@ public class linkEdit extends Data
     }
     catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
 
-    file.Events = true; info(out + "</table></html>");
+    file.Events = true; return(out + "</table></html>");
   }
 
   //Show decoding of only the rebase actions being carried out.
 
-  public void rebase( long pos, long end )
+  public String rebase( long pos, long end )
   {
     byte[] d = new byte[(int)(end - pos)];
     
-    try { file.seek( pos ); file.Events = false; file.seek( pos ); Offset.setSelected( pos, end - 1 ); file.Events = false; file.read(d); } catch( java.io.IOException er ) {}
+    try { file.seek( pos ); file.Events = false; Offset.setSelected( pos, end - 1 ); file.read(d); } catch( java.io.IOException er ) {}
 
     String out = "<html>Decoding of the link edit rebase information.<br /><br />" +
     "<table border='1'><tr><td>Adjust location</td><td>type</td></tr>";
@@ -402,7 +411,14 @@ public class linkEdit extends Data
     }
     catch( Exception er ) { } //Incase the file is corrupted and we read an bad opcode that goes out of bound of the import data. This way we still load what we can.
 
-    file.Events = true; info(out + "</table></html>");
+    file.Events = true; return(out + "</table></html>");
+  }
+
+  //Load the symbols as fast as possible, and bind methods if specified.
+
+  public void loadSyms( boolean dyld )
+  {
+    
   }
 
   //Descriptions on what everything is.
