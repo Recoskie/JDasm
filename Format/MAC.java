@@ -179,7 +179,7 @@ public class MAC extends Data implements JDEventListener
 
     //Load detailed decoding of the symbol table.
 
-    else if( arg == 8 ) { ds.clear(); ledit.decodeSyms( e.getArg(1), e.getArg(2), e.getArg(3), (JDNode)tree.getLastSelectedPathComponent() ); }
+    else if( arg == 8 ) { int r = ref; ledit.decodeSyms( e.getArg(1), e.getArg(2), e.getArg(3), (JDNode)tree.getLastSelectedPathComponent() ); ds.setDescriptor( des.get( r ) ); }
 
     //Optional info.
 

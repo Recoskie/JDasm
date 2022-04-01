@@ -505,13 +505,11 @@ public class linkEdit extends Data
 
   public void decodeSyms( long pos, long syms, long strOff, JDNode n )
   {
-    n.removeAllChildren(); file.Events= false;
-    
     try
     {
-      file.seek(pos); DTemp = new Descriptor( file ); DTemp.setEvent( this::symsInfo ); des.add( DTemp );
+      file.Events= false; file.seek(pos); DTemp = new Descriptor( file ); DTemp.setEvent( this::symsInfo ); des.add( DTemp );
     
-      ((JDNode)n).setArgs( new long[]{ -1, ref++ } );
+      n.removeAllChildren(); ((JDNode)n).setArgs( new long[]{ 0, ref++ } );
 
       JDNode Debug = new JDNode( "Debug", new long[]{ 0x4000000000000000L } );
 
