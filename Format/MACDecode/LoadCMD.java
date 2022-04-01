@@ -207,7 +207,7 @@ public class LoadCMD extends Data
         if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + ( csize << 2 ) - 1 } ) ); }
         if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + ( msize << 2 ) - 1 } ) ); }
         if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + ( rsize << 2 ) - 1 } ) ); }
-        if( indsize > 0 ) { n1.add( new JDNode("Indirect Symbols.h", new long[]{ 0x8000000000000002L, indoff, indoff + ( indsize << 2 ) - 1 } ) ); }
+        if( indsize > 0 ) { n1.add( new JDNode("Indirect Symbols.h", new long[]{ 0x8000000000000002L, indoff, indoff + indsize - 1 } ) ); }
         if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ 0x8000000000000002L, extoff, extoff + ( extsize << 2 ) - 1 } ) ); }
         if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ 0x8000000000000002L, loff, loff + ( lsize << 2 ) - 1 } ) ); }
 
