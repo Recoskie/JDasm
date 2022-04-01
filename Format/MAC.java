@@ -13,7 +13,7 @@ public class MAC extends Data implements JDEventListener
 
   //Mac header reader.
 
-  private static Headers header = new Headers();
+  private static Header header = new Header();
   private static LoadCMD commands = new LoadCMD();
   private static linkEdit ledit = new linkEdit();
   

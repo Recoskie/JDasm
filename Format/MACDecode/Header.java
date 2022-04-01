@@ -6,7 +6,7 @@ import javax.swing.tree.*;
 
 import core.x86.*;
 
-public class Headers extends Data
+public class Header extends Data
 {
   public JDNode readMAC( JDNode app ) throws java.io.IOException
   {
