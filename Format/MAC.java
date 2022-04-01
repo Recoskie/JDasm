@@ -40,7 +40,7 @@ public class MAC extends Data implements JDEventListener
     open( new JDEvent( this, "", new long[]{ 0x4000000000000000L, 0 } ) );
   }
 
-  public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; App = null; rPath.clear(); segment.clear(); sections.clear(); syms.clear(); ptr.clear(); if( core != null ) { core.resetMap(); } paths = 0; }
+  public void Uninitialize() { des = new java.util.ArrayList<Descriptor>(); ref = 0; DTemp = null; App = null; rPath.clear(); segment.clear(); sections.clear(); ptr.clear(); if( core != null ) { core.resetMap(); } paths = 0; }
 
   public void open(JDEvent e)
   {
@@ -176,6 +176,10 @@ public class MAC extends Data implements JDEventListener
     //Decode an export node.
 
     else if( arg == 7 ) { ds.clear(); info( ledit.export( e.getArg(1) ) ); }
+
+    //Load detailed decoding of the symbol table.
+
+    else if( arg == 8 ) { ds.clear(); ledit.decodeSyms( e.getArg(1), e.getArg(2), e.getArg(3), (JDNode)tree.getLastSelectedPathComponent() ); }
 
     //Optional info.
 

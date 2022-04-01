@@ -7,18 +7,40 @@ public class LoadCMD extends Data
 {
   public void load(JDNode root) throws java.io.IOException
   {
-    //Remove the dummy node.
+    //Remove the dummy node. Note that any sections located to by load commands should be processed after the load commands.
 
     if( App.getChildCount() > 0 ) { App.remove( 0 ); }
 
-    //Program start address.
+    //Program start address. Defined by load command 0x28.
 
-    long main = 0, bind = -1, lazyBind = -1, studs = -1;
-    boolean mapped = false;
+    long main = 0;
+
+    //When we dump sections to RAM memory we must pay attention to sections that are pointer lists that call linkable methods from other binaries.
+    //Sections with flag settings 6 to 8 as they are used by the indirect symbol table. The order the symbols go in is the order each pointer is loaded in.
+    
+    long bind = -1, lazyBind = -1, studs = -1;
+
+    //The symbol table defines address location in the file with names. The location can be a function, or variable name.
+    //Some symbols do not locates to a set of data, or method/function in the file as they are set 0 address location.
+    //Such symbols define the library the symbol can be found in which the address in that symbol in the other file is copied to this symbol.
+    //The symbol table is used by the indirect symbol table to tell us which symbols to set to pointers that the machine code reads and jumps to the method in the other binary.
+
+    int symOff = -1, symSize = 0, strOff = 0, strSize = 0;
+
+    //The indirect symbol table tells us which symbol by symbol number in the symbol list is each pointer across the pointer sections in the binary.
+    //These symbols often have address locations of other symbols copied into them from other binaries.
+
+    int indoff = -1, indsize = 0;
+    
+    //Modern Mach binaries do not use the indirect symbol table, but use a new compressed table that define the exact location of each pointer and method.
+    //It is normal for mach binaries to still have both. In which case we skip the indirect symbol table and map only the symbols with addresses not set 0.
+    //We then load in the pointers using the new format.
+
+    int boff = -1, wboff = -1, lboff = -1, bsize = 0, wbsize = 0, lbsize = 0;
 
     //WE should divide sections by data.
 
-    JDNode code = new JDNode( "Code Sections", new long[]{ 0xC0000000000000FFL } );
+    JDNode code = new JDNode( "Code Sections", new long[]{ 0xC000000000000000L } );
 
     int cmd = 0, size = 0, ordinal = 1;
 
@@ -131,115 +153,20 @@ public class LoadCMD extends Data
 
       else if( cmd == 0x02 )
       {
-        DTemp.LUINT32("Symbol Offset"); int off = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Number of symbol"); int len = (int)DTemp.value;
-        DTemp.LUINT32("String table offset"); int strOff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("String table size"); int strSize = (int)DTemp.value;
+        DTemp.LUINT32("Symbol Offset"); symOff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Number of symbol"); symSize = (int)DTemp.value;
+        DTemp.LUINT32("String table offset"); strOff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("String table size"); strSize = (int)DTemp.value;
 
         DTemp.setEvent( this::symInfo ); des.add( DTemp );
         
-        JDNode n2 = new JDNode( "Symbol Table", new long[]{ 0x4000000000000000L, ref++ } ); root.add( n2 );
+        JDNode n = new JDNode( "Symbol Table", new long[]{ 0x4000000000000000L, ref++ } ); root.add( n );
       
-        n2.add( new JDNode( "String table.h", new long[]{ 0x8000000000000002L, strOff, strOff + strSize - 1 } ) );
+        n.add( new JDNode( "String table.h", new long[]{ 0x8000000000000002L, strOff, strOff + strSize - 1 } ) );
 
-        JDNode n3 = new JDNode( "Symbols", new long[]{ 0x4000000000000000L, ref++ } ); n2.add( n3 );
+        JDNode n1 = new JDNode( "Symbols", new long[]{ 0x4000000000000008L, symOff, symSize, strOff } ); n1.add( new JDNode("Dummy") ); n.add( n1 );
 
-        JDNode Debug = new JDNode( "Debug", new long[]{ 0x4000000000000000L } );
-
-        JDNode Ordinals = new JDNode( "Ordinals", new long[]{ 0x4000000000000000L } );
-
-        JDNode External = new JDNode( "External", new long[]{ 0x4000000000000000L } );
-
-        JDNode ExternalP = new JDNode( "External Private", new long[]{ 0x4000000000000000L } );
-        
-        //Begin reading all the symbols.
-        
-        Descriptor string;
-
-        long t1 = file.getFilePointer(), t2 = 0;
-
-        file.seek(off); DTemp = new Descriptor( file ); DTemp.setEvent( this::symsInfo ); des.add( DTemp );
-
-        int name, type, DInfo; long loc;
-      
-        for( int i2 = 0; i2 < len; i2++ )
-        {
-          DTemp.Array("Symbol #" + i2 + "", is64bit ? 16 : 12 );
-          DTemp.LUINT32("Name"); name = (int)DTemp.value;
-          DTemp.UINT8("Type"); type = (byte)DTemp.value;
-          DTemp.UINT8("Section Number");
-          DTemp.LUINT16("Data info"); DInfo = (Short)DTemp.value & 0xFFFF;
-
-          if( is64bit ) { DTemp.LUINT64("Symbol offset"); loc = (long)DTemp.value; } else { DTemp.LUINT32("Symbol offset"); loc = (int)DTemp.value & 0x00000000FFFFFFFFL; }
-          
-          if( name != 0 )
-          {
-            t2 = file.getFilePointer(); file.seek( name + strOff );
-
-            string = new Descriptor( file ); string.setEvent( this::blank );
-
-            string.String8("Symbol name", (byte)0x00 ); if( string.value.equals("") ) { string.value = "No Name"; }
-
-            //Categorize the symbols.
-
-            if( ( DInfo & 0xFF00 ) != 0 )
-            {
-              Ordinals.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
-            }
-            else if( ( type & 0xE0 ) != 0 )
-            {
-              Debug.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
-            }
-            else if( ( type & 0x01 ) != 0 )
-            {
-              External.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
-            }
-            else if( ( type & 0x10 ) != 0 )
-            {
-              ExternalP.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
-            }
-            else
-            {
-              n3.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
-            }
-
-            des.add( string ); file.seek( t2 ); syms.add( new Syms( string.value + "", loc, type, DInfo ) );
-          }
-          else
-          {
-            //Categorize the symbols.
-
-            if( ( DInfo & 0xFF00 ) != 0 )
-            {
-              Ordinals.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
-            }
-            else if( ( type & 0xE0 ) != 0 )
-            {
-              Debug.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
-            }
-            else if( ( type & 0x01 ) != 0 )
-            {
-              External.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
-            }
-            else if( ( type & 0x10 ) != 0 )
-            {
-              ExternalP.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
-            }
-            else
-            {
-              n3.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
-            }
-            
-            syms.add( new Syms( "No Name", loc, type, DInfo ) );
-          }
-        }
-
-        if( ExternalP.getChildCount() > 0 ) { n3.insert( ExternalP, 0 ); }
-        if( External.getChildCount() > 0 ) { n3.insert( External, 0 ); }
-        if( Ordinals.getChildCount() > 0 ) { n3.insert( Ordinals, 0 ); }
-        if( Debug.getChildCount() > 0 ) { n3.insert( Debug, 0 ); }
-
-        file.seek( t1 );
+        symSize = is64bit ? symSize << 4 : ( ( symSize << 2 ) + ( symSize << 3 ) ); //Each symbol is 12 bytes if 32 bit and is 16 bytes if 64 bit.
       }
 
       //Dynamic link edit symbol table.
@@ -262,8 +189,10 @@ public class LoadCMD extends Data
         DTemp.LUINT32("Offset to referenced symbol table"); int roff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("Number of referenced symbol table entries"); int rsize = (int)DTemp.value;
 
-        DTemp.LUINT32("File offset to the indirect symbol table"); int indoff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Number of indirect symbol table entries"); int indsize = (int)DTemp.value;
+        DTemp.LUINT32("File offset to the indirect symbol table"); indoff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Number of indirect symbol table entries"); indsize = (int)DTemp.value;
+
+        indsize <<= 2; //Each indirect entire is a 32 bit number specifying which symbol to map.
 
         DTemp.LUINT32("Offset to external relocation entries"); int extoff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("Number of external relocation entries"); int extsize = (int)DTemp.value;
@@ -275,45 +204,12 @@ public class LoadCMD extends Data
 
         JDNode n1 = new JDNode( "Symbol info", new long[]{ 0x4000000000000000L, ref++ } );
       
-        if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + csize * 4 - 1 } ) ); }
-        if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + msize * 4 - 1 } ) ); }
-        if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + rsize * 4 - 1 } ) ); }
-        if( indsize > 0 )
-        {
-          long t2 = file.getFilePointer(); file.seek( indoff );
-
-          Descriptor Decode = new Descriptor( file ); Decode.setEvent( this::blank ); des.add( Decode );
-
-          JDNode t = new JDNode("Indirect Sym", new long[]{ 0x4000000000000000L, ref++ } );
-
-          int sym = 0;
-
-          String name = "";
-
-          int Pointer = 0;
-          Pointers p = ptr.get( Pointer );
-          long Pos = p.loc;
-
-          for( int i2 = 0; i2 < indsize; i2++ )
-          {
-            Decode.LUINT32("Sym number"); sym = (int)Decode.value; name = ( ( sym & 0xC0000000 ) == 0 ) ? syms.get( sym ).name + "" : "";
-            
-            if( !name.equals("") ) { t.add( new JDNode( name + ".h" ) ); }
-
-            //If the function calls and methods are not already mapped, then we can start mapping them here old style.
-
-            if( !mapped )
-            {
-              core.mapped_pos.add(Pos); Pos += p.ptr_size; core.mapped_pos.add( Pos ); core.mapped_loc.add( name );
-
-              if( Pos >= p.size && ( Pointer + 1 ) < ptr.size() ){ Pointer += 1; p = ptr.get( Pointer ); Pos = p.loc; }
-            }
-          }
-
-          n1.add( t ); file.seek( t2 ); mapped = true;
-        }
-        if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ 0x8000000000000002L, extoff, extoff + extsize * 4 - 1 } ) ); }
-        if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ 0x8000000000000002L, loff, loff + lsize * 4 - 1 } ) ); }
+        if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + ( csize << 2 ) - 1 } ) ); }
+        if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + ( msize << 2 ) - 1 } ) ); }
+        if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + ( rsize << 2 ) - 1 } ) ); }
+        if( indsize > 0 ) { n1.add( new JDNode("Indirect Symbols.h", new long[]{ 0x8000000000000002L, indoff, indoff + ( indsize << 2 ) - 1 } ) ); }
+        if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ 0x8000000000000002L, extoff, extoff + ( extsize << 2 ) - 1 } ) ); }
+        if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ 0x8000000000000002L, loff, loff + ( lsize << 2 ) - 1 } ) ); }
 
         root.add( n1 );
       }
@@ -402,12 +298,12 @@ public class LoadCMD extends Data
       {
         DTemp.LUINT32("rebase offset"); int roff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("rebase size"); int rsize = (int)DTemp.value;
-        DTemp.LUINT32("bind offset"); int boff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("bind size"); int bsize = (int)DTemp.value;
-        DTemp.LUINT32("weak bind offset"); int wboff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("weak bind size"); int wbsize = (int)DTemp.value;
-        DTemp.LUINT32("lazy bind offset"); int lboff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("lazy bind size"); int lbsize = (int)DTemp.value;
+        DTemp.LUINT32("bind offset"); boff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("bind size"); bsize = (int)DTemp.value;
+        DTemp.LUINT32("weak bind offset"); wboff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("weak bind size"); wbsize = (int)DTemp.value;
+        DTemp.LUINT32("lazy bind offset"); lboff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("lazy bind size"); lbsize = (int)DTemp.value;
         DTemp.LUINT32("export offset"); int eoff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("export size"); int esize = (int)DTemp.value;
 
@@ -433,10 +329,6 @@ public class LoadCMD extends Data
           tm.add( new JDNode( "Opcodes.h", new long[]{ 4, boff, boff + bsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 5, boff, boff + bsize } ) );
           n1.add( tm );
-        
-          //Bind the pointers.
-
-          if( core != null ) { long tloc = file.getFilePointer(); linkEdit.bindSyms( boff, boff + bsize, true ); file.seek( tloc ); }
         }
         
         if( wbsize > 0 )
@@ -446,10 +338,6 @@ public class LoadCMD extends Data
           tm.add( new JDNode( "Opcodes.h", new long[]{ 4, wboff, wboff + wbsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 5, wboff, wboff + wbsize } ) );
           n1.add( tm );
-
-          //Bind the weak pointers.
-
-          if( core != null ) { long tloc = file.getFilePointer(); linkEdit.bindSyms( lboff, lboff + lbsize, true ); file.seek( tloc ); }
         }
 
         if( lbsize > 0 )
@@ -461,15 +349,11 @@ public class LoadCMD extends Data
           tm.add( new JDNode( "Opcodes.h", new long[]{ 4, lboff, lboff + lbsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 5, lboff, lboff + lbsize } ) );
           n1.add( tm );
-        
-          //Bind the lazy pointers.
-
-          if( core != null ) { long tloc = file.getFilePointer(); linkEdit.bindSyms( lboff, lboff + lbsize, true ); file.seek( tloc ); }
         }
         
         if( esize > 0 ) { tm =  new JDNode("Export", new long[]{ 0x4000000000000306L, eoff, eoff + esize - 1 } ); tm.add( new JDNode( "dummy" ) ); n1.add( tm ); }
 
-        root.add( n1 ); mapped = true;
+        root.add( n1 );
       }
 
       //Minimum OS version. Specifying platform and tools.
@@ -529,16 +413,22 @@ public class LoadCMD extends Data
       }
     }
 
-    //Load in data symbols.
+    //Load in symbols and methods.
 
-    Syms s = syms.get(0); for( int i = 0, e = syms.size(); i < e; s = syms.get( i++ ) )
+    if( core != null )
     {
-      if( !s.name.equals("") && s.loc != 0 ){ core.mapped_pos.add(s.loc); core.mapped_pos.add(s.loc + 1); core.mapped_loc.add( s.name ); }
+      //Modern Mack format.
+
+      if( wboff > 0 ) { linkEdit.bindSyms( wboff, wboff + wbsize, true ); }
+      if( lboff > 0 ) { linkEdit.bindSyms( lboff, lboff + lbsize, true ); }
+      if( boff > 0 ) { linkEdit.bindSyms( boff, boff + bsize, true ); }
+
+      //We only map the methods by symbol table if the modern compressed linker format is not present == -1.
+
+      linkEdit.mapSyms( symOff, symSize, strOff, strSize, indoff, indsize, ( wboff | lboff | boff ) == -1 );
     }
 
-    syms.clear();
-
-    //Sections that only machine code.
+    //Sections that only have machine code.
 
     if( code.getChildCount() > 0 ) { App.add( code ); }
 
@@ -716,57 +606,6 @@ public class LoadCMD extends Data
     "<html>This is the number of symbols at the symbol table offset.</html>",
     "<html>This is the file position to the string table. This value is added with the name value in the symbol table to find create the file position to the name of a symbol." + offsets + "</html>",
     "<html>This is the size of the string table. If the name value is bigger than the string table size then we know we are reading outside the names and that there is something wrong.</html>"
-  };
-
-  private static final String[] symsInfo = new String[]
-  {
-    "<html>Array element for defining one symbol.</html>",
-    "<html>The name value is added to the file position for the string table. If this value is 0 then the symbol has no name.</html>",
-    "<html>This value is broken into tow sections. First is the flag setting. Any of the binary digits that are set one correspond to the following settings.<br /><br />" +
-    "<table border='1'>" +
-    "<tr><td>Digit</td><td>Setting</td></tr>" +
-    "<tr><td>xxx00000</td><td>Combination for symbolic debugging entry type.</td></tr>" +
-    "<tr><td>00010000</td><td>Private external symbol.</td></tr>" +
-    "<tr><td>0000xxx0</td><td>Combination for the type setting.</td></tr>" +
-    "<tr><td>00000001</td><td>External symbol.</td></tr>" +
-    "</table><br /><br />" +
-    "The type setting uses the three digits marked as x in the above table as the type setting combination. The hyphens are used to separate the three bits for the type setting.<br /><br />" +
-    "<table border='1'>" +
-    "<tr><td>Combination</td><td>Setting</td></tr>" +
-    "<tr><td>0000-000-0</td><td>Symbol undefined.</td></tr>" +
-    "<tr><td>0000-001-0</td><td>Symbol absolute.</td></tr>" +
-    "<tr><td>0000-101-0</td><td>Symbol indirect.</td></tr>" +
-    "<tr><td>0000-110-0</td><td>Symbol prebound undefined.</td></tr>" +
-    "<tr><td>0000-111-0</td><td>Symbol defined in section number.</td></tr>" +
-    "</table></html>",
-    "<html>An integer specifying the section number that this symbol can be found in.<br /><br />" +
-    "Section numbers start at 1 so an value of 0 means no section. This means the symbol may be a method name in another file.<br /><br />" +
-    "If this symbol is an method in another file then the Data info felid will tell us which load link library command by ordinal.</html>",
-    "<html>The data info value setting describes additional information about the type of symbol this is.<br /><br />" +
-    "The Last 2 hex digits is the library ordinal. As we load link libraries we label them starting from library 1 to nth library as ordinals.<br /><br />" +
-    "If the symbol is not part of any section and section number is set 0, but has an non zero ordinal then it is a method name in a link library.<br /><br />" +
-    "An data info section with the last 2 hex digits set 03 07 would mean ordinal 07. We ignore the first 2 hex digits.<br /><br />" +
-    "The first 2 hex digits are used as 4 optional settings, and a 4 bit combination code. An digit that is set one corresponds to the following settings.<br /><br />" +
-    "<table border='1'>"+
-    "<tr><td>Digit</td><td>Setting</td></tr>" +
-    "<tr><td>0001-xxxx</td><td>Must be set for any defined symbol that is referenced by dynamic-loader.</td></tr>" +
-    "<tr><td>0010-xxxx</td><td>Used by the dynamic linker at runtime.</td></tr>" +
-    "<tr><td>0100-xxxx</td><td>If the dynamic linker cannot find a definition for this symbol, it sets the address of this symbol to 0.</td></tr>" +
-    "<tr><td>1000-xxxx</td><td>If the static linker or the dynamic linker finds another definition for this symbol, the definition is ignored.</td></tr>" +
-    "</table><br />" +
-    "The last four binary digits are used as a combination for the symbol function/method call type which are separated by a hyphen.<br /><br />" +
-    "These settings are used to define the type of function/method call that this symbol defines by ordinal.<br /><br />" +
-    "<table border='1'>" +
-    "<tr><td>Value</td><td>Description</td></tr>" +
-    "<tr><td>xxxx-0000</td><td>Non Lazy loaded pointer method call.</td></tr>" +
-    "<tr><td>xxxx-0001</td><td>Lazy loaded pointer method call.</td></tr>" +
-    "<tr><td>xxxx-0010</td><td>Method call defined in this library/program.</td></tr>" +
-    "<tr><td>xxxx-0011</td><td>Private Method call defined in this library/program.</td></tr>" +
-    "<tr><td>xxxx-0100</td><td>Private Non Lazy loaded pointer method call.</td></tr>" +
-    "<tr><td>xxxx-0101</td><td>Private Lazy loaded pointer method call.</td></tr>" +
-    "</table><br />" +
-    "A Pointer is a value that is read by the program to call a method from another binary file. Private means other programs are not meant to be able to read or call the methods other than the binary it's self.</html>",
-    "<html>The address location that the symbol is at.</html>",
   };
 
   private static final String[] osVerInfo = new String[]
@@ -1043,25 +882,6 @@ public class LoadCMD extends Data
     else
     {
       info( symInfo[i] );
-    }
-  }
-
-  private void symsInfo( int i )
-  {
-    if( i < 0 )
-    {
-      info( "<html>This is the symbol array. The symbol type and data info are divided into subfolders here.<br /><br />" +
-      "A symbol with an ordinal set in data info other than 0 means it is a method in a library load command with an ordinal number.<br /><br />" +
-      "Symbols that are of an ordinal type have a location of 0, and a section number of 0 meaning no section along the load commands.<br /><br />" +
-      "If we examine the symbol table in the linked library we will find the symbol defined as an external symbol with its position in the library.<br /><br />" +
-      "We set the ordinal symbol to the location of the external symbol. The rest of the function/method linker is carried out by the \"symbol info\" section.<br /><br />" +
-      "A debug symbol is put in its own category as it is used to define positions in the code relative to the original source code lines, so some symbols may have no names.<br /><br />" +
-      "External symbols that are readable from other binary files in this binary are stored into an external list.<br /><br />" +
-      "A full detailed breakdown of a symbol's type setting and data info can be viewed by clicking on the data fields in the symbol array.</html>" );
-    }
-    else
-    {
-      info( symsInfo[ i % 6 ] );
     }
   }
 

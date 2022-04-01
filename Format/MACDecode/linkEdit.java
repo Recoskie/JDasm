@@ -1,6 +1,7 @@
 package Format.MACDecode;
 
 import swingIO.tree.JDNode;
+import swingIO.Descriptor;
 
 public class linkEdit extends Data
 {
@@ -414,14 +415,271 @@ public class linkEdit extends Data
     file.Events = true; return(out + "</table></html>");
   }
 
-  //Load the symbols as fast as possible, and bind methods if specified.
+  //Faster mapping and loading of all symbols and methods.
 
-  public void loadSyms( boolean dyld )
+  public static void mapSyms( int symOff, int symSize, int strOff, int strSize, int indOff, int indSize, boolean dyld )
   {
+    byte[] syms = new byte[symSize], str = new byte[strSize], ind = new byte[indSize];
+
+    try
+    {
+      file.seek( symOff ); file.read(syms); file.seek( strOff ); file.read(str);
+
+      int pos = 0, namePos = 0; long Pos = 0; String name = "";
+
+      //We only add linkable symbol methods if the they are not mapped yet as modern Mach-O binaries use the compressed dyld linker.
     
+      if( dyld && indOff > 0 )
+      {
+        file.seek( indOff ); file.read(ind);
+
+        int symNum = 0, Pointer = 0; Pointers p = ptr.get( Pointer ); Pos = p.loc;
+
+        while( pos < ind.length )
+        {
+          symNum = ( ind[pos] & 0xFF ) | ( (ind[pos + 1] << 8) & 0xFF00 ) | ( (ind[pos + 2] << 16) & 0xFF0000 ) | ( (ind[pos + 3] << 24) & 0xFF000000 );
+
+          if( ( symNum & 0xC0000000 ) == 0 )
+          {
+            //The size and spacing of each symbol.
+
+            if( is64bit ) { symNum <<= 4; } else { symNum = ( symNum << 2 ) + ( symNum << 3 ); }
+
+            //The position for the symbol name in the string table.
+
+            namePos = ( syms[symNum] & 0xFF ) | ( (syms[symNum + 1] << 8) & 0xFF00 ) | ( (syms[symNum + 2] << 16) & 0xFF0000 ) | ( (syms[symNum + 3] << 24) & 0xFF000000 );
+
+            //Read the symbol name.
+
+            while( str[namePos] != 0 ){ name += (char)str[namePos++]; }
+          }
+          else { name = symNum < 0 ? "Local_Method" : "Absolute_Method"; }
+
+          //Map the method call.
+
+          core.mapped_pos.add(Pos); Pos += p.ptr_size; core.mapped_pos.add(Pos); core.mapped_loc.add(name); name = "";
+
+          //Move to the next pointer.
+
+          if( Pos >= p.size && ( Pointer + 1 ) < ptr.size() ){ Pointer += 1; p = ptr.get( Pointer ); Pos = p.loc; }
+
+          //Move to the next indirect symbol number.
+
+          pos += 4;
+        }
+  
+        pos = 0; name = "";
+      }
+
+      //This time we add all symbols that locate to variables or data, or callable methods locations in file.
+
+      while( pos < syms.length )
+      {
+        namePos = ( syms[pos] & 0xFF ) | ( (syms[pos + 1] << 8) & 0xFF00 ) | ( (syms[pos + 2] << 16) & 0xFF0000 ) | ( (syms[pos + 3] << 24) & 0xFF000000 ); pos += 8;
+
+        if( is64bit )
+        {
+          Pos = ( (long)syms[pos] & 0xFFL ) | ( ((long)syms[pos + 1] << 8) & 0xFF00L ) | ( ((long)syms[pos + 2] << 16) & 0xFF0000L ) | ( ((long)syms[pos + 3] << 24) & 0xFF000000L ) |
+          ( ( (long)syms[pos + 4] << 32 ) & 0xFF00000000L ) | ( ( (long)syms[pos + 5] << 40 ) & 0xFF0000000000L ) | ( ( (long)syms[pos + 6] << 48 ) & 0xFF000000000000L ) | ( ( (long)syms[pos + 7] << 56 ) & 0xFF00000000000000L ); pos += 8;
+        }
+        else
+        {
+          Pos = ( syms[pos] & 0xFF ) | ( (syms[pos + 1] << 8) & 0xFF00 ) | ( (syms[pos + 2] << 16) & 0xFF0000 ) | ( (syms[pos + 3] << 24) & 0xFF000000 ); pos += 4;
+        }
+        
+        //Check if Symbol address is defined, and Symbol name is not undefined.
+
+        if( Pos > 0 && namePos != 0 && str[namePos] != 0 )
+        {
+          while( str[namePos] != 0 ){ name += (char)str[namePos++]; }
+
+          //Define the symbol location.
+          
+          core.mapped_pos.add(Pos); core.mapped_pos.add(Pos); core.mapped_loc.add(name); name = "";
+        }
+      }      
+    } catch( Exception e ){ e.printStackTrace(); }
   }
 
-  //Descriptions on what everything is.
+  //Decode the symbol table in detail when the user wants to view the symbol table.
+
+  public void decodeSyms( long pos, long syms, long strOff, JDNode n )
+  {
+    n.removeAllChildren(); file.Events= false;
+    
+    try
+    {
+      file.seek(pos); DTemp = new Descriptor( file ); DTemp.setEvent( this::symsInfo ); des.add( DTemp );
+    
+      ((JDNode)n).setArgs( new long[]{ -1, ref++ } );
+
+      JDNode Debug = new JDNode( "Debug", new long[]{ 0x4000000000000000L } );
+
+      JDNode Ordinals = new JDNode( "Ordinals", new long[]{ 0x4000000000000000L } );
+
+      JDNode External = new JDNode( "External", new long[]{ 0x4000000000000000L } );
+
+      JDNode ExternalP = new JDNode( "External Private", new long[]{ 0x4000000000000000L } );
+    
+      //Begin reading all the symbols.
+    
+      Descriptor string; long t = 0;
+      
+      int name, type, DInfo;
+  
+      for( int i2 = 0; i2 < syms; i2++ )
+      {
+        DTemp.Array("Symbol #" + i2 + "", is64bit ? 16 : 12 );
+        DTemp.LUINT32("Name"); name = (int)DTemp.value;
+        DTemp.UINT8("Type"); type = (byte)DTemp.value;
+        DTemp.UINT8("Section Number");
+        DTemp.LUINT16("Data info"); DInfo = (Short)DTemp.value & 0xFFFF;
+
+        if( is64bit ) { DTemp.LUINT64("Symbol offset"); } else { DTemp.LUINT32("Symbol offset"); }
+      
+        if( name != 0 )
+        {
+          t = file.getFilePointer(); file.seek( name + strOff );
+
+          string = new Descriptor( file ); //string.setEvent( this::blank );
+
+          string.String8("Symbol name", (byte)0x00 ); if( string.value.equals("") ) { string.value = "No Name"; }
+
+          //Categorize the symbols.
+
+          if( ( DInfo & 0xFF00 ) != 0 )
+          {
+            Ordinals.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+          }
+          else if( ( type & 0xE0 ) != 0 )
+          {
+            Debug.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+          }
+          else if( ( type & 0x01 ) != 0 )
+          {
+            External.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+          }
+          else if( ( type & 0x10 ) != 0 )
+          {
+            ExternalP.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+          }
+          else
+          {
+            n.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+          }
+
+          des.add( string ); file.seek( t );
+        }
+        else
+        {
+          //Categorize the symbols.
+
+          if( ( DInfo & 0xFF00 ) != 0 )
+          {
+            Ordinals.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+          }
+          else if( ( type & 0xE0 ) != 0 )
+          {
+            Debug.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+          }
+          else if( ( type & 0x01 ) != 0 )
+          {
+            External.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+          }
+          else if( ( type & 0x10 ) != 0 )
+          {
+            ExternalP.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+          }
+          else
+          {
+            n.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+          }
+        }
+      }
+
+      if( ExternalP.getChildCount() > 0 ) { n.insert( ExternalP, 0 ); }
+      if( External.getChildCount() > 0 ) { n.insert( External, 0 ); }
+      if( Ordinals.getChildCount() > 0 ) { n.insert( Ordinals, 0 ); }
+      if( Debug.getChildCount() > 0 ) { n.insert( Debug, 0 ); }
+    }
+    catch( Exception e ) { e.printStackTrace(); }
+
+    file.Events = true;
+  }
+
+  //Description on the symbol table.
+
+  private static final String[] symsInfo = new String[]
+  {
+    "<html>Array element for defining one symbol.</html>",
+    "<html>The name value is added to the file position for the string table. If this value is 0 then the symbol has no name.</html>",
+    "<html>This value is broken into tow sections. First is the flag setting. Any of the binary digits that are set one correspond to the following settings.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Digit</td><td>Setting</td></tr>" +
+    "<tr><td>xxx00000</td><td>Combination for symbolic debugging entry type.</td></tr>" +
+    "<tr><td>00010000</td><td>Private external symbol.</td></tr>" +
+    "<tr><td>0000xxx0</td><td>Combination for the type setting.</td></tr>" +
+    "<tr><td>00000001</td><td>External symbol.</td></tr>" +
+    "</table><br /><br />" +
+    "The type setting uses the three digits marked as x in the above table as the type setting combination. The hyphens are used to separate the three bits for the type setting.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Combination</td><td>Setting</td></tr>" +
+    "<tr><td>0000-000-0</td><td>Symbol undefined.</td></tr>" +
+    "<tr><td>0000-001-0</td><td>Symbol absolute.</td></tr>" +
+    "<tr><td>0000-101-0</td><td>Symbol indirect.</td></tr>" +
+    "<tr><td>0000-110-0</td><td>Symbol prebound undefined.</td></tr>" +
+    "<tr><td>0000-111-0</td><td>Symbol defined in section number.</td></tr>" +
+    "</table></html>",
+    "<html>An integer specifying the section number that this symbol can be found in.<br /><br />" +
+    "Section numbers start at 1 so an value of 0 means no section. This means the symbol may be a method name in another file.<br /><br />" +
+    "If this symbol is an method in another file then the Data info felid will tell us which load link library command by ordinal.</html>",
+    "<html>The data info value setting describes additional information about the type of symbol this is.<br /><br />" +
+    "The Last 2 hex digits is the library ordinal. As we load link libraries we label them starting from library 1 to nth library as ordinals.<br /><br />" +
+    "If the symbol is not part of any section and section number is set 0, but has an non zero ordinal then it is a method name in a link library.<br /><br />" +
+    "An data info section with the last 2 hex digits set 03 07 would mean ordinal 07. We ignore the first 2 hex digits.<br /><br />" +
+    "The first 2 hex digits are used as 4 optional settings, and a 4 bit combination code. An digit that is set one corresponds to the following settings.<br /><br />" +
+    "<table border='1'>"+
+    "<tr><td>Digit</td><td>Setting</td></tr>" +
+    "<tr><td>0001-xxxx</td><td>Must be set for any defined symbol that is referenced by dynamic-loader.</td></tr>" +
+    "<tr><td>0010-xxxx</td><td>Used by the dynamic linker at runtime.</td></tr>" +
+    "<tr><td>0100-xxxx</td><td>If the dynamic linker cannot find a definition for this symbol, it sets the address of this symbol to 0.</td></tr>" +
+    "<tr><td>1000-xxxx</td><td>If the static linker or the dynamic linker finds another definition for this symbol, the definition is ignored.</td></tr>" +
+    "</table><br />" +
+    "The last four binary digits are used as a combination for the symbol function/method call type which are separated by a hyphen.<br /><br />" +
+    "These settings are used to define the type of function/method call that this symbol defines by ordinal.<br /><br />" +
+    "<table border='1'>" +
+    "<tr><td>Value</td><td>Description</td></tr>" +
+    "<tr><td>xxxx-0000</td><td>Non Lazy loaded pointer method call.</td></tr>" +
+    "<tr><td>xxxx-0001</td><td>Lazy loaded pointer method call.</td></tr>" +
+    "<tr><td>xxxx-0010</td><td>Method call defined in this library/program.</td></tr>" +
+    "<tr><td>xxxx-0011</td><td>Private Method call defined in this library/program.</td></tr>" +
+    "<tr><td>xxxx-0100</td><td>Private Non Lazy loaded pointer method call.</td></tr>" +
+    "<tr><td>xxxx-0101</td><td>Private Lazy loaded pointer method call.</td></tr>" +
+    "</table><br />" +
+    "A Pointer is a value that is read by the program to call a method from another binary file. Private means other programs are not meant to be able to read or call the methods other than the binary it's self.</html>",
+    "<html>The address location that the symbol is at.</html>",
+  };
+
+  private void symsInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>This is the symbol array. The symbol type and data info are divided into subfolders here.<br /><br />" +
+      "A symbol with an ordinal set in data info other than 0 means it is a method in a library load command with an ordinal number.<br /><br />" +
+      "Symbols that are of an ordinal type have a location of 0, and a section number of 0 meaning no section along the load commands.<br /><br />" +
+      "If we examine the symbol table in the linked library we will find the symbol defined as an external symbol with its position in the library.<br /><br />" +
+      "We set the ordinal symbol to the location of the external symbol. The rest of the function/method linker is carried out by the \"symbol info\" section.<br /><br />" +
+      "A debug symbol is put in its own category as it is used to define positions in the code relative to the original source code lines, so some symbols may have no names.<br /><br />" +
+      "External symbols that are readable from other binary files in this binary are stored into an external list.<br /><br />" +
+      "A full detailed breakdown of a symbol's type setting and data info can be viewed by clicking on the data fields in the symbol array.</html>" );
+    }
+    else
+    {
+      info( symsInfo[ i % 6 ] );
+    }
+  }
+
+  //Descriptions on what everything is in the compressed link edit table.
 
   private static final String ulib128 = "The first 7 binary digits are the value, and if the last binary digit is set one then we read the next value as the next 7 binary digits for the number.<br />" +
   "The last 7 binary digits for the number should end with a value that is smaller than 80 hex as the last binary digit should be zero.<br /><br />";
