@@ -207,13 +207,7 @@ public class LoadCMD extends Data
         if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + ( csize << 2 ) - 1 } ) ); }
         if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + ( msize << 2 ) - 1 } ) ); }
         if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + ( rsize << 2 ) - 1 } ) ); }
-        if( indsize > 0 )
-        {
-          JDNode n = new JDNode("Indirect Symbols", new long[]{ 0x8000000000000002L, indoff, indoff + indsize - 1 } );
-          n.add( new JDNode("Symbols.h", new long[]{ 9, indoff, indoff + indsize - 1 } ) );
-          n.add( new JDNode("Actions.h", new long[]{ 10, indoff, indoff + indsize - 1 } ) );
-          n1.add( n );
-        }
+        if( indsize > 0 ) { n1.add( new JDNode("Indirect Symbols.h", new long[]{ 9, symOff, symSize, strOff, strSize, indoff, indsize } ) ); }
         if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ 0x8000000000000002L, extoff, extoff + ( extsize << 2 ) - 1 } ) ); }
         if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ 0x8000000000000002L, loff, loff + ( lsize << 2 ) - 1 } ) ); }
 
@@ -879,8 +873,6 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>The symbols define the method calls and function calls in a mac binary, exportable methods, and data.<br /><br />" +
-      "A Mach binary uses a list of numbers called a pointer list for the location to a method call. The machine code in the binary reads the number set in the list and calls the method.<br /><br />" +
-      "This way the binary or machine code never has to be modified. The section \"Symbol info\" organizes the symbols by symbol number in this list that locate to the method in the order the pointer list is in.<br /><br />" +
       "The only time we load in link library methods using the symbol table is if there is no \"Link library setup\" section that uses the modern dyld linker format.<br /><br />" +
       "A modern Mach binary may keep only the debug symbols such as line numbers relative to machine code position, and locations of variable names.<br /><br />" +
       "Some Mach binaries may include everything in the symbol table to maintain backwards compatibility.</html>" );

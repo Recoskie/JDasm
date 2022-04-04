@@ -183,11 +183,7 @@ public class MAC extends Data implements JDEventListener
 
     //Read indirect symbol table.
 
-    else if( arg == 9 ) { int r = ref; ledit.decodeIndSym( e.getArg(1), e.getArg(2), (JDNode)tree.getLastSelectedPathComponent() ); ds.setDescriptor( des.get( r ) ); }
-
-    //Display the symbol binding actions.
-
-    else if( arg == 10 ) { ds.clear(); info( ledit.indSymInfo( e.getArg(1), e.getArg(2) ) ); }
+    else if( arg == 9 ) { int r = ref; ledit.decodeIndSym( e.getArg(5), e.getArg(6), (JDNode)tree.getLastSelectedPathComponent() ); ds.setDescriptor( des.get( r ) ); }
 
     //Optional info.
 

@@ -133,7 +133,7 @@ public class linkEdit extends Data
 
     String name = "", out = "", fmt = "";
 
-    if( !bind ){ out = "<table border='1'><tr><td>Set address.</td><td>Export method.</td></tr>"; fmt = is64bit ? "%1$016X" : "%1$08X"; }
+    if( !bind ){ out = "<table border='1'><tr><td>Set address.</td><td>Export method.</td></tr>"; fmt = fmt = is64bit ? "%1$016X" : "%1$08X"; }
 
     long loc = 0, offset = 0;
     int opcode = 0, arg = 0, bpos = 0, count = 1, ptr_size = is64bit ? 8 : 4;
@@ -289,7 +289,7 @@ public class linkEdit extends Data
 
     int Pos = 0, End = d.length;
 
-    String bind_type = "pointer", opcodeh = "", hex1 = "", hex2 = "", s = is64bit ? "8" : "4", fmt = is64bit ? "%1$016X" : "%1$08X";
+    String bind_type = "pointer", opcodeh = "", hex1 = "", hex2 = "", s = is64bit ? "8" : "4", fmt = is64bit ? "%1$016X" : "%1$08X";;
     long loc = 0, bloc = 0, offset = 0, mask = is64bit ? -1 : 0x00000000FFFFFFFFL;
     int opcode = 0, arg = 0, bpos = 0, count = 0, adj = 0;
 
@@ -506,6 +506,8 @@ public class linkEdit extends Data
   }
 
   //Decode the symbol table in detail when the user wants to view the symbol table.
+  //The reason for separating the detailed view from loading is for performance, but we end up
+  //using more memory because we can't pass the symbol names from detailed view to the core address map.
 
   public void decodeSyms( long pos, long syms, long strOff, JDNode n )
   {
@@ -613,11 +615,13 @@ public class linkEdit extends Data
 
   public void decodeIndSym( long pos, long size, JDNode n )
   {
-    file.Events = false;
+    file.Events = false; size += pos;
     
     try
     {
-      file.seek(pos); DTemp = new Descriptor( file ); des.add( DTemp ); n.setArgs( new long[]{ 0, ref++ } );
+      file.seek(pos); DTemp = new Descriptor( file ); des.add( DTemp ); DTemp.setEvent( this::indInfo );
+      
+      n.setArgs( new long[]{ 0, ref++, n.getArg(1), n.getArg(2), n.getArg(3), n.getArg(4), n.getArg(5), n.getArg(6) } );
 
       while( pos < size ) { DTemp.LUINT32("Symbol Number"); pos += 4; }
     }
@@ -626,12 +630,82 @@ public class linkEdit extends Data
     file.Events = true;
   }
 
-  //Create data descriptor for indirect symbol table.
+  //We do the same code as when we are mapping the symbols to show the actions.
+  //The reason for separating the detailed view from loading is for performance.
 
-  public String indSymInfo( long pos, long size )
+  public String indSymInfo( int symOff, int symSize, int strOff, int strSize, int indOff, int indSize )
   {
-    return("Symbol binding actions.");
+    String out = indInfo, name = "", fmt = is64bit ? "%1$016X" : "%1$08X";;
+
+    byte[] syms = new byte[symSize], str = new byte[strSize], ind = new byte[indSize];
+
+    try
+    {
+      file.Events = false; file.seek( symOff ); file.read(syms); file.seek( strOff ); file.read(str); file.seek( indOff ); file.read(ind);
+
+      int pos = 0, namePos = 0; long Pos = 0;
+
+      int symNum = 0, Pointer = 0; Pointers p = ptr.get( Pointer ); Pos = p.loc;
+
+      out += "Locating First pointer section in load commands " + String.format( fmt, p.loc ) + " to " + String.format( fmt, p.size ) + "";
+      out += ( ( p.ptr_size != (is64bit ? 8 : 4) ) ? ". Each jump instruction size " : ". Each pointer size " ) + p.ptr_size + ".";
+      out += "<br /><br /><table border='1'><tr><td>Hex</td><td>Symbol Number</td><td>Symbol Name</td><td>Location</td></tr>";
+
+      while( pos < ind.length )
+      {
+        symNum = ( ind[pos] & 0xFF ) | ( (ind[pos + 1] << 8) & 0xFF00 ) | ( (ind[pos + 2] << 16) & 0xFF0000 ) | ( (ind[pos + 3] << 24) & 0xFF000000 );
+
+        if( ( symNum & 0xC0000000 ) == 0 )
+        {
+          //The size and spacing of each symbol.
+
+          if( is64bit ) { symNum <<= 4; } else { symNum = ( symNum << 2 ) + ( symNum << 3 ); }
+
+          //The position for the symbol name in the string table.
+
+          namePos = ( syms[symNum] & 0xFF ) | ( (syms[symNum + 1] << 8) & 0xFF00 ) | ( (syms[symNum + 2] << 16) & 0xFF0000 ) | ( (syms[symNum + 3] << 24) & 0xFF000000 );
+
+          //Read the symbol name.
+
+          while( str[namePos] != 0 ){ name += (char)str[namePos++]; }
+        }
+        else { name = symNum < 0 ? "Local_Method" : "Absolute_Method"; }
+
+        //Map the method call.
+
+        out += "<tr><td>" + String.format("%1$02X", ind[pos] ) + " " + String.format("%1$02X", ind[pos + 1] ) + " " + String.format("%1$02X", ind[pos + 2] ) + " " + String.format("%1$02X", ind[pos + 3] ) + "</td>";
+        out += "<td>" + symNum + "</td><td>" + name + "</td><td>" + String.format( fmt, Pos ) + "</td></tr>";
+
+        Pos += p.ptr_size; name = "";
+
+        //Move to the next pointer.
+
+        if( Pos >= p.size && ( Pointer + 1 ) < ptr.size() )
+        {
+          Pointer += 1; p = ptr.get( Pointer ); Pos = p.loc;
+          out += "</table><br />Locating Next pointer section " + String.format( fmt, p.loc ) + " to " + String.format( fmt, p.size ) + "";
+          out += ( ( p.ptr_size != (is64bit ? 8 : 4) ) ? ". Each jump instruction size " : ". Each pointer size " ) + p.ptr_size + ".";
+          out += "<br /><br /><table border='1'><tr><td>Hex</td><td>Symbol Number</td><td>Symbol Name</td><td>Location</td></tr>";
+        }
+
+        //Move to the next indirect symbol number.
+
+        pos += 4;
+      }
+  
+      pos = 0; name = "";
+    }
+    catch( Exception e ){ e.printStackTrace(); }
+
+    file.Events = true; return( out + "</table></html>" );
   }
+
+  //Description on how the indirect symbol table is read.
+
+  private static final String indInfo = "<html>Any section under load commands with flag setting 6, or 7 (Lazy) set is a pointer list. We record the position of each of these sections as we dump them to Memory by load commands.<br /><br />" +
+  "Pointers are read by the machine code in the program as the location to jump to the method. Each pointer is 4 in size in 32 bit programs, and 8 in size for 64 bit programs.<br /><br />" +
+  "Any section under load commands with flag setting 8 is a jump list. This section is set machine code that should jump to the method. The size of each jump instruction is stored in the reserved2 value in the section load command.<br /><br />" +
+  "The symbol numbers tell us which symbol to set to each pointer across the pointer lists, and jump lists. The indirect symbol number list is structured to go in order to each pointer/jump section.<br /><br />";
 
   //Description on the symbol table.
 
@@ -646,7 +720,7 @@ public class linkEdit extends Data
     "<tr><td>00010000</td><td>Private external symbol.</td></tr>" +
     "<tr><td>0000xxx0</td><td>Combination for the type setting.</td></tr>" +
     "<tr><td>00000001</td><td>External symbol.</td></tr>" +
-    "</table><br /><br />" +
+    "</table><br />" +
     "The type setting uses the three digits marked as x in the above table as the type setting combination. The hyphens are used to separate the three bits for the type setting.<br /><br />" +
     "<table border='1'>" +
     "<tr><td>Combination</td><td>Setting</td></tr>" +
@@ -683,7 +757,7 @@ public class linkEdit extends Data
     "<tr><td>xxxx-0101</td><td>Private Lazy loaded pointer method call.</td></tr>" +
     "</table><br />" +
     "A Pointer is a value that is read by the program to call a method from another binary file. Private means other programs are not meant to be able to read or call the methods other than the binary it's self.</html>",
-    "<html>The address location that the symbol is at.</html>",
+    "<html>The address location that the symbol is at. If address is 0 and ordinal number is set, then the location is set by the matching external symbol name in the other file.</html>",
   };
 
   private void symsInfo( int i )
@@ -702,6 +776,18 @@ public class linkEdit extends Data
     else
     {
       info( symsInfo[ i % 6 ] );
+    }
+  }
+
+  private void indInfo( int i )
+  {
+    if( i < 0 )
+    {
+      long[] n = ((JDNode)tree.getLastSelectedPathComponent()).getArgs(); info( indSymInfo( (int)n[2], (int)n[3], (int)n[4], (int)n[5], (int)n[6], (int)n[7]) );
+    }
+    else
+    {
+      info("<html>Symbol number from the symbol table.</html>");
     }
   }
 
