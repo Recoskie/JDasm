@@ -273,10 +273,7 @@ public class JPEG extends Window.Window implements JDEventListener
       {
         a = ( node = (JDNode)nodes.getChildAt(i1)).getArgs();
 
-        if( m[i2] == ( a.length > 3 ? a[3] : -1 ) )
-        {
-          tree.setSelectionPath( new TreePath( node.getPath() ) ); open( new JDEvent(this, "", a ) );
-        }
+        if( m[i2] == ( a.length > 3 ? a[3] : -1 ) ) { tree.fireOpenEvent( node ); }
       }
     }
 
@@ -409,8 +406,6 @@ public class JPEG extends Window.Window implements JDEventListener
 
     else if( e.getArg(0) >= 0 )
     {
-      tree.expandPath( tree.getLeadSelectionPath() );
-
       if( e.getArgs().length == 2 ) { HuffTable = (int)e.getArg(1); }
 
       ds.setDescriptor(des.get((int)e.getArg(0)));
@@ -432,8 +427,6 @@ public class JPEG extends Window.Window implements JDEventListener
       {
         info("<html>This is one 8x8 square in the image. Each color can have a max of 64 values, or less.</html>");
       }
-
-      tree.expandPath( tree.getLeadSelectionPath() );
       
       Offset.setSelected( e.getArg(1), e.getArg(2) ); ds.clear();
     }
@@ -455,8 +448,6 @@ public class JPEG extends Window.Window implements JDEventListener
       catch( Exception er ) { er.printStackTrace(); }
 
       info("<html>" + imageData + "</html>"); ds.clear();
-
-      tree.expandPath( tree.getLeadSelectionPath() );
       
       Offset.setSelected( e.getArg(1), e.getArg(2) );
     }

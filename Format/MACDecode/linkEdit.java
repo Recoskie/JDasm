@@ -473,29 +473,33 @@ public class linkEdit extends Data
 
       //This time we add all symbols that locate to variables or data, or callable methods locations in file.
 
-      while( pos < syms.length )
+      int size = is64bit ? 8 : 4, type = 0; while( pos < syms.length )
       {
-        namePos = ( syms[pos] & 0xFF ) | ( (syms[pos + 1] << 8) & 0xFF00 ) | ( (syms[pos + 2] << 16) & 0xFF0000 ) | ( (syms[pos + 3] << 24) & 0xFF000000 ); pos += 8;
+        namePos = ( syms[pos] & 0xFF ) | ( (syms[pos + 1] << 8) & 0xFF00 ) | ( (syms[pos + 2] << 16) & 0xFF0000 ) | ( (syms[pos + 3] << 24) & 0xFF000000 ); type = syms[pos + 4]; pos += 8;
 
         if( is64bit )
         {
           Pos = ( (long)syms[pos] & 0xFFL ) | ( ((long)syms[pos + 1] << 8) & 0xFF00L ) | ( ((long)syms[pos + 2] << 16) & 0xFF0000L ) | ( ((long)syms[pos + 3] << 24) & 0xFF000000L ) |
-          ( ( (long)syms[pos + 4] << 32 ) & 0xFF00000000L ) | ( ( (long)syms[pos + 5] << 40 ) & 0xFF0000000000L ) | ( ( (long)syms[pos + 6] << 48 ) & 0xFF000000000000L ) | ( ( (long)syms[pos + 7] << 56 ) & 0xFF00000000000000L ); pos += 8;
+          ( ( (long)syms[pos + 4] << 32 ) & 0xFF00000000L ) | ( ( (long)syms[pos + 5] << 40 ) & 0xFF0000000000L ) | ( ( (long)syms[pos + 6] << 48 ) & 0xFF000000000000L ) | ( ( (long)syms[pos + 7] << 56 ) & 0xFF00000000000000L );
         }
         else
         {
-          Pos = ( syms[pos] & 0xFF ) | ( (syms[pos + 1] << 8) & 0xFF00 ) | ( (syms[pos + 2] << 16) & 0xFF0000 ) | ( (syms[pos + 3] << 24) & 0xFF000000 ); pos += 4;
+          Pos = ( syms[pos] & 0xFF ) | ( (syms[pos + 1] << 8) & 0xFF00 ) | ( (syms[pos + 2] << 16) & 0xFF0000 ) | ( (syms[pos + 3] << 24) & 0xFF000000 );
         }
+
+        pos += size;
         
         //Check if Symbol address is defined, and Symbol name is not undefined.
+        //We also skip Debug symbols as they are positions in machine code for line numbers and sections.
+        //The current core engine does not yet support line numbers.
 
-        if( Pos > 0 && namePos != 0 && str[namePos] != 0 )
+        if( Pos > 0 && namePos != 0 && str[namePos] != 0 && ( type & 0xE0 ) == 0 )
         {
           while( str[namePos] != 0 ){ name += (char)str[namePos++]; }
 
           //Define the symbol location.
           
-          core.mapped_pos.add(Pos); core.mapped_pos.add(Pos); core.mapped_loc.add(name); name = "";
+          core.mapped_pos.add(Pos); core.mapped_pos.add(Pos + size); core.mapped_loc.add(name); name = "";
         }
       }      
     } catch( Exception e ){ e.printStackTrace(); }
@@ -539,7 +543,7 @@ public class linkEdit extends Data
         {
           t = file.getFilePointer(); file.seek( name + strOff );
 
-          string = new Descriptor( file ); //string.setEvent( this::blank );
+          string = new Descriptor( file ); string.setEvent( this::string );
 
           string.String8("Symbol name", (byte)0x00 ); if( string.value.equals("") ) { string.value = "No Name"; }
 
@@ -603,6 +607,30 @@ public class linkEdit extends Data
     catch( Exception e ) { e.printStackTrace(); }
 
     file.Events = true;
+  }
+
+  //Create data descriptor for indirect symbol table.
+
+  public void decodeIndSym( long pos, long size, JDNode n )
+  {
+    file.Events = false;
+    
+    try
+    {
+      file.seek(pos); DTemp = new Descriptor( file ); des.add( DTemp ); n.setArgs( new long[]{ 0, ref++ } );
+
+      while( pos < size ) { DTemp.LUINT32("Symbol Number"); pos += 4; }
+    }
+    catch(Exception e) { e.printStackTrace(); }
+
+    file.Events = true;
+  }
+
+  //Create data descriptor for indirect symbol table.
+
+  public String indSymInfo( long pos, long size )
+  {
+    return("Symbol binding actions.");
   }
 
   //Description on the symbol table.
@@ -675,6 +703,11 @@ public class linkEdit extends Data
     {
       info( symsInfo[ i % 6 ] );
     }
+  }
+
+  private void string( int i )
+  {
+    info("<html>The end if the symbols name is defined by the first byte that is 00.</html>");
   }
 
   //Descriptions on what everything is in the compressed link edit table.

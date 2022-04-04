@@ -172,8 +172,6 @@ public class BMP extends Window.Window implements JDEventListener
 
     else if( e.getArg(0) == 3 )
     {
-      tree.expandPath( tree.getLeadSelectionPath() );
-
       try
       {
         if( runLen )

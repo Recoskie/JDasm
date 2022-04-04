@@ -93,10 +93,6 @@ public class ELF extends Data implements JDEventListener
     "</table></html>"
   };
 
-  //Expand sections once on single click.
-
-  private boolean[] expandOnce = new boolean[]{ true, true, true, true, true, true, true, true, true, true };
-
   //Read the ELF binary.
 
   public ELF()
@@ -202,11 +198,7 @@ public class ELF extends Data implements JDEventListener
 
     else if( e.getArgs().length == 1 )
     {
-      if( e.getArg(0) >= 0 )
-      {
-        if( expandOnce[ (int)e.getArg(0) ] ){ expandOnce[ (int)e.getArg(0) ] = false; tree.expandPath( tree.getLeadSelectionPath() ); }
-        info(SInfo[(int)e.getArg(0)]); ds.clear();
-      }
+      if( e.getArg(0) >= 0 ) { info(SInfo[(int)e.getArg(0)]); ds.clear(); }
       else
       {
         info("<html></html>"); ds.clear();
@@ -324,7 +316,6 @@ public class ELF extends Data implements JDEventListener
             ((DefaultTreeModel)tree.getModel()).nodeChanged( sections[el].getChildAt(i) );
           }
 
-          tree.expandPath( new TreePath( tree.getSelectionPath().getPath() ) );
           open( new JDEvent( this, "", ((JDNode)tree.getLastSelectedPathComponent()).getArgs() ) );
         }
       }

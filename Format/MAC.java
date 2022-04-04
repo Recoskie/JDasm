@@ -46,7 +46,7 @@ public class MAC extends Data implements JDEventListener
   {
     long val = e.getArg(0);
 
-    boolean cmd = ( val & 0x8000000000000000L ) != 0, expandNode = ( val & 0x4000000000000000L ) != 0;
+    boolean cmd = ( val & 0x8000000000000000L ) != 0;
 
     int arg = (int)val, CMDinfo = ( ( arg >> 8 ) & 0xFF ) - 1; arg &= 0xFF;
 
@@ -61,7 +61,7 @@ public class MAC extends Data implements JDEventListener
       if( arg == 5 )
       {
         tree.setSelectionPath( new TreePath( rPath.get((int)e.getArg(1)).getPath() ) );
-        tree.expandPath(tree.getLeadSelectionPath()); tree.scrollPathToVisible(tree.getLeadSelectionPath().getParentPath());
+        tree.scrollPathToVisible(tree.getLeadSelectionPath().getParentPath());
         open( new JDEvent( this, "", ((JDNode)tree.getLastSelectedPathComponent()).getArgs() ) ); return;
       }
 
@@ -149,7 +149,7 @@ public class MAC extends Data implements JDEventListener
         }
         catch(Exception er) { er.printStackTrace(); }
 
-        file.Events = true; tree.setSelectionPath( new TreePath( App.getPath() ) ); tree.expandPath( new TreePath( App.getPath() ) );
+        file.Events = true; tree.setSelectionPath( new TreePath( App.getPath() ) );
       }
     }
 
@@ -181,13 +181,17 @@ public class MAC extends Data implements JDEventListener
 
     else if( arg == 8 ) { int r = ref; ledit.decodeSyms( e.getArg(1), e.getArg(2), e.getArg(3), (JDNode)tree.getLastSelectedPathComponent() ); ds.setDescriptor( des.get( r ) ); }
 
+    //Read indirect symbol table.
+
+    else if( arg == 9 ) { int r = ref; ledit.decodeIndSym( e.getArg(1), e.getArg(2), (JDNode)tree.getLastSelectedPathComponent() ); ds.setDescriptor( des.get( r ) ); }
+
+    //Display the symbol binding actions.
+
+    else if( arg == 10 ) { ds.clear(); info( ledit.indSymInfo( e.getArg(1), e.getArg(2) ) ); }
+
     //Optional info.
 
     if( CMDinfo > 0 ) { info( MInfo[CMDinfo] ); }
-
-    //Expand node on click.
-
-    if( expandNode ) { tree.expandPath(tree.getLeadSelectionPath()); }
   }
 
   //Some nodes should require a small exploration as they carry out an command like selecting bytes.

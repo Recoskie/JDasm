@@ -40,7 +40,7 @@ public class LoadCMD extends Data
 
     //WE should divide sections by data.
 
-    JDNode code = new JDNode( "Code Sections", new long[]{ 0xC000000000000000L } );
+    JDNode code = new JDNode( "Code Sections", new long[]{ 0x8000000000000000L } );
 
     int cmd = 0, size = 0, ordinal = 1;
 
@@ -160,11 +160,11 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::symInfo ); des.add( DTemp );
         
-        JDNode n = new JDNode( "Symbol Table", new long[]{ 0x4000000000000000L, ref++ } ); root.add( n );
+        JDNode n = new JDNode( "Symbol Table", new long[]{ 0, ref++ } ); root.add( n );
       
         n.add( new JDNode( "String table.h", new long[]{ 0x8000000000000002L, strOff, strOff + strSize - 1 } ) );
 
-        JDNode n1 = new JDNode( "Symbols", new long[]{ 0x4000000000000008L, symOff, symSize, strOff } ); n1.add( new JDNode("Dummy") ); n.add( n1 );
+        JDNode n1 = new JDNode( "Symbols", new long[]{ 8, symOff, symSize, strOff } ); n1.add( new JDNode("Dummy") ); n.add( n1 );
 
         symSize = is64bit ? symSize << 4 : ( ( symSize << 2 ) + ( symSize << 3 ) ); //Each symbol is 12 bytes if 32 bit and is 16 bytes if 64 bit.
       }
@@ -202,12 +202,18 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::blank ); des.add( DTemp );
 
-        JDNode n1 = new JDNode( "Symbol info", new long[]{ 0x4000000000000000L, ref++ } );
+        JDNode n1 = new JDNode( "Symbol info", new long[]{ 0, ref++ } );
       
         if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + ( csize << 2 ) - 1 } ) ); }
         if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + ( msize << 2 ) - 1 } ) ); }
         if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + ( rsize << 2 ) - 1 } ) ); }
-        if( indsize > 0 ) { n1.add( new JDNode("Indirect Symbols.h", new long[]{ 0x8000000000000002L, indoff, indoff + indsize - 1 } ) ); }
+        if( indsize > 0 )
+        {
+          JDNode n = new JDNode("Indirect Symbols", new long[]{ 0x8000000000000002L, indoff, indoff + indsize - 1 } );
+          n.add( new JDNode("Symbols.h", new long[]{ 9, indoff, indoff + indsize - 1 } ) );
+          n.add( new JDNode("Actions.h", new long[]{ 10, indoff, indoff + indsize - 1 } ) );
+          n1.add( n );
+        }
         if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ 0x8000000000000002L, extoff, extoff + ( extsize << 2 ) - 1 } ) ); }
         if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ 0x8000000000000002L, loff, loff + ( lsize << 2 ) - 1 } ) ); }
 
@@ -309,11 +315,11 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::dynLoaderInfo ); des.add( DTemp );
 
-        JDNode n1 = new JDNode( "Link library setup", new long[]{ 0x4000000000000000L, ref++ } ), tm;
+        JDNode n1 = new JDNode( "Link library setup", new long[]{ 0, ref++ } ), tm;
 
         if( rsize > 0 )
         {
-          tm =  new JDNode("rebase", new long[]{ 0xC000000000000102L, roff, roff + rsize - 1 } );
+          tm =  new JDNode("rebase", new long[]{ 0x8000000000000102L, roff, roff + rsize - 1 } );
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 2, roff, roff + rsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 3, roff, roff + rsize } ) );
@@ -322,7 +328,7 @@ public class LoadCMD extends Data
         
         if( bsize > 0 )
         {
-          tm = new JDNode("bind", new long[]{ 0xC000000000000202L, boff, boff + bsize - 1 } );
+          tm = new JDNode("bind", new long[]{ 0x8000000000000202L, boff, boff + bsize - 1 } );
 
           if( bind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, bind } ) ); }
 
@@ -333,7 +339,7 @@ public class LoadCMD extends Data
         
         if( wbsize > 0 )
         {
-          tm = new JDNode("week bind", new long[]{ 0xC000000000000202L, wboff, wboff + wbsize - 1 } );
+          tm = new JDNode("week bind", new long[]{ 0x8000000000000202L, wboff, wboff + wbsize - 1 } );
 
           tm.add( new JDNode( "Opcodes.h", new long[]{ 4, wboff, wboff + wbsize } ) );
           tm.add( new JDNode( "Actions.h", new long[]{ 5, wboff, wboff + wbsize } ) );
@@ -342,7 +348,7 @@ public class LoadCMD extends Data
 
         if( lbsize > 0 )
         {
-          tm = new JDNode("lazy bind", new long[]{ 0xC000000000000202L, lboff, lboff + lbsize - 1 } );
+          tm = new JDNode("lazy bind", new long[]{ 0x8000000000000202L, lboff, lboff + lbsize - 1 } );
 
           if( lazyBind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, lazyBind } ) ); }
 
@@ -351,7 +357,7 @@ public class LoadCMD extends Data
           n1.add( tm );
         }
         
-        if( esize > 0 ) { tm =  new JDNode("Export", new long[]{ 0x4000000000000306L, eoff, eoff + esize - 1 } ); tm.add( new JDNode( "dummy" ) ); n1.add( tm ); }
+        if( esize > 0 ) { tm =  new JDNode("Export", new long[]{ 0x0306L, eoff, eoff + esize - 1 } ); tm.add( new JDNode( "Dummy" ) ); n1.add( tm ); }
 
         root.add( n1 );
       }
