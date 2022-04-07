@@ -122,10 +122,10 @@ public class LoadCMD extends Data
           DTemp.LUINT32("Relocations Offset");
           DTemp.LUINT32("Relocations");
           DTemp.LUINT32("flags"); int flag = (int)DTemp.value;
-          DTemp.LUINT32("Reserved");
-          DTemp.LUINT32("Reserved"); int stud_size = (int)DTemp.value;
+          DTemp.LUINT32("Reserved1");
+          DTemp.LUINT32("Reserved2"); int stud_size = (int)DTemp.value;
           
-          if( is64bit ) { DTemp.LUINT32("Reserved"); }
+          if( is64bit ) { DTemp.LUINT32("Reserved3"); }
 
           //Section contains only machine code.
 
@@ -158,7 +158,7 @@ public class LoadCMD extends Data
         DTemp.LUINT32("String table offset"); strOff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("String table size"); strSize = (int)DTemp.value;
 
-        DTemp.setEvent( this::symInfo ); des.add( DTemp );
+        DTemp.setEvent( this::symDataInfo ); des.add( DTemp );
         
         JDNode n = new JDNode( "Symbol Table", new long[]{ 0, ref++ } ); root.add( n );
       
@@ -200,7 +200,7 @@ public class LoadCMD extends Data
         DTemp.LUINT32("Offset to local relocation entries"); int loff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("Number of local relocation entries"); int lsize = (int)DTemp.value;
 
-        DTemp.setEvent( this::blank ); des.add( DTemp );
+        DTemp.setEvent( this::symInfo ); des.add( DTemp );
 
         JDNode n1 = new JDNode( "Symbol info", new long[]{ 0, ref++ } );
       
@@ -599,13 +599,36 @@ public class LoadCMD extends Data
     "<html>Reserved for future use (for use on 64 bit programs only).</html>"
   };
 
-  private static final String[] symInfo = new String[]
+  private static final String[] symDataInfo = new String[]
   {
     cmdType, cmdSize,
     "<html>This is the file position to the symbol table." + offsets + "</html>",
     "<html>This is the number of symbols at the symbol table offset.</html>",
     "<html>This is the file position to the string table. This value is added with the name value in the symbol table to find create the file position to the name of a symbol." + offsets + "</html>",
     "<html>This is the size of the string table. If the name value is bigger than the string table size then we know we are reading outside the names and that there is something wrong.</html>"
+  };
+
+  private static final String[] symInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>Index to local symbols.</html>",
+    "<html>Number of local symbols.</html>",
+    "<html>Index to externally defined symbols.</html>",
+    "<html>Number of externally defined symbols.</html>",
+    "<html>Index to undefined symbols.</html>",
+    "<html>Number of undefined symbols.</html>",
+    "<html>File offset to table of contents.</html>",
+    "<html>Number of entries in table of contents.</html>",
+    "<html>File offset to module table.</html>",
+    "<html>Number of module table entries.</html>",
+    "<html>Offset to referenced symbol table.</html>",
+    "<html>Number of referenced symbol table entries.</html>",
+    "<html>File offset to the indirect symbol table.</html>",
+    "<html>Number of indirect symbol table entries.</html>",
+    "<html>Offset to external relocation entries.</html>",
+    "<html>Number of external relocation entries.</html>",
+    "<html>Offset to local relocation entries.</html>",
+    "<html>Number of local relocation entries.</html>"
   };
 
   private static final String[] osVerInfo = new String[]
@@ -778,9 +801,9 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>This is a binary we wish to load. Every binary has a symbol table that gives parts of the program names by locations.<br /><br />" +
+      info( "<html>This is a binary we wish to load. Every binary has a symbol table that gives parts of the program names for address locations.<br /><br />" +
       "Not all symbols locate to a section of code, and are defined by type. We can define symbols that use a library ordinal to spefiy which binary the external symbol can be found in.<br /><br />" +
-      "The symbol types are explained in detail in the symbol table. Additionaly mondern Mach binariyes use a new command called \"link library setup\".<br /><br />" +
+      "The symbol types are explained in detail in the \"symbol table\". Additionaly mondern Mach binariyes use a new command called \"link library setup\".<br /><br />" +
       "The command \"link library setup\" section should be used to setup methods/functions if present instead of the symbol table.<br /><br />" +
       "A Mach binary may inculde both sets of information to maintain compatibility to older systems.<br /><br />" +
       "The symbols that need to be set are a jump or call operation which are to be set to the location of an exportable method from another binary. We call these jumps and calls stubs.<br /><br />" +
@@ -868,12 +891,31 @@ public class LoadCMD extends Data
     }
   }
 
+  private void symDataInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>The symbols define the method calls and function calls in a mac binary, exportable functions/methods, and data.<br /><br />" +
+      "The only time we load in link library methods using the \"symbol table\", and \"Symbol info\" is if there is no \"Link library setup\" section that uses the modern dyld linker format.<br /><br />" +
+      "A modern Mach binary may keep only the debug symbols such as line numbers relative to machine code position, and locations of variable names.<br /><br />" +
+      "Some Mach binaries may include everything in the symbol table to maintain backwards compatibility.</html>" );
+    }
+    else
+    {
+      info( symDataInfo[i] );
+    }
+  }
+
   private void symInfo( int i )
   {
     if( i < 0 )
     {
-      info( "<html>The symbols define the method calls and function calls in a mac binary, exportable methods, and data.<br /><br />" +
-      "The only time we load in link library methods using the symbol table is if there is no \"Link library setup\" section that uses the modern dyld linker format.<br /><br />" +
+      info( "<html>This section uses the \"symbol table\" by symbol number to setup method/function calls using the \"indirect symbol\" list, and to speed up locating symbols in the \"symbol table\".<br /><br />" +
+      "The \"symbol table\" contains names with locations to methods/function and data in this binary as external/local, and also symbols that may specify the binary the symbol can be found in.<br /><br />" +
+      "When the dynamic linker wants to find a symbol with the matching name in the other binary it uses the external index as the starting point in the \"symbol table\".<br /><br />" +
+      "When the symbol is found it sets our symbol in our program to the location of the symbol in the other binary. This improves performance rather than going through all the symbols.<br /><br />" +
+      "This section organizes the symbol table for us and is used by the dynamic linker to setup the binaries method/function calls using the \"indirect symbol\" list.<br /><br />" +
+      "The only time we load in link library methods using the \"symbol table\", and \"Symbol info\" is if there is no \"Link library setup\" section that uses the modern dyld linker format.<br /><br />" +
       "A modern Mach binary may keep only the debug symbols such as line numbers relative to machine code position, and locations of variable names.<br /><br />" +
       "Some Mach binaries may include everything in the symbol table to maintain backwards compatibility.</html>" );
     }

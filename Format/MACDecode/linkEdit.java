@@ -443,7 +443,7 @@ public class linkEdit extends Data
           {
             //The size and spacing of each symbol.
 
-            if( is64bit ) { symNum <<= 4; } else { symNum = ( symNum << 2 ) + ( symNum << 3 ); }
+            symNum = is64bit ? symNum << 4 : ( symNum << 2 ) + ( symNum << 3 );
 
             //The position for the symbol name in the string table.
 
@@ -539,7 +539,7 @@ public class linkEdit extends Data
         DTemp.UINT8("Section Number");
         DTemp.LUINT16("Data info"); DInfo = (Short)DTemp.value & 0xFFFF;
 
-        if( is64bit ) { DTemp.LUINT64("Symbol offset"); } else { DTemp.LUINT32("Symbol offset"); }
+        if( is64bit ) { DTemp.LUINT64("Symbol Address"); } else { DTemp.LUINT32("Symbol Address"); }
       
         if( name != 0 )
         {
@@ -645,7 +645,7 @@ public class linkEdit extends Data
 
       int pos = 0, namePos = 0; long Pos = 0;
 
-      int symNum = 0, Pointer = 0; Pointers p = ptr.get( Pointer ); Pos = p.loc;
+      int symNum = 0, symPos = 0, Pointer = 0; Pointers p = ptr.get( Pointer ); Pos = p.loc;
 
       out += "Locating First pointer section in load commands " + String.format( fmt, p.loc ) + " to " + String.format( fmt, p.size ) + "";
       out += ( ( p.ptr_size != (is64bit ? 8 : 4) ) ? ". Each jump instruction size " : ". Each pointer size " ) + p.ptr_size + ".";
@@ -659,11 +659,11 @@ public class linkEdit extends Data
         {
           //The size and spacing of each symbol.
 
-          if( is64bit ) { symNum <<= 4; } else { symNum = ( symNum << 2 ) + ( symNum << 3 ); }
+          symPos = is64bit ? symNum << 4 : ( symNum << 2 ) + ( symNum << 3 );
 
           //The position for the symbol name in the string table.
 
-          namePos = ( syms[symNum] & 0xFF ) | ( (syms[symNum + 1] << 8) & 0xFF00 ) | ( (syms[symNum + 2] << 16) & 0xFF0000 ) | ( (syms[symNum + 3] << 24) & 0xFF000000 );
+          namePos = ( syms[symPos] & 0xFF ) | ( (syms[symPos + 1] << 8) & 0xFF00 ) | ( (syms[symPos + 2] << 16) & 0xFF0000 ) | ( (syms[symPos + 3] << 24) & 0xFF000000 );
 
           //Read the symbol name.
 
@@ -703,7 +703,7 @@ public class linkEdit extends Data
   //Description on how the indirect symbol table is read.
 
   private static final String indInfo = "<html>Any section under load commands with flag setting 6, or 7 (Lazy) set is a pointer list. We record the position of each of these sections as we dump them to Memory by load commands.<br /><br />" +
-  "Pointers are read by the machine code in the program as the location to jump to the method. Each pointer is 4 in size in 32 bit programs, and 8 in size for 64 bit programs.<br /><br />" +
+  "Pointers are read by the machine code in the program as the location to jump to the function/method. Each pointer is 4 in size in 32 bit programs, and 8 in size for 64 bit programs.<br /><br />" +
   "Any section under load commands with flag setting 8 is a jump list. This section is set machine code that should jump to the method. The size of each jump instruction is stored in the reserved2 value in the section load command.<br /><br />" +
   "The symbol numbers tell us which symbol to set to each pointer across the pointer lists, and jump lists. The indirect symbol number list is structured to go in order to each pointer/jump section.<br /><br />";
 
@@ -756,7 +756,7 @@ public class linkEdit extends Data
     "<tr><td>xxxx-0100</td><td>Private Non Lazy loaded pointer method call.</td></tr>" +
     "<tr><td>xxxx-0101</td><td>Private Lazy loaded pointer method call.</td></tr>" +
     "</table><br />" +
-    "A Pointer is a value that is read by the program to call a method from another binary file. Private means other programs are not meant to be able to read or call the methods other than the binary it's self.</html>",
+    "A Pointer is a value that is read by the program to call a method from another binary file. Private means other programs are not meant to be able to read or call the function/methods other than the binary it's self.</html>",
     "<html>The address location that the symbol is at. If address is 0 and ordinal number is set, then the location is set by the matching external symbol name in the other file.</html>",
   };
 
@@ -765,11 +765,12 @@ public class linkEdit extends Data
     if( i < 0 )
     {
       info( "<html>This is the symbol array. The symbol type and data info are divided into subfolders here.<br /><br />" +
-      "A symbol with an ordinal set in data info other than 0 means it is a method in a library load command with an ordinal number.<br /><br />" +
+      "Each library load command is labelled from ordinal 1 to nth library. We use the ordinal numbers to specify which link library to look in.<br /><br />" +
+      "A symbol with an ordinal set in \"data info\" other than 0 means it is a function/method in a link library.<br /><br />" +
       "Symbols that are of an ordinal type have a location of 0, and a section number of 0 meaning no section along the load commands.<br /><br />" +
       "If we examine the symbol table in the linked library we will find the symbol defined as an external symbol with its position in the library.<br /><br />" +
       "We set the ordinal symbol to the location of the external symbol. The rest of the function/method linker is carried out by the \"symbol info\" section.<br /><br />" +
-      "A debug symbol is put in its own category as it is used to define positions in the code relative to the original source code lines, so some symbols may have no names.<br /><br />" +
+      "A debug symbol is put in its own category as it is used to define address positions in the code relative to the original source code lines, so some symbols may have no names.<br /><br />" +
       "External symbols that are readable from other binary files in this binary are stored into an external list.<br /><br />" +
       "A full detailed breakdown of a symbol's type setting and data info can be viewed by clicking on the data fields in the symbol array.</html>" );
     }
