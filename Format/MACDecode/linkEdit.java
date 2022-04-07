@@ -768,14 +768,15 @@ public class linkEdit extends Data
     if( i < 0 )
     {
       info( "<html>This is the symbol array. The symbol type and data info are divided into subfolders here.<br /><br />" +
-      "Each library load command is labelled from ordinal 1 to nth library. We use the ordinal numbers to specify which link library to look in.<br /><br />" +
+      "Each link library we load is given a number starting from 1 incrementing upward. The ordinal number is used to specify which link library the method is in.<br /><br />" +
       "A symbol with an ordinal set in \"data info\" other than 0 means it is a function/method in a link library.<br /><br />" +
-      "Symbols that are of an ordinal type have a location of 0, and a section number of 0 meaning no section along the load commands.<br /><br />" +
-      "If we examine the symbol table in the linked library we will find the symbol defined as an external symbol with its position in the library.<br /><br />" +
-      "We set the ordinal symbol to the location of the external symbol. The rest of the function/method linker is carried out by the \"symbol info\" section.<br /><br />" +
+      "Symbols that are of an ordinal type have an address of 0, and a section number of 0 meaning no section along the load commands and are considered as undefined.<br /><br />" +
+      "If we examine the symbol table in the linked library we will find the symbol defined as an external symbol with its address in the library.<br /><br />" +
+      "We set the ordinal symbol to the address of the external symbol.<br /><br />" +
       "A debug symbol is put in its own category as it is used to define address positions in the code relative to the original source code lines, so some symbols may have no names.<br /><br />" +
-      "External symbols that are readable from other binary files in this binary are stored into an external list.<br /><br />" +
-      "A full detailed breakdown of a symbol's type setting and data info can be viewed by clicking on the data fields in the symbol array.</html>" );
+      "The Debug symbols are more commonly known as local symbols. External symbols that are readable from other binary files are put in their own category.<br /><br />" +
+      "A full detailed breakdown of a symbol's type setting and data info can be viewed by clicking on the data fields in the symbol array.<br /><br />" +
+      "The symbol array goes in order by symbol types local, external, undefined and is further organized by the \"symbol info\" load command.</html>" );
     }
     else
     {

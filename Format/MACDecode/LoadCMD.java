@@ -173,32 +173,32 @@ public class LoadCMD extends Data
 
       else if( cmd == 0x0B )
       {
-        DTemp.LUINT32("Local sym index");
+        DTemp.LUINT32("Local sym num");
         DTemp.LUINT32("Number of local symbols");
-        DTemp.LUINT32("Index to external sym");
+        DTemp.LUINT32("External sym num");
         DTemp.LUINT32("Number of external sym");
-        DTemp.LUINT32("Index to undefined sym");
+        DTemp.LUINT32("Undefined sym num");
         DTemp.LUINT32("Number of undefined sym");
 
         DTemp.LUINT32("Contents table offset"); int coff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Entries in table of contents"); int csize = (int)DTemp.value;
+        DTemp.LUINT32("Content table entries"); int csize = (int)DTemp.value;
 
-        DTemp.LUINT32("Offset to module table"); int moff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("number of module table entries"); int msize = (int)DTemp.value;
+        DTemp.LUINT32("Module table offset"); int moff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Module table entries"); int msize = (int)DTemp.value;
 
         DTemp.LUINT32("Offset to referenced symbol table"); int roff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("Number of referenced symbol table entries"); int rsize = (int)DTemp.value;
 
-        DTemp.LUINT32("File offset to the indirect symbol table"); indoff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Number of indirect symbol table entries"); indsize = (int)DTemp.value;
+        DTemp.LUINT32("Indirect symbol table offset"); indoff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Indirect symbol table entries"); indsize = (int)DTemp.value;
 
         indsize <<= 2; //Each indirect entire is a 32 bit number specifying which symbol to map.
 
-        DTemp.LUINT32("Offset to external relocation entries"); int extoff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Number of external relocation entries"); int extsize = (int)DTemp.value;
+        DTemp.LUINT32("External relocation offset"); int extoff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("External relocation entries"); int extsize = (int)DTemp.value;
 
-        DTemp.LUINT32("Offset to local relocation entries"); int loff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Number of local relocation entries"); int lsize = (int)DTemp.value;
+        DTemp.LUINT32("Local relocation offset"); int loff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Local relocation entries"); int lsize = (int)DTemp.value;
 
         DTemp.setEvent( this::symInfo ); des.add( DTemp );
 
@@ -621,12 +621,15 @@ public class LoadCMD extends Data
   private static final String[] symInfo = new String[]
   {
     cmdType, cmdSize,
-    "<html>Index to local symbols.</html>",
-    "<html>Number of local symbols.</html>",
-    "<html>Index to externally defined symbols.</html>",
-    "<html>Number of externally defined symbols.</html>",
-    "<html>Index to undefined symbols.</html>",
-    "<html>Number of undefined symbols.</html>",
+    "<html>The first symbol number in the symbol table that defines local symbols.<br /><br />" +
+    "Local symbols are generally things like debug symbols that store line numbers for address positions in code.</html>",
+    "<html>This is how many local symbols. The local symbols are grouped together one after another in the symbol table.</html>",
+    "<html>The first symbol number in the symbol table that defines external symbols.<br /><br />" +
+    "External symbols are locations in the program you can call as a method/function, or read data/value.</html>",
+    "<html>This is how many external symbols. The external symbols are grouped together one after another in the symbol table.</html>",
+    "<html>The first symbol number in the symbol table that defines undefined symbols.<br /><br />" +
+    "Undefined symbols are symbols that do not exist in this binary that have to be found as an external symbol in a link library.</html>",
+    "<html>This is how many undefined symbols. The undefined symbols are grouped together one after another in the symbol table.</html>",
     "<html>File offset to table of contents.</html>",
     "<html>Number of entries in table of contents.</html>",
     "<html>File offset to module table.</html>",
@@ -921,11 +924,14 @@ public class LoadCMD extends Data
     if( i < 0 )
     {
       info( "<html>The original set of symbol information in the \"Symbol table\" which contains the symbol names, and type must also be present when this load command is present.<br /><br />" +
-      "This section uses the \"symbol table\" by symbol number to setup method/function calls using the \"indirect symbol\" list, and to speed up locating symbols in the \"symbol table\".<br /><br />" +
-      "The \"symbol table\" contains names with locations to methods/function and data in this binary as external/local, and also symbols that may specify the binary the symbol can be found in.<br /><br />" +
-      "When the dynamic linker wants to find a symbol with the matching name in the other binary it uses the external index as the starting point in the \"symbol table\".<br /><br />" +
-      "When the symbol is found it sets our symbol in our program to the location of the symbol defined in the other binary. This improves performance rather than going through all the symbols.<br /><br />" +
-      "This section organizes the symbol table for us and is used by the dynamic linker to setup the binaries method/function calls using the \"indirect symbol\" list.<br /><br />" +
+      "This section uses the \"symbol table\" by symbol number. The \"symbol table\" is structured to go in order by symbol types Local, External, and Undeifnined.<br /><br />" +
+      "This section defines where symbols start in the \"Symbol table\" as types Local, External, and undefined. It specifies how many are grouped together in the \"Symbol table\".<br /><br />" +
+      "Undefined symbols are symbols that do not exist in any section of this binary, but exist in a link library.<br /><br />" +
+      "Each link library we load is given a number starting from 1 incrementing upward. The ordinal number is used to specify which link library the method is in.<br /><br />" +
+      "We handle undefined symbols by reading their ordinal number in the \"Symbol table\" and looking for the external symbol in the other binary.<br /><br />" +
+      "External symbols tell us where to read the \"symbol table\" to find number of external symbols. We use this to quickly check a binary for an external symbol for our undefined symbols.<br /><br />" +
+      "Local symbols are used for address locations in the programs code is a particular line number in the source code file. Used only for debugging code.<br /><br />" +
+      "Lastly the \"Indirect symbol\" table tells us which undefined symbols by number that call method/function for each pointer in the program.<br /><br />" +
       "The only time we load in link library methods using the \"symbol table\", and \"Symbol info\" is if there is no \"Link library setup\" section that uses the modern dyld linker format.<br /><br />" +
       "A modern Mach binary may keep only the debug symbols such as line numbers relative to machine code position, and locations of variable names.<br /><br />" +
       "Some Mach binaries may include everything in the symbol table to maintain backwards compatibility.</html>" );
