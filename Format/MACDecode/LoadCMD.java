@@ -18,7 +18,7 @@ public class LoadCMD extends Data
     //When we dump sections to RAM memory we must pay attention to sections that are pointer lists that call linkable methods from other binaries.
     //Sections with flag settings 6 to 8 as they are used by the indirect symbol table. The order the symbols go in is the order each pointer is loaded in.
     
-    long bind = -1, lazyBind = -1, studs = -1;
+    int bind = -1, lazyBind = -1, studs = -1;
 
     //The symbol table defines address location in the file with names. The location can be a function, or variable name.
     //Some symbols do not locates to a set of data, or method/function in the file as they are set 0 address location.
@@ -139,9 +139,9 @@ public class LoadCMD extends Data
 
           flag &= 0xFF;
           
-          if( flag == 6 ) { rPath.add( t ); bind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4) ); }
-          else if( flag == 7 ) { rPath.add( t ); lazyBind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4) ); }
-          else if( flag == 8 ) { rPath.add( t ); studs = paths++; ptr.add( new Pointers(address, vSize, stud_size) ); }
+          if( flag == 6 ) { rPath.add( t ); bind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4, bind)); }
+          else if( flag == 7 ) { rPath.add( t ); lazyBind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4, lazyBind) ); }
+          else if( flag == 8 ) { rPath.add( t ); studs = paths++; ptr.add( new Pointers(address, vSize, stud_size, studs) ); }
 
           n2.add( t );
         }
@@ -204,12 +204,22 @@ public class LoadCMD extends Data
 
         JDNode n1 = new JDNode( "Symbol info", new long[]{ 0, ref++ } );
       
-        if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + ( csize << 2 ) - 1 } ) ); }
-        if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + ( msize << 2 ) - 1 } ) ); }
-        if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + ( rsize << 2 ) - 1 } ) ); }
-        if( indsize > 0 ) { n1.add( new JDNode("Indirect Symbols.h", new long[]{ 9, symOff, symSize, strOff, strSize, indoff, indsize } ) ); }
-        if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ 0x8000000000000002L, extoff, extoff + ( extsize << 2 ) - 1 } ) ); }
-        if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ 0x8000000000000002L, loff, loff + ( lsize << 2 ) - 1 } ) ); }
+        if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + csize - 1 } ) ); }
+        if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + msize - 1 } ) ); }
+        if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + rsize - 1 } ) ); }
+        if( indsize > 0 )
+        {
+          JDNode n = new JDNode("Indirect Symbols", new long[]{ 9, symOff, symSize, strOff, strSize, indoff, indsize } );
+
+          Pointers p; for( int i2 = 0; i2 < ptr.size(); i2++ )
+          {
+            p = ptr.get(i2); n.add( new JDNode( rPath.get( p.node ).getUserObject().toString() + ".h", new long[]{ 0x8000000000000005L, p.node } ) );
+          }
+
+          n1.add( n );
+        }
+        if( extsize > 0 ) { n1.add( new JDNode("Export.h", new long[]{ 0x8000000000000002L, extoff, extoff + extsize - 1 } ) ); }
+        if( lsize > 0 ) { n1.add( new JDNode("Local.h", new long[]{ 0x8000000000000002L, loff, loff + lsize - 1 } ) ); }
 
         root.add( n1 );
       }
@@ -761,7 +771,7 @@ public class LoadCMD extends Data
     {
       info( "<html>This is a section. It labels a section within the loaded data segment.<br /><br />" +
       "Sections can be referenced by segment num/name, then section name, or only by section number. The first section number is 1 and we increment upward per section across load command.<br /><br />" +
-      "By starting at section 1 allows us to use section number 0 as no section. This is important if we want to define a callable method, but know it is not part of the pragram.<br /><br />" +
+      "By starting at section 1 allows us to use section number 0 as no section. This is important if we want to define a callable method, but know it is not part of the program.<br /><br />" +
       "Instead we use the symbol table to define the method name and which link library the method can be found in using the library load command number (ordinal).<br /><br />" +
       "The symbol table uses section numbers to tell us which part of the program the symbol can be found if not set 0.<br /><br />" +
       "<table border='1'>" +
@@ -910,10 +920,11 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>This section uses the \"symbol table\" by symbol number to setup method/function calls using the \"indirect symbol\" list, and to speed up locating symbols in the \"symbol table\".<br /><br />" +
+      info( "<html>The original set of symbol information in the \"Symbol table\" which contains the symbol names, and type must also be present when this load command is present.<br /><br />" +
+      "This section uses the \"symbol table\" by symbol number to setup method/function calls using the \"indirect symbol\" list, and to speed up locating symbols in the \"symbol table\".<br /><br />" +
       "The \"symbol table\" contains names with locations to methods/function and data in this binary as external/local, and also symbols that may specify the binary the symbol can be found in.<br /><br />" +
       "When the dynamic linker wants to find a symbol with the matching name in the other binary it uses the external index as the starting point in the \"symbol table\".<br /><br />" +
-      "When the symbol is found it sets our symbol in our program to the location of the symbol in the other binary. This improves performance rather than going through all the symbols.<br /><br />" +
+      "When the symbol is found it sets our symbol in our program to the location of the symbol defined in the other binary. This improves performance rather than going through all the symbols.<br /><br />" +
       "This section organizes the symbol table for us and is used by the dynamic linker to setup the binaries method/function calls using the \"indirect symbol\" list.<br /><br />" +
       "The only time we load in link library methods using the \"symbol table\", and \"Symbol info\" is if there is no \"Link library setup\" section that uses the modern dyld linker format.<br /><br />" +
       "A modern Mach binary may keep only the debug symbols such as line numbers relative to machine code position, and locations of variable names.<br /><br />" +

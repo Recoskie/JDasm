@@ -705,7 +705,10 @@ public class linkEdit extends Data
   private static final String indInfo = "<html>Any section under load commands with flag setting 6, or 7 (Lazy) set is a pointer list. We record the position of each of these sections as we dump them to Memory by load commands.<br /><br />" +
   "Pointers are read by the machine code in the program as the location to jump to the function/method. Each pointer is 4 in size in 32 bit programs, and 8 in size for 64 bit programs.<br /><br />" +
   "Any section under load commands with flag setting 8 is a jump list. This section is set machine code that should jump to the method. The size of each jump instruction is stored in the reserved2 value in the section load command.<br /><br />" +
-  "The symbol numbers tell us which symbol to set to each pointer across the pointer lists, and jump lists. The indirect symbol number list is structured to go in order to each pointer/jump section.<br /><br />";
+  "The symbol numbers tell us which symbol to set to each pointer across the pointer lists, and jump lists. The indirect symbol number list is structured to go in order to each pointer/jump section.<br /><br />" +
+  "There are two symbol numbers that are used to define pointers that locate to a method in the file and are not dynamically loaded, and have no name.<br /><br />" +
+  "2147483648 = Local_Method meaning the pointer its self locates to the method relative (Local method).<br /><br />" +
+  "1073741824 = Absolute_Method meaning the pointer locates to the exact address of a method.<br /><br />";
 
   //Description on the symbol table.
 
@@ -788,7 +791,9 @@ public class linkEdit extends Data
     }
     else
     {
-      info("<html>Symbol number from the symbol table.</html>");
+      info("<html>Symbol number from the symbol table. There are two Special symbol number types.<br /><br />" +
+      "2147483648 = Local_Method meaning the pointer its self locates to the method and that there is no method name (Local method).<br /><br />" +
+      "1073741824 = Absolute_Method meaning the pointer locates to the exact address of a method elsewhere.</html>");
     }
   }
 
