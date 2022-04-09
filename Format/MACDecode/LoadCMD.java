@@ -265,6 +265,51 @@ public class LoadCMD extends Data
 
         root.add( new JDNode( "Start Address.h", new long[]{ 0, ref++ } ) );
       }
+    
+      //Thread save state. Command only supports x86, and ARM cores.
+
+      else if( cmd == 0x04 || cmd == 0x05 )
+      {
+        long t = file.getFilePointer(); file.read(4); int type = file.toLInt() - 1; file.seek( t );
+        int reg = 0, rs = 0;
+        boolean start = false;
+
+        if( coreType == 7 && type >= 0 && type <= 24 )
+        {
+          String[] regs = threadStates.x86regs[type]; int[] rSize = threadStates.x86size[type];
+
+          if( rSize.length > regs.length )
+          {
+            rs = is64bit ? rSize[2] : rSize[1]; regs = threadStates.x86regs[rs]; rSize = threadStates.x86size[rs];
+          }
+          
+          DTemp.LUINT32(regs[reg++]); DTemp.LUINT32("Count");
+
+          size -= 8; while( reg < rSize.length && ( size - ( rs = rSize[reg] ) ) >= 0 )
+          {
+            start = rs < 0; if( start ) { rs = -rs; }
+
+            if( rs == 4 ){ DTemp.LUINT32(regs[reg]); if( start ) { main = (int)DTemp.value; } }
+            else if( rs == 8 ){ DTemp.LUINT64(regs[reg]); if( start ) { main = (long)DTemp.value; } }
+            else if( rs == 2 ){ DTemp.LUINT16(regs[reg]); }
+            else if( rs == 1 ){ DTemp.INT8(regs[reg]); }
+            else { DTemp.Other(regs[reg], rs); }
+
+            size -= rs; reg++;
+          }
+
+          if( size > 0 ){ DTemp.Other("???", size ); }
+        }
+        else
+        {
+          DTemp.LUINT32(( coreType == 7 || coreType == 12 ) ? "BAD Thread Type" : "BAD CPU");
+          DTemp.LUINT32("Count"); DTemp.Other("???", size);
+        }
+      
+        DTemp.setEvent( this::stateInfo ); des.add( DTemp );
+      
+        root.add( new JDNode( "Thread State.h", new long[]{ 0, ref++ } ) );
+      }
 
       //The UUID.
 
@@ -421,6 +466,8 @@ public class LoadCMD extends Data
 
         root.add( new JDNode( "CMD #" + i + ".h", new long[]{ 0, ref++ } ) );
       }
+
+      if( cmd == 0x04 || cmd == 0x05 ){break;}
     }
 
     //Load in symbols and methods.
@@ -732,6 +779,13 @@ public class LoadCMD extends Data
     "<html>Stack memory size.</html>"
   };
 
+  private static final String[] stateInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>The saved state of the Processor.</html>",
+    "<html>Count is number of 32 bits. Note x86 has variable length registers so we pad some of them with reserved bytes to keep the count a multiple of 4 bytes.</html>"
+  };
+
   private void cmdInfo( int i )
   {
     if( i < 0 )
@@ -952,6 +1006,21 @@ public class LoadCMD extends Data
     {
       info( startInfo[i] );
     }
+  }
+
+  private void stateInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info("<html>The thread state command stores the state of the CPU inculding the processor instruction position register.<br /><br />" +
+      "Some older software use the thread state command to define the programs start address.<br /><br />" +
+      "It is recommended to use the new main entry point command to define the start address of the program.</html>");
+    }
+    else if( i < 4 )
+    {
+      info( stateInfo[i] );
+    }
+    else { info("<html>Value to set to an processor register.</html>"); }
   }
 
   private void blank( int i )

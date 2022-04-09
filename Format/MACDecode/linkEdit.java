@@ -770,7 +770,7 @@ public class linkEdit extends Data
       info( "<html>This is the symbol array. The symbol type and data info are divided into subfolders here.<br /><br />" +
       "Each link library we load is given a number starting from 1 incrementing upward. The ordinal number is used to specify which link library the method is in.<br /><br />" +
       "A symbol with an ordinal set in \"data info\" other than 0 means it is a function/method in a link library.<br /><br />" +
-      "Symbols that are of an ordinal type have an address of 0, and a section number of 0 meaning no section along the load commands and are considered as undefined.<br /><br />" +
+      "Symbols that are of an ordinal type have an address of 0, and a section number of 0 meaning no section along the load commands and are considered to be undefined.<br /><br />" +
       "If we examine the symbol table in the linked library we will find the symbol defined as an external symbol with its address in the library.<br /><br />" +
       "We set the ordinal symbol to the address of the external symbol.<br /><br />" +
       "A debug symbol is put in its own category as it is used to define address positions in the code relative to the original source code lines, so some symbols may have no names.<br /><br />" +
