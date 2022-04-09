@@ -274,15 +274,24 @@ public class LoadCMD extends Data
         int reg = 0, rs = 0;
         boolean start = false;
 
-        if( coreType == 7 && type >= 0 && type <= 24 )
+        String[] regs = new String[]{}; int[] rSize = new int[]{};
+
+        if( coreType == 7 && type >= 0 && type < 25 )
         {
-          String[] regs = threadStates.x86regs[type]; int[] rSize = threadStates.x86size[type];
+          regs = threadStates.x86regs[type]; rSize = threadStates.x86size[type];
 
           if( rSize.length > regs.length )
           {
             rs = is64bit ? rSize[2] : rSize[1]; regs = threadStates.x86regs[rs]; rSize = threadStates.x86size[rs];
           }
-          
+        }
+        else if( coreType == 12 && type >= 0 && type < 27 )
+        {
+          regs = threadStates.ARMregs[type]; rSize = threadStates.ARMsize[type]; 
+        }
+
+        if( regs.length > 0 ) 
+        {
           DTemp.LUINT32(regs[reg++]); DTemp.LUINT32("Count");
 
           size -= 8; while( reg < rSize.length && ( size - ( rs = rSize[reg] ) ) >= 0 )
@@ -466,8 +475,6 @@ public class LoadCMD extends Data
 
         root.add( new JDNode( "CMD #" + i + ".h", new long[]{ 0, ref++ } ) );
       }
-
-      if( cmd == 0x04 || cmd == 0x05 ){break;}
     }
 
     //Load in symbols and methods.
@@ -782,8 +789,8 @@ public class LoadCMD extends Data
   private static final String[] stateInfo = new String[]
   {
     cmdType, cmdSize,
-    "<html>The saved state of the Processor.</html>",
-    "<html>Count is number of 32 bits. Note x86 has variable length registers so we pad some of them with reserved bytes to keep the count a multiple of 4 bytes.</html>"
+    "<html>The save state of the Processor.</html>",
+    "<html>Count is number of 32 bits numbers. Note x86 has variable length registers so we pad some of them with reserved bytes to keep the count a multiple of 4 bytes.</html>"
   };
 
   private void cmdInfo( int i )
