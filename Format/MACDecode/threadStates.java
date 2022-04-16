@@ -16,7 +16,7 @@ public class threadStates
     {
       "x86_FLOAT_STATE32",
       "Reserved", "Reserved", "Control", "Status", "FTW", "Reserved", "FOP", "IP",
-	  "CS", "Reserved", "DP", "DS", "Reserved", "MXCSR", "MXCSRMASK",
+      "CS", "Reserved", "DP", "DS", "Reserved", "MXCSR", "MXCSRMASK",
       "MM0/ST0", "Reserved", "MM1/ST1", "Reserved", "MM2/ST2", "Reserved", "MM3/ST3", "Reserved",
       "MM4/ST4", "Reserved", "MM5/ST5", "Reserved", "MM6/ST6", "Reserved", "MM7/ST7", "Reserved",
       "XMM0", "XMM1", "XMM2", "XMM3", "XMM4", "XMM5", "XMM6", "XMM7",
@@ -34,7 +34,7 @@ public class threadStates
     {
       "x86_FLOAT_STATE64",
       "Reserved", "Reserved", "Control", "Status", "FTW", "Reserved", "FOP", "IP",
-	  "CS", "Reserved", "DP", "DS", "Reserved", "MXCSR", "MXCSRMASK",
+      "CS", "Reserved", "DP", "DS", "Reserved", "MXCSR", "MXCSRMASK",
       "MM0/ST0", "Reserved", "MM1/ST1", "Reserved", "MM2/ST2", "Reserved", "MM3/ST3", "Reserved",
       "MM4/ST4", "Reserved", "MM5/ST5", "Reserved", "MM6/ST6", "Reserved", "MM7/ST7", "Reserved",
       "XMM0", "XMM1", "XMM2", "XMM3", "XMM4", "XMM5", "XMM6", "XMM7",
@@ -48,7 +48,20 @@ public class threadStates
     new String[] { "x86_DEBUG_STATE32", "DR0", "DR1", "DR2", "DR3", "DR4", "DR5", "DR6", "DR7" },
     new String[] { "x86_DEBUG_STATE64", "DR0", "DR1", "DR2", "DR3", "DR4", "DR5", "DR6", "DR7" },
     new String[] { "x86_DEBUG_STATE" },
-    new String[] { "THREAD_STATE_NONE" }, new String[] { "x86_SAVED_STATE32" }, new String[] { "x86_SAVED_STATE64" },
+    new String[] { "THREAD_STATE_NONE" },
+    new String[]
+    {
+      "x86_SAVED_STATE32", "GS", "FS", "ES", "DS",
+      "EDI", "ESI", "EBP", "CR2", "EBX", "EDX", "ECX", "EAX",
+      "TRAPNO", "CPU", "ERR", "EIP", "CS", "EFL", "UESP", "SS"
+    },
+    new String[]
+    {
+      "x86_SAVED_STATE64", "RDI", "RSI", "RDX", "R10", "R8", "R9",
+      "CR2", "R15", "R14", "R13", "R12", "R11", "RBP", "RBX", "RCX", "RAX",
+      "GS", "FS", "DS", "ES",
+      "TRAPNO", "CPU", "PAD", "TRAPFN", "ERR", "RIP", "CS", "RFLAGS", "RSP", "SS"
+    },
     new String[]
     {
       "x86_AVX_STATE32",
@@ -148,7 +161,9 @@ public class threadStates
     new int[] { 4, 4, 4, 4, 4, 4, 4, 4, 4 },
     new int[] { 4, 8, 8, 8, 8, 8, 8, 8, 8 },
     new int[] { 4 }, //32=9, 64=10
-    new int[] { 4 }, new int[] { 4 }, new int[] { 4 },
+    new int[] { 4 },
+    new int[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 4, -4, 4, 4, 4, 4 },
+    new int[] { 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 2, 2, 4, 8, 8, -8, 8, 8, 8, 8 },
     new int[]
     {
       4, 4, 4, 2, 2, 1, 1, 2, -4, 2, 2, 4, 2, 2, 4, 4,

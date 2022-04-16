@@ -517,9 +517,9 @@ public class linkEdit extends Data
     
       n.removeAllChildren(); ((JDNode)n).setArgs( new long[]{ 0, ref++ } );
 
-      JDNode Debug = new JDNode( "Debug", new long[]{ 0x4000000000000000L } );
+      JDNode Debug = new JDNode( "Local (Debug)", new long[]{ 0x4000000000000000L } );
 
-      JDNode Ordinals = new JDNode( "Ordinals", new long[]{ 0x4000000000000000L } );
+      JDNode Ordinals = new JDNode( "Undefined (Library Function calls)", new long[]{ 0x4000000000000000L } );
 
       JDNode External = new JDNode( "External", new long[]{ 0x4000000000000000L } );
 
@@ -601,9 +601,9 @@ public class linkEdit extends Data
         }
       }
 
-      if( ExternalP.getChildCount() > 0 ) { n.insert( ExternalP, 0 ); }
-      if( External.getChildCount() > 0 ) { n.insert( External, 0 ); }
       if( Ordinals.getChildCount() > 0 ) { n.insert( Ordinals, 0 ); }
+      if( External.getChildCount() > 0 ) { n.insert( External, 0 ); }
+      if( ExternalP.getChildCount() > 0 ) { n.insert( ExternalP, 0 ); }
       if( Debug.getChildCount() > 0 ) { n.insert( Debug, 0 ); }
     }
     catch( Exception e ) { e.printStackTrace(); }

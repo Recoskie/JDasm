@@ -992,7 +992,7 @@ public class LoadCMD extends Data
       "We handle undefined symbols by reading their ordinal number in the \"Symbol table\" and looking for the external symbol in the other binary.<br /><br />" +
       "External symbols tell us where to read the \"symbol table\" to find number of external symbols. We use this to quickly check a binary for an external symbol for our undefined symbols.<br /><br />" +
       "Local symbols are used for address locations in the programs code is a particular line number in the source code file. Used only for debugging code.<br /><br />" +
-      "Lastly the \"Indirect symbol\" table tells us which undefined symbols by number that call method/function for each pointer in the program.<br /><br />" +
+      "Lastly the \"Indirect symbol\" table tells us which undefined symbols by number that call method/function for each pointer in the program, and jump table.<br /><br />" +
       "The only time we load in link library methods using the \"symbol table\", and \"Symbol info\" is if there is no \"Link library setup\" section that uses the modern dyld linker format.<br /><br />" +
       "A modern Mach binary may keep only the debug symbols such as line numbers relative to machine code position, and locations of variable names.<br /><br />" +
       "Some Mach binaries may include everything in the symbol table to maintain backwards compatibility.</html>" );
