@@ -505,6 +505,76 @@ public class linkEdit extends Data
     } catch( Exception e ){ e.printStackTrace(); }
   }
 
+  //We do the same code as when we are mapping the symbols to show the actions.
+  //The reason for separating the detailed view from loading is for performance.
+
+  public String indSymInfo( int symOff, int symSize, int strOff, int strSize, int indOff, int indSize )
+  {
+    String out = indInfo, name = "", fmt = is64bit ? "%1$016X" : "%1$08X";;
+
+    byte[] syms = new byte[symSize], str = new byte[strSize], ind = new byte[indSize];
+
+    try
+    {
+      file.Events = false; file.seek( symOff ); file.read(syms); file.seek( strOff ); file.read(str); file.seek( indOff ); file.read(ind);
+
+      int pos = 0, namePos = 0; long Pos = 0;
+
+      int symNum = 0, symPos = 0, Pointer = 0; Pointers p = ptr.get( Pointer ); Pos = p.loc;
+
+      out += "Locating First pointer section in load commands " + String.format( fmt, p.loc ) + " to " + String.format( fmt, p.size ) + "";
+      out += ( ( p.ptr_size != (is64bit ? 8 : 4) ) ? ". Each jump instruction size " : ". Each pointer size " ) + p.ptr_size + ".";
+      out += "<br /><br /><table border='1'><tr><td>Hex</td><td>Symbol Number</td><td>Symbol Name</td><td>Location</td></tr>";
+
+      while( pos < ind.length )
+      {
+        symNum = ( ind[pos] & 0xFF ) | ( (ind[pos + 1] << 8) & 0xFF00 ) | ( (ind[pos + 2] << 16) & 0xFF0000 ) | ( (ind[pos + 3] << 24) & 0xFF000000 );
+
+        if( ( symNum & 0xC0000000 ) == 0 )
+        {
+          //The size and spacing of each symbol.
+
+          symPos = is64bit ? symNum << 4 : ( symNum << 2 ) + ( symNum << 3 );
+
+          //The position for the symbol name in the string table.
+
+          namePos = ( syms[symPos] & 0xFF ) | ( (syms[symPos + 1] << 8) & 0xFF00 ) | ( (syms[symPos + 2] << 16) & 0xFF0000 ) | ( (syms[symPos + 3] << 24) & 0xFF000000 );
+
+          //Read the symbol name.
+
+          while( str[namePos] != 0 ){ name += (char)str[namePos++]; }
+        }
+        else { name = symNum < 0 ? "Local_Method" : "Absolute_Method"; }
+
+        //Map the method call.
+
+        out += "<tr><td>" + String.format("%1$02X", ind[pos] ) + " " + String.format("%1$02X", ind[pos + 1] ) + " " + String.format("%1$02X", ind[pos + 2] ) + " " + String.format("%1$02X", ind[pos + 3] ) + "</td>";
+        out += "<td>" + symNum + "</td><td>" + name + "</td><td>" + String.format( fmt, Pos ) + "</td></tr>";
+
+        Pos += p.ptr_size; name = "";
+
+        //Move to the next pointer.
+
+        if( Pos >= p.size && ( Pointer + 1 ) < ptr.size() )
+        {
+          Pointer += 1; p = ptr.get( Pointer ); Pos = p.loc;
+          out += "</table><br />Locating Next pointer section " + String.format( fmt, p.loc ) + " to " + String.format( fmt, p.size ) + "";
+          out += ( ( p.ptr_size != (is64bit ? 8 : 4) ) ? ". Each jump instruction size " : ". Each pointer size " ) + p.ptr_size + ".";
+          out += "<br /><br /><table border='1'><tr><td>Hex</td><td>Symbol Number</td><td>Symbol Name</td><td>Location</td></tr>";
+        }
+
+        //Move to the next indirect symbol number.
+
+        pos += 4;
+      }
+  
+      pos = 0; name = "";
+    }
+    catch( Exception e ){ e.printStackTrace(); }
+
+    file.Events = true; return( out + "</table></html>" );
+  }
+
   //Decode the symbol table in detail when the user wants to view the symbol table.
   //The reason for separating the detailed view from loading is for performance, but we end up
   //using more memory because we can't pass the symbol names from detailed view to the core address map.
@@ -631,76 +701,6 @@ public class linkEdit extends Data
     catch(Exception e) { e.printStackTrace(); }
 
     file.Events = true;
-  }
-
-  //We do the same code as when we are mapping the symbols to show the actions.
-  //The reason for separating the detailed view from loading is for performance.
-
-  public String indSymInfo( int symOff, int symSize, int strOff, int strSize, int indOff, int indSize )
-  {
-    String out = indInfo, name = "", fmt = is64bit ? "%1$016X" : "%1$08X";;
-
-    byte[] syms = new byte[symSize], str = new byte[strSize], ind = new byte[indSize];
-
-    try
-    {
-      file.Events = false; file.seek( symOff ); file.read(syms); file.seek( strOff ); file.read(str); file.seek( indOff ); file.read(ind);
-
-      int pos = 0, namePos = 0; long Pos = 0;
-
-      int symNum = 0, symPos = 0, Pointer = 0; Pointers p = ptr.get( Pointer ); Pos = p.loc;
-
-      out += "Locating First pointer section in load commands " + String.format( fmt, p.loc ) + " to " + String.format( fmt, p.size ) + "";
-      out += ( ( p.ptr_size != (is64bit ? 8 : 4) ) ? ". Each jump instruction size " : ". Each pointer size " ) + p.ptr_size + ".";
-      out += "<br /><br /><table border='1'><tr><td>Hex</td><td>Symbol Number</td><td>Symbol Name</td><td>Location</td></tr>";
-
-      while( pos < ind.length )
-      {
-        symNum = ( ind[pos] & 0xFF ) | ( (ind[pos + 1] << 8) & 0xFF00 ) | ( (ind[pos + 2] << 16) & 0xFF0000 ) | ( (ind[pos + 3] << 24) & 0xFF000000 );
-
-        if( ( symNum & 0xC0000000 ) == 0 )
-        {
-          //The size and spacing of each symbol.
-
-          symPos = is64bit ? symNum << 4 : ( symNum << 2 ) + ( symNum << 3 );
-
-          //The position for the symbol name in the string table.
-
-          namePos = ( syms[symPos] & 0xFF ) | ( (syms[symPos + 1] << 8) & 0xFF00 ) | ( (syms[symPos + 2] << 16) & 0xFF0000 ) | ( (syms[symPos + 3] << 24) & 0xFF000000 );
-
-          //Read the symbol name.
-
-          while( str[namePos] != 0 ){ name += (char)str[namePos++]; }
-        }
-        else { name = symNum < 0 ? "Local_Method" : "Absolute_Method"; }
-
-        //Map the method call.
-
-        out += "<tr><td>" + String.format("%1$02X", ind[pos] ) + " " + String.format("%1$02X", ind[pos + 1] ) + " " + String.format("%1$02X", ind[pos + 2] ) + " " + String.format("%1$02X", ind[pos + 3] ) + "</td>";
-        out += "<td>" + symNum + "</td><td>" + name + "</td><td>" + String.format( fmt, Pos ) + "</td></tr>";
-
-        Pos += p.ptr_size; name = "";
-
-        //Move to the next pointer.
-
-        if( Pos >= p.size && ( Pointer + 1 ) < ptr.size() )
-        {
-          Pointer += 1; p = ptr.get( Pointer ); Pos = p.loc;
-          out += "</table><br />Locating Next pointer section " + String.format( fmt, p.loc ) + " to " + String.format( fmt, p.size ) + "";
-          out += ( ( p.ptr_size != (is64bit ? 8 : 4) ) ? ". Each jump instruction size " : ". Each pointer size " ) + p.ptr_size + ".";
-          out += "<br /><br /><table border='1'><tr><td>Hex</td><td>Symbol Number</td><td>Symbol Name</td><td>Location</td></tr>";
-        }
-
-        //Move to the next indirect symbol number.
-
-        pos += 4;
-      }
-  
-      pos = 0; name = "";
-    }
-    catch( Exception e ){ e.printStackTrace(); }
-
-    file.Events = true; return( out + "</table></html>" );
   }
 
   //Description on how the indirect symbol table is read.

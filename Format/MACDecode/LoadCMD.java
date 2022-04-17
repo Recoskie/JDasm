@@ -197,8 +197,12 @@ public class LoadCMD extends Data
         DTemp.LUINT32("External relocation offset"); int extoff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("External relocation entries"); int extsize = (int)DTemp.value;
 
+        extsize <<= 3;
+
         DTemp.LUINT32("Local relocation offset"); int loff = (int)base + (int)DTemp.value;
         DTemp.LUINT32("Local relocation entries"); int lsize = (int)DTemp.value;
+
+        lsize <<= 3;
 
         DTemp.setEvent( this::symInfo ); des.add( DTemp );
 
@@ -218,8 +222,8 @@ public class LoadCMD extends Data
 
           n1.add( n );
         }
-        if( extsize > 0 ) { n1.add( new JDNode("External Relocations.h", new long[]{ 0x8000000000000002L, extoff, extoff + ( extsize << 3 ) - 1 } ) ); }
-        if( lsize > 0 ) { n1.add( new JDNode("Local Relocations.h", new long[]{ 0x8000000000000002L, loff, loff + ( lsize << 3 ) - 1 } ) ); }
+        if( extsize > 0 ) { n1.add( new JDNode("External Relocations.h", new long[]{ 0x8000000000000002L, extoff, extoff + extsize - 1 } ) ); }
+        if( lsize > 0 ) { n1.add( new JDNode("Local Relocations.h", new long[]{ 0x8000000000000002L, loff, loff + lsize - 1 } ) ); }
 
         root.add( n1 );
       }
@@ -340,7 +344,7 @@ public class LoadCMD extends Data
 
         DTemp.setEvent( this::blank ); des.add( DTemp );
 
-        JDNode n1;
+        JDNode n1, tm = new JDNode("sect.h", new long[]{ 0x8000000000000002L, off, off + s - 1 } );
         
         if( cmd == 0x1D ) { n1 = new JDNode( "Code Signature", new long[]{ 0, ref++ } ); }
         else if( cmd == 0x1E ) { n1 = new JDNode( "Split info", new long[]{ 0, ref++ } ); }
@@ -348,10 +352,15 @@ public class LoadCMD extends Data
         else if( cmd == 0x29 ) { n1 = new JDNode( "Data in Code", new long[]{ 0, ref++ } ); }
         else if( cmd == 0x2B ) { n1 = new JDNode( "Code Singing", new long[]{ 0, ref++ } ); }
         else if( cmd == 0x2E ) { n1 = new JDNode( "Optimization Hints", new long[]{ 0, ref++ } ); }
-        else if( cmd == 0x33 ) { n1 =  new JDNode("Export", new long[]{ 0x0306L, off, off + s - 1 } ); }
+        else if( cmd == 0x33 )
+        {
+          n1 =  new JDNode("Export CMD",  new long[]{ 0, ref++ } );
+          tm = new JDNode("Export", new long[]{ 0x0306L, off, off + s - 1 } );
+          tm.add( new JDNode( "Dummy.h" ) );
+        }
         else { n1 = new JDNode( "Chained Fixups", new long[]{ 0, ref++ } ); }
 
-        n1.add( new JDNode("sect.h", new long[]{ 0x8000000000000002L, off, off + s - 1 } ) ); root.add( n1 );
+        n1.add( tm ); root.add( n1 );
       }
 
       //The linking and method call setup information.
