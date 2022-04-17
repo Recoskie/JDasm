@@ -519,6 +519,8 @@ public class linkEdit extends Data
 
       JDNode Debug = new JDNode( "Local (Debug)", new long[]{ 0x4000000000000000L } );
 
+      JDNode Local = new JDNode( "Local (Other)", new long[]{ 0x4000000000000000L } );
+
       JDNode Ordinals = new JDNode( "Undefined (Library Function calls)", new long[]{ 0x4000000000000000L } );
 
       JDNode External = new JDNode( "External", new long[]{ 0x4000000000000000L } );
@@ -569,7 +571,7 @@ public class linkEdit extends Data
           }
           else
           {
-            n.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
+            Local.add( new JDNode( string.value + " (Sym=" + i2 + ").h", new long[]{ 0, ref++ }) );
           }
 
           des.add( string ); file.seek( t );
@@ -596,7 +598,7 @@ public class linkEdit extends Data
           }
           else
           {
-            n.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
+            Local.add( new JDNode( "No Name (Sym=" + i2 + ").h" ) );
           }
         }
       }
@@ -604,6 +606,7 @@ public class linkEdit extends Data
       if( Ordinals.getChildCount() > 0 ) { n.insert( Ordinals, 0 ); }
       if( External.getChildCount() > 0 ) { n.insert( External, 0 ); }
       if( ExternalP.getChildCount() > 0 ) { n.insert( ExternalP, 0 ); }
+      if( Local.getChildCount() > 0 ) { n.insert( Local, 0 ); }
       if( Debug.getChildCount() > 0 ) { n.insert( Debug, 0 ); }
     }
     catch( Exception e ) { e.printStackTrace(); }
