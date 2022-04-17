@@ -160,7 +160,7 @@ public class threadStates
     new int[] { 4, 2, 5 }, //32=2, 64=5
     new int[] { 4, 4, 4, 4, 4, 4, 4, 4, 4 },
     new int[] { 4, 8, 8, 8, 8, 8, 8, 8, 8 },
-    new int[] { 4 }, //32=9, 64=10
+    new int[] { 4, 9, 10 }, //32=9, 64=10
     new int[] { 4 },
     new int[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 4, -4, 4, 4, 4, 4 },
     new int[] { 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 2, 2, 4, 8, 8, -8, 8, 8, 8, 8 },
@@ -287,8 +287,29 @@ public class threadStates
       "CTRS0", "CTRS1", "CTRS2", "CTRS3", "CTRS4", "CTRS5", "CTRS6", "CTRS7", "CTRS8", "CTRS9", "CTRS10", "CTRS11", "CTRS12", "CTRS13", "CTRS14", "CTRS15"
     },
     new String[] { "BAD Thread Type" },
-    new String[] { "ARM_SAVED_STATE32" }, new String[] { "ARM_SAVED_STATE64" },
-    new String[] { "ARM_NEON_SAVED_STATE32" }, new String[] { "ARM_NEON_SAVED_STATE64" },
+    new String[]
+    {
+      "ARM_SAVED_STATE32",
+      "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "SP", "LR", "PC", "CPSR",
+      "FAR", "ESR", "EXCEPTION"
+    },
+    new String[]
+    {
+      "ARM_SAVED_STATE64", "X0", "X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9", "X10", "X11", "X12", "X13", "X14", "X15",
+      "X16", "X17", "X18", "X19", "X20", "X21", "X22", "X23", "X24", "X25", "X26", "X27", "X28",
+      "FP", "LR", "SP", "PC", "CPSR", "Reserved (Padding)", "FAR", "ESR", "EXCEPTION"
+    },
+    new String[]
+    {
+      "ARM_NEON_SAVED_STATE32",
+      "V0", "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "FPSR", "FPCR"
+    },
+    new String[]
+    {
+      "ARM_NEON_SAVED_STATE64",
+      "V0", "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15",
+      "V16", "V17", "V18", "V19", "V20", "V21", "V22", "V23", "V24", "V25", "V26", "V27", "V28", "V29", "V30", "V31", "FPSR", "FPCR"
+    },
     new String[] { "BAD Thread Type" }, new String[] { "BAD Thread Type" }, new String[] { "BAD Thread Type" },
     new String[]
     {
@@ -344,7 +365,10 @@ public class threadStates
     new int[] { 4, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 4, 4 },
     new int[] { 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
     new int[] { 4 },
-    new int[] { 4 }, new int[] { 4 }, new int[] { 4 }, new int[] { 4 },
+    new int[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, -4, 4, 4, 4, 4 },
+    new int[] { 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, -8, 4, 4, 8, 4, 4 },
+    new int[] { 4, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 4, 4 },
+    new int[] { 4, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 4, 4 },
     new int[] { 4 }, new int[] { 4 }, new int[] { 4 },
     new int[] { 4, 4 }
   };
