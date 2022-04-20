@@ -149,6 +149,21 @@ public class LoadCMD extends Data
         root.add( n2 );
       }
 
+      //Encrypted data segment.
+
+      else if( cmd == 0x21 || cmd == 0x2C )
+      {
+        DTemp.LUINT32("Data Offset"); int enOff = (int)base + (int)DTemp.value;
+        DTemp.LUINT32("Data Size"); int enSize = (int)DTemp.value;
+        DTemp.LUINT32("ID Number");
+
+        DTemp.setEvent( this::enDataInfo ); des.add( DTemp );
+        
+        JDNode n = new JDNode( "Encrypted Data", new long[]{ 0, ref++ } ); root.add( n );
+      
+        n.add( new JDNode( "Data.h", new long[]{ 0x8000000000000002L, enOff, enOff + enSize - 1 } ) );
+      }
+
       //Symbol information.
 
       else if( cmd == 0x02 )
@@ -246,16 +261,16 @@ public class LoadCMD extends Data
         root.add( new JDNode( "Load link library (Ordinal=" + ordinal++ + ").h", new long[]{ 0, ref++ } ) );
       }
 
-      //Load a dynamic linker.
+      //Load a dynamic linker/Set run paths.
 
-      else if( cmd == 0x0E )
+      else if( cmd == 0x0E || cmd == 0x1C )
       {
         DTemp.LUINT32("String Offset"); int off = (int)DTemp.value;
-        DTemp.String8("Dynamic linker", ( size + 8 ) - off );
+        DTemp.String8( cmd == 0x0E ? "Dynamic linker" : "Run Path", ( size + 8 ) - off );
 
-        DTemp.setEvent( this::dynInfo ); des.add( DTemp );
+        DTemp.setEvent( cmd == 0x0E ? this::dynInfo : this::rPathInfo ); des.add( DTemp );
 
-        root.add( new JDNode( "Dynamic linker.h", new long[]{ 0, ref++ } ) );
+        root.add( new JDNode( cmd == 0x0E ? "Dynamic linker.h" : "Run Path.h", new long[]{ 0, ref++ } ) );
       }
     
       //The start of the application.
@@ -670,6 +685,14 @@ public class LoadCMD extends Data
     "<html>Reserved for future use (for use on 64 bit programs only).</html>"
   };
 
+  private static final String[] enDataInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>Location to encrypted data.</html>",
+    "<html>The size of the encrypted data.</html>",
+    "<html>Data ID number.</html>"
+  };
+
   private static final String[] symDataInfo = new String[]
   {
     cmdType, cmdSize,
@@ -738,6 +761,13 @@ public class LoadCMD extends Data
     "<tr><td>3</td><td>LD</td></tr>" +
     "</table></html>",
     "<html>Tool version number.</html>"
+  };
+
+  private static final String[] rPathInfo = new String[]
+  {
+    cmdType, cmdSize,
+    "<html>" + offStr + "</html>",
+    "<html>" + Str + " This tells us the path to use in looking for files in this application.</html>"
   };
 
   private static final String[] dynInfo = new String[]
@@ -863,6 +893,31 @@ public class LoadCMD extends Data
     else
     {
       info( sectInfo[i] );
+    }
+  }
+
+  private void enDataInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>The encrypted data segment uses your device's unique encryption key to encode data that can only be read on this device, such as securely storing a password in the app.<br /><br />" +
+      "Copying this app to another device may make this data unreadable and will be overwritten by the other device's unique encryption key.</html>" );
+    }
+    else
+    {
+      info( enDataInfo[i] );
+    }
+  }
+
+  private void rPathInfo( int i )
+  {
+    if( i < 0 )
+    {
+      info( "<html>We can specify the default location to look for files. This allows us to not have to use the full file path location for querying files.</html>" );
+    }
+    else
+    {
+      info( rPathInfo[i] );
     }
   }
 
