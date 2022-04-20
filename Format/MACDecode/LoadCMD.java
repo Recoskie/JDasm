@@ -900,8 +900,8 @@ public class LoadCMD extends Data
   {
     if( i < 0 )
     {
-      info( "<html>The encrypted data segment uses your device's unique encryption key to encode data that can only be read on this device, such as securely storing a password in the app.<br /><br />" +
-      "Copying this app to another device may make this data unreadable and will be overwritten by the other device's unique encryption key.</html>" );
+      info( "<html>The encrypted data segment uses your device's unique encryption key to encode data that can only be read on this device, such as securely storing a password or user info in the app.<br /><br />" +
+      "Copying this app to another device may make this data unreadable and will be overwritten by the other device's unique encryption key, also resetting the data.</html>" );
     }
     else
     {
