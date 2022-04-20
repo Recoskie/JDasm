@@ -857,6 +857,10 @@ The operating system does not set up video memory. It is set up by the BIOS (Boo
 
 <br />
 
+Even handheld game consoles like the Nintendo DS has a video memory location that you can write to for setting each individual pixel color on the screens.
+
+<br />
+
 The CPU then can do any graphics function you like on any display or monitor without requiring graphics drivers, which is called software-rendered graphics.
 
 <br />
@@ -875,6 +879,10 @@ However, it is recommended to add Hardware accelerated graphics through a GPU by
 
 Lastly you can get very creative in software with raw graphics pixel format. You can compare the difference in colors and define edges and shapes and create an artificial intelligence that learns and understands its surroundings, or create video/picture enhancers, and filters. The possibilities are limitless.
 
+<br />
+
+Video memory is very standard across all consoles and mobile/PC systems, and the bitmap format is hardware independent because it is a hardware design standard.
+
 <h2>Audio format.</h2>
 
 Audio is also another standard format. It can be a bit confusing at first. It also does not change between systems, just like video memory.
@@ -885,7 +893,7 @@ An audio file can consist of sizes byte 1, word 2, dword 4, qword 8 array.
 
 <br />
 
-An integer that is a dword (32 binary digits) gives a range of control 2^32-1. The value is the point to move the magnet in the speaker. We call this an sample.
+An integer that is a dword (32 binary digits) gives a range of control 2^32-1. The value is the point to move the magnet in the speaker. We call this an sample point.
 
 <br />
 
