@@ -79,7 +79,7 @@ public class Header extends Data
       DTemp.LUINT32("CPU Sub Type");
       DTemp.LUINT32("File Type");
       DTemp.LUINT32("Commands"); loadCMD = (int)DTemp.value;
-      DTemp.LUINT32("Commands Size");
+      DTemp.LUINT32("Commands Size"); loadCMDSize = (int)DTemp.value;
       DTemp.LUINT32("Flags");
     
       if( is64bit ){ DTemp.UINT32("Reserved"); }

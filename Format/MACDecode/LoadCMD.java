@@ -1,5 +1,7 @@
 package Format.MACDecode;
 
+import javax.swing.JOptionPane;
+
 import swingIO.*;
 import swingIO.tree.*;
 
@@ -44,460 +46,469 @@ public class LoadCMD extends Data
 
     int cmd = 0, size = 0, ordinal = 1;
 
-    for( int i = 0; i < loadCMD; i++ )
+    try
     {
-      DTemp = new Descriptor( file );
-
-      DTemp.LUINT32("Command"); cmd = (int)DTemp.value & 0xFF;
-      DTemp.LUINT32("Size"); size = (int)DTemp.value - 8;
-
-      if( size <= 0 ){ size = 0; }
-
-      //Loading the programs sections and data is the main priority here, so commands 0x19, and 0x01 come first.
-
-      if( cmd == 0x19 || cmd == 0x01 )
+      for( int i = 0; i < loadCMD && loadCMDSize > 0; i++ )
       {
-        String segName = "", name = "";
+        DTemp = new Descriptor( file );
 
-        DTemp.String8("Segment Name", 16 ); name = (String)DTemp.value;
+        DTemp.LUINT32("Command"); cmd = (int)DTemp.value & 0xFF;
+        DTemp.LUINT32("Size"); size = (int)DTemp.value; loadCMDSize -= size; size -= 8;
 
-        long address = 0, vSize = 0, offset = 0, oSize = 0;
+        if( size <= 0 ){ size = 0; }
 
-        if( is64bit )
+        //Loading the programs sections and data is the main priority here, so commands 0x19, and 0x01 come first.
+
+        if( cmd == 0x19 || cmd == 0x01 )
         {
-          DTemp.LUINT64("Address"); address = (long)DTemp.value;
-          DTemp.LUINT64("Size"); vSize = (long)DTemp.value;
-          DTemp.LUINT64("File position"); offset = base + (long)DTemp.value;
-          DTemp.LUINT64("Length"); oSize = (long)DTemp.value;
-        }
-        else
-        {
-          DTemp.LUINT32("Address"); address = (int)DTemp.value;
-          DTemp.LUINT32("Size"); vSize = (int)DTemp.value;
-          DTemp.LUINT32("File position"); offset = base + (int)DTemp.value;
-          DTemp.LUINT32("Length"); oSize = (int)DTemp.value;
-        }
+          String segName = "", name = "";
 
-        DTemp.LUINT32("maxvprot");
-        DTemp.LUINT32("minvprot");
-        DTemp.LUINT32("Number of sections"); int sect = (int)DTemp.value;
-        DTemp.LUINT32("flags");
+          DTemp.String8("Segment Name", 16 ); name = (String)DTemp.value;
 
-        JDNode n2 = new JDNode( name + " (Seg=" + segment.size() + ")" + ( oSize > 0 ? "" : ".h" ), new long[] { 0, ref++ } );
-
-        file.addV( offset, oSize, address, vSize ); segment.add( address );
-        
-        DTemp.setEvent( this::segInfo ); des.add( DTemp );
-
-        if( oSize > 0 ) { n2.add( new JDNode( name + " (Data).h", new long[] { 0x8000000000000003L, address, address + vSize - 1 } ) ); }
-
-        for( int i2 = 0; i2 < sect; i2++ )
-        {
-          DTemp = new Descriptor( file ); DTemp.setEvent( this::sectInfo ); des.add( DTemp );
-
-          DTemp.String8("Section Name", 16); segName = (String)DTemp.value;
-          
-          JDNode t = new JDNode( DTemp.value + " (Sect=" + ( sections.size() + 1 ) + ")", new long[] { 0, ref++ } );
-
-          DTemp.String8("Segment Name", 16);
+          long address = 0, vSize = 0, offset = 0, oSize = 0;
 
           if( is64bit )
           {
             DTemp.LUINT64("Address"); address = (long)DTemp.value;
             DTemp.LUINT64("Size"); vSize = (long)DTemp.value;
+            DTemp.LUINT64("File position"); offset = base + (long)DTemp.value;
+            DTemp.LUINT64("Length"); oSize = (long)DTemp.value;
           }
           else
           {
             DTemp.LUINT32("Address"); address = (int)DTemp.value;
             DTemp.LUINT32("Size"); vSize = (int)DTemp.value;
+            DTemp.LUINT32("File position"); offset = base + (int)DTemp.value;
+            DTemp.LUINT32("Length"); oSize = (int)DTemp.value;
           }
 
-          DTemp.LUINT32("Offset"); offset = base + (int)DTemp.value;
+          DTemp.LUINT32("maxvprot");
+          DTemp.LUINT32("minvprot");
+          DTemp.LUINT32("Number of sections"); int sect = (int)DTemp.value;
+          DTemp.LUINT32("flags");
 
-          file.addV(offset, vSize, address, vSize); sections.add( address );
+          JDNode n2 = new JDNode( name + " (Seg=" + segment.size() + ")" + ( oSize > 0 ? "" : ".h" ), new long[] { 0, ref++ } );
 
-          t.add( new JDNode( "Goto Data.h", new long[] { 0x8000000000000003L, address, address + vSize - 1 } ) );
-
-          DTemp.LUINT32("Alignment");
-          DTemp.LUINT32("Relocations Offset");
-          DTemp.LUINT32("Relocations");
-          DTemp.LUINT32("flags"); int flag = (int)DTemp.value;
-          DTemp.LUINT32("Reserved1");
-          DTemp.LUINT32("Reserved2"); int stud_size = (int)DTemp.value;
-          
-          if( is64bit ) { DTemp.LUINT32("Reserved3"); }
-
-          //Section contains only machine code.
-
-          if( ( flag & 0x80000000 ) != 0 )
-          {
-            JDNode c = new JDNode("Disassemble.h", new long[]{ 0x8000000000000004L, address, vSize } ); rPath.add( c );
-            t.add( c ); code.add( new JDNode( name + "." + segName + "().h", new long[]{ 0x8000000000000005L, paths++ } ) );
-          }
-
-          //Sections we want to be able to navigate too.
-
-          flag &= 0xFF;
-          
-          if( flag == 6 ) { rPath.add( t ); bind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4, bind)); }
-          else if( flag == 7 ) { rPath.add( t ); lazyBind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4, lazyBind) ); }
-          else if( flag == 8 ) { rPath.add( t ); studs = paths++; ptr.add( new Pointers(address, vSize, stud_size, studs) ); }
-
-          n2.add( t );
-        }
-
-        root.add( n2 );
-      }
-
-      //Encrypted data segment.
-
-      else if( cmd == 0x21 || cmd == 0x2C )
-      {
-        DTemp.LUINT32("Data Offset"); int enOff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Data Size"); int enSize = (int)DTemp.value;
-        DTemp.LUINT32("ID Number");
-
-        DTemp.setEvent( this::enDataInfo ); des.add( DTemp );
+          file.addV( offset, oSize, address, vSize ); segment.add( address );
         
-        JDNode n = new JDNode( "Encrypted Data", new long[]{ 0, ref++ } ); root.add( n );
-      
-        n.add( new JDNode( "Data.h", new long[]{ 0x8000000000000002L, enOff, enOff + enSize - 1 } ) );
-      }
+          DTemp.setEvent( this::segInfo ); des.add( DTemp );
 
-      //Symbol information.
+          if( oSize > 0 ) { n2.add( new JDNode( name + " (Data).h", new long[] { 0x8000000000000003L, address, address + vSize - 1 } ) ); }
 
-      else if( cmd == 0x02 )
-      {
-        DTemp.LUINT32("Symbol Offset"); symOff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Number of symbol"); symSize = (int)DTemp.value;
-        DTemp.LUINT32("String table offset"); strOff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("String table size"); strSize = (int)DTemp.value;
+          for( int i2 = 0; i2 < sect; i2++ )
+          {
+            DTemp = new Descriptor( file ); DTemp.setEvent( this::sectInfo ); des.add( DTemp );
 
-        DTemp.setEvent( this::symDataInfo ); des.add( DTemp );
+            DTemp.String8("Section Name", 16); segName = (String)DTemp.value;
+          
+            JDNode t = new JDNode( DTemp.value + " (Sect=" + ( sections.size() + 1 ) + ")", new long[] { 0, ref++ } );
+
+            DTemp.String8("Segment Name", 16);
+
+            if( is64bit )
+            {
+              DTemp.LUINT64("Address"); address = (long)DTemp.value;
+              DTemp.LUINT64("Size"); vSize = (long)DTemp.value;
+            }
+            else
+            {
+              DTemp.LUINT32("Address"); address = (int)DTemp.value;
+              DTemp.LUINT32("Size"); vSize = (int)DTemp.value;
+            }
+
+            DTemp.LUINT32("Offset"); offset = base + (int)DTemp.value;
+
+            file.addV(offset, vSize, address, vSize); sections.add( address );
+
+            t.add( new JDNode( "Goto Data.h", new long[] { 0x8000000000000003L, address, address + vSize - 1 } ) );
+
+            DTemp.LUINT32("Alignment");
+            DTemp.LUINT32("Relocations Offset");
+            DTemp.LUINT32("Relocations");
+            DTemp.LUINT32("flags"); int flag = (int)DTemp.value;
+            DTemp.LUINT32("Reserved1");
+            DTemp.LUINT32("Reserved2"); int stud_size = (int)DTemp.value;
+          
+            if( is64bit ) { DTemp.LUINT32("Reserved3"); }
+
+            //Section contains only machine code.
+
+            if( ( flag & 0x80000000 ) != 0 )
+            {
+              JDNode c = new JDNode("Disassemble.h", new long[]{ 0x8000000000000004L, address, vSize } ); rPath.add( c );
+              t.add( c ); code.add( new JDNode( name + "." + segName + "().h", new long[]{ 0x8000000000000005L, paths++ } ) );
+            }
+
+            //Sections we want to be able to navigate too.
+
+            flag &= 0xFF;
+          
+            if( flag == 6 ) { rPath.add( t ); bind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4, bind)); }
+            else if( flag == 7 ) { rPath.add( t ); lazyBind = paths++; ptr.add( new Pointers(address, vSize, is64bit ? 8 : 4, lazyBind) ); }
+            else if( flag == 8 ) { rPath.add( t ); studs = paths++; ptr.add( new Pointers(address, vSize, stud_size, studs) ); }
+
+            n2.add( t );
+          }
+
+          root.add( n2 );
+        }
+
+        //Encrypted data segment.
+
+        else if( cmd == 0x21 || cmd == 0x2C )
+        {
+          DTemp.LUINT32("Data Offset"); int enOff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("Data Size"); int enSize = (int)DTemp.value;
+          DTemp.LUINT32("ID Number");
+
+          DTemp.setEvent( this::enDataInfo ); des.add( DTemp );
         
-        JDNode n = new JDNode( "Symbol Table", new long[]{ 0, ref++ } ); root.add( n );
+          JDNode n = new JDNode( "Encrypted Data", new long[]{ 0, ref++ } ); root.add( n );
       
-        n.add( new JDNode( "String table.h", new long[]{ 0x8000000000000002L, strOff, strOff + strSize - 1 } ) );
-
-        JDNode n1 = new JDNode( "Symbols", new long[]{ 8, symOff, symSize, strOff } ); n1.add( new JDNode("Dummy") ); n.add( n1 );
-
-        symSize = is64bit ? symSize << 4 : ( ( symSize << 2 ) + ( symSize << 3 ) ); //Each symbol is 12 bytes if 32 bit and is 16 bytes if 64 bit.
-      }
-
-      //Dynamic link edit symbol table.
-
-      else if( cmd == 0x0B )
-      {
-        DTemp.LUINT32("Local sym num");
-        DTemp.LUINT32("Number of local symbols");
-        DTemp.LUINT32("External sym num");
-        DTemp.LUINT32("Number of external sym");
-        DTemp.LUINT32("Undefined sym num");
-        DTemp.LUINT32("Number of undefined sym");
-
-        DTemp.LUINT32("Contents table offset"); int coff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Content table entries"); int csize = (int)DTemp.value;
-
-        DTemp.LUINT32("Module table offset"); int moff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Module table entries"); int msize = (int)DTemp.value;
-
-        DTemp.LUINT32("Offset to referenced symbol table"); int roff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Number of referenced symbol table entries"); int rsize = (int)DTemp.value;
-
-        DTemp.LUINT32("Indirect symbol table offset"); indoff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Indirect symbol table entries"); indsize = (int)DTemp.value;
-
-        indsize <<= 2; //Each indirect entire is a 32 bit number specifying which symbol to map.
-
-        DTemp.LUINT32("External relocation offset"); int extoff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("External relocation entries"); int extsize = (int)DTemp.value;
-
-        extsize <<= 3;
-
-        DTemp.LUINT32("Local relocation offset"); int loff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Local relocation entries"); int lsize = (int)DTemp.value;
-
-        lsize <<= 3;
-
-        DTemp.setEvent( this::symInfo ); des.add( DTemp );
-
-        JDNode n1 = new JDNode( "Symbol info", new long[]{ 0, ref++ } );
-      
-        if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + csize - 1 } ) ); }
-        if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + msize - 1 } ) ); }
-        if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + rsize - 1 } ) ); }
-        if( indsize > 0 )
-        {
-          JDNode n = new JDNode("Indirect Symbols", new long[]{ 9, symOff, symSize, strOff, strSize, indoff, indsize } );
-
-          Pointers p; for( int i2 = 0; i2 < ptr.size(); i2++ )
-          {
-            p = ptr.get(i2); n.add( new JDNode( rPath.get( p.node ).getUserObject().toString() + ".h", new long[]{ 0x8000000000000005L, p.node } ) );
-          }
-
-          n1.add( n );
+          n.add( new JDNode( "Data.h", new long[]{ 0x8000000000000002L, enOff, enOff + enSize - 1 } ) );
         }
-        if( extsize > 0 ) { n1.add( new JDNode("External Relocations.h", new long[]{ 0x8000000000000002L, extoff, extoff + extsize - 1 } ) ); }
-        if( lsize > 0 ) { n1.add( new JDNode("Local Relocations.h", new long[]{ 0x8000000000000002L, loff, loff + lsize - 1 } ) ); }
 
-        root.add( n1 );
-      }
+        //Symbol information.
 
-      //Load a link library.
+        else if( cmd == 0x02 )
+        {
+          DTemp.LUINT32("Symbol Offset"); symOff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("Number of symbol"); symSize = (int)DTemp.value;
+          DTemp.LUINT32("String table offset"); strOff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("String table size"); strSize = (int)DTemp.value;
 
-      else if( cmd == 0x0C || cmd == 0x0D || cmd == 0x18 )
-      {
-        DTemp.LUINT32("String Offset"); int off = (int)DTemp.value;
-        DTemp.LUINT32("Time date stamp");
-        DTemp.LUINT32("Current version");
-        DTemp.LUINT32("Compatibility version");
-
-        if( off < 24 ){ DTemp.Other( "Other Data", off - 24 ); }
-
-        DTemp.String8("Dynamic Library", ( size + 8 ) - off );
-
-        DTemp.setEvent( this::dynlInfo ); des.add( DTemp );
+          DTemp.setEvent( this::symDataInfo ); des.add( DTemp );
+        
+          JDNode n = new JDNode( "Symbol Table", new long[]{ 0, ref++ } ); root.add( n );
       
-        root.add( new JDNode( "Load link library (Ordinal=" + ordinal++ + ").h", new long[]{ 0, ref++ } ) );
-      }
+          n.add( new JDNode( "String table.h", new long[]{ 0x8000000000000002L, strOff, strOff + strSize - 1 } ) );
 
-      //Load a dynamic linker/Set run paths.
+          JDNode n1 = new JDNode( "Symbols", new long[]{ 8, symOff, symSize, strOff } ); n1.add( new JDNode("Dummy") ); n.add( n1 );
 
-      else if( cmd == 0x0E || cmd == 0x1C )
-      {
-        DTemp.LUINT32("String Offset"); int off = (int)DTemp.value;
-        DTemp.String8( cmd == 0x0E ? "Dynamic linker" : "Run Path", ( size + 8 ) - off );
+          symSize = is64bit ? symSize << 4 : ( ( symSize << 2 ) + ( symSize << 3 ) ); //Each symbol is 12 bytes if 32 bit and is 16 bytes if 64 bit.
+        }
 
-        DTemp.setEvent( cmd == 0x0E ? this::dynInfo : this::rPathInfo ); des.add( DTemp );
+        //Dynamic link edit symbol table.
 
-        root.add( new JDNode( cmd == 0x0E ? "Dynamic linker.h" : "Run Path.h", new long[]{ 0, ref++ } ) );
-      }
+        else if( cmd == 0x0B )
+        {
+          DTemp.LUINT32("Local sym num");
+          DTemp.LUINT32("Number of local symbols");
+          DTemp.LUINT32("External sym num");
+          DTemp.LUINT32("Number of external sym");
+          DTemp.LUINT32("Undefined sym num");
+          DTemp.LUINT32("Number of undefined sym");
+
+          DTemp.LUINT32("Contents table offset"); int coff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("Content table entries"); int csize = (int)DTemp.value;
+
+          DTemp.LUINT32("Module table offset"); int moff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("Module table entries"); int msize = (int)DTemp.value;
+
+          DTemp.LUINT32("Offset to referenced symbol table"); int roff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("Number of referenced symbol table entries"); int rsize = (int)DTemp.value;
+
+          DTemp.LUINT32("Indirect symbol table offset"); indoff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("Indirect symbol table entries"); indsize = (int)DTemp.value;
+
+          indsize <<= 2; //Each indirect entire is a 32 bit number specifying which symbol to map.
+
+          DTemp.LUINT32("External relocation offset"); int extoff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("External relocation entries"); int extsize = (int)DTemp.value;
+
+          extsize <<= 3;
+
+          DTemp.LUINT32("Local relocation offset"); int loff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("Local relocation entries"); int lsize = (int)DTemp.value;
+
+          lsize <<= 3;
+
+          DTemp.setEvent( this::symInfo ); des.add( DTemp );
+
+          JDNode n1 = new JDNode( "Symbol info", new long[]{ 0, ref++ } );
+      
+          if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + csize - 1 } ) ); }
+          if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + msize - 1 } ) ); }
+          if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + rsize - 1 } ) ); }
+          if( indsize > 0 )
+          {
+            JDNode n = new JDNode("Indirect Symbols", new long[]{ 9, symOff, symSize, strOff, strSize, indoff, indsize } );
+
+            Pointers p; for( int i2 = 0; i2 < ptr.size(); i2++ )
+            {
+              p = ptr.get(i2); n.add( new JDNode( rPath.get( p.node ).getUserObject().toString() + ".h", new long[]{ 0x8000000000000005L, p.node } ) );
+            }
+
+            n1.add( n );
+          }
+          if( extsize > 0 ) { n1.add( new JDNode("External Relocations.h", new long[]{ 0x8000000000000002L, extoff, extoff + extsize - 1 } ) ); }
+          if( lsize > 0 ) { n1.add( new JDNode("Local Relocations.h", new long[]{ 0x8000000000000002L, loff, loff + lsize - 1 } ) ); }
+
+          root.add( n1 );
+        }
+
+        //Load a link library.
+
+        else if( cmd == 0x0C || cmd == 0x0D || cmd == 0x18 )
+        {
+          DTemp.LUINT32("String Offset"); int off = (int)DTemp.value;
+          DTemp.LUINT32("Time date stamp");
+          DTemp.LUINT32("Current version");
+          DTemp.LUINT32("Compatibility version");
+
+          if( off < 24 ){ DTemp.Other( "Other Data", off - 24 ); }
+
+          DTemp.String8("Dynamic Library", ( size + 8 ) - off );
+
+          DTemp.setEvent( this::dynlInfo ); des.add( DTemp );
+      
+          root.add( new JDNode( "Load link library (Ordinal=" + ordinal++ + ").h", new long[]{ 0, ref++ } ) );
+        }
+
+        //Load a dynamic linker/Set run paths.
+
+        else if( cmd == 0x0E || cmd == 0x1C )
+        {
+          DTemp.LUINT32("String Offset"); int off = (int)DTemp.value;
+          DTemp.String8( cmd == 0x0E ? "Dynamic linker" : "Run Path", ( size + 8 ) - off );
+
+          DTemp.setEvent( cmd == 0x0E ? this::dynInfo : this::rPathInfo ); des.add( DTemp );
+
+          root.add( new JDNode( cmd == 0x0E ? "Dynamic linker.h" : "Run Path.h", new long[]{ 0, ref++ } ) );
+        }
     
-      //The start of the application.
+        //The start of the application.
 
-      else if( cmd == 0x28 )
-      {
-        DTemp.LUINT64("Programs start address"); main = file.toVirtual( base + (long)DTemp.value );
-        DTemp.LUINT64("Stack memory size");
+        else if( cmd == 0x28 )
+        {
+          DTemp.LUINT64("Programs start address"); main = file.toVirtual( base + (long)DTemp.value );
+          DTemp.LUINT64("Stack memory size");
 
-        DTemp.setEvent( this::startInfo ); des.add( DTemp );
+          DTemp.setEvent( this::startInfo ); des.add( DTemp );
 
-        root.add( new JDNode( "Start Address.h", new long[]{ 0, ref++ } ) );
-      }
+          root.add( new JDNode( "Start Address.h", new long[]{ 0, ref++ } ) );
+        }
     
-      //Thread save state. Command only supports x86, and ARM cores.
+        //Thread save state. Command only supports x86, and ARM cores.
 
-      else if( cmd == 0x04 || cmd == 0x05 )
-      {
-        long t = file.getFilePointer(); file.read(4); int type = file.toLInt() - 1; file.seek( t );
-        int reg = 0, rs = 0;
-        boolean start = false;
-
-        String[] regs = new String[]{}; int[] rSize = new int[]{};
-
-        if( coreType == 7 && type >= 0 && type < 25 )
+        else if( cmd == 0x04 || cmd == 0x05 )
         {
-          regs = threadStates.x86regs[type]; rSize = threadStates.x86size[type];
+          long t = file.getFilePointer(); file.read(4); int type = file.toLInt() - 1; file.seek( t );
+          int reg = 0, rs = 0;
+          boolean start = false;
 
-          if( rSize.length > regs.length )
+          String[] regs = new String[]{}; int[] rSize = new int[]{};
+
+          if( coreType == 7 && type >= 0 && type < 25 )
           {
-            rs = is64bit ? rSize[2] : rSize[1]; regs = threadStates.x86regs[rs]; rSize = threadStates.x86size[rs];
+            regs = threadStates.x86regs[type]; rSize = threadStates.x86size[type];
+
+            if( rSize.length > regs.length )
+            {
+              rs = is64bit ? rSize[2] : rSize[1]; regs = threadStates.x86regs[rs]; rSize = threadStates.x86size[rs];
+            }
           }
-        }
-        else if( coreType == 12 && type >= 0 && type < 27 )
-        {
-          regs = threadStates.ARMregs[type]; rSize = threadStates.ARMsize[type]; 
-        }
-
-        if( regs.length > 0 ) 
-        {
-          DTemp.LUINT32(regs[reg++]); DTemp.LUINT32("Count");
-
-          size -= 8; while( reg < rSize.length && ( size - ( rs = rSize[reg] ) ) >= 0 )
+          else if( coreType == 12 && type >= 0 && type < 27 )
           {
-            start = rs < 0; if( start ) { rs = -rs; }
-
-            if( rs == 4 ){ DTemp.LUINT32(regs[reg]); if( start ) { main = (int)DTemp.value; } }
-            else if( rs == 8 ){ DTemp.LUINT64(regs[reg]); if( start ) { main = (long)DTemp.value; } }
-            else if( rs == 2 ){ DTemp.LUINT16(regs[reg]); }
-            else if( rs == 1 ){ DTemp.INT8(regs[reg]); }
-            else { DTemp.Other(regs[reg], rs); }
-
-            size -= rs; reg++;
+            regs = threadStates.ARMregs[type]; rSize = threadStates.ARMsize[type]; 
           }
 
-          if( size > 0 ){ DTemp.Other("???", size ); }
+          if( regs.length > 0 ) 
+          {
+            DTemp.LUINT32(regs[reg++]); DTemp.LUINT32("Count");
+
+            size -= 8; while( reg < rSize.length && ( size - ( rs = rSize[reg] ) ) >= 0 )
+            {
+              start = rs < 0; if( start ) { rs = -rs; }
+
+              if( rs == 4 ){ DTemp.LUINT32(regs[reg]); if( start ) { main = (int)DTemp.value; } }
+              else if( rs == 8 ){ DTemp.LUINT64(regs[reg]); if( start ) { main = (long)DTemp.value; } }
+              else if( rs == 2 ){ DTemp.LUINT16(regs[reg]); }
+              else if( rs == 1 ){ DTemp.INT8(regs[reg]); }
+              else { DTemp.Other(regs[reg], rs); }
+
+              size -= rs; reg++;
+            }
+
+            if( size > 0 ){ DTemp.Other("???", size ); }
+          }
+          else
+          {
+            DTemp.LUINT32(( coreType == 7 || coreType == 12 ) ? "BAD Thread Type" : "BAD CPU");
+            DTemp.LUINT32("Count"); DTemp.Other("???", size);
+          }
+      
+          DTemp.setEvent( this::stateInfo ); des.add( DTemp );
+      
+          root.add( new JDNode( "Thread State.h", new long[]{ 0, ref++ } ) );
         }
+
+        //The UUID.
+
+        else if( cmd == 0x1B )
+        {
+          DTemp.Other("128-bit UUID", 16);
+
+          DTemp.setEvent( this::uuidInfo ); des.add( DTemp );
+
+          root.add( new JDNode( "APP UUID.h", new long[]{ 0, ref++ } ) );
+        }
+
+        //Link edit.
+
+        else if( cmd == 0x1D || cmd == 0x1E || cmd == 0x26 || cmd == 0x29 || cmd == 0x2B || cmd == 0x2E || cmd == 0x33 || cmd == 0x34 )
+        {
+          DTemp.LUINT32("Offset"); int off = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("Size"); int s = (int)DTemp.value;
+
+          DTemp.setEvent( this::blank ); des.add( DTemp );
+
+          JDNode n1, tm = new JDNode("sect.h", new long[]{ 0x8000000000000002L, off, off + s - 1 } );
+        
+          if( cmd == 0x1D ) { n1 = new JDNode( "Code Signature", new long[]{ 0, ref++ } ); }
+          else if( cmd == 0x1E ) { n1 = new JDNode( "Split info", new long[]{ 0, ref++ } ); }
+          else if( cmd == 0x26) { n1 = new JDNode( "Function Starts", new long[]{ 0, ref++ } ); }
+          else if( cmd == 0x29 ) { n1 = new JDNode( "Data in Code", new long[]{ 0, ref++ } ); }
+          else if( cmd == 0x2B ) { n1 = new JDNode( "Code Singing", new long[]{ 0, ref++ } ); }
+          else if( cmd == 0x2E ) { n1 = new JDNode( "Optimization Hints", new long[]{ 0, ref++ } ); }
+          else if( cmd == 0x33 )
+          {
+            n1 =  new JDNode("Export CMD",  new long[]{ 0, ref++ } );
+            tm = new JDNode("Export", new long[]{ 0x0306L, off, off + s - 1 } );
+            tm.add( new JDNode( "Dummy.h" ) );
+          }
+          else { n1 = new JDNode( "Chained Fixups", new long[]{ 0, ref++ } ); }
+
+          n1.add( tm ); root.add( n1 );
+        }
+
+        //The linking and method call setup information.
+
+        else if( cmd == 0x22 )
+        {
+          DTemp.LUINT32("rebase offset"); int roff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("rebase size"); int rsize = (int)DTemp.value;
+          DTemp.LUINT32("bind offset"); boff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("bind size"); bsize = (int)DTemp.value;
+          DTemp.LUINT32("weak bind offset"); wboff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("weak bind size"); wbsize = (int)DTemp.value;
+          DTemp.LUINT32("lazy bind offset"); lboff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("lazy bind size"); lbsize = (int)DTemp.value;
+          DTemp.LUINT32("export offset"); int eoff = (int)base + (int)DTemp.value;
+          DTemp.LUINT32("export size"); int esize = (int)DTemp.value;
+
+          DTemp.setEvent( this::dynLoaderInfo ); des.add( DTemp );
+
+          JDNode n1 = new JDNode( "Link library setup", new long[]{ 0, ref++ } ), tm;
+
+          if( rsize > 0 )
+          {
+            tm =  new JDNode("rebase", new long[]{ 0x8000000000000102L, roff, roff + rsize - 1 } );
+
+            tm.add( new JDNode( "Opcodes.h", new long[]{ 2, roff, roff + rsize } ) );
+            tm.add( new JDNode( "Actions.h", new long[]{ 3, roff, roff + rsize } ) );
+            n1.add( tm );
+          }
+        
+          if( bsize > 0 )
+          {
+            tm = new JDNode("bind", new long[]{ 0x8000000000000202L, boff, boff + bsize - 1 } );
+
+            if( bind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, bind } ) ); }
+
+            tm.add( new JDNode( "Opcodes.h", new long[]{ 4, boff, boff + bsize } ) );
+            tm.add( new JDNode( "Actions.h", new long[]{ 5, boff, boff + bsize } ) );
+            n1.add( tm );
+          }
+        
+          if( wbsize > 0 )
+          {
+            tm = new JDNode("week bind", new long[]{ 0x8000000000000202L, wboff, wboff + wbsize - 1 } );
+
+            tm.add( new JDNode( "Opcodes.h", new long[]{ 4, wboff, wboff + wbsize } ) );
+            tm.add( new JDNode( "Actions.h", new long[]{ 5, wboff, wboff + wbsize } ) );
+            n1.add( tm );
+          }
+
+          if( lbsize > 0 )
+          {
+            tm = new JDNode("lazy bind", new long[]{ 0x8000000000000202L, lboff, lboff + lbsize - 1 } );
+
+            if( lazyBind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, lazyBind } ) ); }
+
+            tm.add( new JDNode( "Opcodes.h", new long[]{ 4, lboff, lboff + lbsize } ) );
+            tm.add( new JDNode( "Actions.h", new long[]{ 5, lboff, lboff + lbsize } ) );
+            n1.add( tm );
+          }
+        
+          if( esize > 0 ) { tm =  new JDNode("Export", new long[]{ 0x0306L, eoff, eoff + esize - 1 } ); tm.add( new JDNode( "Dummy" ) ); n1.add( tm ); }
+
+          root.add( n1 );
+        }
+
+        //Minimum OS version. Specifying platform and tools.
+
+        else if( cmd == 0x32 )
+        {
+          DTemp.LUINT32("Platform");
+          DTemp.LUINT32("Minium OS");
+          DTemp.LUINT32("SDK");
+          DTemp.LUINT32("Num Tools"); int t = (int)DTemp.value;
+
+          for( int i1 = 0; i1 < t; i1++ )
+          {
+            DTemp.Array("Tool #" + i1 + "", 8);
+            DTemp.LUINT32("Tool type");
+            DTemp.LUINT32("Tool version");
+          }
+
+          DTemp.setEvent( this::osVerInfo ); des.add( DTemp );
+
+          root.add( new JDNode( "Min OS Version.h", new long[]{ 0, ref++ } ) );
+        }
+
+        //The old way of doing Min os version.
+
+        else if( cmd == 0x24 || cmd == 0x25 || cmd == 0x2F || cmd == 0x30 )
+        {
+          DTemp.LUINT32("Min Version");
+          DTemp.LUINT32("Min SDK");
+
+          DTemp.setEvent( this::osInfo ); des.add( DTemp );
+
+          if( cmd == 0x24 ){ root.add( new JDNode("Min MacOS version.h", new long[]{ 0, ref++ } ) ); }
+          else if( cmd == 0x25 ){ root.add( new JDNode("Min iPhone Version.h", new long[]{ 0, ref++ } ) ); }
+          else if( cmd == 0x2F ){ root.add( new JDNode("Min Apple TV Version.h", new long[]{ 0, ref++ } ) ); }
+          if( cmd == 0x30 ){ root.add( new JDNode("Min Apple Watch Version.h", new long[]{ 0, ref++ } ) ); }
+        }
+
+        //The Source Version.
+
+        else if( cmd == 0x2A )
+        {
+          DTemp.LUINT64("Source Version");
+      
+          DTemp.setEvent( this::sourceVerInfo ); des.add( DTemp );
+      
+          root.add( new JDNode( "Source Version.h", new long[]{ 0, ref++ } ) );
+        }
+
+        //An unknown command, or a command I have not added Yet.
+
         else
         {
-          DTemp.LUINT32(( coreType == 7 || coreType == 12 ) ? "BAD Thread Type" : "BAD CPU");
-          DTemp.LUINT32("Count"); DTemp.Other("???", size);
+          DTemp.Other("Command Data", size ); DTemp.setEvent( this::cmdInfo ); des.add( DTemp );
+
+          root.add( new JDNode( "CMD #" + i + ".h", new long[]{ 0, ref++ } ) );
         }
-      
-        DTemp.setEvent( this::stateInfo ); des.add( DTemp );
-      
-        root.add( new JDNode( "Thread State.h", new long[]{ 0, ref++ } ) );
-      }
-
-      //The UUID.
-
-      else if( cmd == 0x1B )
-      {
-        DTemp.Other("128-bit UUID", 16);
-
-        DTemp.setEvent( this::uuidInfo ); des.add( DTemp );
-
-        root.add( new JDNode( "APP UUID.h", new long[]{ 0, ref++ } ) );
-      }
-
-      //Link edit.
-
-      else if( cmd == 0x1D || cmd == 0x1E || cmd == 0x26 || cmd == 0x29 || cmd == 0x2B || cmd == 0x2E || cmd == 0x33 || cmd == 0x34 )
-      {
-        DTemp.LUINT32("Offset"); int off = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("Size"); int s = (int)DTemp.value;
-
-        DTemp.setEvent( this::blank ); des.add( DTemp );
-
-        JDNode n1, tm = new JDNode("sect.h", new long[]{ 0x8000000000000002L, off, off + s - 1 } );
-        
-        if( cmd == 0x1D ) { n1 = new JDNode( "Code Signature", new long[]{ 0, ref++ } ); }
-        else if( cmd == 0x1E ) { n1 = new JDNode( "Split info", new long[]{ 0, ref++ } ); }
-        else if( cmd == 0x26) { n1 = new JDNode( "Function Starts", new long[]{ 0, ref++ } ); }
-        else if( cmd == 0x29 ) { n1 = new JDNode( "Data in Code", new long[]{ 0, ref++ } ); }
-        else if( cmd == 0x2B ) { n1 = new JDNode( "Code Singing", new long[]{ 0, ref++ } ); }
-        else if( cmd == 0x2E ) { n1 = new JDNode( "Optimization Hints", new long[]{ 0, ref++ } ); }
-        else if( cmd == 0x33 )
-        {
-          n1 =  new JDNode("Export CMD",  new long[]{ 0, ref++ } );
-          tm = new JDNode("Export", new long[]{ 0x0306L, off, off + s - 1 } );
-          tm.add( new JDNode( "Dummy.h" ) );
-        }
-        else { n1 = new JDNode( "Chained Fixups", new long[]{ 0, ref++ } ); }
-
-        n1.add( tm ); root.add( n1 );
-      }
-
-      //The linking and method call setup information.
-
-      else if( cmd == 0x22 )
-      {
-        DTemp.LUINT32("rebase offset"); int roff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("rebase size"); int rsize = (int)DTemp.value;
-        DTemp.LUINT32("bind offset"); boff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("bind size"); bsize = (int)DTemp.value;
-        DTemp.LUINT32("weak bind offset"); wboff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("weak bind size"); wbsize = (int)DTemp.value;
-        DTemp.LUINT32("lazy bind offset"); lboff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("lazy bind size"); lbsize = (int)DTemp.value;
-        DTemp.LUINT32("export offset"); int eoff = (int)base + (int)DTemp.value;
-        DTemp.LUINT32("export size"); int esize = (int)DTemp.value;
-
-        DTemp.setEvent( this::dynLoaderInfo ); des.add( DTemp );
-
-        JDNode n1 = new JDNode( "Link library setup", new long[]{ 0, ref++ } ), tm;
-
-        if( rsize > 0 )
-        {
-          tm =  new JDNode("rebase", new long[]{ 0x8000000000000102L, roff, roff + rsize - 1 } );
-
-          tm.add( new JDNode( "Opcodes.h", new long[]{ 2, roff, roff + rsize } ) );
-          tm.add( new JDNode( "Actions.h", new long[]{ 3, roff, roff + rsize } ) );
-          n1.add( tm );
-        }
-        
-        if( bsize > 0 )
-        {
-          tm = new JDNode("bind", new long[]{ 0x8000000000000202L, boff, boff + bsize - 1 } );
-
-          if( bind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, bind } ) ); }
-
-          tm.add( new JDNode( "Opcodes.h", new long[]{ 4, boff, boff + bsize } ) );
-          tm.add( new JDNode( "Actions.h", new long[]{ 5, boff, boff + bsize } ) );
-          n1.add( tm );
-        }
-        
-        if( wbsize > 0 )
-        {
-          tm = new JDNode("week bind", new long[]{ 0x8000000000000202L, wboff, wboff + wbsize - 1 } );
-
-          tm.add( new JDNode( "Opcodes.h", new long[]{ 4, wboff, wboff + wbsize } ) );
-          tm.add( new JDNode( "Actions.h", new long[]{ 5, wboff, wboff + wbsize } ) );
-          n1.add( tm );
-        }
-
-        if( lbsize > 0 )
-        {
-          tm = new JDNode("lazy bind", new long[]{ 0x8000000000000202L, lboff, lboff + lbsize - 1 } );
-
-          if( lazyBind >= 0 ) { tm.add( new JDNode( "Pointers.h", new long[]{ 0x8000000000000005L, lazyBind } ) ); }
-
-          tm.add( new JDNode( "Opcodes.h", new long[]{ 4, lboff, lboff + lbsize } ) );
-          tm.add( new JDNode( "Actions.h", new long[]{ 5, lboff, lboff + lbsize } ) );
-          n1.add( tm );
-        }
-        
-        if( esize > 0 ) { tm =  new JDNode("Export", new long[]{ 0x0306L, eoff, eoff + esize - 1 } ); tm.add( new JDNode( "Dummy" ) ); n1.add( tm ); }
-
-        root.add( n1 );
-      }
-
-      //Minimum OS version. Specifying platform and tools.
-
-      else if( cmd == 0x32 )
-      {
-        DTemp.LUINT32("Platform");
-        DTemp.LUINT32("Minium OS");
-        DTemp.LUINT32("SDK");
-        DTemp.LUINT32("Num Tools"); int t = (int)DTemp.value;
-
-        for( int i1 = 0; i1 < t; i1++ )
-        {
-          DTemp.Array("Tool #" + i1 + "", 8);
-          DTemp.LUINT32("Tool type");
-          DTemp.LUINT32("Tool version");
-        }
-
-        DTemp.setEvent( this::osVerInfo ); des.add( DTemp );
-
-        root.add( new JDNode( "Min OS Version.h", new long[]{ 0, ref++ } ) );
-      }
-
-      //The old way of doing Min os version.
-
-      else if( cmd == 0x24 || cmd == 0x25 || cmd == 0x2F || cmd == 0x30 )
-      {
-        DTemp.LUINT32("Min Version");
-        DTemp.LUINT32("Min SDK");
-
-        DTemp.setEvent( this::osInfo ); des.add( DTemp );
-
-        if( cmd == 0x24 ){ root.add( new JDNode("Min MacOS version.h", new long[]{ 0, ref++ } ) ); }
-        else if( cmd == 0x25 ){ root.add( new JDNode("Min iPhone Version.h", new long[]{ 0, ref++ } ) ); }
-        else if( cmd == 0x2F ){ root.add( new JDNode("Min Apple TV Version.h", new long[]{ 0, ref++ } ) ); }
-        if( cmd == 0x30 ){ root.add( new JDNode("Min Apple Watch Version.h", new long[]{ 0, ref++ } ) ); }
-      }
-
-      //The Source Version.
-
-      else if( cmd == 0x2A )
-      {
-        DTemp.LUINT64("Source Version");
-      
-        DTemp.setEvent( this::sourceVerInfo ); des.add( DTemp );
-      
-        root.add( new JDNode( "Source Version.h", new long[]{ 0, ref++ } ) );
-      }
-
-      //An unknown command, or a command I have not added Yet.
-
-      else
-      {
-        DTemp.Other("Command Data", size ); DTemp.setEvent( this::cmdInfo ); des.add( DTemp );
-
-        root.add( new JDNode( "CMD #" + i + ".h", new long[]{ 0, ref++ } ) );
       }
     }
+    catch( Exception err )
+    {
+      JOptionPane.showMessageDialog(null, "Encountered an Bad Load command.\r\n\r\nFile may be corrupted!");
+    }
+
+    if( loadCMDSize < 0 ) { JOptionPane.showMessageDialog(null, "Error load commands extend past load commands size.\r\n\r\nFile may be corrupted!"); }
 
     //Load in symbols and methods.
 

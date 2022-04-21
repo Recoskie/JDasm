@@ -39,6 +39,10 @@ public class Data extends Window.Window
 
   public static int loadCMD = 0;
 
+  //The number of bytes load commands should be. This helps with error detection while reading.
+
+  public static int loadCMDSize = 0;
+
   //Error when reading headers, or section.
 
   public static boolean error = false;
