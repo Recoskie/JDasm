@@ -202,11 +202,15 @@ public class LoadCMD extends Data
           DTemp.LUINT32("Contents table offset"); int coff = (int)base + (int)DTemp.value;
           DTemp.LUINT32("Content table entries"); int csize = (int)DTemp.value;
 
+          csize <<= 3;
+
           DTemp.LUINT32("Module table offset"); int moff = (int)base + (int)DTemp.value;
           DTemp.LUINT32("Module table entries"); int msize = (int)DTemp.value;
 
           DTemp.LUINT32("Offset to referenced symbol table"); int roff = (int)base + (int)DTemp.value;
           DTemp.LUINT32("Number of referenced symbol table entries"); int rsize = (int)DTemp.value;
+
+          rsize <<= 2;
 
           DTemp.LUINT32("Indirect symbol table offset"); indoff = (int)base + (int)DTemp.value;
           DTemp.LUINT32("Indirect symbol table entries"); indsize = (int)DTemp.value;
@@ -899,7 +903,7 @@ public class LoadCMD extends Data
       "<tr><td>__selector_refs</td><td>String table references.</td></tr>" +
       "<tr><td>__header</td><td>The icon headers.</td></tr>" +
       "<tr><td>__tiff</td><td>The icons in tiff format.</td></tr>" +
-      "</table></html>" );
+      "</table><br />It is important to always read the flag setting to know what type of section the data is, as the names can be set to whatever we like actually.</html>" );
     }
     else
     {
