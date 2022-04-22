@@ -202,15 +202,17 @@ public class LoadCMD extends Data
           DTemp.LUINT32("Contents table offset"); int coff = (int)base + (int)DTemp.value;
           DTemp.LUINT32("Content table entries"); int csize = (int)DTemp.value;
 
-          csize <<= 3;
+          csize <<= 3; //two 32 bit integers. Symbol number and module number.
 
           DTemp.LUINT32("Module table offset"); int moff = (int)base + (int)DTemp.value;
           DTemp.LUINT32("Module table entries"); int msize = (int)DTemp.value;
 
+          msize = ( msize << 2 ) + ( msize << 4 ) + ( msize << 5 ); //52 bytes per module.
+
           DTemp.LUINT32("Offset to referenced symbol table"); int roff = (int)base + (int)DTemp.value;
           DTemp.LUINT32("Number of referenced symbol table entries"); int rsize = (int)DTemp.value;
 
-          rsize <<= 2;
+          rsize <<= 2; //32 bit Symbol number with a flag setting specifying external referenced symbols.
 
           DTemp.LUINT32("Indirect symbol table offset"); indoff = (int)base + (int)DTemp.value;
           DTemp.LUINT32("Indirect symbol table entries"); indsize = (int)DTemp.value;
@@ -220,20 +222,20 @@ public class LoadCMD extends Data
           DTemp.LUINT32("External relocation offset"); int extoff = (int)base + (int)DTemp.value;
           DTemp.LUINT32("External relocation entries"); int extsize = (int)DTemp.value;
 
-          extsize <<= 3;
+          extsize <<= 3; //Packed byte encoding 64 bits each.
 
           DTemp.LUINT32("Local relocation offset"); int loff = (int)base + (int)DTemp.value;
           DTemp.LUINT32("Local relocation entries"); int lsize = (int)DTemp.value;
 
-          lsize <<= 3;
+          lsize <<= 3; //Packed byte encoding 64 bits each.
 
           DTemp.setEvent( this::symInfo ); des.add( DTemp );
 
           JDNode n1 = new JDNode( "Symbol info", new long[]{ 0, ref++ } );
       
-          if( csize > 0 ) { n1.add( new JDNode("Content.h", new long[]{ 0x8000000000000002L, coff, coff + csize - 1 } ) ); }
-          if( msize > 0 ) { n1.add( new JDNode("Module.h", new long[]{ 0x8000000000000002L, moff, moff + msize - 1 } ) ); }
-          if( rsize > 0 ) { n1.add( new JDNode("Sym Ref.h", new long[]{ 0x8000000000000002L, roff, roff + rsize - 1 } ) ); }
+          if( csize > 0 ) { n1.add( new JDNode("Content Table.h", new long[]{ 0x8000000000000002L, coff, coff + csize - 1 } ) ); }
+          if( msize > 0 ) { n1.add( new JDNode("Modules.h", new long[]{ 0x8000000000000002L, moff, moff + msize - 1 } ) ); }
+          if( rsize > 0 ) { n1.add( new JDNode("External Ref.h", new long[]{ 0x8000000000000002L, roff, roff + rsize - 1 } ) ); }
           if( indsize > 0 )
           {
             JDNode n = new JDNode("Indirect Symbols", new long[]{ 9, symOff, symSize, strOff, strSize, indoff, indsize } );
