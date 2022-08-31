@@ -200,7 +200,7 @@ public class Window
     {
       file = new RandomAccessFileV( new byte[16] );
 
-      di = new dataInspector( file ); ds = new dataDescriptor( di );
+      di = new dataInspector( file ); ds = new dataDescriptor( file, di );
           
       Virtual = new VHex( file, di, true ); Offset = new VHex( file, di, false );
     }

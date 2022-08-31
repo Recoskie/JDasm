@@ -23,6 +23,7 @@ public class app extends Window implements ActionListener, DropTargetListener, W
 
   private byte Signature[][] = new byte[][]
   {
+    new byte[] { }, //Dummy format for testing.
     new byte[] { 0x4D, 0x5A }, //Microsoft binaries.
     new byte[] { 0x7F, 0x45, 0x4C, 0x46 }, //Linux/UNIX binaries.
     new byte[] { -50, -6, -19, -2 }, //32 Bit Mac/IOS binary.
@@ -58,7 +59,7 @@ public class app extends Window implements ActionListener, DropTargetListener, W
 
   private String DecodeAPP[] = new String[]
   {
-    "Format.EXE", "Format.ELF", "Format.MAC", "Format.MAC", "Format.MAC", /*"Format.JAVA",*/
+    "Format.TEST", "Format.EXE", "Format.ELF", "Format.MAC", "Format.MAC", "Format.MAC", /*"Format.JAVA",*/
     "Format.BMP", "Format.JPEG", "Format.RIFF", "Format.RIFF",
     "Format.ZIP", "Format.ZIP", "Format.ZIP"
   };
@@ -443,7 +444,7 @@ public class app extends Window implements ActionListener, DropTargetListener, W
 
       //Set io components to target.
 
-      Offset.setTarget( file ); Virtual.setTarget( file ); di.setTarget( file );
+      Offset.setTarget( file ); Virtual.setTarget( file ); ds.setTarget( file ); di.setTarget( file );
 
       winFrame.setJMenuBar( bdBar );
 
@@ -549,7 +550,9 @@ public class app extends Window implements ActionListener, DropTargetListener, W
 
   public int DefaultProgram()
   {
-    boolean Valid = true; file.Events = false; try{ file.read( Sig ); file.seek(0); } catch( IOException err ) { } file.Events = true;
+    return(0);
+    
+    /*boolean Valid = true; file.Events = false; try{ file.read( Sig ); file.seek(0); } catch( IOException err ) { } file.Events = true;
 
     for( int i1 = 0; i1 < Signature.length; i1++ )
     {
@@ -577,7 +580,7 @@ public class app extends Window implements ActionListener, DropTargetListener, W
       }
     }
       
-    return( -1 );
+    return( -1 );*/
   }
 
   //Some formats have no headers. They can only be recognized by file extension.
