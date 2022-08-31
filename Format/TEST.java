@@ -122,9 +122,10 @@ public class TEST extends Window.Window implements JDEventListener
     {
       info("You just set this descriptor, but did not click on any values read in the descriptor.");
     }
-    else
+    else if( index < 2 )
     {
       info( infoEx[ index ] );
     }
+    else { info( "Value = " + (index + 1) + "" ); }
   }
 }
