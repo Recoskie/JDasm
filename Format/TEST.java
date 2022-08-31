@@ -76,6 +76,8 @@ public class TEST extends Window.Window implements JDEventListener
     JDNode FHeader1 = new JDNode("File Header1.h", new long[]{ 0, 0x0000 } ); root.add( FHeader1 );
 
     JDNode FHeader2 = new JDNode("File Header2.h", new long[]{ 1, 0x0100 } ); root.add( FHeader2 );
+
+    JDNode FHeader3 = new JDNode("Reuse Header1.h", new long[]{ 0, 0x0700 } ); root.add( FHeader3 );
       
     tools.update(); //Update the window and its tools.
       
@@ -102,11 +104,7 @@ public class TEST extends Window.Window implements JDEventListener
 
     if( el >= 0 )
     {
-      headers[el].pos = offset;
-      
-      Offset.setSelected(offset, offset + headers[el].length() - 1);
-      
-      ds.setDescriptor( headers[el] );
+      headers[el].pos = offset; ds.setDescriptor( headers[el] ); Offset.setSelected(offset, offset + headers[el].length() - 1);
     }
   }
 
