@@ -23,11 +23,11 @@ public class TEST extends Window.Window implements JDEventListener
 
     headers[0] = new Descriptor( new dataType[]
     {
-      new dataType("Value 1", Descriptor.Int32 ),
+      new dataType("Value 1", Descriptor.LInt32 ),
       new dataType("Value 2", Descriptor.Int32 ),
-      new dataType("Value 3", Descriptor.Int32 ),
+      new dataType("Value 3", Descriptor.LInt32 ),
       new dataType("Value 4", Descriptor.Int32 ),
-      new dataType("Value 5", Descriptor.Int32 ),
+      new dataType("Value 5", Descriptor.LInt32 ),
       new dataType("Value 6", Descriptor.Int32 ),
       new dataType("Value 7", Descriptor.Int32 ),
       new dataType("Value 8", Descriptor.Int32 ),
@@ -98,14 +98,9 @@ public class TEST extends Window.Window implements JDEventListener
 
   public void open(JDEvent e)
   {
-    int el = (int)e.getArg(0); long offset = e.getArg(1);
+    int el = (int)e.getArg(0); if( e.getID().equals("UInit") ) { Uninitialize(); return; } long offset = e.getArg(1);
 
-    if( e.getID().equals("UInit") ) { Uninitialize(); }
-
-    if( el >= 0 )
-    {
-      headers[el].pos = offset; ds.setDescriptor( headers[el] ); Offset.setSelected(offset, offset + headers[el].length() - 1);
-    }
+    headers[el].pos = offset; ds.setDescriptor( headers[el] ); Offset.setSelected(offset, offset + headers[el].length() - 1);
   }
 
   private static final String[] infoEx = new String[]
