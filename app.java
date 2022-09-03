@@ -24,26 +24,26 @@ public class app extends Window implements ActionListener, DropTargetListener, W
   private byte Signature[][] = new byte[][]
   {
     new byte[] { }, //Dummy format for testing.
-    new byte[] { 0x4D, 0x5A }, //Microsoft binaries.
-    new byte[] { 0x7F, 0x45, 0x4C, 0x46 }, //Linux/UNIX binaries.
-    new byte[] { -50, -6, -19, -2 }, //32 Bit Mac/IOS binary.
-    new byte[] { -49, -6, -19, -2 }, //64 Bit Mac/IOS binary.
-    new byte[] { -54, -2, -70, -66 }, //Mac/IOS universal binary.
+    /*new byte[] { 0x4D, 0x5A },*/ //Microsoft binaries.
+    /*new byte[] { 0x7F, 0x45, 0x4C, 0x46 },*/ //Linux/UNIX binaries.
+    /*new byte[] { -50, -6, -19, -2 },*/ //32 Bit Mac/IOS binary.
+    /*new byte[] { -49, -6, -19, -2 },*/ //64 Bit Mac/IOS binary.
+    /*new byte[] { -54, -2, -70, -66 },*/ //Mac/IOS universal binary.
     /*new byte[] { -54, -2, -70, -66 },*/ //Reserved for java class loader format plugin.
-    new byte[] { 0x42, 0x4D }, //Bit map pictures.
-    new byte[] { -1, -40 }, //JPEG start of image marker.
-    new byte[] { 0x52, 0x49, 0x46, 0x46 }, //Multimedia RIFF file.
-    new byte[] { 0x52, 0x46, 0x36, 0x34 }, //Multimedia RIFF/64 file.
-    new byte[] { 0x50, 0x4B, 0x03, 0x04 }, //Compressed ZIP files.
-    new byte[] { 0x50, 0x4B, 0x07, 0x08 }, //Compressed ZIP files (split).
-    new byte[] { 0x50, 0x4B, 0x05, 0x06 } //Compressed ZIP files (Empty).
+    /*new byte[] { 0x42, 0x4D },*/ //Bit map pictures.
+    /*new byte[] { -1, -40 },*/ //JPEG start of image marker.
+    /*new byte[] { 0x52, 0x49, 0x46, 0x46 },*/ //Multimedia RIFF file.
+    /*new byte[] { 0x52, 0x46, 0x36, 0x34 },*/ //Multimedia RIFF/64 file.
+    /*new byte[] { 0x50, 0x4B, 0x03, 0x04 },*/ //Compressed ZIP files.
+    /*new byte[] { 0x50, 0x4B, 0x07, 0x08 },*/ //Compressed ZIP files (split).
+    /*new byte[] { 0x50, 0x4B, 0x05, 0x06 }*/ //Compressed ZIP files (Empty).
   };
 
   //Depending on the file format we do not need a virtual address space.
 
   private static boolean SignatureV[] = new boolean[]
   {
-    true, true, true, true, true, /*true,*/
+    false, true, true, true, true, true, /*true,*/
     false, false, false, false, false, false, false
   };
 
@@ -450,7 +450,8 @@ public class app extends Window implements ActionListener, DropTargetListener, W
 
       //If file format is Supported. Open in reader with binary tools.
 
-      int I = DefaultProgram(), E = -1; if( I < 0 ) { E = I = ExtensionOnly(e.getExtension()); }
+      int E = ExtensionOnly(e.getExtension()), I = E; if( I < 0 ) { I = DefaultProgram(); }
+      //int I = DefaultProgram(), E = -1; if( I < 0 ) { E = I = ExtensionOnly(e.getExtension()); }
 
       //If is a recognized file.
 
@@ -467,7 +468,7 @@ public class app extends Window implements ActionListener, DropTargetListener, W
 
           stree.setVisible(true); ds.setVisible(true); iData.setVisible(true);
       
-          if( I > 0 ) { Virtual.setVisible( E == -1 ? SignatureV[ I ] : ExtensionV[ E ] ); }
+          if( I >= 0 ) { Virtual.setVisible( E == -1 ? SignatureV[ I ] : ExtensionV[ E ] ); }
           
           Offset.setVisible(true); di.setVisible(true);
         }
@@ -550,8 +551,8 @@ public class app extends Window implements ActionListener, DropTargetListener, W
 
   public int DefaultProgram()
   {
-    return(0);
-    
+    return( 0 );
+
     /*boolean Valid = true; file.Events = false; try{ file.read( Sig ); file.seek(0); } catch( IOException err ) { } file.Events = true;
 
     for( int i1 = 0; i1 < Signature.length; i1++ )

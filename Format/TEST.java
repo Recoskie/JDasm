@@ -104,7 +104,9 @@ public class TEST extends Window.Window implements JDEventListener
     
     if( e.getID().equals("UInit") ) { Uninitialize(); return; } long offset = e.getArg(1);
 
-    headers[el].pos = offset; ds.setDescriptor( headers[el] ); Offset.setSelected(offset, offset + headers[el].length() - 1);
+    headers[el].pos = offset; try{ file.seek(headers[el].pos); } catch( java.io.IOException er ) {  }
+
+    ds.setDescriptor( headers[el] ); Offset.setSelected(offset, offset + headers[el].length() - 1);
   }
 
   private static final String[] infoEx = new String[]

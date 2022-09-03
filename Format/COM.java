@@ -10,8 +10,6 @@ import core.x86.*; //X86.
 
 public class COM extends Window.Window implements JDEventListener
 {
-  private static Descriptor blank = new Descriptor( file );
-
   public COM()
   {
     tree.setEventListener( this );
@@ -41,7 +39,7 @@ public class COM extends Window.Window implements JDEventListener
   {
     if( e.getPath().equals("Info.h") )
     {
-      ds.setDescriptor( blank );
+      ds.clear();
       info("<html>DOS COM Files have no header or setup information. The program begins at the start of the file.</html>");
     }
     else
