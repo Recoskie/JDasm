@@ -22,10 +22,10 @@ JDisassembly.
 <table>
   <tr>
     <td>
-      <a href="/docs/Figs/pre1.gif" target="_blank"><img src="/docs/Figs/pre1.gif" style="width:50%;"></a>
+      <a href="https://recoskie.github.io/JDisassembly/docs/Figs/pre1.gif" target="_blank"><img src="https://recoskie.github.io/JDisassembly/docs/Figs/pre1.gif" style="width:50%;"></a>
     </td>
     <td>
-      <a href="/docs/Figs/pre2.gif" target="_blank"><img src="/docs/Figs/pre2.gif" style="width:50%;"></a>
+      <a href="https://recoskie.github.io/JDisassembly/docs/Figs/pre2.gif" target="_blank"><img src="https://recoskie.github.io/JDisassembly/docs/Figs/pre2.gif" style="width:50%;"></a>
     </td>
   </tr>
 </table>
