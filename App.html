@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>JDASM</title>
+  <title>JD-asm</title>
 </head>
 <body onload="init();" onresize="sc1();">
 <script type="text/javascript" src="swingIO/UI.js"></script>
@@ -11,52 +11,39 @@
   ------------------------------------------------------------*/
   
   var file = null, fr = new FileReader();
-  var h1 = null, h2 = null;
+  var h = null;
   
   function init()
   {
-    h1 = new VHex("vhex1", false, sc1);
+    h = new VHex("vhex", false, sc);
     
-    h1.hide(true);
-    
-    h2 = new VHex("vhex2", true, sc2);
-    
-    h2.hide(true);
+    h.hide(true);
   }
   
   function Open( f )
   {
     file = f.files[0];
     
-    h1.hide(false);
+    h.hide(false);
     
-    h1.setSize(file.size);
+    h.setSize(file.size);
     
-    fr.readAsArrayBuffer(file.slice(0, h1.getRows() * 16));
+    fr.readAsArrayBuffer(file.slice(0, h.getRows() * 16));
   }
   
-  function sc1()
+  function sc()
   {
-    var pos = h1.getPos(); pos = (pos < 0 ? 0 : pos) * 16;
-    var row = h1.getRows() * 16;
+    var pos = h.getPos(); pos = (pos < 0 ? 0 : pos) * 16;
+    var row = h.getRows() * 16;
     
     fr.readAsArrayBuffer(file.slice(pos, pos + row));
   }
   
-  function sc2()
-  {
-    var pos = h2.getPos(); pos = (pos < 0 ? 0 : pos) * 16;
-    var row = h2.getRows() * 16;
-    
-    fr.readAsArrayBuffer(file.slice(pos, pos + row));
-  }
-  
-  fr.onload = function() { h1.update( new Uint8Array(fr.result) ); }
+  fr.onload = function() { h.update( new Uint8Array(fr.result) ); }
         
   fr.onerror = function() { alert("error"); }
 </script>
 <input type="file" id="file" onchange="Open(this);">
-<iframe style='width:100%;height:80%;' id="vhex1"></iframe>
-<iframe style='width:100%;height:50%;' id="vhex2"></iframe>
+<iframe style='width:100%;height:100%;' id="vhex"></iframe>
 </body>
 </html>
