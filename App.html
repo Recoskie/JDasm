@@ -1,0 +1,62 @@
+<html>
+<head>
+  <title>JDASM</title>
+</head>
+<body onload="init();" onresize="sc1();">
+<script type="text/javascript" src="swingIO/UI.js"></script>
+<script>
+  /*------------------------------------------------------------
+  This is a web based version of JDisassembly originally designed to run in Java.
+  See https://github.com/Recoskie/JDisassembly/blob/master/app.java
+  ------------------------------------------------------------*/
+  
+  var file = null, fr = new FileReader();
+  var h1 = null, h2 = null;
+  
+  function init()
+  {
+    h1 = new VHex("vhex1", false, sc1);
+    
+    h1.hide(true);
+    
+    h2 = new VHex("vhex2", true, sc2);
+    
+    h2.hide(true);
+  }
+  
+  function Open( f )
+  {
+    file = f.files[0];
+    
+    h1.hide(false);
+    
+    h1.setSize(file.size);
+    
+    fr.readAsArrayBuffer(file.slice(0, h1.getRows() * 16));
+  }
+  
+  function sc1()
+  {
+    var pos = h1.getPos(); pos = (pos < 0 ? 0 : pos) * 16;
+    var row = h1.getRows() * 16;
+    
+    fr.readAsArrayBuffer(file.slice(pos, pos + row));
+  }
+  
+  function sc2()
+  {
+    var pos = h2.getPos(); pos = (pos < 0 ? 0 : pos) * 16;
+    var row = h2.getRows() * 16;
+    
+    fr.readAsArrayBuffer(file.slice(pos, pos + row));
+  }
+  
+  fr.onload = function() { h1.update( new Uint8Array(fr.result) ); }
+        
+  fr.onerror = function() { alert("error"); }
+</script>
+<input type="file" id="file" onchange="Open(this);">
+<iframe style='width:100%;height:80%;' id="vhex1"></iframe>
+<iframe style='width:100%;height:50%;' id="vhex2"></iframe>
+</body>
+</html>
