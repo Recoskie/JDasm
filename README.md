@@ -20,14 +20,14 @@ JDisassembly.
 ## Web Version.
 
 <table>
-  <tr><td>Web based verion:</td><td><a href="https://recoskie.github.io/JDisassembly/App.html">Link</a></td></tr>
+  <tr><td>Web based version:</td><td><a href="https://recoskie.github.io/JDisassembly/App.html">Link</a></td></tr>
 </table>
 
-The web based version uses a diffrent file system built into javascript: <a href="https://developer.mozilla.org/en-US/docs/Web/API/FileReader">FileReader API</a>
+The web based version uses a different file system built into javascript: <a href="https://developer.mozilla.org/en-US/docs/Web/API/FileReader">FileReader API</a>
 
 It renders the VHex component using HTML5 canvas. It is experimental and currently only supports the swingIO VHex component.
 
-More will be added inculding my JS dissasembler <a href="https://github.com/Recoskie/X86-64-Disassembler-JS">X86-64-Disassembler-JS.js</a>
+More will be added including my JS disassembler <a href="https://github.com/Recoskie/X86-64-Disassembler-JS">X86-64-Disassembler-JS.js</a>
 
 The "core" type package should be a submodule.
 
@@ -80,7 +80,7 @@ Supports Unix/Linux (ELF) binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko
 
 Supports MacOS/iPhone (Mach-o) binaries, and also MacOS/iPhone (Mach-o) Universal binaries.
 
-Supports Decompiling Mobile Andoird APK application binaries.
+Supports Decompiling Mobile Android APK application binaries.
 
 Supports Decompiling Mobile iPhone IPA application binaries.
 
