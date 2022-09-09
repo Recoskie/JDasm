@@ -2,7 +2,7 @@
 <head>
   <title>JD-asm</title>
 </head>
-<body onload="init();" onresize="sc1();">
+<body onload="init();" onresize="sc();">
 <script type="text/javascript" src="swingIO/UI.js"></script>
 <script>
   /*------------------------------------------------------------
@@ -11,39 +11,49 @@
   ------------------------------------------------------------*/
   
   var file = null, fr = new FileReader();
-  var h = null;
+  var offset = null;
   
   function init()
   {
-    h = new VHex("vhex", false, sc);
+    offset = new VHex("vhex", false, sc);
     
-    h.hide(true);
+    offset.hide(true);
   }
   
   function Open( f )
   {
     file = f.files[0];
     
-    h.hide(false);
+    offset.hide(false); show("c1");
     
-    h.setSize(file.size);
+    offset.setSize(file.size);
     
-    fr.readAsArrayBuffer(file.slice(0, h.getRows() * 16));
+    fr.readAsArrayBuffer(file.slice(0, offset.getRows() * 16));
+  }
+  
+  function show( el )
+  {
+    document.getElementById(el).style.display = "";
   }
   
   function sc()
   {
-    var pos = h.getPos(); pos = (pos < 0 ? 0 : pos) * 16;
-    var row = h.getRows() * 16;
+    var pos = offset.getPos(); pos = (pos < 0 ? 0 : pos) * 16;
+    var row = offset.getRows() * 16;
     
     fr.readAsArrayBuffer(file.slice(pos, pos + row));
   }
   
-  fr.onload = function() { h.update( new Uint8Array(fr.result) ); }
+  fr.onload = function()
+  {
+    var data = new Uint8Array(fr.result);
+    
+    offset.update( data );
+  }
         
   fr.onerror = function() { alert("error"); }
 </script>
-<input type="file" id="file" onchange="Open(this);">
+<input type="file" id="file" onchange="Open(this);"><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);this.value='Show text';}else{offset.setText(true);this.value='Hide text';}sc();" style="display:none;">
 <iframe style='width:100%;height:100%;' id="vhex"></iframe>
 </body>
 </html>
