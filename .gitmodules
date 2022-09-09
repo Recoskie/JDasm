@@ -1,4 +1,6 @@
 [submodule "swingIO"]
 	path = swingIO
 	url = https://github.com/Recoskie/swingIO
-
+[submodule "RandomAccessFileV"]
+	path = RandomAccessFileV
+	url = https://github.com/Recoskie/RandomAccessFileV.git
