@@ -11,6 +11,8 @@ image:
   
   document.body.onload = function()
   {
+    window.onresize = function() { offset1.update(file); offset1.adjSize(); }
+    
     offset1 = new VHex("vhex1",file,false);
   
     file.getFile("https://raw.githubusercontent.com/Recoskie/JDisassembly/master/JD-asm.jar", load);
@@ -18,13 +20,20 @@ image:
   
   function load(f)
   {
+    var d = new DataTransfer(); d.items.add(f);
+    
+    document.getElementById("sfile").files = d.files;
+    
+    Open(f);
+  }
+  
+  function Open(f)
+  {
     file.setTarget(f);
     
     offset1.adjSize();
     
     offset1.sc();
-    
-    window.onresize = function() { offset1.update(file); offset1.adjSize(); }
   }
 </script>
 <table border="1">
@@ -36,11 +45,11 @@ image:
 
 <h1 id="SysMem">Reading, and editing binary data.</h1>
 
-When you open any file or disk drive, you will see an output that looks like this.
+When you open any file or disk drive, you will see the following output.
 
 <br />
-
-<div style="min-width:680px;width:100%;height:200px;" id="vhex1"></div>
+<input type="File" id="sfile" onchange="Open(this.files[0]);" />
+<div style="min-width:680px;width:100%;height:480px;" id="vhex1"></div>
 
 <br />
 
