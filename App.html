@@ -80,6 +80,8 @@
       document.getElementById("vhex2").style.height="100%";
       
       if( v ) { offset.update(file); } else { virtual.update(file); }
+      
+      offset.adjSize(); virtual.adjSize();
     }
     else if( offset.visible && virtual.visible )
     {
@@ -87,6 +89,8 @@
       document.getElementById("vhex2").style.height="50%";
       
       offset.update(file); virtual.update(file);
+      
+      offset.adjSize(); virtual.adjSize();
     }
   }
   
