@@ -46,13 +46,75 @@
   
   function Open( f )
   {
-    offset.hide(false); virtual.hide(false); show("c1");
+    offset.hide(false);
+    
+    show("c1"); show("c2"); show("c3");
     
     file.setTarget( f );
     
     offset.adjSize(); virtual.adjSize();
     
-    offset.sc(); virtual.sc();
+    offset.sc();
+  }
+  
+  //Hex editor show and hide.
+  
+  function OShow()
+  {
+    offset.hide(offset.visible);
+    
+    if( offset.visible && virtual.visible )
+    {
+      document.getElementById("vhex1").style.height="50%";
+      document.getElementById("vhex2").style.height="50%";
+      
+      virtual.update(file);
+    }
+    else
+    {
+      document.getElementById("vhex1").style.height="100%";
+      document.getElementById("vhex2").style.height="100%";
+      
+      virtual.update(file);
+    }
+    
+    if( offset.visible )
+    {
+      document.getElementById("c2").value = "Hide Offset"; offset.update(file);
+    }
+    else
+    {
+      document.getElementById("c2").value = "Show Offset";
+    }
+  }
+  
+  function VShow()
+  {
+    virtual.hide(virtual.visible);
+    
+    if( offset.visible && virtual.visible )
+    {
+      document.getElementById("vhex1").style.height="50%";
+      document.getElementById("vhex2").style.height="50%";
+      
+      offset.update(file);
+    }
+    else
+    {
+      document.getElementById("vhex1").style.height="100%";
+      document.getElementById("vhex2").style.height="100%";
+      
+      offset.update(file);
+    }
+    
+    if( virtual.visible )
+    {
+      document.getElementById("c3").value = "Hide Virtual"; virtual.update(file);
+    }
+    else
+    {
+      document.getElementById("c3").value = "Show Virtual";
+    }
   }
   
   //Show hidden elements.
@@ -62,8 +124,8 @@
     document.getElementById(el).style.display = "";
   }
 </script>
-<input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);this.value='Show text';}else{offset.setText(true);this.value='Hide text';};offset.update(file);" style="display:none;" />
-<div style='width:100%;height:50%;' id="vhex1"></div>
-<div style='width:100%;height:50%;' id="vhex2"></div>
+<input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};offset.update(file);virtual.update(file);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="OShow();" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="VShow();" style="display:none;" />
+<div style='width:100%;height:100%;' id="vhex1"></div>
+<div style='width:100%;height:100%;' id="vhex2"></div>
 </body>
 </html>
