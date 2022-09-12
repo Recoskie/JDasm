@@ -4,7 +4,29 @@ title: Binary Analysis
 image:
   path: https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1
 ---
-
+<script type="text/javascript" src="../swingIO/UI.js"></script>
+<script type="text/javascript" src="../RandomAccessFileV/FileReaderV.js"></script>
+<script type="text/javascript">
+  var file = new FileReaderV(), offset1 = null;
+  
+  document.body.onload = function()
+  {
+    offset1 = new VHex("vhex1",file,false);
+  
+    file.getFile("https://raw.githubusercontent.com/Recoskie/JDisassembly/master/JD-asm.jar", load);
+  }
+  
+  function load(f)
+  {
+    file.setTarget(f);
+    
+    offset1.adjSize();
+    
+    offset1.sc();
+    
+    window.onresize = function() { offset1.update(file); offset1.adjSize(); }
+  }
+</script>
 <table border="1">
   <tr><td>System Memory: <a href="#SysMem">Link</a></td></tr>
   <tr><td>Processor data types: <a href="#dTypes">Link</a></td></tr>
@@ -18,7 +40,7 @@ When you open any file or disk drive, you will see an output that looks like thi
 
 <br />
 
-<image src="Figs\Offset.gif"></image>
+<div style="min-width:680px;width:100%;height:200px;" id="vhex1"></div>
 
 <br />
 
