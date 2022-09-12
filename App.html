@@ -7,7 +7,7 @@
   <link rel="apple-touch-icon" href="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1">
   <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
 </head>
-<body onload="init();" onresize="offset.adjSize();offset.update(file);">
+<body onload="init();" onresize="offset.adjSize();offset.update(file);virtual.update(file);">
 <script type="text/javascript" src="swingIO/UI.js"></script>
 <script type="text/javascript" src="RandomAccessFileV/FileReaderV.js"></script>
 <script>
@@ -17,13 +17,14 @@
   ------------------------------------------------------------*/
   
   var file = new FileReaderV();
-  var offset = null;
+  var offset = null, virtual = null;
   
   function init()
   {
-    offset = new VHex("vhex", file, false);
+    offset = new VHex("vhex1", file, false);
+    virtual = new VHex("vhex2", file, true);
     
-    offset.hide(true);
+    offset.hide(true); virtual.hide(true);
     
     //Open an example file.
     
@@ -45,13 +46,13 @@
   
   function Open( f )
   {
-    offset.hide(false); show("c1");
+    offset.hide(false); virtual.hide(false); show("c1");
     
     file.setTarget( f );
     
-    offset.adjSize();
+    offset.adjSize(); virtual.adjSize();
     
-    offset.sc();
+    offset.sc(); virtual.sc();
   }
   
   //Show hidden elements.
@@ -62,6 +63,7 @@
   }
 </script>
 <input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);this.value='Show text';}else{offset.setText(true);this.value='Hide text';};offset.update(file);" style="display:none;" />
-<div style='width:100%;height:100%;' id="vhex"></div>
+<div style='width:100%;height:50%;' id="vhex1"></div>
+<div style='width:100%;height:50%;' id="vhex2"></div>
 </body>
 </html>
