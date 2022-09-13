@@ -49,7 +49,7 @@ When you open any file or disk drive, you will see the following output.
 
 <br />
 <input type="File" id="sfile" onchange="Open(this.files[0]);" />
-<div style="min-width:680px;width:100%;height:480px;" id="vhex1"></div>
+<div style="width:100%;height:480px;" id="vhex1"></div>
 
 <br />
 
