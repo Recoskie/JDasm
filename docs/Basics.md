@@ -11,6 +11,11 @@ image:
   
   document.body.onload = function()
   {
+    document.body.style = "min-width: 1084px;";
+    var meta = document.createElement('meta');
+    meta.name = "viewport";
+    meta.content = "inital-scale=1.0;";
+    document.head.appendChild(meta);
     window.onresize = function() { offset1.update(file); offset1.adjSize(); }
     
     offset1 = new VHex("vhex1",file,false);
