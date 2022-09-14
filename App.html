@@ -52,7 +52,7 @@
     
     document.getElementById("file").files = d.files;
     
-    Open( f )
+    Open( f );
   }
   
   //When opening an file.
@@ -115,6 +115,7 @@
   }
 </script>
 <input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};offset.update(file);virtual.update(file);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
-<div style='width:100%;height:100%;' id="vhex1"></div><div id="vhex2"></div>
+<div style='width:100%;height:100%;border-style:solid;border-color:black;border-width:2px;' id="vhex1"></div>
+<div style='width:100%;border-style:solid;border-color:black;border-width:2px;' id="vhex2"></div>
 </body>
 </html>
