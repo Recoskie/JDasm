@@ -90,7 +90,7 @@
       document.getElementById("vhex1").style.height="100%";
       document.getElementById("vhex2").style.height="100%";
       
-      if( v ) { offset.update(file); } else { virtual.update(file); }
+      if( v ) { offset.update(file); } else { virtual.update(file); virtual.sc(); }
       
       offset.adjSize();
     }
@@ -101,7 +101,7 @@
       
       offset.update(file); virtual.update(file);
       
-      offset.adjSize();
+      offset.adjSize(); virtual.sc();
     }
   }
   
