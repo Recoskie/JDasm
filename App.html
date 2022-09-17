@@ -65,9 +65,7 @@
     
     file.setTarget( f );
     
-    offset.adjSize(); virtual.adjSize();
-    
-    offset.sc();
+    offset.adjSize(); offset.sc();
   }
   
   //Hex editor show and hide.
@@ -94,7 +92,7 @@
       
       if( v ) { offset.update(file); } else { virtual.update(file); }
       
-      offset.adjSize(); virtual.adjSize();
+      offset.adjSize();
     }
     else if( offset.visible && virtual.visible )
     {
@@ -103,7 +101,7 @@
       
       offset.update(file); virtual.update(file);
       
-      offset.adjSize(); virtual.adjSize();
+      offset.adjSize();
     }
   }
   
