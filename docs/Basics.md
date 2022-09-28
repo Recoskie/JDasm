@@ -58,11 +58,11 @@ When you open any file or disk drive, you will see the following output.
 
 <br />
 
-This is called a hex editor. It lets you read what the raw binary data is in files or the entire disk and allows you to even change its binary data.
+This is called a hex editor. It lets you read the raw binary data in files or the entire disk as it is and allows you to even change its binary data.
 
 <br />
 
-However, to use it properly, you need to understand how the information is displayed.
+To use a hex editor properly, you need to understand how the information is displayed and what system memory is made out of.
 
 <br />
 
@@ -81,11 +81,11 @@ Each single 0 to 9 and A to F character is four binary digits.
 
 <br />
 
-Hex is used to make the binary view more compact and to keep it readable. It is meant to be a shorthand representation of binary.
+Hex is used to make the binary view more compact and to keep it readable. It is meant to be a short easy to read representation of binary.
 
 <br />  
 
-For example, 19FE is 0001 1001 1111 1110 binary. Also 00611 is 0000 0000 0110 0001 0001.
+For example, 19FE hex maps into 0001 1001 1111 1110 binary. Also 00611 is 0000 0000 0110 0001 0001.
 
 <br />
 
@@ -93,19 +93,23 @@ Double-clicking any hex digit will let you type a 0 to 9 and A to F value. You c
 
 <br />
 
-There is a square around every two hex digits because every eight binary digits are one position in memory.
+Note that the web version lets you analyze binary formats and files as they are, but does not let you edit the files. Only the java application allows you to do edits to binary files.
 
 <br />
 
-Each hex digit is four binary digits. So every two digits are eight binary digits.
+There is also a square around every two hex digits because every eight binary digits are one position in system memory.
 
 <br />
 
-Eight binary digits are called a byte. All memory devices operate in bytes, CD ROMs, blue rays, DVD, Solid-state drives, RAM, and floppy disks. Even video game cartages: GameBoy color cartages, Nintendo DS cartages, switch cartages, game disks (playstation, wii).
+Each hex digit is four binary digits, so every two digits are eight binary digits.
 
 <br />
 
-It is a memory standard.
+Eight binary digits are called a byte. All memory devices operate in bytes: CD ROMs, blue rays, DVD, Solid-state drives, RAM, and floppy disks. Even video game cartages: GameBoy color cartages, Nintendo DS cartages, switch cartages, game disks (playstation, wii).
+
+<br />
+
+It is a memory standard, and is something you should understand if you want to be a good software/game developer, or software engineer.
 
 <br />
 
@@ -135,7 +139,7 @@ The highlighted square above is position 16 in the binary file. And so on. Also,
 
 <br />
 
-Also, binary files are measured in the number of bytes in the binary file. Also, the size of a memory device is measured by how many bytes it can hold.
+Binary files are measured in the number of bytes in the binary file. The size of a memory device is measured by how many bytes it can hold.
 
 <h1>System Memory.</h1>
 
@@ -186,11 +190,11 @@ Also, 1000 is 1 kilo in metric. So 1000 kilo is 1 mega in metric. The word "byte
 
 <br />
 
-The same applies to ohms for resistors in electronics. Thus 1 kilo is 1000. Thus an ohm is the unit just as the byte is the singular unit.
+The same applies to ohms for resistors in electronics. As 1 kilo is 1000 as a number. Thus an ohm is the thing just as the byte is the singular unit.
 
 <br />
 
-So 1-kilo ohm is a 1000 ohm resistor. The same is true with wattage as kilo wat to Giga wat. In which Giga is the measure and the wat is the thing.
+So 1-kilo ohm is actually a 1000 ohm resistor. The same is true with wattage as kilo wat to Giga wat. In which Giga is the measure and the wat is the thing.
 
 <br />
 
@@ -202,11 +206,11 @@ However, terms like a petabyte of memory are rarely used. You will, however, hea
 
 <br />
 
-When it comes to video game cartages and roms we can dump all the byte data into a file on an computer. Thus emulators are designed to read the roms and play them.
+When it comes to video game cartages and roms we can dump all the byte data into a file on an computer. Emulators are designed to read the roms and play them.
 
 <h1 id="dTypes" style="clear:left;"><hr />Data types.</h1>
 
-Data types are limited and are the same across all systems (game boy color to PC). Even different system architecture types use the same data types. They are your building blocks for creating new picture formats, creating Disk drive formats such as FAT32, NTFS, or creating something new, or just writing software on the platform, or console in general.
+Data types are limited and are the same across all systems (game boy color to PC). Even different system architecture types use the same data types. They are your building blocks for creating new picture formats, creating Disk drive formats such as FAT32, NTFS, or creating something new, or just writing software on the platform, or game console in general.
 
 <br />
 
@@ -226,11 +230,15 @@ Processors are designed to read bytes of data, which is the standard unit of mem
 
 <br />
 
-Originally two bytes created a "word". Thus two words created a "double word" shortened to "DWORD". Also, two "DWORD" created a "quadword" called "QWORD".
+Originally two bytes created a "word", then two words created a "double word" shortened to "DWORD". Also, two "DWORD" created a "quadword" called "QWORD".
 
 <br />
 
-These are the original names given to bytes, and their lengths. We could Read 2 bytes that form a Word just as two letters make a word in English, which we can add as a 16-bit number.
+Data types are generally in sizes 8-bit, 16-bit, 32-bit, 64-bit as they are doubled from each prior word size in byte format.
+
+<br />
+
+These are the original names given to bytes, and their "WORD" lengths. We could Read 2 bytes that form a Word just as two letters make a word in English, which we can add as a 16-bit number.
 
 <br />
 
@@ -238,15 +246,15 @@ Today these words are no longer used. Except for in-machine code translation of 
 
 <br />
 
-Thus the original saying that a picture is worth a "thousand words". Meaning it took a thousand words, for each red, green, blue value, for each pixel. Back in the day, pictures were 2-kilo big, so a thousand words.
+This is also where the original saying that a picture is worth a "thousand words" came from. Meaning it took a thousand words, for each red, green, blue value, for each pixel. Back in the day, pictures were 2-kilo big, so a thousand words.
 
 <br />
 
-Today when we read these sizes. Then wish to do arithmetic with different read lengths of data. We specify types like "byte", "short" (WORD), “integer” (DWORD), “long” (QWORD).
+Today when we read these "WORD" grouping sizes. Then wish to do arithmetic with different read lengths of data. We specify types like "byte", "short" (WORD), “integer” (DWORD), “long” (QWORD).
 
 <br />
 
-The original names stay intact in disassembly between basic CPU operations, like add, multiply, or divide.
+The original names stay intact in disassembly between basic CPU operations, like add, multiply, or divide when reading different word sizes of data.
 
 <br />
 
@@ -254,11 +262,11 @@ IT also does not matter if you have an ARM core, X86 core, or embedded core. The
 
 <br />
 
-We will cover processor instruction sets in another document, for now we will talk about the data types which are the same no matter which platform you design software for.
+We will cover processor instruction sets in another document, for now we will talk about the data types which are the same no matter which platform you design software on.
 
 <br />
 
-A byte is still a byte of memory no matter what the system cpu architecture is. The lengths of data are also still in word size. Thus integers are still the same.
+A byte is still a byte of memory no matter what the system cpu architecture is. The lengths of data are also still in "word size". Also, integers are still the same.
 
 <br />
 
@@ -282,11 +290,11 @@ In a processor that reads bytes in big-endian byte order: Bytes are read in orde
 
 <br />
 
-Big-endian is not used much, if at all, in many systems. Thus, big-endian systems switch the byte order using arithmetic operations to maintain compatibility with the majority of file formats.
+Big-endian is not used much, if at all, in many systems. This also means big-endian systems switch the byte order using arithmetic operations to maintain compatibility with the majority of file formats.
 
 <br />
 
-So basically, little-endian is the format that is used the most today.
+Basically little-endian is the format that is used the most today, so big-endian systems do not do well as they must flip the byte order when reading a value and flip the byte order when saving changes to files.
 
 <h2>Integer numbers.</h2>
 
@@ -294,7 +302,7 @@ When we talk integers, we are talking numbers without a decimal point. That oper
 
 <br />
 
-We can count to 9 before adding one to the next place value. In which 9+1=10. So the number of times we have counted to 10 is in the 10 position. The number we have counted to 100 is in the 100 position. As 10 can be added to 10 times to reach 100 position, for the number of 100s.
+We can count to 9 before adding one to the next place value. In which 9+1=10. So the number of times we have counted to 10 is in the 10 position. The number we have counted to 100 is in the 100 position. As 10 can be added to ten times to reach 100 position, for the number of 100s.
 
 <br />
 
@@ -302,11 +310,11 @@ A max value for 7 digits with 10 per place value 7 across is 10000000-1=9999999.
 
 <br />
 
-In binary, we limit ourselves to 1 and 0. We go 1+1=10, which is the number of twos we have counted.
+In binary, we limit ourselves to 1 and 0. We go 1+1=10, which is the number of twos we have counted instead of ten.
 
 <br />
 
-Thus if we count to place value 2 a second time, we forum place value 100, which is 4 because each place value can be counted to twice at each position, making each next position a multiple of two instead of ten.
+So if we count to place value 2 a second time, we forum place value 100, which is 4 because each place value can be counted to twice at each position, making each next position a multiple of two instead of ten.
 
 <br />
 
@@ -314,11 +322,11 @@ This means a number 8 in length has 2^8-1=255 combinations, which is called a by
 
 <br />
 
-Using two symbols or ten symbols does not change how a number counts to the next place value or caries adds. The number of symbols we are using before the next place and carry is called a number base.
+Using two symbols or ten symbols does not change how a number counts to the next place value, or is added and caries per column. The number of symbols we are using before the next place and carry is called a number base.
 
 <br />
 
-You can make any number system you like using any grouping of numbers you like see <a href="https://www.mathsisfun.com/base-conversion-method.html" target="_blank">Base conversion.</a>
+You can make any number system you like using any grouping of numbers you like see <a href="https://www.mathsisfun.com/base-conversion-method.html" target="_blank">Base conversion method.</a>
 
 <br />
 
@@ -348,7 +356,7 @@ It just is that using two symbols as off and on for a transistor makes it easy t
 
 <br />
 
-Adding Signed and unsigned numbers are the same.
+Signed and unsigned numbers are added the same way. The only difference is how we display the value.
 
 <br />
 
@@ -356,19 +364,27 @@ Adding 3 + 8 = 11
 
 <br />
 
-As one can see, the singed value for 11 is -5. The singed value for 8 is -8. The singed value for 3 is 3.
+If we replace each number with their singed values we end up with the correct result as a singed number.
 
 <br />
 
-Thus 3+-8=-5
+The singed value for 11 is -5, and the singed value for 8 is -8, and finally the singed value for 3 is 3.
 
 <br />
 
-The numbers are split into two. Thus the numbers descend the further you go down using regular add. This way, we do not need to design a unique add circuit for negative and positive numbers.
+Changes into 3+-8=-5
 
 <br />
 
-Say we add 1111 = -1, and 1001 = 7. We add 15+7=22. Thus 22 in binary is 10110. The first four numbers are 0110, which is the size of the add operation. Thus 0110 in the table is 6 Singed decimal.
+How it works.
+
+<br />
+
+The numbers are split into two. The numbers descend the further you go down using regular add. This way, we do not need to design a unique add circuit for negative and positive numbers.
+
+<br />
+
+Say we add 1111 = -1, and 1001 = 7. We add 15+7=22. So 22 in binary is 10110. The first four numbers are 0110, which is the size of the add operation, then 0110 in the table is 6 Singed decimal.
 
 <br />
 
@@ -380,7 +396,7 @@ The only thing that changes is how we display the value and how we compare such 
 
 <br />
 
-In reality, your source code can have singed numbers, but by disassembling its machine operations. You could recreate the code as all unsigned numbers without error.
+In reality, your source code can have singed numbers, but by disassembling its machine operations. You, then could recreate the code as all unsigned numbers without error.
 
 <br />
 
@@ -388,15 +404,27 @@ As there is no such thing as a singed add or subtract in any CPU. Singed numbers
 
 <br />
 
+Also, since the last binary digit can be counted to twice, then the last binary digit became the split point for the negative and positive half. The half point is called the sing bit.
+
+<br />
+
+Because, of how numbers add the singed bit is set one for negative mainly because when we add past 1111 = -1, then carry is removed and we land on the positive half.
+
+<br />
+
+So when the sing bit is set one we are in the negative descending half till the last value 1111 = -1, and is set zero for positive 0000 = 0 and up.
+
+<br />
+
 See <a href="https://www.swarthmore.edu/NatSci/echeeve1/Ref/BinaryMath/BinaryMath.html" target="_blank">swarthmore.edu Binary arithmetic.</a>
 
 <br />
 
-It is important to understand that there is no magic way of adding or subtracting different number types (Even fractional numbers).
+The CPU does not care if it is singed or unsinged value as it does the same add/subtract operation for both at hardware level. It is how we display the value that changes.
 
 <br />
 
-This is because you will actually see this in code when translating machine code. Thus you have to make the determination of the number type based on how it is used.
+You will actually see this in code when translating machine code. You actually have to make the determination of the number type based on how it is used.
 
 <h2 style="clear:left;">Floating point numbers.</h2>
 
@@ -416,7 +444,7 @@ This is also a primitive data type that is the same across all processor cores a
 
 <br />
 
-Thus a double-precision number gets its name from being twice the size of a float number as a QWORD, giving you a larger integer and bigger exponent section.
+A double-precision number gets its name from being twice the size of a float number as a QWORD, giving you a larger integer and bigger exponent section.
 
 <br />
 
@@ -424,11 +452,11 @@ These numbers are added the same as regular numbers. With the integer part adjus
 
 <br />
 
-The implementation of said binary number format is the same on mobile as it is on PC as well.
+The implementation of said binary number format is the same on mobile as it is on PC, and game consoles as well.
 
 <br />
 
-The exponent is one byte. So you have a 255 positional point for rally big or rally small number values.
+The exponent is one byte in A float. So you have a 255 positional point for rally big or rally small number values.
 
 <br />
 
@@ -456,11 +484,11 @@ Adding in the decimal point, it becomes 0.1+0.1=1.0 in binary.
 
 <br />
 
-The two numbers are lined up relative to exponent using a shift then added using a regular CPU ADD.
+The two numbers are lined up relative to exponent using a shift then added using a regular CPU ADD. A shift is the number of times to move a value to the left or right. For example 11 to the left 3 times is 11000 and back to the right 3 times is 11.
 
 <br />
 
-Which is how floating-point arithmetic is done if the CPU does not have a Float add operation.
+This is how floating-point arithmetic is done if the CPU does not have a Float add operation.
 
 <br />
 
@@ -468,7 +496,7 @@ Adding in the decimal point means you can have values that are a division of 2 r
 
 <br />
 
-As 0.1 is the same as one divided by two = 0.5. Thus adding 0.5 twice is the same as adding 0.1+0.1=1.0 as binary.
+As 0.1 is the same as one divided by two = 0.5. As adding 0.5 twice is the same as adding 0.1+0.1=1.0 as binary.
 
 <br />
 
@@ -522,7 +550,7 @@ This format stays the same between systems. Otherwise, documents would fail to l
 
 <br />
 
-Char codes 00 to 1F hex are not really text codes. Thus are never saved to text documents or web pages.
+Char codes 00 to 1F hex are not really text codes, so are never saved to text documents or web pages.
 
 <br />
 
@@ -530,7 +558,7 @@ Processor cores come equipped with text processing functions. Such as changing a
 
 <br />
 
-An array of characters is called a String of text. So you could say a text document is an Array of characters.
+An array of characters is called a String of text. You could say a text document is an Array of characters, or is a really long string.
 
 <br />
 
@@ -550,11 +578,11 @@ This is how the <em>toString</em> method is implemented in all programming langu
 
 <br />
 
-Text data is also the same across systems, with each byte value representing a different character to draw from a font file.
+Text data is also the same across systems, with each byte value representing a different character picture to draw from a font file. It is also important that the font file stores the pictures relevant to each byte value (Otherwise we end up with gibberish).
 
 <br />
 
-When decoding a binary file, you will often run into magic numbers (Signatures).
+When decoding a binary file, you will often run into Signatures sometimes called magic numbers.
 
 <br />
 
@@ -563,6 +591,10 @@ When decoded as characters usually mean something like in a Microsoft executable
 <br />
 
 In which the two-character string "MZ" is the initials for Mark Zbikowski.
+
+<br />
+
+ZIP compressed files start with the code 50 4B which are the font characters "PK", which is short for PKWARE.
 
 <br />
 
@@ -582,7 +614,11 @@ Also you can read over <a href="https://unicode.org/standard/principles.html#:~:
 
 <br />
 
-Thus UTF8 is just the smaller version of the standard text format. The original UTF8 codes are still the same values as UTF16. The difference is that it has more combinations for more characters after 255.
+The original UTF8 codes are still the same values as UTF16. The difference is that it has more combinations for more characters after 255.
+
+<br />
+
+Also, UTF8 is sometimes called ASCII text, and it is important to remember that we are actually referring to the UTF8 standard.
 
 <h1 style="clear:left;">Fast binary conversion.</h1>
 
@@ -641,7 +677,7 @@ Hex=(1),(4),(5),(5),(2),(A),(9),(4),(A)
 
 <br />
 
-By matching each 4 binary digit combination in place value to each hex digit in 0 to 15, alows us to quickly change back and forth between binary or hex in one's head.
+By matching each 4 binary digit combination in place value to each hex digit in 0 to 15, allows us to quickly change back and forth between binary or hex in one's head.
 
 <br />
 
@@ -733,10 +769,6 @@ So it does not matter the number of digits you are using to display a number. Yo
 <h1>Array.</h1>
 
 An array is a set of bytes or words. Written one after another in memory.
-
-<br />
-
-The first DWord of an array is the boundaries of the array. If the first DWORD is 2 in value, you can only read the first element then the next element before the end.
 
 <br />
 
@@ -835,7 +867,7 @@ Binary files are basic structures built on primitive data types. The only thing 
 
 <br />
 
-Some old video games on PlayStation will read a single byte. Then divide it using CPU bitwise arithmetic. This allows the read byte to be split into sections. Such byte values are called packed bytes in binary file documentation.
+Some old video games on PlayStation 1 will read a single byte. Then divide it into parts using CPU arithmetic. This allows the read byte to be used in sections as separate values. Such byte values are called packed bytes in binary file documentation.
 
 <br />
 
@@ -843,7 +875,7 @@ It is rare for files to use this unless it is an old file format where memory wa
 
 <br />
 
-Today such things do not matter anymore. Plus, it takes more CPU power to read such bytes and divided them up. Everything in today's binary formats is in bytes, words, dwords, and qwords.
+Today such things do not matter anymore. Plus, it takes more CPU power to read such bytes and divided them up in sections. Everything in today's binary formats is in bytes, words, dwords, and qwords.
 
 <br />
 
@@ -857,7 +889,7 @@ A header usually has a signature which should always be the same byte values. If
 
 <br />
 
-A header can specify the width, height if it is a picture and various things after the file signature.
+A header can specify the width, and height if it is a picture and various things after the file signature.
 
 <br />
 
@@ -883,13 +915,29 @@ When you click, save, and see your picture load in a picture program. That is th
 
 Also, colors of light add together, so it is not hard to visualize the added color in your head. You may want to learn what <a href="https://en.wikipedia.org/wiki/Additive_color" target="_blank">additive colors</a> of light are, and practice making red, green, blue values a little.
 
+<br />
+
+Font files generally are an array of bit map pictures that are used for which picture to draw per key on the keyboard in UTF8, and are hardware independent.
+
 <h2>Video memory.</h2>
 
 A bitmap closely resembles video memory, which video memory is how graphics is done without a graphics card. The CPU writes red, green, blue values per pixel to the very last pixel of the display's resolution.
 
 <br />
 
-The operating system does not set up video memory. It is set up by the BIOS (Boot integrated operating system), which is built into all system motherboards. Thus video memory follows the same video modes and standard of a bit map.
+The operating system does not set up video memory. It is the job of the converters you solder onto a system that go to a display output such as HDMI, VGA, or display port.
+
+<br />
+
+The video out components you put onto a modern motherboard or game console are standardized and connect to a HDMI, VGA, or display port display.
+
+<br />
+
+The format you write to video memory is standardized, and is generally pairs of three bytes for each RGB color per pixel.
+
+<br />
+
+The first three bytes are the top left corner and continues across the screen per pixel and starting on the next line when we reach the of the screen.
 
 <br />
 
@@ -898,6 +946,14 @@ Even handheld game consoles like the Nintendo DS has a video memory location tha
 <br />
 
 The CPU then can do any graphics function you like on any display or monitor without requiring graphics drivers, which is called software-rendered graphics.
+
+<br />
+
+The Nintendo DS used two ARM cores. You would write your graphics functions on ARM9, and the other for running the games instructions and logic on ARM7.
+
+<br />
+
+You could also do mix and match if you wanted, however it was simpler and better to separate the jobs on two cores. THe format the video memory worked in is the same as PC or any graphics device.
 
 <br />
 
