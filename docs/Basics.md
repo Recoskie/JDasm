@@ -937,7 +937,15 @@ The format you write to video memory is standardized, and is generally pairs of 
 
 <br />
 
-The first three bytes are the top left corner and continues across the screen per pixel and starting on the next line when we reach the of the screen.
+The first three bytes are the top left corner and continues across the screen per pixel. We start on the next line when we reach the of the screen.
+
+<br />
+
+The distance across is a multiple of three. Up and down is the number of pixels each line is. The rest is your graphics function and the pair of three bytes you wish to write for color.
+
+<br />
+
+The number of lines up or down and the number of values across before the next line has to do with the set resolution.
 
 <br />
 
@@ -953,11 +961,11 @@ The Nintendo DS used two ARM cores. You would write your graphics functions on A
 
 <br />
 
-You could also do mix and match if you wanted, however it was simpler and better to separate the jobs on two cores. THe format the video memory worked in is the same as PC or any graphics device.
+You could also do mix and match if you wanted, however it was simpler and better to separate the jobs on two cores. The format the video memory worked in is the same as PC or any graphics device.
 
 <br />
 
-Graphics cards have methods that can be called that run graphics methods. Such as filling in a rectangle of pixels or calculating 3D angels. This frees up the CPU because the graphics card then does the graphics.
+Graphics cards have methods that can be called that run graphics methods. Such as filling in a rectangle of pixels or calculating 3D angels. This frees up the CPU because the graphics card then does the graphics drawing functions to video memory.
 
 <br />
 
@@ -965,7 +973,7 @@ In actuality, you can build an operating system that only does software-rendered
 
 <br />
 
-However, it is recommended to add Hardware accelerated graphics through a GPU by implementing basic method calls on the GPU.
+However, it is recommended to add Hardware accelerated graphics through an GPU by implementing basic method calls on the GPU.
 
 <br />
 
