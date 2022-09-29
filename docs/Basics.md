@@ -949,7 +949,7 @@ The number of lines up or down and the number of values across before the next l
 
 <br />
 
-Even handheld game consoles like the Nintendo DS has a video memory location that you can write to for setting each individual pixel color on the screens.
+Even handheld game consoles like the Nintendo DS has a video memory location that you can write to for setting each individual pixel color on the screens. When you reached the end of the first display in memory and go and set the next three bytes you then start at the top left corner of the touch screen. This is also how multi-screen graphics is done with one video memory.
 
 <br />
 
