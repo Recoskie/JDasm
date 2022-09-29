@@ -985,7 +985,11 @@ Video memory is very standard across all consoles and mobile/PC systems, and the
 
 <br />
 
-You may also enjoy the following on graphics cards and video memory. <a href="https://www.techtarget.com/searchstorage/definition/video-RAM" target="_blank">Video memory.</a>
+You may also enjoy the following on graphics cards and video memory. <a href="https://www.techtarget.com/searchstorage/definition/video-RAM" target="_blank">techtarget.com storage Video memory.</a>
+
+<br />
+
+Also, the Nintendo 3DS had three screens one after another in video memory. One for left eye, and one for right eye, and the touch screen.
 
 <h2>Audio format.</h2>
 
