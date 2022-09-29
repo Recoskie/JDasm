@@ -901,7 +901,7 @@ Pictures can store pairs of three bytes in Red, Green, Blue per pixel in an arra
 
 <br />
 
-As such is how a bit map picture works and is read <a href="https://en.wikipedia.org/wiki/BMP_file_format#:~:text=The%20BMP%20file%20format%2C%20also,and%20OS%2F2%20operating%20systems" target="_blank">Bit Map picture format.</a>
+As such is how a bit map pictures work and are read <a href="https://en.wikipedia.org/wiki/BMP_file_format#:~:text=The%20BMP%20file%20format%2C%20also,and%20OS%2F2%20operating%20systems" target="_blank">Bit Map picture format.</a>
 
 <br />
 
@@ -921,7 +921,7 @@ Font files generally are an array of bit map pictures that are used for which pi
 
 <h2>Video memory.</h2>
 
-A bitmap closely resembles video memory, which video memory is how graphics is done without a graphics card. The CPU writes red, green, blue values per pixel to the very last pixel of the display's resolution.
+A bitmap closely resembles video memory, which video memory is how graphics is done without a graphics card. The CPU writes red, green, blue values per pixel to the very last pixel of the display's resolution in video memory.
 
 <br />
 
@@ -937,7 +937,7 @@ The format you write to video memory is standardized, and is generally pairs of 
 
 <br />
 
-The first three bytes are the top left corner and continues across the screen per pixel. We start on the next line when we reach the of the screen.
+The first three bytes are the top left corner and continues across the screen per pixel. We start on the next line when we reach the end of the screen.
 
 <br />
 
@@ -982,6 +982,10 @@ Lastly you can get very creative in software with raw graphics pixel format. You
 <br />
 
 Video memory is very standard across all consoles and mobile/PC systems, and the bitmap format is hardware independent because it is a hardware design standard.
+
+<br />
+
+You may also enjoy the following on graphics cards and video memory. <a href="https://www.techtarget.com/searchstorage/definition/video-RAM" target="_blank">Video memory.</a>
 
 <h2>Audio format.</h2>
 
