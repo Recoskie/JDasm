@@ -392,18 +392,6 @@ So -1 + 7 = 6. This is because the carry is completely disregarded as it is outs
 
 <br />
 
-The only thing that changes is how we display the value and how we compare such a number.
-
-<br />
-
-In reality, your source code can have singed numbers, but by disassembling its machine operations. You, then could recreate the code as all unsigned numbers without error.
-
-<br />
-
-As there is no such thing as a singed add or subtract in any CPU. Singed numbers are only displayed graphically differently by value.
-
-<br />
-
 Also, since the last binary digit can be counted to twice, then the last binary digit became the split point for the negative and positive half. The half point is called the sing bit.
 
 <br />
@@ -420,7 +408,15 @@ See <a href="https://www.swarthmore.edu/NatSci/echeeve1/Ref/BinaryMath/BinaryMat
 
 <br />
 
-The CPU does not care if it is singed or unsinged value as it does the same add/subtract operation for both at hardware level. It is how we display the value that changes.
+The CPU does not care if it is singed or unsinged value as a singed add or subtract does not exist in any CPU as it does the same add/subtract operation for both at hardware level.
+
+<br />
+
+It is how we display the value that changes.
+
+<br />
+
+In reality, your source code can have singed numbers, but by disassembling its machine operations. You, then could recreate the code as all unsigned numbers without error.
 
 <br />
 
@@ -957,11 +953,7 @@ When creating an operating system we call this area of memory in address space t
 
 <br />
 
-Even handheld game consoles like the Nintendo DS has a video memory location that you can write to for setting each individual pixel color on the screens. When you reached the end of the first display in memory and go and set the next three bytes you then start at the top left corner of the touch screen. This is also how multi-screen graphics is done with one video memory.
-
-<br />
-
-The CPU then can do any graphics function you like on any display or monitor without requiring graphics drivers, which is called software-rendered graphics.
+Even handheld game consoles like the Nintendo DS has a video memory location that you can write to for setting each individual pixel color on the screens. When you reached the end of the first display in memory and go to set the next three bytes you then start at the top left corner of the touch screen. This is also how multi-screen graphics is done with one video memory.
 
 <br />
 
@@ -977,7 +969,7 @@ Graphics cards have methods that can be called that run graphics methods that we
 
 <br />
 
-In actuality, you can build an operating system that only does software-rendered graphics, which runs on all systems, and all motherboard configurations. It also is very easy to do.
+In actuality, you can build an operating system that only does software-rendered graphics, which runs on all systems, and all motherboard configurations. It also is very easy to do. It also is good coding practice.
 
 <br />
 
