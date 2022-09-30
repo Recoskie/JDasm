@@ -921,7 +921,7 @@ Font files generally are an array of bit map pictures that are used for which pi
 
 <h2>Video memory.</h2>
 
-A bitmap closely resembles video memory, which video memory is how graphics is done without a graphics card. The CPU writes red, green, blue values per pixel to the very last pixel of the display's resolution in video memory.
+A bitmap closely resembles video memory, which video memory is how graphics is done without a graphics card.
 
 <br />
 
@@ -949,6 +949,14 @@ The number of lines up or down and the number of values across before the next l
 
 <br />
 
+You can also adjust how many times in one second that you want the video output components to display changes made to the video memory.
+
+<br />
+
+When creating an operating system we call this area of memory in address space the frame buffer.
+
+<br />
+
 Even handheld game consoles like the Nintendo DS has a video memory location that you can write to for setting each individual pixel color on the screens. When you reached the end of the first display in memory and go and set the next three bytes you then start at the top left corner of the touch screen. This is also how multi-screen graphics is done with one video memory.
 
 <br />
@@ -965,11 +973,11 @@ You could also do mix and match if you wanted, however it was simpler and better
 
 <br />
 
-Graphics cards have methods that can be called that run graphics methods. Such as filling in a rectangle of pixels or calculating 3D angels. This frees up the CPU because the graphics card then does the graphics drawing functions to video memory.
+Graphics cards have methods that can be called that run graphics methods that we would normally had put together on the CPU. Such as filling in a rectangle of pixels or calculating 3D angels. This frees up the CPU because the graphics card then does the graphics drawing functions to video memory.
 
 <br />
 
-In actuality, you can build an operating system that only does software-rendered graphics, which runs on all systems, and all motherboard configurations.
+In actuality, you can build an operating system that only does software-rendered graphics, which runs on all systems, and all motherboard configurations. It also is very easy to do.
 
 <br />
 
