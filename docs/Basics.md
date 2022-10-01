@@ -246,10 +246,6 @@ Today these words are no longer used. Except for in-machine code translation of 
 
 <br />
 
-This is also where the original saying that a picture is worth a "thousand words" came from. Meaning it took a thousand words, for each red, green, blue value, for each pixel. Back in the day, pictures were 2-kilo big, so a thousand words.
-
-<br />
-
 Today when we read these "WORD" grouping sizes. Then wish to do arithmetic with different read lengths of data. We specify types like "byte", "short" (WORD), “integer” (DWORD), “long” (QWORD).
 
 <br />
@@ -302,7 +298,7 @@ When we talk integers, we are talking numbers without a decimal point. That oper
 
 <br />
 
-We can count to 9 before adding one to the next place value. In which 9+1=10. So the number of times we have counted to 10 is in the 10 position. The number we have counted to 100 is in the 100 position. As 10 can be added to ten times to reach 100 position, for the number of 100s.
+We can count to 9 before adding one to the next place value. In which 9+1=10. So the number of times we have counted to 10 is in the ten position. The number we have counted to 100 is in the 100 position. As 10 can be added to ten times to reach 100 position, for the number of 100s in counting.
 
 <br />
 
@@ -314,11 +310,11 @@ In binary, we limit ourselves to 1 and 0. We go 1+1=10, which is the number of t
 
 <br />
 
-So if we count to place value 2 a second time, we forum place value 100, which is 4 because each place value can be counted to twice at each position, making each next position a multiple of two instead of ten.
+So if we count to place value 2 a second time, we forum place value 100, which is 4 because each place value can be counted to twice at each position, making each next position a multiple of two instead of ten in counting.
 
 <br />
 
-This means a number 8 in length has 2^8-1=255 combinations, which is called a byte. Also is what one position of memory is. Thus a WORD which is two bytes, has a max value of 2^16-1=65535.
+This means a number 8 in length has 2^8-1=255 combinations, which is called a byte. Also is what one position of memory is. A WORD which is two bytes, has a max value of 2^16-1=65535.
 
 <br />
 
@@ -780,23 +776,27 @@ The x86 processor has an address system built in to Handel reading elements one 
 
 <br />
 
-<a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400" target="_blank">Scale index base.</a>
+<a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400" target="_blank">Scale index base</a>. Note that the repose is more complicated than it had to be so I will put it simply bellow.
 
 <br />
 
-The scale is how much index is multiplied by. A byte is the next address from the base address. So base plus index is the selected byte. While a word is two bytes per array element, so scale is times 2 the array selected index.
+The base address is the location of the bytes we are storing in memory sequentially. We add which byte we want to read to the base address (this is called the index).
 
 <br />
 
-Thus an array of double words meaning two words is 4 bytes. Lastly, an array of qword means two double words put together per array index. Meaning scale takes on the index times 8.
+If we want byte three in the array of bytes then we set index three. We then read the third byte from the base address. Now if the array is a grouping of words rather than bytes. We must multiply the index by 2, because each word is two bytes.
 
 <br />
 
-ARM cores do not have a fancy addressing system built-in. It takes two ARM processor's instructions to run such code. So reading arrayed, and indexed files take longer. Or reading file system array structure. That contains all files on your disk drive.
+An array of double words is 4 bytes so we add the starting position of our array then add which element we want to read, but multiply by 4. Lastly, an array of qword is index times 8.
 
 <br />
 
-Thus programming languages are built on primitives and arrays of primitives types in aligned memory. You will learn more about this in the "Code" document.
+ARM cores do not have a fancy addressing system built-in. It takes two ARM processor instructions to run such code. So reading arrayed, and indexed files take longer. Or reading file system array structure. That contains all files on your disk drive.
+
+<br />
+
+Programming languages are built on primitives and arrays of primitives types in aligned memory. You will learn more about this in the "Code" document.
 
 <br />
 
@@ -827,7 +827,7 @@ Programming languages all use the same primitive data types.
 
 <br />
 
-The primitive data types are the same as the CPU/ALU is what processes them, not the programming language. Thus the arithmetic units in CPU processors are the same. As positional arithmetic never changes format. Even if you switch processor types, also, text data is standardized.
+The primitive data types are the same as the CPU/ALU is what processes them, not the programming language. The binary arithmetic units in CPU processors are the same. As positional arithmetic never changes format. Even if you switch processor types, also, text data is standardized.
 
 <br />
 
@@ -893,19 +893,19 @@ Also, there are still a few different types of data stored in binary files given
 
 <br />
 
-Pictures can store pairs of three bytes in Red, Green, Blue per pixel in an array. Thus after index exceeds the width, it moves to the next line of the picture, till picture height.
+Pictures can store pairs of three bytes in Red, Green, Blue per pixel in an array. After index exceeds the width, it moves to the next line of the picture, till picture height.
 
 <br />
 
-As such is how a bit map pictures work and are read <a href="https://en.wikipedia.org/wiki/BMP_file_format#:~:text=The%20BMP%20file%20format%2C%20also,and%20OS%2F2%20operating%20systems" target="_blank">Bit Map picture format.</a>
+As such is how a bit map pictures work and are read <a href="https://en.wikipedia.org/wiki/BMP_file_format#:~:text=The%20BMP%20file%20format%2C%20also,and%20OS%2F2%20operating%20systems" target="_blank">Bit Map picture format</a>.
 
 <br />
 
-I use to actually write bit maps pictures one byte at a time in a hex editor. It is the equivalent of doing pixel art. Also is good practice.
+I use to actually write bit map pictures one byte at a time in a hex editor. It is the equivalent of doing pixel art. Also is good practice.
 
 <br />
 
-When you click, save, and see your picture load in a picture program. That is the moment it is magical. Considering you just wrote the picture in 1's, and 0's.
+When you click save and see your picture load in a picture program. That is the moment it is magical. Considering you just wrote the picture in 1's, and 0's.
 
 <br />
 
@@ -914,6 +914,10 @@ Also, colors of light add together, so it is not hard to visualize the added col
 <br />
 
 Font files generally are an array of bit map pictures that are used for which picture to draw per key on the keyboard in UTF8, and are hardware independent.
+
+<br />
+
+The bit map picture format was added onto and eventually supported defining which colors are used in the picture to number values and using less digits per color to save space.
 
 <h2>Video memory.</h2>
 
@@ -933,7 +937,7 @@ The format you write to video memory is standardized, and is generally pairs of 
 
 <br />
 
-The first three bytes are the top left corner and continues across the screen per pixel. We start on the next line when we reach the end of the screen.
+The first three bytes are the top left corner and continues across the screen per three bytes. We start on the next line when we reach the end of the screen.
 
 <br />
 
@@ -945,7 +949,7 @@ The number of lines up or down and the number of values across before the next l
 
 <br />
 
-You can also adjust how many times in one second that you want the video output components to display changes made to the video memory.
+You can also adjust how many times in one second that you want the video output components to display changes made to the video memory. This is usually set to 60 times in one second known as 60hertz.
 
 <br />
 
@@ -965,6 +969,10 @@ You could also do mix and match if you wanted, however it was simpler and better
 
 <br />
 
+The Nintendo DS was amazing and fun to build games on if you understood the basics.
+
+<br />
+
 Graphics cards have methods that can be called that run graphics methods that we would normally had put together on the CPU. Such as filling in a rectangle of pixels or calculating 3D angels. This frees up the CPU because the graphics card then does the graphics drawing functions to video memory.
 
 <br />
@@ -977,7 +985,7 @@ However, it is recommended to add Hardware accelerated graphics through an GPU b
 
 <br />
 
-Lastly you can get very creative in software with raw graphics pixel format. You can compare the difference in colors and define edges and shapes and create an artificial intelligence that learns and understands its surroundings, or create video/picture enhancers, and filters. The possibilities are limitless.
+Lastly you can get very creative in software with raw graphics format. You can compare the difference in colors and define edges and shapes and create an artificial intelligence that learns and understands its surroundings, or create video/picture enhancers, and filters. The possibilities are limitless.
 
 <br />
 
@@ -1114,3 +1122,23 @@ The only thing requiring any knowhow across systems is if the system has hardwar
 <br />
 
 Modern game consoles can even keep runnable code that can be updated by system update and games can use the code when needed from the game making it even harder to emulate modern game consoles even though the basic formats never change.
+
+<h2>Moving onto Machine.</h2>
+
+With this basic understanding you know how to write pictures into video memory to display them. You know how to translate audio into a standard stream to play them.
+
+<br />
+
+You know how to design audio functions, or graphics function that work on any platforms or system hardware.
+
+<br />
+
+You understand that you can offload a lot of the work using separate processing units such as a GPU, but you need to design drivers that know hoe to instruct it to do things.
+
+<br />
+
+You know everything you need to know to design your own <strong>game system/PC/mobile/tablet</strong> and to program it and make your own OS, but you lack one small thing.
+
+<br />
+
+How do we select a CPU and how do we program it in machine code. In the next section on machine code I will explain how we map instruction sets by processor type and how we program them in machine code by processor type. <a href="https://recoskie.github.io/JDisassembly/docs/Machine.html">A simple introduction to processor instruction sets and coding</a>.

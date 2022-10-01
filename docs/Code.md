@@ -55,7 +55,7 @@ In java it is called <strong>java byte codes</strong>. As loading, a new part in
 
 <br />
 
-In the case of an emulator, it only changes the instruction encoding if it does not match the CPU architecture type in your system, or we can interpret each instruction in code which is very slow.
+In the case of an emulator, it only changes the instruction encoding if it does not match the CPU architecture type in your system, or we can interpret each instruction using arithmetic in code which is very slow.
 
 <br />
 
