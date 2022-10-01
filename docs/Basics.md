@@ -776,7 +776,7 @@ The x86 processor has an address system built in to Handel reading elements one 
 
 <br />
 
-<a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400" target="_blank">Scale index base</a>. Note that the repose is more complicated than it had to be so I will put it simply bellow.
+<a href="https://stackoverflow.com/questions/34058101/referencing-the-contents-of-a-memory-location-x86-addressing-modes/34058400#34058400" target="_blank">Scale index base</a>. Note that the response is more complicated than it had to be so I will put it simply bellow.
 
 <br />
 
@@ -1123,7 +1123,7 @@ The only thing requiring any knowhow across systems is if the system has hardwar
 
 Modern game consoles can even keep runnable code that can be updated by system update and games can use the code when needed from the game making it even harder to emulate modern game consoles even though the basic formats never change.
 
-<h2>Moving onto Machine.</h2>
+<h2>Moving onto Machine code.</h2>
 
 With this basic understanding you know how to write pictures into video memory to display them. You know how to translate audio into a standard stream to play them.
 
@@ -1133,7 +1133,7 @@ You know how to design audio functions, or graphics function that work on any pl
 
 <br />
 
-You understand that you can offload a lot of the work using separate processing units such as a GPU, but you need to design drivers that know hoe to instruct it to do things.
+You understand that you can offload a lot of the work using separate processing units such as a GPU, but you need to design drivers that know how to instruct it to do things.
 
 <br />
 
@@ -1141,4 +1141,4 @@ You know everything you need to know to design your own <strong>game system/PC/m
 
 <br />
 
-How do we select a CPU and how do we program it in machine code. In the next section on machine code I will explain how we map instruction sets by processor type and how we program them in machine code by processor type. <a href="https://recoskie.github.io/JDisassembly/docs/Machine.html">A simple introduction to processor instruction sets and coding</a>.
+How do we select a CPU and how do we program it in machine code. In the next section on machine code I will explain how to map instruction sets by processor type and how we program them in machine code by processor type. <a href="https://recoskie.github.io/JDisassembly/docs/Machine.html">An simple introduction to processor instruction sets and coding</a>.
