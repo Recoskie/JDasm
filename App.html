@@ -78,9 +78,10 @@
   
   function showH(v)
   {
-    if( v ) { virtual.hide(virtual.visible); } else { offset.hide(offset.visible); }
+    var s = 0;
+    if( v ) { virtual.hide(s=virtual.visible); } else { offset.hide(s=offset.visible); }
     
-    document.getElementById(v ? "c3" : "c2").value = "Show " + (v ? "Virtual" : "Offset");
+    document.getElementById(v ? "c3" : "c2").value = (s ? "Show " : "Hide ") + (v ? "Virtual" : "Offset");
     
     adjHeight()
   }
