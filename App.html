@@ -61,15 +61,18 @@
   
   function Open( f )
   {
-    offset.hide(false);
+    file.setTarget( f ); offset.hide(false); offset.setPos(offset.sel = offset.sele = 0);
     
+    //The main byte array.
+    
+    file.init(this, "onload", offset.getRows() * 16);
+  }
+  
+  function onload()
+  {
     show("c1"); show("c2"); show("c3"); show("c4");
     
-    file.setTarget( f );
-    
-    offset.adjSize(); offset.sc();
-    
-    ds.hide(false);
+    offset.adjSize(); ds.hide(false);
     
     adjHeight();
   }
