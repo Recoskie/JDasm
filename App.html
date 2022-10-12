@@ -63,18 +63,22 @@
   {
     file.setTarget( f ); offset.hide(false);
     
-    //The main byte array.
+    //Init the main byte array.
     
-    file.init(this, "onload", offset.getRows() * 16);
+    file.seek(0); file.init(this, "onload", offset.getRows() * 16);
   }
   
   function onload()
   {
     show("c1"); show("c2"); show("c3"); show("c4");
     
-    offset.setPos(offset.sel = offset.sele = 0);
+    offset.sel = offset.sele = 0;
     
-    offset.adjSize(); ds.hide(false);
+    offset.adjSize();
+    
+    offset.update(file);
+    
+    ds.hide(false);
     
     adjHeight();
   }
