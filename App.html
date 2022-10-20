@@ -28,15 +28,16 @@
   
   function init()
   {
+    r = document.getElementById("r").style; r1 = document.getElementById("r1").style; r2 = document.getElementById("r2").style;
+
     offset = new VHex("vhex1", file, false); virtual = new VHex("vhex2", file, true);
     ds = new dataInspector("data", file); ds.addEditor(offset); ds.addEditor(virtual);
 
-    r = document.getElementById("r").style; r1 = document.getElementById("r1").style; r2 = document.getElementById("r2").style;
-    tree = document.getElementById("tree").style; dModel = document.getElementById("dModel").style; info = document.getElementById("info").style;
+    tree = new dTree("tree");
+
+    dModel = document.getElementById("dModel").style; info = document.getElementById("info").style;
     
-    virtual.adjSize();
-    
-    virtual.hide(true); re(); offset.hide(true); ds.hide(true);
+    virtual.adjSize(); virtual.hide(true); re(); offset.hide(true); ds.hide(true);
     
     //Open an example file.
     
@@ -155,15 +156,15 @@
     {
       //Clear horizontal transform.
 
-      r.display = ""; ds.resetDims();
+      r.display = ""; ds.resetDims(); tree.resetDims();
       
-      dModel.minHeight = tree.minHeight = info.minHeight = "";
+      dModel.minHeight = info.minHeight = "";
 
       //Do vertical transform adjustments.
 
       if( beta )
       {
-        r1.display = "flex"; dModel.minWidth = tree.minWidth = offset.minWidth(); info.minWidth = ds.minWidth();
+        r1.display = "flex"; tree.minWidth( dModel.minWidth = offset.minWidth() ); info.minWidth = ds.minWidth();
       }
       r2.display = "flex";
     
@@ -175,15 +176,15 @@
 
       if( beta ) { r1.display = ""; } r2.display = "";
       
-      offset.resetDims(); virtual.resetDims(); ds.resetDims();
+      offset.resetDims(); virtual.resetDims(); ds.resetDims(); tree.resetDims();
       
-      dModel.minWidth = tree.minWidth = info.minWidth = "";
+      dModel.minWidth = info.minWidth = "";
 
       //Do horizontal transform adjustments.
 
       r.display = "flex";
       
-      if( beta ) { tree.minHeight = dModel.minHeight = offset.minHeight(); info.minHeight = ds.minHeight(); }
+      if( beta ) { tree.minHeight( dModel.minHeight = offset.minHeight() ); info.minHeight = ds.minHeight(); }
       
       ds.minWidth(offset.minWidth());
     }
@@ -199,17 +200,17 @@
     
     if( vertical )
     {
-      offset.height( virtual.height(tree.height = dModel.height = info.height = r1.width = r2.width = "100%")); ds.height("0%");
+      offset.height( virtual.height( tree.height( dModel.height = info.height = r1.width = r2.width = "100%"))); ds.height("0%");
       
-      tree.width = dModel.width = info.width = "33.333333336%";
+      tree.width( dModel.width = info.width = "33.333333336%" );
       
       if( isFinite(r) ) { r1.height = r2.height = beta ? "50%" : "100%"; offset.width( virtual.width(r+"%")); } else { r1.height = "100%"; r2.height = "0%"; }
     }
     else
     {
-      offset.width( virtual.width( tree.width = dModel.width = info.width = r1.height = r2.height = "100%" ) );
+      offset.width( virtual.width( tree.width( dModel.width = info.width = r1.height = r2.height = "100%" ) ) );
       
-      tree.height = dModel.height = info.height = "33.333333336%";
+      tree.height( dModel.height = info.height = "33.333333336%" );
       
       if( isFinite(r) ) { r1.width = r2.width = beta ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
     }
@@ -225,7 +226,7 @@
 <input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};offset.update(file);virtual.update(file);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
 <input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" /><input type="button" id="c5" value="Enable Beta mode" onclick="BMode();" style="display:none;" />
 <div id="r" style="height:100%;width:100%;">
-  <div style="display: none;" id="r1"><div style='background-color:#ff0000;' id="tree">Binary tree.</div><div style='background-color:#00ff00;' id="dModel">Data Model.</div><div style='background-color:#0000ff;' id="info">Additional information.</div></div>
+  <div style="display: none;" id="r1"><div id="tree"></div><div style='background-color:#00ff00;' id="dModel">Data Model.</div><div style='background-color:#0000ff;' id="info">Additional information.</div></div>
   <div id="r2"><div id="vhex1"></div><div id="vhex2"></div><div id="data"></div></div>
 </div>
 </body>
