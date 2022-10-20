@@ -21,6 +21,10 @@
   var r = null, r1 = null, r2 = null;
   var tree = null, dModel = null, info = null;
   var offset = null, virtual = null, ds = null;
+
+  //Enable beta fetuses.
+
+  var beta = false;
   
   function init()
   {
@@ -30,11 +34,11 @@
     r = document.getElementById("r").style; r1 = document.getElementById("r1").style; r2 = document.getElementById("r2").style;
     tree = document.getElementById("tree").style; dModel = document.getElementById("dModel").style; info = document.getElementById("info").style;
     
-    offset.hide(true); virtual.hide(true); ds.hide(true); rotateSC(true);
+    virtual.hide(true); rotateSC(vertical); offset.hide(true); ds.hide(true);
     
     //Open an example file.
     
-    file.getFile("https://raw.githubusercontent.com/Recoskie/JDisassembly/master/JD-asm.jar", load); re();
+    file.getFile("https://raw.githubusercontent.com/Recoskie/JDisassembly/master/JD-asm.jar", load);
   }
   
   //Layout change based on window dimensions, or orientation.
@@ -104,17 +108,13 @@
   
   function onload()
   {
-    show("c1"); show("c2"); show("c3"); show("c4");
+    show("c1"); show("c2"); show("c3"); show("c4"); show("c5");
     
     offset.sel = offset.sele = 0;
     
-    offset.adjSize();
-    
-    offset.update(file);
+    offset.adjSize(); offset.update(file);
     
     ds.hide(false);
-    
-    adjRatio();
   }
   
   //Hex editor show and hide.
@@ -138,11 +138,18 @@
     adjRatio();
   }
 
+  function BMode()
+  {
+    document.getElementById("c5").value = ((beta = !beta) ? "Disable " : "Enable ") + "Beta mode";
+
+    rotateSC(vertical); adjRatio();
+  }
+
   //Experimental.
 
   function rotateSC(set)
   {
-    if( (vertical = set) )
+    if( !beta ) { r1.display = "none"; } if( (vertical = set) )
     {
       //Clear horizontal transform.
 
@@ -152,9 +159,11 @@
 
       //Do vertical transform adjustments.
 
-      r1.display = r2.display = "flex";
-
-      dModel.minWidth = tree.minWidth = offset.minWidth(); info.minWidth = ds.minWidth();
+      if( beta )
+      {
+        r1.display = "flex"; dModel.minWidth = tree.minWidth = offset.minWidth(); info.minWidth = ds.minWidth();
+      }
+      r2.display = "flex";
     
       offset.minHeight(virtual.minHeight(ds.minHeight()));
     }
@@ -162,7 +171,9 @@
     {
       //Clear vertical transform.
 
-      r1.display = r2.display = ""; offset.resetDims(); virtual.resetDims(); ds.resetDims();
+      if( beta ) { r1.display = ""; } r2.display = "";
+      
+      offset.resetDims(); virtual.resetDims(); ds.resetDims();
       
       dModel.minWidth = tree.minWidth = info.minWidth = "";
 
@@ -170,7 +181,7 @@
 
       r.display = "flex";
       
-      tree.minHeight = dModel.minHeight = offset.minHeight(); info.minHeight = ds.minHeight();
+      if( beta ) { tree.minHeight = dModel.minHeight = offset.minHeight(); info.minHeight = ds.minHeight(); }
       
       ds.minWidth(offset.minWidth());
     }
@@ -182,7 +193,7 @@
   
   function adjRatio()
   {
-    var r = (100 / (offset.visible + virtual.visible + ds.visible)) + "%";
+    var r = 100 / (offset.visible + virtual.visible + ds.visible);
     
     if( vertical )
     {
@@ -190,7 +201,7 @@
       
       tree.width = dModel.width = info.width = "33.333333336%";
       
-      if( r.indexOf("I", 0) < 0 ) { r1.height = r2.height = "50%"; offset.width( virtual.width(r)); } else { r1.height = "100%"; r2.height = "0%"; }
+      if( isFinite(r) ) { r1.height = r2.height = beta ? "50%" : "100%"; offset.width( virtual.width(r+"%")); } else { r1.height = "100%"; r2.height = "0%"; }
     }
     else
     {
@@ -198,7 +209,7 @@
       
       tree.height = dModel.height = info.height = "33.333333336%";
       
-      if( r.indexOf("I", 0) < 0 ) { r1.width = r2.width = "50%"; offset.height(virtual.height(ds.height(r))); } else { r1.width = "100%"; r2.width = "0%"; }
+      if( isFinite(r) ) { r1.width = r2.width = beta ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
     }
   }
   
@@ -210,9 +221,9 @@
   }
 </script>
 <input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};offset.update(file);virtual.update(file);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
-<input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" />
+<input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" /><input type="button" id="c5" value="Enable Beta mode" onclick="BMode();" style="display:none;" />
 <div id="r" style="height:100%;width:100%;">
-  <div id="r1"><div style='background-color:#ff0000;' id="tree">Binary tree.</div><div style='background-color:#00ff00;' id="dModel">Data Model.</div><div style='background-color:#0000ff;' id="info">Additional information.</div></div>
+  <div style="display: none;" id="r1"><div style='background-color:#ff0000;' id="tree">Binary tree.</div><div style='background-color:#00ff00;' id="dModel">Data Model.</div><div style='background-color:#0000ff;' id="info">Additional information.</div></div>
   <div id="r2"><div id="vhex1"></div><div id="vhex2"></div><div id="data"></div></div>
 </div>
 </body>
