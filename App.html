@@ -34,7 +34,7 @@
     r = document.getElementById("r").style; r1 = document.getElementById("r1").style; r2 = document.getElementById("r2").style;
     tree = document.getElementById("tree").style; dModel = document.getElementById("dModel").style; info = document.getElementById("info").style;
     
-    virtual.hide(true); re(); offset.hide(true); ds.hide(true);
+    re(); offset.hide(true); virtual.hide(true); ds.hide(true);
     
     //Open an example file.
     
@@ -142,7 +142,7 @@
   {
     document.getElementById("c5").value = ((beta = !beta) ? "Disable " : "Enable ") + "Beta mode";
 
-    rotateSC(vertical); adjRatio();
+    rotateSC(vertical);
   }
 
   //Experimental.
