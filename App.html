@@ -34,7 +34,7 @@
     r = document.getElementById("r").style; r1 = document.getElementById("r1").style; r2 = document.getElementById("r2").style;
     tree = document.getElementById("tree").style; dModel = document.getElementById("dModel").style; info = document.getElementById("info").style;
     
-    virtual.hide(true); rotateSC(vertical); offset.hide(true); ds.hide(true);
+    virtual.hide(true); re(); offset.hide(true); ds.hide(true);
     
     //Open an example file.
     
@@ -43,7 +43,7 @@
   
   //Layout change based on window dimensions, or orientation.
     
-  var vertical = true, mobile = !isNaN( window.orientation );
+  var vertical = null, mobile = !isNaN( window.orientation );
   
   if( mobile )
   {
