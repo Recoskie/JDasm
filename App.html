@@ -6,8 +6,9 @@
   <meta name="apple-mobile-web-app-title" content="JD-asm">
   <link rel="apple-touch-icon" href="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1">
   <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
+  <style>#r1 div, #r2 div { border-style:solid; border-color:black; border-width:2px; }</style>
 </head>
-<body onload="init();" onresize="offset.adjSize();virtual.adjSize();offset.update(file);virtual.update(file);">
+<body onload="init();">
 <script type="text/javascript" src="swingIO/UI.js"></script>
 <script type="text/javascript" src="RandomAccessFileV/FileReaderV.js"></script>
 <script>
@@ -17,19 +18,52 @@
   ------------------------------------------------------------*/
   
   var file = new FileReaderV();
+  var r = null, r1 = null, r2 = null;
+  var tree = null, dModel = null, info = null;
   var offset = null, virtual = null, ds = null;
   
   function init()
   {
     offset = new VHex("vhex1", file, false); virtual = new VHex("vhex2", file, true);
-    ds = new dataInspector("data", file);
-    ds.addEditor(offset); ds.addEditor(virtual);
+    ds = new dataInspector("data", file); ds.addEditor(offset); ds.addEditor(virtual);
+
+    r = document.getElementById("r").style; r1 = document.getElementById("r1").style; r2 = document.getElementById("r2").style;
+    tree = document.getElementById("tree").style; dModel = document.getElementById("dModel").style; info = document.getElementById("info").style;
     
-    offset.hide(true); virtual.hide(true); ds.hide(true);
+    offset.hide(true); virtual.hide(true); ds.hide(true); rotateSC(true);
     
     //Open an example file.
     
-    file.getFile("https://raw.githubusercontent.com/Recoskie/JDisassembly/master/JD-asm.jar", load);
+    file.getFile("https://raw.githubusercontent.com/Recoskie/JDisassembly/master/JD-asm.jar", load); re();
+  }
+  
+  //Layout change based on window dimensions, or orientation.
+    
+  var vertical = true, mobile = !isNaN( window.orientation );
+  
+  if( mobile )
+  {
+    window.matchMedia("(orientation: portrait)").onchange = function(){ re(); }
+  }
+  else
+  {
+    window.onresize = re;
+  }
+  
+  function re()
+  {
+    var w = window.innerWidth, h = window.innerHeight;
+      
+    if( mobile )
+    {
+      w = screen.width; h = screen.height;
+      if(window.matchMedia("(orientation: landscape)").matches && h > w )
+      { var t = w; w = h; h = t; }
+    }
+
+    if( vertical != h < w ) { rotateSC(h < w); }
+    
+    if( offset.visible ) { offset.adjSize(); offset.update(file); } if( virtual.visible ) { virtual.adjSize(); virtual.update(file); }
   }
 
   //Drag and drop file Support.
@@ -80,7 +114,7 @@
     
     ds.hide(false);
     
-    adjHeight();
+    adjRatio();
   }
   
   //Hex editor show and hide.
@@ -92,7 +126,7 @@
     
     document.getElementById(v ? "c3" : "c2").value = (s ? "Show " : "Hide ") + (v ? "Virtual" : "Offset");
     
-    adjHeight()
+    adjRatio();
   }
   
   function showD()
@@ -101,18 +135,71 @@
     
     document.getElementById("c4").value = (ds.visible ? "Hide " : "Show ") + "data types";
     
-    adjHeight();
+    adjRatio();
+  }
+
+  //Experimental.
+
+  function rotateSC(set)
+  {
+    if( (vertical = set) )
+    {
+      //Clear horizontal transform.
+
+      r.display = ""; ds.resetDims();
+      
+      dModel.minHeight = tree.minHeight = info.minHeight = "";
+
+      //Do vertical transform adjustments.
+
+      r1.display = r2.display = "flex";
+
+      dModel.minWidth = tree.minWidth = offset.minWidth(); info.minWidth = ds.minWidth();
+    
+      offset.minHeight(virtual.minHeight(ds.minHeight()));
+    }
+    else
+    {
+      //Clear vertical transform.
+
+      r1.display = r2.display = ""; offset.resetDims(); virtual.resetDims(); ds.resetDims();
+      
+      dModel.minWidth = tree.minWidth = info.minWidth = "";
+
+      //Do horizontal transform adjustments.
+
+      r.display = "flex";
+      
+      tree.minHeight = dModel.minHeight = offset.minHeight(); info.minHeight = ds.minHeight();
+      
+      ds.minWidth(offset.minWidth());
+    }
+    
+    adjRatio();
   }
   
-  function adjHeight()
+  //Adjust screen percentage ratio.
+  
+  function adjRatio()
   {
-    document.getElementById("vhex1").style.height=document.getElementById("vhex2").style.height=document.getElementById("data").style.height=(100 / (offset.visible + virtual.visible + ds.visible)) + "%";
+    var r = (100 / (offset.visible + virtual.visible + ds.visible)) + "%";
     
-    //Update componets based on visibility.
-    
-    if( offset.visible ) { offset.update(file); offset.adjSize(); offset.sc(); }
-    
-    if( virtual.visible ) { virtual.update(file); virtual.adjSize(); virtual.sc(); }
+    if( vertical )
+    {
+      offset.height( virtual.height(tree.height = dModel.height = info.height = r1.width = r2.width = "100%")); ds.height("0%");
+      
+      tree.width = dModel.width = info.width = "33.333333336%";
+      
+      if( r.indexOf("I", 0) < 0 ) { r1.height = r2.height = "50%"; offset.width( virtual.width(r)); } else { r1.height = "100%"; r2.height = "0%"; }
+    }
+    else
+    {
+      offset.width( virtual.width( tree.width = dModel.width = info.width = r1.height = r2.height = "100%" ) );
+      
+      tree.height = dModel.height = info.height = "33.333333336%";
+      
+      if( r.indexOf("I", 0) < 0 ) { r1.width = r2.width = "50%"; offset.height(virtual.height(ds.height(r))); } else { r1.width = "100%"; r2.width = "0%"; }
+    }
   }
   
   //Show hidden elements.
@@ -123,9 +210,10 @@
   }
 </script>
 <input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};offset.update(file);virtual.update(file);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
-<input type="button" id="c4" value="Show Data Types" onclick="showD();" style="display:none;" />
-<div style='width:100%;height:100%;border-style:solid;border-color:black;border-width:2px;' id="vhex1"></div>
-<div style='width:100%;border-style:solid;border-color:black;border-width:2px;' id="vhex2"></div>
-<div style='width:100%;border-style:solid;border-color:black;border-width:2px;' id="data"></div>
+<input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" />
+<div id="r" style="height:100%;width:100%;">
+  <div id="r1"><div style='background-color:#ff0000;' id="tree">Binary tree.</div><div style='background-color:#00ff00;' id="dModel">Data Model.</div><div style='background-color:#0000ff;' id="info">Additional information.</div></div>
+  <div id="r2"><div id="vhex1"></div><div id="vhex2"></div><div id="data"></div></div>
+</div>
 </body>
 </html>
