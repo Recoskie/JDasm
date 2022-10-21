@@ -118,6 +118,33 @@
     offset.adjSize(); offset.update(file);
     
     ds.hide(false);
+    
+    //Test the new binary tree component.
+    
+    var root = new treeNode("test");
+    root.add("Header1");
+    root.add("Header2");
+    var im = new treeNode("Import");
+    im.add("Func1");
+    im.add("Func2");
+    var sf = new treeNode("SubFunc");
+    sf.add("SubFunc1");
+    sf.add("SubFunc2");
+    sf.add("SubFunc3");
+    sf.add("SubFunc4");
+    var rs = new treeNode("Resource");
+    rs.add("File1");
+    rs.add("File2");
+    var fl = new treeNode("Folder");
+    fl.add("File1");
+    fl.add("File2");
+    fl.add("File3");
+    fl.add("File4");
+    
+    im.add(sf);root.add(im);
+    rs.add(fl);root.add(rs);
+    
+    tree.set(root);
   }
   
   //Hex editor show and hide.
