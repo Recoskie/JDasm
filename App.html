@@ -19,7 +19,7 @@
   
   var file = new FileReaderV();
   var r = null, r1 = null, r2 = null;
-  var tree = null, dModel = null, info = null;
+  var Tree = null, dModel = null, info = null;
   var offset = null, virtual = null, ds = null;
 
   //Enable beta fetuses.
@@ -33,7 +33,7 @@
     offset = new VHex("vhex1", file, false); virtual = new VHex("vhex2", file, true);
     ds = new dataInspector("data", file); ds.addEditor(offset); ds.addEditor(virtual);
 
-    tree = new dTree("tree");
+    Tree = new tree("tree");
 
     dModel = document.getElementById("dModel").style; info = document.getElementById("info").style;
     
@@ -141,10 +141,10 @@
     fl.add("File3");
     fl.add("File4");
     
-    im.add(sf);root.add(im);
-    rs.add(fl);root.add(rs);
+    im.add(sf); root.add(im);
+    rs.add(fl); root.add(rs);
     
-    tree.set(root);
+    Tree.set(root);
   }
   
   //Hex editor show and hide.
@@ -183,7 +183,7 @@
     {
       //Clear horizontal transform.
 
-      r.display = ""; ds.resetDims(); tree.resetDims();
+      r.display = ""; ds.resetDims(); Tree.resetDims();
       
       dModel.minHeight = info.minHeight = "";
 
@@ -191,7 +191,7 @@
 
       if( beta )
       {
-        r1.display = "flex"; tree.minWidth( dModel.minWidth = offset.minWidth() ); info.minWidth = ds.minWidth();
+        r1.display = "flex"; Tree.minWidth( dModel.minWidth = offset.minWidth() ); info.minWidth = ds.minWidth();
       }
       r2.display = "flex";
     
@@ -203,7 +203,7 @@
 
       if( beta ) { r1.display = ""; } r2.display = "";
       
-      offset.resetDims(); virtual.resetDims(); ds.resetDims(); tree.resetDims();
+      offset.resetDims(); virtual.resetDims(); ds.resetDims(); Tree.resetDims();
       
       dModel.minWidth = info.minWidth = "";
 
@@ -211,7 +211,7 @@
 
       r.display = "flex";
       
-      if( beta ) { tree.minHeight( dModel.minHeight = offset.minHeight() ); info.minHeight = ds.minHeight(); }
+      if( beta ) { Tree.minHeight( dModel.minHeight = offset.minHeight() ); info.minHeight = ds.minHeight(); }
       
       ds.minWidth(offset.minWidth());
     }
@@ -227,17 +227,17 @@
     
     if( vertical )
     {
-      offset.height( virtual.height( tree.height( dModel.height = info.height = r1.width = r2.width = "100%"))); ds.height("0%");
+      offset.height( virtual.height( Tree.height( dModel.height = info.height = r1.width = r2.width = "100%"))); ds.height("0%");
       
-      tree.width( dModel.width = info.width = "33.333333336%" );
+      Tree.width( dModel.width = info.width = "33.333333336%" );
       
       if( isFinite(r) ) { r1.height = r2.height = beta ? "50%" : "100%"; offset.width( virtual.width(r+"%")); } else { r1.height = "100%"; r2.height = "0%"; }
     }
     else
     {
-      offset.width( virtual.width( tree.width( dModel.width = info.width = r1.height = r2.height = "100%" ) ) );
+      offset.width( virtual.width( Tree.width( dModel.width = info.width = r1.height = r2.height = "100%" ) ) );
       
-      tree.height( dModel.height = info.height = "33.333333336%" );
+      Tree.height( dModel.height = info.height = "33.333333336%" );
       
       if( isFinite(r) ) { r1.width = r2.width = beta ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
     }
