@@ -11,6 +11,7 @@
 <body onload="init();">
 <script type="text/javascript" src="swingIO/UI.js"></script>
 <script type="text/javascript" src="RandomAccessFileV/FileReaderV.js"></script>
+<script type="text/javascript" id="Format"></script>
 <script>
   /*------------------------------------------------------------
   This is a web based version of JDisassembly originally designed to run in Java.
@@ -21,6 +22,10 @@
   var r = null, r1 = null, r2 = null;
   var Tree = null, dModel = null, info = null;
   var offset = null, virtual = null, ds = null;
+
+  //The currently loaded format reader.
+
+  var Format = null;
 
   //Enable beta fetuses.
 
@@ -35,9 +40,11 @@
 
     Tree = new tree("tree");
 
-    dModel = document.getElementById("dModel").style; info = document.getElementById("info").style;
+    dModel = document.getElementById("dModel").style; info = document.getElementById("info");
     
     virtual.adjSize(); virtual.hide(true); re(); offset.hide(true); ds.hide(true);
+
+    Format = document.getElementById("Format");
     
     //Open an example file.
     
@@ -119,33 +126,17 @@
     
     ds.hide(false);
     
-    //Test the new binary tree component.
+    //Format plugin based file type goes here.
+    //For now we load a test script.
+
+    Format.parentElement.removeChild(Format); Format = document.createElement("script");
     
-    var root = new treeNode("test.exe");
-    root.add("Header1.h");
-    root.add("Header2.h");
-    var im = new treeNode("Import.dll");
-    im.add("Func1");
-    im.add("Func2");
-    var sf = new treeNode("SubFunc");
-    sf.add("SubFunc1");
-    sf.add("SubFunc2");
-    sf.add("SubFunc3");
-    sf.add("SubFunc4");
-    var rs = new treeNode("Resource");
-    rs.add("File1");
-    rs.add("File2");
-    var fl = new treeNode("Folder");
-    fl.add("File1");
-    fl.add("File2");
-    fl.add("File3");
-    fl.add("File4");
-    
-    im.add(sf); root.add(im);
-    rs.add(fl); root.add(rs);
-    
-    Tree.set(root);
+    Format.src = "Format/test.js"; Format.onerror = fmtErr; Format.onload = function(){ format.load(); }
+
+    document.head.appendChild(Format);
   }
+
+  function fmtErr() { alert("Unable to load format reader for this file format!"); }
   
   //Hex editor show and hide.
   
@@ -227,17 +218,17 @@
     
     if( vertical )
     {
-      offset.height( virtual.height( Tree.height( dModel.height = info.height = r1.width = r2.width = "100%"))); ds.height("0%");
+      offset.height( virtual.height( Tree.height( dModel.height = info.style.height = r1.width = r2.width = "100%"))); ds.height("0%");
       
-      Tree.width( dModel.width = info.width = "33.333333336%" );
+      Tree.width( dModel.width = info.style.width = "33.333333336%" );
       
       if( isFinite(r) ) { r1.height = r2.height = beta ? "50%" : "100%"; offset.width( virtual.width(r+"%")); } else { r1.height = "100%"; r2.height = "0%"; }
     }
     else
     {
-      offset.width( virtual.width( Tree.width( dModel.width = info.width = r1.height = r2.height = "100%" ) ) );
+      offset.width( virtual.width( Tree.width( dModel.width = info.style.width = r1.height = r2.height = "100%" ) ) );
       
-      Tree.height( dModel.height = info.height = "33.333333336%" );
+      Tree.height( dModel.height = info.style.height = "33.333333336%" );
       
       if( isFinite(r) ) { r1.width = r2.width = beta ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
     }
@@ -253,7 +244,7 @@
 <input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};offset.update(file);virtual.update(file);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
 <input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" /><input type="button" id="c5" value="Enable Beta mode" onclick="BMode();" style="display:none;" />
 <div id="r" style="height:100%;width:100%;">
-  <div style="display: none;" id="r1"><div id="tree"></div><div style='background-color:#00ff00;' id="dModel">Data Model.</div><div style='background-color:#0000ff;' id="info">Additional information.</div></div>
+  <div style="display: none;" id="r1"><div id="tree"></div><div style='background-color:#00ff00;' id="dModel">Data Model.</div><div style='overflow: auto;' id="info">Additional information.</div></div>
   <div id="r2"><div id="vhex1"></div><div id="vhex2"></div><div id="data"></div></div>
 </div>
 </body>
