@@ -1,5 +1,5 @@
 //Everything in the format reader must be defined as an object called format.
-//This ensures that an load format readers data does not remain when loading in a new format reader.
+//This ensures that all data in the format reader is overwritten when loading in a new format.
 
 format = {
 
