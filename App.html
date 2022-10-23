@@ -176,13 +176,13 @@
 
       r.display = ""; ds.resetDims(); Tree.resetDims();
       
-      dModel.minHeight = info.minHeight = "";
+      dModel.minHeight = info.style.minHeight = "";
 
       //Do vertical transform adjustments.
 
       if( beta )
       {
-        r1.display = "flex"; Tree.minWidth( dModel.minWidth = offset.minWidth() ); info.minWidth = ds.minWidth();
+        r1.display = "flex"; Tree.minWidth( dModel.minWidth = offset.minWidth() ); info.style.minWidth = ds.minWidth();
       }
       r2.display = "flex";
     
@@ -196,13 +196,13 @@
       
       offset.resetDims(); virtual.resetDims(); ds.resetDims(); Tree.resetDims();
       
-      dModel.minWidth = info.minWidth = "";
+      dModel.minWidth = info.style.minWidth = "";
 
       //Do horizontal transform adjustments.
 
       r.display = "flex";
       
-      if( beta ) { Tree.minHeight( dModel.minHeight = offset.minHeight() ); info.minHeight = ds.minHeight(); }
+      if( beta ) { Tree.minHeight( dModel.minHeight = offset.minHeight() ); info.style.minHeight = ds.minHeight(); }
       
       ds.minWidth(offset.minWidth());
     }
