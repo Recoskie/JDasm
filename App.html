@@ -170,7 +170,7 @@
 
   function rotateSC(set)
   {
-    if( !beta ) { r1.display = "none"; } if( (vertical = set) )
+    if( !beta ) { r1.display = "none"; } if( vertical = set )
     {
       //Clear horizontal transform.
 
@@ -218,7 +218,7 @@
     
     if( vertical )
     {
-      offset.height( virtual.height( Tree.height( dModel.height = info.style.height = r1.width = r2.width = "100%"))); ds.height("0%");
+      offset.height( virtual.height( Tree.height( dModel.height = info.style.height = r1.width = r2.width = "100%"))); ds.width(ds.height("0%"));
       
       Tree.width( dModel.width = info.style.width = "33.333333336%" );
       
@@ -226,7 +226,7 @@
     }
     else
     {
-      offset.width( virtual.width( Tree.width( dModel.width = info.style.width = r1.height = r2.height = "100%" ) ) );
+      offset.width( virtual.width( ds.width( Tree.width( dModel.width = info.style.width = r1.height = r2.height = "100%" ) ) ) );
       
       Tree.height( dModel.height = info.style.height = "33.333333336%" );
       
