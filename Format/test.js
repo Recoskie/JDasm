@@ -27,7 +27,7 @@ format = {
     fl.add("File1");
     fl.add("File2");
     fl.add("File3");
-    fl.add("File4");
+    fl.add("File4",'test');
     
     im.add(sf); root.add(im);
     rs.add(fl); root.add(rs);
@@ -39,6 +39,6 @@ format = {
 
   event: function(node)
   {
-    info.innerHTML = "You click on node " + node.innerText;
+    info.innerHTML = "You click on node " + node.innerText + "<br /><br />Node changeable or setable attributes = " + node.getAttribute("args") + "<br /><br />The attributes can tell our format reader where to go in the file or what to read and decode on a node click.";
   }
 }
