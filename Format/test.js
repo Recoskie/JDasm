@@ -20,10 +20,10 @@ format = {
     sf.add("SubFunc2");
     sf.add("SubFunc3");
     sf.add("SubFunc4");
-    var rs = new treeNode("Resource"); root.add(sf);
+    var rs = new treeNode("Resource"); root.add(rs);
     rs.add("File1");
     rs.add("File2");
-    var fl = new treeNode("Folder"); sf.add(fl);
+    var fl = new treeNode("Folder"); rs.add(fl);
     fl.add("File1");
     fl.add("File2");
     fl.add("File3");
