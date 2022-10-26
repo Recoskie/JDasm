@@ -113,7 +113,7 @@
     
     //Init the main byte array.
     
-    file.seek(0); file.init(this, "onload", offset.getRows() * 16);
+    file.Events = false; file.seek(0); file.Events = true; file.init(this, "onload", offset.getRows() * 16);
   }
   
   function onload()
