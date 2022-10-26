@@ -39,6 +39,6 @@ format = {
 
   event: function(node)
   {
-    info.innerHTML = "You click on node " + node.innerText + "<br /><br />Node changeable or setable attributes = " + node.getAttribute("args") + "<br /><br />The attributes can tell our format reader where to go in the file or what to read and decode on a node click.";
+    info.innerHTML = "You click on node " + node.innerText + "<br /><br />Node changeable or settable attributes = " + node.getAttribute("args") + "<br /><br />The attributes can tell our format reader where to go in the file or what to read and decode on a node click.";
   }
 }
