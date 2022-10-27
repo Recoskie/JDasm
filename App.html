@@ -18,8 +18,7 @@
   See https://github.com/Recoskie/JDisassembly/blob/master/app.java
   ------------------------------------------------------------*/
   
-  var file = new FileReaderV();
-  var r = null, r1 = null, r2 = null;
+  var file = new FileReaderV(), r = null, r1 = null, r2 = null;
   var Tree = null, dModel = null, info = null;
   var offset = null, virtual = null, ds = null;
 
@@ -27,9 +26,11 @@
 
   var Format = null;
 
-  //Enable beta fetuses.
+  //Enable binary tree and data model, and info window for file format readers.
 
-  var beta = false;
+  var formatLoad = false;
+
+  //Initialize the application.
   
   function init()
   {
@@ -38,9 +39,9 @@
     offset = new VHex("vhex1", file, false); virtual = new VHex("vhex2", file, true);
     ds = new dataInspector("data", file); ds.addEditor(offset); ds.addEditor(virtual);
 
-    Tree = new tree("tree");
+    Tree = new tree("tree"); dModel = new dataDescriptor("dModel", file); info = document.getElementById("info");
 
-    dModel = document.getElementById("dModel").style; info = document.getElementById("info");
+    info.style.overflow = "auto"; info.innerHTML = "File format Information is displayed here, and machine code disassembly.";
     
     virtual.adjSize(); virtual.hide(true); re(); offset.hide(true); ds.hide(true);
 
@@ -96,14 +97,7 @@
   
   //Transfers the loaded file to the file input.
   
-  function load( f )
-  {
-    var d = new DataTransfer(); d.items.add(f);
-    
-    document.getElementById("file").files = d.files;
-    
-    Open( f );
-  }
+  function load( f ) { var d = new DataTransfer(); d.items.add(f); document.getElementById("file").files = d.files; Open( f ); }
   
   //When opening an file.
   
@@ -127,14 +121,19 @@
     ds.hide(false);
     
     //Format plugin based file type goes here.
-    //For now we load a test script.
 
-    Format.parentElement.removeChild(Format); Format = document.createElement("script");
+    formatLoad = false; Format.parentElement.removeChild(Format); Format = document.createElement("script");
+
+    //For now we load a test script. This is where we will iterate thought file formats.
     
-    Format.src = "Format/test.js"; Format.onerror = fmtErr; Format.onload = function(){ format.load(); }
+    Format.src = "Format/test.js";
 
-    document.head.appendChild(Format);
+    //We run this if the file format matches a format reader.
+    
+    Format.onerror = fmtErr; Format.onload = function(){ format.load(); if( r1.display == "none" ){ BMode(); } }; document.head.appendChild(Format);
   }
+
+  //Error message if there is a problem loading the format reader.
 
   function fmtErr() { alert("Unable to load format reader for this file format!"); }
   
@@ -142,8 +141,7 @@
   
   function showH(v)
   {
-    var s = 0;
-    if( v ) { virtual.hide(s=virtual.visible); } else { offset.hide(s=offset.visible); }
+    var s = 0; if( v ) { virtual.hide(s=virtual.visible); } else { offset.hide(s=offset.visible); }
     
     document.getElementById(v ? "c3" : "c2").value = (s ? "Show " : "Hide ") + (v ? "Virtual" : "Offset");
     
@@ -161,7 +159,7 @@
 
   function BMode()
   {
-    document.getElementById("c5").value = ((beta = !beta) ? "Disable " : "Enable ") + "Beta mode";
+    document.getElementById("c5").value = ((formatLoad = !formatLoad) ? "Disable " : "Enable ") + "Beta mode";
 
     rotateSC(vertical);
   }
@@ -170,19 +168,17 @@
 
   function rotateSC(set)
   {
-    if( !beta ) { r1.display = "none"; } if( vertical = set )
+    if( !formatLoad ) { r1.display = "none"; } if( vertical = set )
     {
       //Clear horizontal transform.
 
-      r.display = ""; ds.resetDims(); Tree.resetDims();
-      
-      dModel.minHeight = info.style.minHeight = "";
+      r.display = ""; ds.resetDims(); Tree.resetDims(); dModel.resetDims(); info.style.minHeight = "";
 
       //Do vertical transform adjustments.
 
-      if( beta )
+      if( formatLoad )
       {
-        r1.display = "flex"; Tree.minWidth( dModel.minWidth = offset.minWidth() ); info.style.minWidth = ds.minWidth();
+        r1.display = "flex"; Tree.minWidth( dModel.minWidth( offset.minWidth() ) ); info.style.minWidth = ds.minWidth();
       }
       r2.display = "flex";
     
@@ -192,17 +188,15 @@
     {
       //Clear vertical transform.
 
-      if( beta ) { r1.display = ""; } r2.display = "";
+      if( formatLoad ) { r1.display = ""; } r2.display = "";
       
-      offset.resetDims(); virtual.resetDims(); ds.resetDims(); Tree.resetDims();
-      
-      dModel.minWidth = info.style.minWidth = "";
+      offset.resetDims(); virtual.resetDims(); ds.resetDims(); Tree.resetDims(); dModel.resetDims(); info.style.minWidth = "";
 
       //Do horizontal transform adjustments.
 
       r.display = "flex";
       
-      if( beta ) { Tree.minHeight( dModel.minHeight = offset.minHeight() ); info.style.minHeight = ds.minHeight(); }
+      if( formatLoad ) { Tree.minHeight( dModel.minHeight( offset.minHeight() ) ); info.style.minHeight = ds.minHeight(); }
       
       ds.minWidth(offset.minWidth());
     }
@@ -218,19 +212,19 @@
     
     if( vertical )
     {
-      offset.height( virtual.height( Tree.height( dModel.height = info.style.height = r1.width = r2.width = "100%"))); ds.width(ds.height("0%"));
+      offset.height(virtual.height(Tree.height(dModel.height(info.style.height = r1.width = r2.width = "100%")))); ds.width(ds.height("0%"));
       
-      Tree.width( dModel.width = info.style.width = "33.333333336%" );
+      Tree.width(dModel.width(info.style.width = "33.333333336%"));
       
-      if( isFinite(r) ) { r1.height = r2.height = beta ? "50%" : "100%"; offset.width( virtual.width(r+"%")); } else { r1.height = "100%"; r2.height = "0%"; }
+      if( isFinite(r) ) { r1.height = r2.height = formatLoad ? "50%" : "100%"; offset.width( virtual.width(r+"%")); } else { r1.height = "100%"; r2.height = "0%"; }
     }
     else
     {
-      offset.width( virtual.width( ds.width( Tree.width( dModel.width = info.style.width = r1.height = r2.height = "100%" ) ) ) );
+      offset.width(virtual.width(ds.width(Tree.width(dModel.width(info.style.width = r1.height = r2.height = "100%")))));
       
-      Tree.height( dModel.height = info.style.height = "33.333333336%" );
+      Tree.height(dModel.height(info.style.height = "33.333333336%"));
       
-      if( isFinite(r) ) { r1.width = r2.width = beta ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
+      if( isFinite(r) ) { r1.width = r2.width = formatLoad ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
     }
   }
   
@@ -244,7 +238,7 @@
 <input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};offset.update(file);virtual.update(file);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
 <input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" /><input type="button" id="c5" value="Enable Beta mode" onclick="BMode();" style="display:none;" />
 <div id="r" style="height:100%;width:100%;">
-  <div style="display: none;" id="r1"><div id="tree"></div><div style='background-color:#00ff00;' id="dModel">Data Model.</div><div style='overflow: auto;' id="info">Additional information.</div></div>
+  <div style="display:none;" id="r1"><div id="tree"></div><div id="dModel"></div><div id="info"></div></div>
   <div id="r2"><div id="vhex1"></div><div id="vhex2"></div><div id="data"></div></div>
 </div>
 </body>
