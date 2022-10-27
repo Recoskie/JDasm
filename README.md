@@ -25,7 +25,7 @@ JDisassembly.
 
 The web based version uses a different file system built into javascript: <a href="https://developer.mozilla.org/en-US/docs/Web/API/FileReader">FileReader API</a>
 
-It renders the VHex component using HTML5 canvas. It is experimental and only had the dataDescriptor left to be added.
+It renders the VHex component using HTML5 canvas. It is experimental and only has the dataDescriptor left to be added.
 
 It will also use the JS disassembler <a href="https://github.com/Recoskie/X86-64-Disassembler-JS">X86-64-Disassembler-JS.js</a>
 
