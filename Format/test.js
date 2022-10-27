@@ -9,7 +9,7 @@ format = {
   {
     //Test the new binary tree component.
     
-    var root = new treeNode("test.exe");
+    var root = new treeNode("test.exe",[],true,false);
     root.add("Header1.h", ["h1"]);
     root.add("Header2.h", ["h2",0]);
     var im = new treeNode("Import.dll"); root.add(im);
@@ -42,7 +42,7 @@ format = {
     
     if(args[0] == "h1")
     {
-      var n = new treeNode("Header1.h");
+      var n = new treeNode("Header1.h",[""],true,true);
       n.add("info1");
       n.add("info2");
       node.setNode(n);
