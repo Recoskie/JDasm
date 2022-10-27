@@ -122,7 +122,7 @@
     
     //Format plugin based file type goes here.
 
-    formatLoad = false; Format.parentElement.removeChild(Format); Format = document.createElement("script");
+    Format.parentElement.removeChild(Format); Format = document.createElement("script");
 
     //For now we load a test script. This is where we will iterate thought file formats.
     
@@ -130,12 +130,12 @@
 
     //We run this if the file format matches a format reader.
     
-    Format.onerror = fmtErr; Format.onload = function(){ format.load(); if( r1.display == "none" ){ BMode(); } }; document.head.appendChild(Format);
+    Format.onerror = fmtErr; Format.onload = function(){try{format.load();if(r1.display=="none"){BMode();}}catch(e){fmtErr();}};document.head.appendChild(Format);
   }
 
   //Error message if there is a problem loading the format reader.
 
-  function fmtErr() { alert("Unable to load format reader for this file format!"); }
+  function fmtErr() { if(r1.display!="none"){BMode();} alert("Unable to load format reader for this file format!"); }
   
   //Hex editor show and hide.
   
