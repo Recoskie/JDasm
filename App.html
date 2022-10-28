@@ -226,6 +226,8 @@
       
       if( isFinite(r) ) { r1.width = r2.width = formatLoad ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
     }
+
+    offset.validate(); virtual.validate();
   }
   
   //Show hidden elements.
