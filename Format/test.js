@@ -10,8 +10,9 @@ format = {
     //Test the new binary tree component.
     
     var root = new treeNode("test.exe",[],true,false);
-    root.add("Header1.h", ["h1"]);
-    root.add("Header2.h", ["h2",0]);
+    root.add("Add nodes on click.h", ["h1"]);
+    root.add("Click count.h", ["h2",0]);
+    root.add("Mod Tree.h", ["h3"]);
     var im = new treeNode("Import.dll"); root.add(im);
     im.add("Func1");
     im.add("Func2");
@@ -42,7 +43,7 @@ format = {
     
     if(args[0] == "h1")
     {
-      var n = new treeNode("Header1.h",[""],true,true);
+      var n = new treeNode("Add nodes on click.h",[""],true,true);
       n.add("info1");
       n.add("info2");
       node.setNode(n);
@@ -53,6 +54,20 @@ format = {
     if(args[0] == "h2")
     {
       args[1] = parseInt(args[1]) + 1; node.setArgs(args);
+    }
+
+    //Navigate and change tree nodes.
+
+    if(args[0] == "h3")
+    {
+      node.setArgs([]);
+
+      var rNode = Tree.getNode(0).getNode(3);
+
+      var n = new treeNode("Modified.h",["changed"],true);
+      n.add("new node 1");
+      n.add("new node 2");
+      rNode.setNode(n);
     }
     
     info.innerHTML = "You clicked on node " + node.innerText + "<br /><br />Node changeable or settable attributes = " + args + "<br /><br />The attributes can tell our format reader where to go in the file or what to read and decode on a node click.";
