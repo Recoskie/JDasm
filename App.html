@@ -78,7 +78,7 @@
 
     if( vertical != h < w ) { rotateSC(h < w); }
     
-    if( offset.visible ) { offset.adjSize(); offset.update(file); } if( virtual.visible ) { virtual.adjSize(); virtual.update(file); }
+    offset.validate(); virtual.validate(); dModel.update();
   }
 
   //Drag and drop file Support.
@@ -227,7 +227,7 @@
       if( isFinite(r) ) { r1.width = r2.width = formatLoad ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
     }
 
-    offset.validate(); virtual.validate();
+    offset.validate(); virtual.validate(); dModel.update();
   }
   
   //Show hidden elements.
