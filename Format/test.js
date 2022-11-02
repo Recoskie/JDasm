@@ -2,11 +2,63 @@
 //This ensures that all data in the format reader is overwritten when loading in a new format.
 
 format = {
+  
+  headers: [],
 
   //Function load is always called first.
 
   load: function()
   {
+    //test the data descriptor model.
+
+    this.headers[0] = new Descriptor([
+      new dataType("Value 1", Descriptor.LInt32 ),
+      new dataType("Value 2", Descriptor.Int32 ),
+      new dataType("Value 3", Descriptor.LInt32 ),
+      new dataType("Value 4", Descriptor.Int32 ),
+      new dataType("Value 5", Descriptor.LInt32 ),
+      new dataType("Value 6", Descriptor.Int32 ),
+      new dataType("Value 7", Descriptor.Int32 ),
+      new dataType("Value 8", Descriptor.Int32 ),
+      new dataType("Value 9", Descriptor.Int32 ),
+      new dataType("Value 10", Descriptor.Int32 ),
+      new dataType("Value 11", Descriptor.Int32 ),
+      new dataType("Value 12", Descriptor.Int32 ),
+      new dataType("Value 13", Descriptor.Int32 ),
+      new dataType("Value 14", Descriptor.Int32 ),
+      new dataType("Value 15", Descriptor.Int32 ),
+      new dataType("Value 16", Descriptor.Int32 ),
+      new dataType("Value 17", Descriptor.Int32 ),
+      new dataType("Value 18", Descriptor.Int32 ),
+      new dataType("Value 19", Descriptor.Int32 ),
+      new dataType("Value 20", Descriptor.Int32 ),
+      new dataType("Value 21", Descriptor.Int32 ),
+      new dataType("Value 22", Descriptor.Int32 ),
+      new dataType("Value 23", Descriptor.Int32 ),
+      new dataType("Value 24", Descriptor.Int32 ),
+      new dataType("Value 25", Descriptor.Int32 ),
+      new dataType("Value 26", Descriptor.Int32 ),
+      new dataType("This is a long description!", Descriptor.Int32 ),
+      new dataType("Value 28", Descriptor.Int32 ),
+      new dataType("Value 29", Descriptor.Int32 ),
+      new dataType("Value 30", Descriptor.Int32 ),
+      new dataType("Value 31", Descriptor.Int32 ),
+      new dataType("Value 32", Descriptor.Int64 ),
+      new dataType("Value 33", Descriptor.Int32 ),
+      new dataType("Value 34", Descriptor.Int32 ),
+      new dataType("Value 35", Descriptor.Int32 ),
+      new dataType("Value 36", Descriptor.Int32 )
+    ]);
+
+    //test the data descriptor model.
+
+    this.headers[1] = new Descriptor( [
+      new dataType("Value 1", Descriptor.Int32 ),
+      new dataType("Value 2", Descriptor.Int32 ),
+      new dataType("Value 3", Descriptor.Int32 ),
+      new dataType("Value 4", Descriptor.Int32 )
+    ]);
+    
     //Test the new binary tree component.
     
     var root = new treeNode("test.exe",[],true,false);
