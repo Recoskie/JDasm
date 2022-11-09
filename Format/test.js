@@ -58,6 +58,8 @@ format = {
       new dataType("Value 3", Descriptor.Int32 ),
       new dataType("Value 4", Descriptor.Int32 )
     ]);
+
+    dModel.setDescriptor(this.headers[0]);
     
     //Test the new binary tree component.
     
