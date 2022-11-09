@@ -12,11 +12,11 @@ format = {
     //test the data descriptor model.
 
     this.headers[0] = new Descriptor([
-      new dataType("Value 1", Descriptor.LInt32 ),
-      new dataType("Value 2", Descriptor.Int32 ),
+      new dataType("Value 1", Descriptor.LInt64 ),
+      new dataType("Value 2", Descriptor.Int64 ),
       new dataType("Value 3", Descriptor.LInt32 ),
-      new dataType("Value 4", Descriptor.Int32 ),
-      new dataType("Value 5", Descriptor.LInt32 ),
+      new dataType("Value 4", Descriptor.Int64 ),
+      new dataType("Value 5", Descriptor.LInt64 ),
       new dataType("Value 6", Descriptor.Int32 ),
       new dataType("Value 7", Descriptor.Int32 ),
       new dataType("Value 8", Descriptor.Int32 ),
