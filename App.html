@@ -39,7 +39,7 @@
     offset = new VHex("vhex1", file, false); virtual = new VHex("vhex2", file, true);
     ds = new dataInspector("data", file); ds.addEditor(offset); ds.addEditor(virtual);
 
-    Tree = new tree("tree"); dModel = new dataDescriptor("dModel", file); info = document.getElementById("info");
+    Tree = new tree("tree"); dModel = new dataDescriptor("dModel", file); dModel.setInspector(ds); info = document.getElementById("info");
 
     info.style.overflow = "auto"; info.innerHTML = "File format Information is displayed here, and machine code disassembly.";
     

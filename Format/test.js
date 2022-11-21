@@ -86,6 +86,8 @@ format = {
       new dataType("Value 72", Descriptor.Int32 )
     ]);
 
+    this.headers[0].setEvent(this, "data1Event");
+
     //test the data descriptor model.
 
     this.headers[1] = new Descriptor( [
@@ -120,12 +122,12 @@ format = {
     fl.add("File3");
     fl.add("File4", ["test"]);
 
-    Tree.set(root); tree.prototype.event = this.event;
+    Tree.set(root); tree.prototype.event = this.treeEvent;
   },
 
   //Tree event handling.
 
-  event: function(node)
+  treeEvent: function(node)
   {
     var args = node.getArgs();
     
@@ -161,5 +163,25 @@ format = {
     }
     
     info.innerHTML = "You clicked on node " + node.innerText + "<br /><br />Node changeable or settable attributes = " + args + "<br /><br />The attributes can tell our format reader where to go in the file or what to read and decode on a node click.";
+  },
+
+  //Data type descriptor event.
+
+  data1Info: [
+    "This is an example Property.",
+    "This is the second value read by the descriptor."
+  ],
+
+  data1Event: function(index)
+  {
+    if( index < 0 )
+    {
+      info.innerHTML = "You just set this descriptor, but did not click on any values read in the descriptor.";
+    }
+    else if( index < 2 )
+    {
+      info.innerHTML = this.data1Info[ index ];
+    }
+    else { info.innerHTML = "Value = " + (index + 1) + ""; }
   }
 }
