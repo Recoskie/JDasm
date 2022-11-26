@@ -4,3 +4,6 @@
 [submodule "RandomAccessFileV"]
 	path = RandomAccessFileV
 	url = https://github.com/Recoskie/RandomAccessFileV.git
+[submodule "core"]
+	path = core
+	url = https://github.com/Recoskie/core
