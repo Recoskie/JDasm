@@ -20,18 +20,12 @@ JDisassembly.
 ## Web Version.
 
 <table>
-  <tr><td>Web based version:</td><td><a href="https://recoskie.github.io/JDisassembly/App.html">Link</a></td></tr>
+  <tr><td>Web-based version:</td><td><a href="https://recoskie.github.io/JDisassembly/App.html">Link</a></td></tr>
 </table>
 
-The web based version uses a different file system built into javascript: <a href="https://developer.mozilla.org/en-US/docs/Web/API/FileReader">FileReader API</a>
+The web-based version uses a different file system built into javascript: <a href="https://developer.mozilla.org/en-US/docs/Web/API/FileReader">FileReader API</a>
 
-It renders the VHex component using HTML5 canvas. It is experimental and only has the dataDescriptor left to be added.
-
-It will also use the JS disassembler <a href="https://github.com/Recoskie/X86-64-Disassembler-JS">X86-64-Disassembler-JS.js</a>
-
-The "core" type package should be a submodule.
-
-- [ ] I plan to make my javascript x86 project into a multi-core library for java and javascript with one branch for java and the other for javascript.
+It renders the swingIO components using HTML5 canvas. It is experimental and only has the dataDescriptor left to be added.
 
 ------------------------------------------------------------
 
