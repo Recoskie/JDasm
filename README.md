@@ -176,9 +176,17 @@ The swing IO components can be found <a href="https://github.com/Recoskie/swingI
 The Disassembler.
 ------------------------------------------------------------
 
-It was cool to write it in JavaScript. The project can be found <a href="https://github.com/Recoskie/X86-64-CPU-Binary-Code-Disassembler-JS">here</a>.
+The disassembler was originally designed as an x86 disassembly library for javascript only.
 
-The disassembler is rebuilt in Java for this project.
+The project can be found <a href="https://github.com/Recoskie/core">here</a>.
+
+It was rebuilt in java and existed in this project separately.
+
+The javascript project gained a new branch for the java version from this project and then was added to this project as a submodule.
+
+The disassembler library was renamed from "x86-64-disassembler" to the "core" submodule and added to the project for both web use and java application use.
+
+The project was restructured to have separate folders for each core and to support more cores than just x86 ones.
 
 I plan on creating an ARM core disassembler as well for mobile devices.
 
