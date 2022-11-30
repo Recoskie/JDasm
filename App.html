@@ -12,6 +12,7 @@
 <script type="text/javascript" src="swingIO/UI.js"></script>
 <script type="text/javascript" src="RandomAccessFileV/FileReaderV.js"></script>
 <script type="text/javascript" id="Format"></script>
+<script type="text/javascript" id="coreType"></script>
 <script>
   /*------------------------------------------------------------
   This is a web based version of JDisassembly originally designed to run in Java.
@@ -25,6 +26,10 @@
   //The currently loaded format reader.
 
   var Format = null;
+
+  //Used for loading in processor core types.
+
+  var coreType = null;
 
   //Enable binary tree and data model, and info window for file format readers.
 
@@ -45,7 +50,7 @@
     
     virtual.adjSize(); virtual.hide(true); re(); offset.hide(true); ds.hide(true);
 
-    Format = document.getElementById("Format");
+    Format = document.getElementById("Format"); coreType = document.getElementById("coreType");
     
     //Open an example file.
     
@@ -119,23 +124,59 @@
     offset.adjSize(); offset.update(file);
     
     ds.hide(false);
-    
-    //Format plugin based file type goes here.
-
-    Format.parentElement.removeChild(Format); Format = document.createElement("script");
 
     //For now we load a test script. This is where we will iterate thought file formats.
-    
-    Format.src = "Format/test.js";
 
-    //We run this if the file format matches a format reader.
+    loadFormat("Format/test.js");
+  }
+
+  //Format loader.
+
+  function loadFormat(url)
+  {
+    //If we already have the format loaded there is no need to reload the script.
+
+    if( Format.src != url )
+    {
+      //Format plugin based file type goes here.
+
+      Format.parentElement.removeChild(Format); Format = document.createElement("script"); Format.src = url;
+
+      //We run this if the file format matches a format reader.
     
-    Format.onerror = fmtErr; Format.onload = function(){try{format.load();if(r1.display=="none"){BMode();}}catch(e){fmtErr();}};document.head.appendChild(Format);
+      Format.onerror = fmtErr; Format.onload = function(){ try{ format.load(); if(r1.display=="none") { BMode(); } } catch(e) { fmtErr(); } }; document.head.appendChild(Format);
+    }
+
+    //Else we just call the load operation over again.
+
+    else { try{ format.load(); if(r1.display=="none") { BMode(); } } catch(e) { fmtErr(); } document.head.appendChild(Format); }
+  }
+
+  //core loader.
+
+  function loadCore(url)
+  {
+    //If we already have the core loaded there is no need to reload the script.
+
+    if( coreType.src != url )
+    {
+      //Format plugin based file type goes here.
+
+      coreType.parentElement.removeChild(coreType); coreType = document.createElement("script"); coreType.src = url;
+
+      //We run this if the file format matches a format reader.
+    
+      coreType.onerror = coreErr; document.head.appendChild(coreType);
+    }
   }
 
   //Error message if there is a problem loading the format reader.
 
   function fmtErr() { if(r1.display!="none"){BMode();} alert("Unable to load format reader for this file format!"); }
+
+  //Error message if there is a problem loading the processor core type.
+
+  function coreErr() { alert("Unable to load processor core type for disassembling this binary application!"); }
   
   //Hex editor show and hide.
   
