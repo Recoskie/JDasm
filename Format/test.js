@@ -2,11 +2,6 @@
 //This ensures that all data in the format reader is overwritten when loading in a new format.
 
 format = {
-
-  //We must define a format type for the file format reader otherwise loading and unloading a format will not work properly.
-
-  type: "test",
-
   //This will be used to hold the descriptors for the file format headers in this example.
   
   headers: [],
@@ -129,6 +124,10 @@ format = {
     fl.add("File4", ["test"]);
 
     Tree.set(root); tree.prototype.event = this.treeEvent;
+
+    //Virtual address space is not needed for this demo.
+
+    if( virtual.visible ) { showH(true); }
   },
 
   //Tree event handling.

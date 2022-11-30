@@ -35,6 +35,14 @@
 
   var formatLoad = false;
 
+  //Format to load by formats that only use file extension for file type.
+
+  var extensions = [".com"];
+
+  //What file to load by file extension.
+
+  var decodeAppEX = ["Format/com.js"];
+
   //Initialize the application.
   
   function init()
@@ -54,7 +62,7 @@
     
     //Open an example file.
     
-    file.getFile("https://raw.githubusercontent.com/Recoskie/JDisassembly/master/JD-asm.jar", load);
+    file.getFile("https://raw.githubusercontent.com/microsoft/MS-DOS/master/v2.0/bin/DEBUG.COM", load);
   }
   
   //Layout change based on window dimensions, or orientation.
@@ -125,7 +133,13 @@
     
     ds.hide(false);
 
-    //For now we load a test script. This is where we will iterate thought file formats.
+    //For now it is easy to test the x86 disassembler with a MS-DOS com file.
+
+    var ex = file.name.substring(file.name.lastIndexOf("."), file.name.length).toLowerCase();
+
+    for( var i = 0; i < extensions.length; i++ ) { if( ex == extensions[i] ) { loadFormat(decodeAppEX[i]); return; } }
+
+    //No matching format then load the beta testing plugin.
 
     loadFormat("Format/test.js");
   }
@@ -144,7 +158,7 @@
 
       //We run this if the file format matches a format reader.
     
-      Format.onerror = fmtErr; Format.onload = function(){ try{ format.load(); if(r1.display=="none") { BMode(); } } catch(e) { fmtErr(); } }; document.head.appendChild(Format);
+      Format.onerror = fmtErr; Format.onload = function(){ format.load(); if(r1.display=="none") { BMode(); } }; document.head.appendChild(Format);
     }
 
     //Else we just call the load operation over again.
