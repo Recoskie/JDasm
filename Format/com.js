@@ -18,12 +18,14 @@ format = {
     
     var root = new treeNode(file.name.substring(file.name.lastIndexOf("/")+1,file.name.length),[],true,false);
 
-    root.add("Info.h", [0]); root.add("Program Start (Machine code).h", [1]);
+    root.add("Info.h", [0],true); root.add("Program Start (Machine code).h", [1]);
     Tree.set(root); tree.prototype.event = this.treeEvent;
 
     //Show virtual address space.
 
     if( !virtual.visible ) { showH(true); }
+
+    this.treeEvent({getArgs:function(){return([0]);}})
   },
 
   //Tree event handling.
@@ -35,11 +37,11 @@ format = {
     if( args[0] == 0 ) { info.innerHTML = "DOS COM Files have no header or setup information. The program begins at the start of the file and is placed at 0x100 in RAM memory."; }
     else
     {
-      core.bitMode = 0; file.seekV(0x100); core.setBasePosition("72D2:0100");
+      core.addressMap = true; core.resetMap(); core.bitMode = 0; file.seekV(0x100); core.setBasePosition("72D2:0100"); dModel.setCore(core);
 
       //Code crawling is not yet available, so I will use linear disassembly.
 
-      core.setBinCode(file.data,0); info.innerHTML = "<pre>" + core.lDisassemble() + "</pre>";
+      core.setBinCode(file.data,0); info.innerHTML = "<pre>" + core.disassemble(true) + "</pre>";
     }
   }
 }
