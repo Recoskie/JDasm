@@ -37,11 +37,11 @@ format = {
     if( args[0] == 0 ) { info.innerHTML = "DOS COM Files have no header or setup information. The program begins at the start of the file and is placed at 0x100 in RAM memory."; }
     else
     {
-      core.addressMap = true; core.resetMap(); core.bitMode = 0; file.seekV(0x100); core.setBasePosition("72D2:0100"); dModel.setCore(core);
+      core.addressMap = true; core.resetMap(); core.bitMode = 0; file.seekV(0x100); core.setBasePosition("72D2:0100");
 
       //Code crawling is not yet available, so I will use linear disassembly.
 
-      core.setBinCode(file.data,0); info.innerHTML = "<pre>" + core.disassemble(true) + "</pre>";
+      core.setBinCode(file.data,0); info.innerHTML = "<pre>" + core.disassemble(true) + "</pre>"; dModel.setCore(core);
     }
   }
 }
