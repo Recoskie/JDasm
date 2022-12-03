@@ -18,14 +18,16 @@ format = {
     
     var root = new treeNode(file.name.substring(file.name.lastIndexOf("/")+1,file.name.length),[],true,false);
 
-    root.add("Info.h", [0],true); root.add("Program Start (Machine code).h", [1]);
+    root.add("Info.h", [0]); root.add("Program Start (Machine code).h", [1]);
     Tree.set(root); tree.prototype.event = this.treeEvent;
 
     //Show virtual address space.
 
-    if( !virtual.visible ) { showH(true); } virtual.sc();
+    if( !virtual.visible ) { showH(true); } file.seekV(0x100); virtual.sc();
 
-    this.treeEvent({getArgs:function(){return([0]);}});
+    //Set the default selected node.
+
+    tree.prototype.treeClick( Tree.getNode(0).getNode(0).parentElement );
   },
 
   //Tree event handling.
