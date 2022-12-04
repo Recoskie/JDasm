@@ -35,11 +35,11 @@
 
   var formatLoad = false;
 
-  //Format to load by formats that only use file extension for file type.
+  //Format to load that only use file extension for file type.
 
   var extensions = [".com"];
 
-  //What file to load by file extension.
+  //What file to load for file extension.
 
   var decodeAppEX = ["Format/com.js"];
 
@@ -125,6 +125,12 @@
   
   function onload()
   {
+    //Always reset the virtual address space when loading a new file.
+
+    file.resetV();
+
+    //The default controls that are enabled on loading a file.
+
     show("c1"); show("c2"); show("c3"); show("c4"); show("c5");
     
     offset.sel = offset.sele = 0;
@@ -152,12 +158,7 @@
 
     if( Format.src != url )
     {
-      //Format plugin based file type goes here.
-
       Format.parentElement.removeChild(Format); Format = document.createElement("script"); Format.src = url;
-
-      //We run this if the file format matches a format reader.
-    
       Format.onerror = fmtErr; Format.onload = function(){ format.load(); if(r1.display=="none") { BMode(); } }; document.head.appendChild(Format);
     }
 
@@ -174,12 +175,7 @@
 
     if( coreType.src != url )
     {
-      //Format plugin based file type goes here.
-
       coreType.parentElement.removeChild(coreType); coreType = document.createElement("script"); coreType.src = url;
-
-      //We run this if the file format matches a format reader.
-    
       coreType.onerror = coreErr; document.head.appendChild(coreType);
     }
   }

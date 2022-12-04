@@ -12,11 +12,11 @@ format = {
 
     //Dos com files are loaded at 0x100 by default in virtual address space.
 
-    file.resetV(); file.addV( 0, file.size, 0x0100, file.size );
+    file.addV( 0, file.size, 0x0100, file.size );
 
     //The root node is the binary application.
     
-    var root = new treeNode(file.name.substring(file.name.lastIndexOf("/")+1,file.name.length),[],true,false);
+    var root = new treeNode(file.name.substring(file.name.lastIndexOf("/")+1,file.name.length),[],true);
 
     root.add("Info.h", [0]); root.add("Program Start (Machine code).h", [1]);
     Tree.set(root); tree.prototype.event = this.treeEvent;
@@ -48,8 +48,6 @@ format = {
 
 //The data descriptor calls this function when we go to click on an address we wish to disassemble.
 
-var cr = false, vr = 0;
-
 dModel.coreDisLoc = function(virtual,crawl)
 {
   //We still have to move to a section and read the data if it is not loaded.
@@ -57,22 +55,26 @@ dModel.coreDisLoc = function(virtual,crawl)
 
   if( this.dis == null ) { this.dis = function()
   {
-    core.setBinCode(file.dataV,vr); //Relative position within the buffer.
+    //Set binary code relative position within the buffer.
+
+    core.setBinCode(file.dataV,this.vr);
   
     //Begin disassembling the code.
   
-    info.innerHTML = "<pre>" + core.disassemble(cr) + "</pre>"; dModel.update();
+    info.innerHTML = "<pre>" + core.disassemble(this.cr) + "</pre>";
+    
+    file.seekV(file.dataV.offset+this.vr); dModel.adjSize(); dModel.update();
   }}
 
   //Begin data check.
 
-  vr = virtual; cr = crawl; core.setBasePosition("72D2:" + vr.toString(16));
+  this.vr = virtual; this.cr = crawl; core.setBasePosition("72D2:" + this.vr.toString(16));
 
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
-  var pos = vr - file.dataV.offset; if(vr >= 0 && pos <= file.dataV.length) { file.seekV(vr); vr = pos; this.dis(); }
+  var pos = this.vr - file.dataV.offset; if(pos >= 0 && pos <= file.dataV.length) { this.vr = pos; this.dis(); }
  
-  //Else we need to locate to the section disassembly can happen.
+  //Else we need to locate to the section before disassembly can happen.
  
-  else { file.call( this, "dis" ); file.seekV(vr); vr = 0; file.readV(data); }
+  else { this.vr = virtual & 0x0F; file.call( this, "dis" ); file.seekV(virtual-this.vr); file.readV(file.dataV.length); }
 }
