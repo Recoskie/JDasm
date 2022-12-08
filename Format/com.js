@@ -43,7 +43,11 @@ format = {
       
       dModel.setCore(core); dModel.coreDisLoc(0x100,true);
     }
-  }
+  },
+
+  //Code segment that the program is positioned at.
+
+  codeSeg: ((Math.random()*0x1000)*16).toString(16)
 }
 
 //The data descriptor calls this function when we go to click on an address we wish to disassemble.
@@ -68,7 +72,7 @@ dModel.coreDisLoc = function(virtual,crawl)
 
   //Begin data check.
 
-  this.vr = virtual; this.cr = crawl; core.setBasePosition("72D2:" + this.vr.toString(16));
+  this.vr = virtual; this.cr = crawl; core.setBasePosition( format.codeSeg + ":" + this.vr.toString(16));
 
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
@@ -76,5 +80,5 @@ dModel.coreDisLoc = function(virtual,crawl)
  
   //Else we need to locate to the section before disassembly can happen.
  
-  else { this.vr = virtual & 0x0F; file.call( this, "dis" ); file.seekV(virtual-this.vr); file.readV(file.dataV.length); }
+  else { this.vr = virtual & 0x0F; file.call( this, "dis" ); file.seekV(virtual-this.vr); file.readV(window.innerHeight >> 1); }
 }
