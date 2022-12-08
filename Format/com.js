@@ -2,10 +2,18 @@
 //This ensures that all data in the format reader is overwritten when loading in a new format.
 
 format = {
+  //DOS com files have a blank header.
+
+  header: new Descriptor([]),
+
   //Function load is always called first.
 
   load: function()
   {
+    //DOS com Files have no header.
+
+    this.header.setEvent(this, "dataEvent");
+
     //Dos com files are by default x86-16 bit programs.
 
     loadCore("core/x86/dis-x86.js");
@@ -36,13 +44,20 @@ format = {
   {
     var args = node.getArgs();
 
-    if( args[0] == 0 ) { info.innerHTML = "DOS COM Files have no header or setup information. The program begins at the start of the file and is placed at 0x100 in RAM memory."; }
+    if( args[0] == 0 ) { dModel.setDescriptor(format.header); }
     else
     {
       core.addressMap = true; core.resetMap(); core.bitMode = 0; file.seekV(0x100);
       
-      core.setCodeSeg((Math.random()*0x1000)<<4); dModel.setCore(core); dModel.coreDisLoc(0x100,true);
+      core.setCodeSeg((Math.random()*0x2000)<<3); dModel.setCore(core); dModel.coreDisLoc(0x100,true);
     }
+  },
+
+  //When user clicks on information for the program header.
+
+  dataEvent: function()
+  {
+    info.innerHTML = "DOS COM Files have no header or setup information. The program begins at the start of the file and is placed at 0x100 in RAM memory.";
   }
 }
 
