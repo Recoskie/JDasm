@@ -47,7 +47,7 @@ format = {
 
   //Code segment that the program is positioned at.
 
-  codeSeg: ((Math.random()*0x1000)*16).toString(16)
+  codeSeg: (Math.random()*0x1000)<<4
 }
 
 //The data descriptor calls this function when we go to click on an address we wish to disassemble.
@@ -72,7 +72,7 @@ dModel.coreDisLoc = function(virtual,crawl)
 
   //Begin data check.
 
-  this.vr = virtual; this.cr = crawl; core.setBasePosition( format.codeSeg + ":" + this.vr.toString(16));
+  this.vr = virtual; this.cr = crawl; core.setCodeSeg(format.codeSeg); core.setAddress(this.vr);
 
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
