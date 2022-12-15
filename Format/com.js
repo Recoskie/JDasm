@@ -31,11 +31,11 @@ format = {
 
     //Show virtual address space.
 
-    if( !virtual.visible ) { showH(true); } file.seekV(0x100);
+    if( !virtual.visible ) { showH(true); }
 
     //Set the default selected node.
 
-    tree.prototype.treeClick( Tree.getNode(0).getNode(0).parentElement );
+    tree.prototype.treeClick( Tree.getNode(0).getNode(0).parentElement ); file.seekV(0x100);
   },
 
   //Tree event handling.
@@ -72,13 +72,13 @@ dModel.coreDisLoc = function(virtual,crawl)
   {
     //Set binary code relative position within the buffer.
 
-    core.setBinCode(file.dataV,file.virtual - file.dataV.offset);
+    core.setBinCode(file.dataV,this.vr - file.dataV.offset);
   
     //Begin disassembling the code.
   
     info.innerHTML = "<pre>" + core.disassemble(this.cr) + "</pre>";
     
-    dModel.adjSize(); dModel.update(); file.seekV(file.virtual);
+    dModel.adjSize(); dModel.update(); file.seekV(this.vr);
   }}
 
   //Begin data check.
@@ -87,5 +87,5 @@ dModel.coreDisLoc = function(virtual,crawl)
 
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
-  file.call( this, "dis" ); file.seekV(virtual); file.initBufV();
+  file.call( this, "dis" ); file.seekV(this.vr = virtual); file.initBufV();
 }
