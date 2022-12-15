@@ -91,6 +91,8 @@
 
     if( vertical != h < w ) { rotateSC(h < w); }
     
+    file.setBuf( offset.getRows() << 4 );
+    
     offset.validate(); virtual.validate(); dModel.validate();
   }
 
@@ -118,9 +120,9 @@
   {
     file.setTarget( f ); offset.hide(false);
     
-    //Init the main byte array.
+    //Initialize the file buffer.
     
-    file.Events = false; file.seek(0); file.Events = true; file.init(this, "onload", offset.getRows() * 16);
+    file.call(this, "onload"); file.seek(0); file.setBuf( offset.getRows() << 4 ); file.initBuf();
   }
   
   function onload()
@@ -278,7 +280,7 @@
       if( isFinite(r) ) { r1.width = r2.width = formatLoad ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
     }
 
-    offset.validate(); virtual.validate(); dModel.validate();
+    offset.validate(); virtual.validate(); dModel.validate(); file.setBuf( offset.getRows() << 4 );
   }
   
   //Show hidden elements.

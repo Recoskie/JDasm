@@ -31,7 +31,7 @@ format = {
 
     //Show virtual address space.
 
-    if( !virtual.visible ) { showH(true); } file.seekV(0x100); virtual.sc();
+    if( !virtual.visible ) { showH(true); } file.seekV(0x100);
 
     //Set the default selected node.
 
@@ -47,7 +47,7 @@ format = {
     if( args[0] == 0 ) { dModel.setDescriptor(format.header); }
     else
     {
-      core.addressMap = true; core.resetMap(); core.bitMode = 0; file.seekV(0x100);
+      core.addressMap = true; core.resetMap(); core.bitMode = 0;
       
       core.setCodeSeg((Math.random()*0x2000)<<3); dModel.setCore(core); dModel.coreDisLoc(0x100,true);
     }
@@ -72,24 +72,20 @@ dModel.coreDisLoc = function(virtual,crawl)
   {
     //Set binary code relative position within the buffer.
 
-    core.setBinCode(file.dataV,this.vr);
+    core.setBinCode(file.dataV,file.virtual - file.dataV.offset);
   
     //Begin disassembling the code.
   
     info.innerHTML = "<pre>" + core.disassemble(this.cr) + "</pre>";
     
-    file.seekV(file.dataV.offset+this.vr); dModel.adjSize(); dModel.update();
+    dModel.adjSize(); dModel.update(); file.seekV(file.virtual);
   }}
 
   //Begin data check.
 
-  this.vr = virtual; this.cr = crawl; core.setAddress(this.vr);
+  this.cr = crawl; core.setAddress(virtual);
 
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
-  var pos = this.vr - file.dataV.offset; if(pos >= 0 && pos <= file.dataV.length) { this.vr = pos; this.dis(); }
- 
-  //Else we need to locate to the section before disassembly can happen.
- 
-  else { this.vr = virtual & 0x0F; file.call( this, "dis" ); file.seekV(virtual-this.vr); file.readV(window.innerHeight >> 1); }
+  file.call( this, "dis" ); file.seekV(virtual); file.initBufV();
 }
