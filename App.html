@@ -93,9 +93,7 @@
     
     //Update components after updating the buffer.
     
-    file.call(this,"validate");
-    
-    file.setBuf( offset.getRows() << 4 );
+    file.setBuf( offset.getRows() << 4, validate );
   }
   
   function validate()
@@ -129,7 +127,9 @@
     
     //Initialize the file buffer.
     
-    file.call(this, "onload"); file.seek(0); file.setBuf( offset.getRows() << 4 );
+    file.call(this, "onload"); file.seek(0);
+    
+    file.setBuf( offset.getRows() << 4, onload );
   }
   
   function onload()
@@ -289,7 +289,7 @@
     
     file.call(this,"validate");
 
-    file.setBuf( offset.getRows() << 4 );
+    file.setBuf( offset.getRows() << 4, validate );
   }
   
   //Show hidden elements.
