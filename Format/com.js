@@ -77,6 +77,8 @@ dModel.coreDisLoc = function(virtual,crawl)
     //Begin disassembling the code.
   
     info.innerHTML = "<pre>" + core.disassemble(this.cr) + "</pre>";
+
+    window.virtual.slen = core.getAddress() - this.vr;
     
     dModel.adjSize(); dModel.update(); file.seekV(this.vr);
   }}
