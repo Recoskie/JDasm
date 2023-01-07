@@ -78,7 +78,7 @@ dModel.coreDisLoc = function(virtual,crawl)
   
     info.innerHTML = "<pre>" + core.disassemble(this.cr) + "</pre>";
 
-    window.virtual.sel = this.vr; window.virtual.sele = core.getAddress();
+    window.virtual.slen = core.getAddress() - this.vr;
     
     dModel.adjSize(); dModel.update(); file.seekV(this.vr);
   }}
