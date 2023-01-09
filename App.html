@@ -91,14 +91,9 @@
 
     if( vertical != h < w ) { rotateSC(h < w); }
     
-    //Update components after updating the buffer.
+    //Update and validate all UI components
     
-    file.setBuf( offset.getRows() << 4, validate );
-  }
-  
-  function validate()
-  {
-    offset.validate(); virtual.validate(); dModel.validate();
+    validate();
   }
 
   //Drag and drop file Support.
@@ -285,7 +280,9 @@
       if( isFinite(r) ) { r1.width = r2.width = formatLoad ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
     }
 
-    file.setBuf( offset.getRows() << 4, validate );
+    //Update and validate all UI components
+    
+    validate();
   }
   
   //Show hidden elements.
