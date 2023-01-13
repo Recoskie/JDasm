@@ -35,6 +35,10 @@
 
   var formatLoad = false;
 
+  //It is important that the GUI components do not validate till everything completes.
+
+  var loadingDone = false;
+
   //Format to load that only use file extension for file type.
 
   var extensions = [".com"];
@@ -93,7 +97,7 @@
     
     //Update and validate all UI components
     
-    validate();
+    else if( loadingDone ) { validate(); }
   }
 
   //Drag and drop file Support.
@@ -118,7 +122,7 @@
   
   function Open( f )
   {
-    file.setTarget( f ); offset.hide(false);
+    loadingDone = false; file.setTarget( f ); offset.hide(false);
     
     //Initialize the file buffer.
     
@@ -133,7 +137,7 @@
 
     //The default controls that are enabled on loading a file.
 
-    show("c1"); show("c2"); show("c3"); show("c4"); show("c5");
+    show("c1"); show("c2"); show("c3"); show("c4");
     
     offset.sel = offset.sele = 0;
     
@@ -161,12 +165,12 @@
     if( Format.src != url )
     {
       Format.parentElement.removeChild(Format); Format = document.createElement("script"); Format.src = url;
-      Format.onerror = fmtErr; Format.onload = function(){ format.load(); if(r1.display=="none") { BMode(); } }; document.head.appendChild(Format);
+      Format.onerror = fmtErr; Format.onload = function(){ format.load(); loadingDone = true; if(r1.display=="none") { BMode(); } }; document.head.appendChild(Format);
     }
 
     //Else we just call the load operation over again.
 
-    else { try{ format.load(); if(r1.display=="none") { BMode(); } } catch(e) { fmtErr(); } document.head.appendChild(Format); }
+    else { try{ format.load(); loadingDone = true; if(r1.display=="none") { BMode(); } } catch(e) { fmtErr(); } document.head.appendChild(Format); }
   }
 
   //core loader.
@@ -184,7 +188,7 @@
 
   //Error message if there is a problem loading the format reader.
 
-  function fmtErr() { if(r1.display!="none"){BMode();} alert("Unable to load format reader for this file format!"); }
+  function fmtErr() { loadingDone = true; if(r1.display!="none"){ BMode(); } alert("Unable to load format reader for this file format!"); }
 
   //Error message if there is a problem loading the processor core type.
 
@@ -210,12 +214,7 @@
     adjRatio();
   }
 
-  function BMode()
-  {
-    document.getElementById("c5").value = ((formatLoad = !formatLoad) ? "Disable " : "Enable ") + "Beta mode";
-
-    rotateSC(vertical);
-  }
+  function BMode() { formatLoad = !formatLoad; rotateSC(vertical); }
 
   //Experimental.
 
@@ -282,7 +281,7 @@
 
     //Update and validate all UI components
     
-    validate();
+    if( loadingDone ) { validate(); }
   }
   
   //Show hidden elements.
@@ -293,7 +292,7 @@
   }
 </script>
 <input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};rotateSC(vertical);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
-<input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" /><input type="button" id="c5" value="Enable Beta mode" onclick="BMode();" style="display:none;" />
+<input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" />
 <div id="r" style="height:100%;width:100%;">
   <div style="display:none;" id="r1"><div id="tree"></div><div id="dModel"></div><div id="info"></div></div>
   <div id="r2"><div id="vhex1"></div><div id="vhex2"></div><div id="data"></div></div>
