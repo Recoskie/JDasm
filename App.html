@@ -165,12 +165,12 @@
     if( Format.src != url )
     {
       Format.parentElement.removeChild(Format); Format = document.createElement("script"); Format.src = url;
-      Format.onerror = fmtErr; Format.onload = function(){ format.load(); loadingDone = true; if(r1.display=="none") { BMode(); } }; document.head.appendChild(Format);
+      Format.onerror = fmtErr; Format.onload = function(){ format.load(); loadingDone = true; if(r1.display=="none") { formatLoad = !formatLoad; rotateSC(vertical); } }; document.head.appendChild(Format);
     }
 
     //Else we just call the load operation over again.
 
-    else { try{ format.load(); loadingDone = true; if(r1.display=="none") { BMode(); } } catch(e) { fmtErr(); } document.head.appendChild(Format); }
+    else { try{ format.load(); loadingDone = true; if(r1.display=="none") { formatLoad = !formatLoad; rotateSC(vertical); } } catch(e) { fmtErr(); } document.head.appendChild(Format); }
   }
 
   //core loader.
@@ -188,7 +188,7 @@
 
   //Error message if there is a problem loading the format reader.
 
-  function fmtErr() { loadingDone = true; if(r1.display!="none"){ BMode(); } alert("Unable to load format reader for this file format!"); }
+  function fmtErr() { loadingDone = true; if(r1.display!="none"){ formatLoad = !formatLoad; rotateSC(vertical); } alert("Unable to load format reader for this file format!"); }
 
   //Error message if there is a problem loading the processor core type.
 
@@ -213,8 +213,6 @@
     
     adjRatio();
   }
-
-  function BMode() { formatLoad = !formatLoad; rotateSC(vertical); }
 
   //Experimental.
 

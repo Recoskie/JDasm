@@ -89,5 +89,5 @@ dModel.coreDisLoc = function(virtual,crawl)
 
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
-  file.call( this, "dis" ); file.seekV(this.vr = virtual); file.initBufV();
+  file.bufRead( this, "dis" ); file.seekV(this.vr = virtual); file.initBufV();
 }
