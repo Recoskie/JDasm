@@ -39,6 +39,34 @@
 
   var loadingDone = false;
 
+  //Use the file signature codes instead of file extension.
+
+  var signature =
+  [
+    [ 0x4D, 0x5A ], //Microsoft binaries.
+    [ 0x7F, 0x45, 0x4C, 0x46 ], //Linux/UNIX binaries.
+    [ 0xCE, 0xFA, 0xED, 0xFE ], //32 Bit Mac/IOS binary.
+    [ 0xCF, 0xFA, 0xED, 0xFE ], //64 Bit Mac/IOS binary.
+    [ 0xCA, 0xFE, 0xBA, 0xBE ], //Mac/IOS universal binary.
+    /*[ 0xCA, 0xFE, 0xBA, 0xBE ],*/ //Reserved for java class loader format plugin.
+    [ 0x42, 0x4D ], //Bit map pictures.
+    [ 0xFF, 0xD8 ], //JPEG start of image marker.
+    [ 0x52, 0x49, 0x46, 0x46 ], //Multimedia RIFF file.
+    [ 0x52, 0x46, 0x36, 0x34 ], //Multimedia RIFF/64 file.
+    [ 0x50, 0x4B, 0x03, 0x04 ], //Compressed ZIP files.
+    [ 0x50, 0x4B, 0x07, 0x08 ], //Compressed ZIP files (split).
+    [ 0x50, 0x4B, 0x05, 0x06 ] //Compressed ZIP files (Empty).
+  ];
+
+  //The file to load. To begin decoding file types.
+
+  var decodeAPP =
+  [
+    "Format/exe.js", "Format/elf.js", "Format/mac.js", "Format/mac.js", "Format/mac.js", /*"Format/java.js",*/
+    "Format/bmp.js", "Format/jpeg.js", "Format/riff.js", "Format/riff.js",
+    "Format/zip.js", "Format/zip.js", "Format/zip.js"
+  ];
+
   //Format to load that only use file extension for file type.
 
   var extensions = [".com"];
@@ -144,6 +172,20 @@
     offset.adjSize(); offset.update(file);
     
     ds.hide(false);
+
+    //Check format signature type.
+
+    for( var i = 0, c = true; i < signature.length; i++ )
+    {
+      c = true; for( var b = 0; b < signature[i].length; b++ ){ if( signature[i][b] != file.data[b] ){ c = false; } }
+
+      //Java class files have the same signature.
+
+      if( c && (i != 4 || ((file.data[4] << 24) | (file.data[5] << 16) | (file.data[6] << 8) | file.data[7]) < 45) )
+      {
+        loadFormat( decodeAPP[i] ); return;
+      }
+    }
 
     //For now it is easy to test the x86 disassembler with a MS-DOS com file.
 
