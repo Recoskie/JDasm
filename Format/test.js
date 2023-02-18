@@ -4,7 +4,7 @@
 format = {
   //This will be used to hold the descriptors for the file format headers in this example.
   
-  headers: [],
+  headers: [], strTest: new dataType("Adjustable String", Descriptor.String8),
 
   //Function load is always called first.
 
@@ -81,6 +81,7 @@ format = {
       new dataType("Value 66", Descriptor.Int32 ),
       new dataType("Value 67", Descriptor.Int32 ),
       new dataType("Value 68", Descriptor.Int64 ),
+      this.strTest,
       new dataType("Value 69", Descriptor.Int32 ),
       new dataType("Value 70", Descriptor.Int32 ),
       new dataType("Value 71", Descriptor.Int32 ),
@@ -181,6 +182,8 @@ format = {
   {
     if( index < 0 )
     {
+      format.strTest.length(Math.round(Math.random()*10));
+      
       info.innerHTML = "You just set this descriptor, but did not click on any values read in the descriptor.";
     }
     else if( index < 2 )
