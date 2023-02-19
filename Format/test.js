@@ -14,6 +14,7 @@ format = {
 
     this.headers[0] = new Descriptor([
       new dataType("Value 1", Descriptor.LInt64 ),
+      this.strTest,
       new dataType("Value 2", Descriptor.Int64 ),
       new dataType("Value 3", Descriptor.LInt32 ),
       new dataType("Value 4", Descriptor.Int64 ),
@@ -104,6 +105,10 @@ format = {
     //Test the new binary tree component.
     
     var root = new treeNode("test.exe",[],true,false);
+    root.add(des = new treeNode("Data test"));
+    des.add("Descriptor 1(pos=0).h",["d",0,0]);
+    des.add("Descriptor 2(pos=0).h",["d",1,0]);
+    des.add("Descriptor 1(pos=1024).h",["d",0,1024]);
     root.add("Add nodes on click.h", ["h1"]);
     root.add("Click count.h", ["h2",0]);
     root.add("Mod Tree.h", ["h3"]);
@@ -137,6 +142,13 @@ format = {
   {
     var args = node.getArgs();
     
+    //Change or set descriptors.
+    
+    if(args[0] == "d")
+    {
+      dModel.setDescriptor(format.headers[args[1]]);
+    }
+    
     //Dynamically change the tree.
     
     if(args[0] == "h1")
@@ -160,7 +172,7 @@ format = {
     {
       node.setArgs([]);
 
-      var rNode = Tree.getNode(0).getNode(3);
+      var rNode = Tree.getNode(0).getNode(4);
 
       var n = new treeNode("Modified.h",["changed"],true);
       n.add("new node 1");
