@@ -146,7 +146,7 @@ format = {
     
     if(args[0] == "d")
     {
-      dModel.setDescriptor(format.headers[args[1]]);
+      format.headers[args[1]].offset = parseInt(args[2]); dModel.setDescriptor(format.headers[args[1]]);
     }
     
     //Dynamically change the tree.
@@ -194,7 +194,7 @@ format = {
   {
     if( index < 0 )
     {
-      format.strTest.length(Math.round(Math.random()*10));
+      this.strTest.length(Math.round(Math.random()*10));
       
       info.innerHTML = "You just set this descriptor, but did not click on any values read in the descriptor.";
     }
