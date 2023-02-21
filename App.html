@@ -154,7 +154,7 @@
     
     //Initialize the file buffer.
     
-    file.bufRead(this, "onload"); file.seek(0); file.read( offset.getRows() << 4 );
+    file.bufRead(this, "onload"); file.seek(0); file.read( file.buf = offset.getRows() << 4 );
   }
   
   function onload()
