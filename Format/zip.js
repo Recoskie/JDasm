@@ -176,11 +176,16 @@ format = {
           }
           else { this.bpos += ((file.tempD[this.bpos + 3] << 8) | file.tempD[this.bpos + 2]) + 4; }
         }
-        
-        this.bpos = end; this.addDir(name, this.fpos);
 
-        this.bpos += size; this.fpos += 30 + strLen + extData + size; name = "";
+        //Add the dir, and add the data node if size is > 0, and skip the files data to quickly read the next file signature.
+        
+        this.bpos = end; this.addDir(name, this.fpos); this.bpos += size; this.fpos += 30 + strLen + extData + size; name = "";
       }
+      
+      //If a file signature had zero size then the preceding data till a data descriptor signature identifies the files data end.
+      //The data descriptor signature has a number that should match how many bytes we read before we reached the data descriptor signature (end of the files data).
+      //If the number does not match then the file is corrupted.
+
       else
       {
         this.bpos += 1; this.fpos += 1;
@@ -245,7 +250,7 @@ format = {
       "Java uses the zip format to store application files as a single file as a runnable file called an java jar.<br /><br />" +
       "Android APK applications are stored in zip files to save space, and to keep applications organized.<br /><br />" +
       "Apple iPhone IPA applications are stored in zip files to also save space and to keep applications organized.<br /><br />" +
-      "Disassembling android and iPhone apps is supported by JDisassembly, but you will first need to find the application file in the IPA, or APK file.<br /><br />" +
+      "Disassembling android and iPhone apps is supported by JDisassembly, but you will first need to decompress the application file as a zip, then find the application file in the IPA, or APK to open the application binary in JDisassembly.<br /><br />" +
       "Microsoft stores office document files into compressed zip files to save space and to keep pictures and models used in the office document organized as one file.</html>";
   },
 
