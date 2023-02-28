@@ -133,6 +133,10 @@ format = {
       
       if( sig == 0x04034B50 )
       {
+        //File data size was undefined.
+
+        if( this.fdata > 0 ) { this.cRoot.add("File Data.h",[1,this.fpos-this.fdata,this.fdata]); this.fdata = 0; }
+
         //If buffer pos is grater than 4062 then there is not enough data to read the file header properly.
 
         if( this.bpos >= 4062 ){ file.onRead(this, "scan"); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
@@ -172,6 +176,20 @@ format = {
         //Add the dir, and add the data node if size is > 0, and skip the files data to quickly read the next file signature.
         
         this.bpos = end; this.addDir(name, this.fpos); this.bpos += size; this.fpos += 30 + strLen + extData + size; name = "";
+
+        //Add the file data node if size is defined.
+
+        if( size != 0 ) { this.cRoot.add("File Data.h",[1,this.fpos,size]); }
+      }
+
+      //The data descriptor tells us the size of the compressed data after we have read it.
+
+      else if( sig == 0x08074B50 )
+      {
+        this.cRoot.add(new treeNode("File Data.h", [1,this.fpos-this.fdata,this.fdata]));
+        this.cRoot.add(new treeNode("Data info.h", [3, this.fpos]));
+      
+        this.bpos += 16; this.fpos += 16; this.fdata = 0;
       }
       
       //If a file signature had zero size then the preceding data till a data descriptor signature identifies the files data end.
@@ -180,7 +198,7 @@ format = {
 
       else
       {
-        this.bpos += 1; this.fpos += 1;
+        this.bpos += 1; this.fpos += 1;this.fdata += 1;
       }
     }
     
