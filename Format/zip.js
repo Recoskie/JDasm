@@ -7,14 +7,13 @@ format = {
   clear: new Descriptor([]), des: [],
   
   /*As we read each PK file entry we split the full file path apart in forward slash.
-  We add nodes to root for the full file path and set level to number of folders in.
-  As we add more file paths from each PK header we check which folder has changed in the path.
-  If the value change holds a different value then we must match the current path level to the change to start adding the new path folders nodes.
-  The value cRoot is the current path and level is how many folders in we are.
-  The value change is set to how many folders we must move out of in cRoot to add a new file path.
-  Since file paths are grouped together in order in a zip usually this is the fastest way to build the file structure of the zip.*/
+  We add nodes to root for the full file path and store the current node and it's file path.
+  The value cRoot is the current path node. The value path is the current path we are at.
+  As we add more file paths from each PK header we check which folder node changed in the path from the current path.
+  We move up one node to match the point of change. Then add non existing tree nodes.
+  Since file paths are grouped together in order in a zip this is the fastest way to build the file structure of the zip.*/
   
-  root: undefined, cRoot: undefined, level: 0, path: [],
+  root: undefined, cRoot: undefined, path: [],
   
   //Begins setting up the zip analysis algorithm.
   
@@ -122,11 +121,9 @@ format = {
     file.onRead(this, "scan"); file.seek(this.fpos); file.read(4096);
   },
 
-  bpos: 0, fpos: 0, fdata: 0,
-
   //Scan the zip.
 
-  scan: function()
+  bpos: 0, fpos: 0, fdata: 0, scan: function()
   {
     var sig, size = 0, strLen = 0, extData = 0, end = 0, name = "";
 
@@ -187,14 +184,16 @@ format = {
       }
     }
     
-    if( this.fpos < file.size ) { file.onRead(this, "scan"); this.bpos = 0; file.seek(this.fpos); file.read(4096); } else { this.done(); }
+    if( this.fpos < file.size ) { file.onRead(this, "scan"); this.bpos = 0; file.seek(this.fpos); file.read(4096); } else { this.bpos = this.fpos = this.fdata = 0; this.done(); }
   },
 
   //Algorithm for adding tree nodes. It is optimized based on how zip organizes paths.
 
   addDir: function(path, pos)
   {
-    var path = path.split("/"), exists = false, change = 0; if(path[path.length-1] == ""){ path.pop(); }
+    var path = path.split("/"), level = this.path.length, change = 0, exists = false; if(path[path.length-1] == ""){ path.pop(); }
+
+    //Find which part of the path dose not match the current path.
 
     for( var e = this.path.length < path.length ? this.path.length : path.length; change < e; change++ )
     {
@@ -203,26 +202,26 @@ format = {
 
     //Move up from the current path to where the path change occurred.
 
-    while( change < this.level ) { this.level--; this.cRoot = this.cRoot.parentNode; }
+    while( change < level ) { level--; this.cRoot = this.cRoot.parentNode; }
 
     //Move through the path at the point of change. 
 
-    while( path.length > this.level )
+    while( path.length > level )
     {
       //If node exists set it to the current Path node. It is possible that it was previously added from a different path.
 
       exists = false; for( var e = this.cRoot.length(), el = 0; el < e; el++ )
       {
-        if( path[this.level] == this.cRoot.getNode(el).name ) { exists = true; this.cRoot = this.cRoot.getNode(el); break; }
+        if( path[level] == this.cRoot.getNode(el).name ) { exists = true; this.cRoot = this.cRoot.getNode(el); break; }
       }
 
       //Create Node if it does not exist, then set it to the current path node.
 
-      if(!exists) { this.cRoot.add(this.cRoot = new treeNode(path[this.level], [2, pos])); }
+      if(!exists) { this.cRoot.add(this.cRoot = new treeNode(path[level], [2, pos])); }
 
       //Move up one in path position.
 
-      this.level++;
+      level++;
     }
 
     //The current path is now the path we just added.
@@ -237,6 +236,10 @@ format = {
     //Set binary tree view, and enable IO system events.
 
     Tree.set(this.root); tree.prototype.event = this.open;
+
+    //We no longer need the root node once set as html to the tree.
+
+    this.root = this.cRoot = undefined; this.path = [];
       
     //basic zip info.
 
