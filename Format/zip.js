@@ -14,12 +14,7 @@ format = {
   The value change is set to how many folders we must move out of in cRoot to add a new file path.
   Since file paths are grouped together in order in a zip usually this is the fastest way to build the file structure of the zip.*/
   
-  root: undefined, cRoot: undefined, level: 0, change: 0,
-  
-  //We need to keep track of the current path and new path to know the values level and change.
-  //The value exists is used to check if the node exists at the current path.
-  
-  path: [], newPath: [], exists: false,
+  root: undefined, cRoot: undefined, level: 0, path: [],
   
   //Begins setting up the zip analysis algorithm.
   
@@ -195,43 +190,44 @@ format = {
     if( this.fpos < file.size ) { file.onRead(this, "scan"); this.bpos = 0; file.seek(this.fpos); file.read(4096); } else { this.done(); }
   },
 
-  //Algorithm for adding tree nodes.
+  //Algorithm for adding tree nodes. It is optimized based on how zip organizes paths.
 
   addDir: function(path, pos)
   {
-    this.cRoot.add(new treeNode(path,[2,pos]));
+    var path = path.split("/"), exists = false, change = 0; if(path[path.length-1] == ""){ path.pop(); }
 
-    /*this.path = path.split("/");
-
-    this.change = 0; for( var e = this.path.length > opath.length ? opath.length : this.path.length ; this.change < e; this.change++ )
+    for( var e = this.path.length < path.length ? this.path.length : path.length; change < e; change++ )
     {
-      if( !this.path[this.change].equals(opath[this.change]) ){ break; }
+      if( path[change] != this.path[change] ){ break; }
     }
 
-    while( this.change < this.level ) { this.level--; r = this.cRoot.getParent(); }
+    //Move up from the current path to where the path change occurred.
 
-    while( this.path.length > this.level )
+    while( change < this.level ) { this.level--; this.cRoot = this.cRoot.parentNode; }
+
+    //Move through the path at the point of change. 
+
+    while( path.length > this.level )
     {
-      //Check if node exists.
+      //If node exists set it to the current Path node. It is possible that it was previously added from a different path.
 
-      this.exists = false;
-      
-      for( var e = this.cRoot.getChildCount(), el = 0; el < e; el++ )
+      exists = false; for( var e = this.cRoot.length(), el = 0; el < e; el++ )
       {
-        if( this.path[this.level].equals(r.getChildAt(el).toString()))
-        {
-          this.exists = true; r = this.cRoot.getChildAt(el);
-        }
+        if( path[this.level] == this.cRoot.getNode(el).name ) { exists = true; this.cRoot = this.cRoot.getNode(el); break; }
       }
 
-      //Node does not exist.
+      //Create Node if it does not exist, then set it to the current path node.
 
-      if(!this.exists) { var h = new treeNode( this.path[ this.level ], [ 2, pkPos ] ); this.cRoot.add( h ); r = h; }
+      if(!exists) { this.cRoot.add(this.cRoot = new treeNode(path[this.level], [2, pos])); }
+
+      //Move up one in path position.
 
       this.level++;
     }
+
+    //The current path is now the path we just added.
     
-    opath = name.split("/");*/
+    this.path = path;
   },
 
   //Done scanning the zip file.
