@@ -78,7 +78,7 @@ format = {
     ]);
     this.des[4] = new Descriptor([
       this.sig,
-      new dataType("End 64 Size", Descriptor.LUInt64), //Note -44 bytes.
+      new dataType("End 64 Size", Descriptor.LUInt64),
       new dataType("Version", Descriptor.LUInt16),
       new dataType("Min Version", Descriptor.LUInt16),
       new dataType("Disk Number", Descriptor.LUInt32),
@@ -179,11 +179,15 @@ format = {
 
         //Add the dir, and add the data node if size is > 0, and skip the files data to quickly read the next file signature.
         
-        this.bpos = end; this.addDir(name, this.fpos); this.bpos += size; this.fpos += 30 + strLen + extData + size; name = "";
+        this.bpos = end; this.addDir(name, this.fpos); this.fpos += 30 + strLen + extData;
 
         //Add the file data node if size is defined.
 
         if( size != 0 ) { this.cRoot.add("File Data.h",[1,this.fpos,size]); }
+
+        //Update position.
+
+        this.bpos += size; this.fpos += size; name = "";
       }
 
       //The data descriptor tells us the size of the compressed data after we have read it.
@@ -654,6 +658,10 @@ format = {
   {
     if( i < 0 )
     {
+      var pos = file.offset-file.data.offset;
+      this.fName.length(file.data[pos+28] | (file.data[pos+29]<<8));
+      this.dFelid.length(file.data[pos+30] | (file.data[pos+31]<<8));
+      this.comment.length(file.data[pos+32] | (file.data[pos+33]<<8));
       info.innerHTML = this.cDirInfo;
     }
     else if( i == 0 )
@@ -687,6 +695,9 @@ format = {
   {
     if( i < 0 )
     {
+      var pos = file.offset-file.data.offset;
+      this.dFelid.length(((file.data[pos + 11] * (2**56)) + (file.data[pos + 10] * (2**48)) + (file.data[pos + 9] * (2**40)) + (file.data[pos + 8] * (2**32)) +
+      (file.data[pos + 7] * (2**24)) + ((file.data[pos + 6] << 16) | (file.data[pos + 5] << 8) | file.data[pos + 4]))-44);
       info.innerHTML = "<html>The end of zip may specify more than one zip file as a disk." + this.multiPartZip;
     }
     else
@@ -699,6 +710,8 @@ format = {
   {
     if( i < 0 )
     {
+      var pos = file.offset-file.data.offset;
+      this.comment.length(file.data[pos+20] | (file.data[pos+21]<<8));
       info.innerHTML = "<html>The end of zip may specify more than one zip file as a disk." + this.multiPartZip;
     }
     else
