@@ -385,7 +385,7 @@ format = {
       {
         out += "<tr><td>zip64 (0x" + cmd.toStr(16).pad(4) + ").</td><td>" + hex + "</td><td>" + cmd + "</td></tr>";
 
-        size = ( ( d[pos + 3] & 0xFF ) << 8 ) | ( d[pos + 2] & 0xFF ); hex = d[pos + 2].byte() + " " + d[pos + 3].byte();
+        size = (file.data[pos + 3] << 8) | file.data[pos + 2]; hex = file.data[pos + 2].byte() + " " + file.data[pos + 3].byte();
 
         out += "<tr><td>zip64 len.</td><td>" + hex + "</td><td>" + ( size > 28 ? "Error (" + size + " > 28)" : size ) + "</td></tr>"; size = size > 28 ? 0 : size; pos += 4;
 
