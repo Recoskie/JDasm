@@ -14,6 +14,10 @@ format = {
   Since file paths are grouped together in order in a zip this is the fastest way to build the file structure of the zip.*/
   
   root: undefined, cRoot: undefined, path: [],
+
+  //The central directory nodes.
+
+  dir: 0, cDir: new treeNode("Central Directory",[8]),
   
   //Begins setting up the zip analysis algorithm.
   
@@ -125,7 +129,7 @@ format = {
 
   bpos: 0, fpos: 0, fdata: 0, scan: function()
   {
-    var sig, size = 0, strLen = 0, extData = 0, end = 0, name = "";
+    var sig, size = 0, strLen = 0, extData = 0, cLen = 0, end = 0, name = "";
 
     while( this.bpos < 4092 )
     {
@@ -191,15 +195,58 @@ format = {
       
         this.bpos += 16; this.fpos += 16; this.fdata = 0;
       }
+
+      //The central directory.
+
+      else if( sig == 0x02014B50 )
+      {
+        if( this.fdata > 0 ) { this.cRoot.add(new treeNode("File Data.h", [1,this.fpos-this.fdata,this.fdata])); this.fdata = 0; }
+
+        //Is there enough data to read the variable in length data felids.
+      
+        if( this.bpos >= 4062 ){ file.onRead(this, "scan"); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
+      
+        strLen = (file.tempD[this.bpos + 29] << 8) | file.tempD[this.bpos + 28];
+        extData = (file.tempD[this.bpos + 31] << 8) | file.tempD[this.bpos + 30];
+        cLen = (file.tempD[this.bpos + 33] << 8) | file.tempD[this.bpos + 32];
+      
+        this.cDir.add(new treeNode("Directory #" + (this.dir++) + ".h", [4, this.fpos]));
+      
+        this.bpos += 46 + strLen + extData + cLen; this.fpos += 46 + strLen + extData + cLen;
+      }
+      else if( sig == 0x06064B50 )
+      {
+        //Is there enough data to read the variable in length data felids.
+
+        if( this.bpos >= 4084 ){ file.onRead(this, "scan"); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
+      
+        extData = (file.tempD[this.bpos + 11] * (2**56)) + (file.tempD[this.bpos + 10] * (2**48)) + (file.tempD[this.bpos + 9] * (2**40)) + (file.tempD[this.bpos + 8] * (2**32)) +
+        (file.tempD[this.bpos + 7] * (2**24)) + ((file.tempD[this.bpos + 6] << 16) | (file.tempD[this.bpos + 5] << 8) | file.tempD[this.bpos + 4]);
+        
+        this.cDir.add(new treeNode("Directory End64.h", [6,this.fpos])); this.bpos += (extData - 44) + 56; this.fpos += (extData - 44) + 56;
+      }
+      else if( sig == 0x07064B50 )
+      {
+        this.cDir.add(new treeNode("Directory Loc64.h", [7,this.fpos])); this.bpos += 20; this.fpos += 20;
+      }
+      else if( sig == 0x06054B50 )
+      {
+        //Is there enough data to read the variable in length data felids.
+
+        if( this.bpos >= 4074 ){ file.onRead(this, "scan"); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
+      
+        cLen = (file.tempD[this.bpos + 21] << 8) | file.tempD[this.bpos + 20];
+      
+        this.cDir.add(new treeNode("Directory End.h", [5,this.fpos]));
+      
+        this.bpos += cLen + 22; this.fpos += cLen + 22;
+      }
       
       //If a file signature had zero size then the preceding data till a data descriptor signature identifies the files data end.
       //The data descriptor signature has a number that should match how many bytes we read before we reached the data descriptor signature (end of the files data).
       //If the number does not match then the file is corrupted.
 
-      else
-      {
-        this.bpos += 1; this.fpos += 1;this.fdata += 1;
-      }
+      else { this.bpos += 1; this.fpos += 1; this.fdata += 1; }
     }
     
     if( this.fpos < file.size ) { file.onRead(this, "scan"); this.bpos = 0; file.seek(this.fpos); file.read(4096); } else { this.bpos = this.fpos = this.fdata = 0; this.done(); }
@@ -253,11 +300,11 @@ format = {
   {
     //Set binary tree view, and enable IO system events.
 
-    Tree.set(this.root); tree.prototype.event = this.open;
+    if( this.cDir.length() > 0 ) { this.root.add(this.cDir); }; Tree.set(this.root); tree.prototype.event = this.open;
 
     //We no longer need the root node once set as html to the tree.
 
-    this.root = this.cRoot = undefined; this.path = [];
+    this.root = this.cDir = this.cRoot = undefined; this.path = []; this.dir = 0;
       
     //basic zip info.
 
@@ -426,9 +473,13 @@ format = {
   {
     var e = e.getArgs(), el = parseInt(e[0]);
 
+    //Central directory explanation.
+
+    if( el == 8 ) { dModel.clear(); info.innerHTML = format.cDirInfo; }
+
     //Select file data bytes.
 
-    if( el == 1 )
+    else if( el == 1 )
     {
       dModel.clear(); file.seek(parseInt(e[1])); ds.setType(15, 0, parseInt(e[2]));
 
@@ -447,7 +498,7 @@ format = {
 
   //Central directory.
 
-  cDir: "<html>The central directory Has a copy of each file signature in this file and the location to each file signature.<br /><br />" +
+  cDirInfo: "<html>The central directory Has a copy of each file signature in this file and the location to each file signature.<br /><br />" +
   "The central directory has some additional attributes that can be used to add comments to files.<br /><br />" +
   "The central directory tells us which disk we are on, and allows us to do multi part zip files as well which is not included in the file signatures.<br /><br />" +
   "It is recommend that we read the central directory first and locate the file signatures using the offset given to the file signature.<br /><br />" +
@@ -603,7 +654,7 @@ format = {
   {
     if( i < 0 )
     {
-      info.innerHTML = this.cDir;
+      info.innerHTML = this.cDirInfo;
     }
     else if( i == 0 )
     {
