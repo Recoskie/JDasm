@@ -331,8 +331,6 @@ format = {
 
     out += "<table border='1'><tr><td>Description</td><td>Hex</td><td>Value</td></tr>";
 
-    console.log(file.data[pos].byte());
-
     //Analyze the data.
 
     var cmd = 0, hex = "", val = 0, size = 0, end = pos + this.dFelid.length(); while( pos < end ) 
@@ -341,7 +339,7 @@ format = {
 
       //The unix time date stamp.
 
-      if( cmd == 0x5455 )
+      if(cmd == 0x5455)
       {
         out += "<tr><td>Unix Time Date stamps (0x" + cmd.toStr(16).pad(4) + ").</td><td>" + hex + "</td><td>" + cmd + "</td></tr>";
 
@@ -349,14 +347,14 @@ format = {
 
         out += "<tr><td>Time stamp len.</td><td>" + hex + "</td><td>" + ( size > 28 ? "Error (" + size + " > 13)" : size ) + "</td></tr>"; size = size > 13 ? 0 : size; pos += 4;
 
-        if( size > 0 )
+        if(size > 0)
         {
           val = file.data[pos]; hex = file.data[pos].byte();
 
           out += "<tr><td>Flag settings.</td><td>" + hex + "</td><td>" + val + "</td></tr>"; pos += 1; size -= 1;
         }
 
-        if( size > 0 )
+        if(size > 0)
         {
           val = (file.data[pos + 3] * (2**24)) + (file.data[pos + 2] << 16) | (file.data[pos + 1] << 8) | file.data[pos];
           hex = file.data[pos].byte() + " " + file.data[pos + 1].byte() + " " + file.data[pos + 2].byte() + " " + file.data[pos + 3].byte();
@@ -364,7 +362,7 @@ format = {
           out += "<tr><td>Last Modification.</td><td>" + hex + "</td><td>" + val + "</td></tr>"; pos += 4; size -= 4;
         }
 
-        if( size > 0 )
+        if(size > 0)
         {
           val = (file.data[pos + 3] * (2**24)) + (file.data[pos + 2] << 16 ) | (file.data[pos + 1] << 8 ) | file.data[pos];
           hex = file.data[pos].byte() + " " + file.data[pos + 1].byte() + " " + file.data[pos + 2].byte() + " " + file.data[pos + 3].byte();
@@ -372,7 +370,7 @@ format = {
           out += "<tr><td>Last accessed.</td><td>" + hex + "</td><td>" + val + "</td></tr>"; pos += 4; size -= 4;
         }
 
-        if( size > 0 )
+        if(size > 0)
         {
           val = (file.data[pos + 3] * (2**24)) + (file.data[pos + 2] << 16) | (file.data[pos + 1] << 8) | file.data[pos];
           hex = file.data[pos].byte() + " " + file.data[pos + 1].byte() + " " + file.data[pos + 2].byte() + " " + file.data[pos + 3].byte();
@@ -383,61 +381,56 @@ format = {
 
       //Compressed file attributes as 64 bit fields.
 
-      /*else if( CMD == 0x0001 )
+      else if(cmd == 0x0001)
       {
-        out += "<tr><td>zip64 (0x" + String.format("%1$04X", CMD ) + ").</td><td>" + Hex + "</td><td>" + CMD + "</td></tr>";
+        out += "<tr><td>zip64 (0x" + cmd.toStr(16).pad(4) + ").</td><td>" + hex + "</td><td>" + cmd + "</td></tr>";
 
-        int size = ( ( d[pos + 3] & 0xFF ) << 8 ) | ( d[pos + 2] & 0xFF );
-        Hex = String.format("%1$02X", d[pos + 2] ) + " " + String.format("%1$02X", d[pos + 3] );
+        size = ( ( d[pos + 3] & 0xFF ) << 8 ) | ( d[pos + 2] & 0xFF ); hex = d[pos + 2].byte() + " " + d[pos + 3].byte();
 
-        out += "<tr><td>zip64 len.</td><td>" + Hex + "</td><td>" + ( size > 28 ? "Error (" + size + " > 28)" : size ) + "</td></tr>"; size = size > 28 ? 0 : size; pos += 4;
+        out += "<tr><td>zip64 len.</td><td>" + hex + "</td><td>" + ( size > 28 ? "Error (" + size + " > 28)" : size ) + "</td></tr>"; size = size > 28 ? 0 : size; pos += 4;
 
-        if( size > 0 )
+        if(size > 0)
         {
-          val = ( ( d[pos + 7] & 0xFF ) << 56 ) | ( ( d[pos + 6] & 0xFF ) << 48 ) | ( ( d[pos + 5] & 0xFF ) << 40 ) | ( ( d[pos + 4] & 0xFF ) << 32 ) |
-          ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
-          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] )
-          + " " + String.format("%1$02X", d[pos + 4] )+ " " + String.format("%1$02X", d[pos + 5] )+ " " + String.format("%1$02X", d[pos + 6] )+ " " + String.format("%1$02X", d[pos + 7] );
+          val = (file.data[pos + 7] * (2**56)) + (file.data[pos + 6] * (2**48)) + (file.data[pos + 5] * (2**40)) + (file.data[pos + 4] * (2**32)) +
+          (file.data[pos + 3] << 24) | (file.data[pos + 2] << 16) | (file.data[pos + 1] << 8 ) | file.data[pos];
+          hex = file.data[pos].byte() + " " + file.data[pos + 1].byte() + " " + file.data[pos + 2].byte() + " " + file.data[pos + 3].byte() + " " +
+          file.data[pos + 4].byte() + " " + file.data[pos + 5].byte() + " " + file.data[pos + 6].byte() + " " + file.data[pos + 7].byte();
 
-          out += "<tr><td>Uncompressed file size.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 8; size -= 8;
+          out += "<tr><td>Uncompressed file size.</td><td>" + hex + "</td><td>" + val + "</td></tr>"; pos += 8; size -= 8;
         }
 
-        if( size > 0 )
+        if(size > 0)
         {
-          val = ( ( d[pos + 7] & 0xFF ) << 56 ) | ( ( d[pos + 6] & 0xFF ) << 48 ) | ( ( d[pos + 5] & 0xFF ) << 40 ) | ( ( d[pos + 4] & 0xFF ) << 32 ) |
-          ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
-          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] )
-          + " " + String.format("%1$02X", d[pos + 4] )+ " " + String.format("%1$02X", d[pos + 5] )+ " " + String.format("%1$02X", d[pos + 6] )+ " " + String.format("%1$02X", d[pos + 7] );
+          val = (file.data[pos + 7] * (2**56)) + (file.data[pos + 6] * (2**48)) + (file.data[pos + 5] * (2**40)) + (file.data[pos + 4] * (2**32)) +
+          (file.data[pos + 3] << 24) | (file.data[pos + 2] << 16) | (file.data[pos + 1] << 8 ) | file.data[pos];
+          hex = file.data[pos].byte() + " " + file.data[pos + 1].byte() + " " + file.data[pos + 2].byte() + " " + file.data[pos + 3].byte() + " " +
+          file.data[pos + 4].byte() + " " + file.data[pos + 5].byte() + " " + file.data[pos + 6].byte() + " " + file.data[pos + 7].byte();
 
-          out += "<tr><td>Size of compressed data.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 8; size -= 8;
+          out += "<tr><td>Size of compressed data.</td><td>" + hex + "</td><td>" + val + "</td></tr>"; pos += 8; size -= 8;
         }
 
-        if( size > 0 )
+        if(size > 0)
         {
-          val = ( ( d[pos + 7] & 0xFF ) << 56 ) | ( ( d[pos + 6] & 0xFF ) << 48 ) | ( ( d[pos + 5] & 0xFF ) << 40 ) | ( ( d[pos + 4] & 0xFF ) << 32 ) |
-          ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
-          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] )
-          + " " + String.format("%1$02X", d[pos + 4] )+ " " + String.format("%1$02X", d[pos + 5] )+ " " + String.format("%1$02X", d[pos + 6] )+ " " + String.format("%1$02X", d[pos + 7] );
+          val = (file.data[pos + 7] * (2**56)) + (file.data[pos + 6] * (2**48)) + (file.data[pos + 5] * (2**40)) + (file.data[pos + 4] * (2**32)) +
+          (file.data[pos + 3] << 24) | (file.data[pos + 2] << 16) | (file.data[pos + 1] << 8 ) | file.data[pos];
+          hex = file.data[pos].byte() + " " + file.data[pos + 1].byte() + " " + file.data[pos + 2].byte() + " " + file.data[pos + 3].byte() + " " +
+          file.data[pos + 4].byte() + " " + file.data[pos + 5].byte() + " " + file.data[pos + 6].byte() + " " + file.data[pos + 7].byte();
 
-          out += "<tr><td>Offset to File signature.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 8; size -= 8;
+          out += "<tr><td>Offset to File signature.</td><td>" + hex + "</td><td>" + val + "</td></tr>"; pos += 8; size -= 8;
         }
 
-        if( size > 0 )
+        if(size > 0)
         {
-          val = ( ( d[pos + 3] & 0xFF ) << 24 ) | ( ( d[pos + 2] & 0xFF ) << 16 ) | ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
-          Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] )+ " " + String.format("%1$02X", d[pos + 2] )+ " " + String.format("%1$02X", d[pos + 3] );
+          val = (file.data[pos + 3] * (2**24)) + (file.data[pos + 2] << 16) | (file.data[pos + 1] << 8) | file.data[pos];
+          hex = file.data[pos].byte() + " " + file.data[pos + 1].byte() + " " + file.data[pos + 2].byte() + " " + file.data[pos + 3].byte();
 
-          out += "<tr><td>Offset to File signature.</td><td>" + Hex + "</td><td>" + val + "</td></tr>"; pos += 4; size -= 4;
+          out += "<tr><td>Offset to File signature.</td><td>" + hex + "</td><td>" + val + "</td></tr>"; pos += 4; size -= 4;
         }
-      }*/
-      /*else if( CMD == 0x0000 )
+      }
+      else if(cmd == 0x0000)
       {
-        while( CMD == 0x0000 && pos < d.length )
-        {
-          out += "<tr><td>Padding (0x0000).</td><td>" + String.format("%1$02X", CMD & 0xFF ) + "</td><td>Unused.</td></tr>";
-          CMD = d[pos++];
-        }
-      }*/
+        while(cmd == 0x0000 && pos < end) { out += "<tr><td>Padding (0x0000).</td><td>" + cmd.byte() + "</td><td>Unused.</td></tr>"; cmd = file.data[pos++]; }
+      }
       else
       {
         out += "<tr><td>Unknown (0x" + cmd.toStr(16).pad(4) + ").</td><td>" + hex + "</td><td>" + cmd + "</td></tr>";
@@ -446,18 +439,18 @@ format = {
 
         out += "<tr><td>Unknown data len.</td><td>" + hex + "</td><td>" + size + "</td></tr>"; pos += 4;
 
-        if( size > 0 )
+        if(size > 0)
         {
-          hex = ""; while( size > 0 ) { hex += file.data[pos].byte() + ( size > 1 ? " " : "" ); size -= 1; pos += 1; }
+          hex = ""; while( size > 0 ) { hex += file.data[pos].byte() + (size > 1 ? " " : ""); size -= 1; pos += 1; }
 
           out += "<tr><td>Unknown data.</td><td>" + hex + "</td><td>?</td></tr>";
         }
       }
     }
 
-    if( pos < end )
+    if(pos < end)
     {
-      Hex = ""; size = end - pos; while( size > 0 ) { hex += (file.data[pos] || 0).byte() + ( size > 1 ? " " : "" ); size -= 1; pos += 1; }
+      hex = ""; size = end - pos; while(size > 0) { hex += (file.data[pos] || 0).byte() + (size > 1 ? " " : ""); size -= 1; pos += 1; }
       out += "<tr><td>Bad Data.</td><td>" + hex + "</td><td>?</td></tr>";
     }
 
