@@ -4,7 +4,7 @@
 format = {
   sig: new dataType("Signature", Descriptor.Other), fName: new dataType("File name", Descriptor.String8),
   dFelid: new dataType("Data Felid", Descriptor.Other), comment: new dataType("Comment", Descriptor.String8),
-  clear: new Descriptor([]), des: [],
+  des: [],
   
   /*As we read each PK file entry we split the full file path apart in forward slash.
   We add nodes to root for the full file path and store the current node and it's file path.
@@ -243,7 +243,7 @@ format = {
       
     //basic zip info.
 
-    dModel.setDescriptor(this.clear);
+    dModel.clear();
   
     info.innerHTML = "<html>The zip file format is used as a container for mobile (android, iPhone) applications, and java applications, and also Microsoft office documents as well as being useful for users to store files as a compressed zip file.<br /><br />" +
       "Java uses the zip format to store application files as a single file as a runnable file called an java jar.<br /><br />" +
@@ -412,14 +412,12 @@ format = {
 
     if( el == 1 )
     {
-      var start = parseInt(e[1]), end = parseInt(e[2]);
+      dModel.clear(); file.seek(parseInt(e[1])); ds.setType(15, 0, parseInt(e[2]));
 
-      dModel.setDescriptor(format.clear); info.innerHTML = "<html>Extracting files from an zip is only supported by the application version.\r\nYou can use a zip application to extract the files if you wish to open or analyze them in the web version.</html>";
-
-      file.seek( start ); ds.setType( 15, 0, end - start );
+      info.innerHTML = "<html>Extracting files from an zip is only supported by the application version.\r\nYou can use a zip application to extract the files if you wish to open or analyze them in the web version.</html>";
     }
 
-    //Position and set descriptor.
+    //Set descriptor.
 
     else if( el >= 2 ) { format.des[el-2].offset = parseInt(e[1]); dModel.setDescriptor(format.des[el-2]); }
   },
