@@ -324,22 +324,16 @@ format = {
 
   //Decode the extended data field information.
 
-  /*public void extendedData()
+  extendedData: function(pos)
   {
-    file.Events = false;
-
-    byte[] d = new byte[]{}; String out = "<html>Extra data field is a set of 2 byte pairs (code pair type) with a value that specifies the number of bytes to read.<br /><br />" +
+    var out = "<html>Extra data field is a set of 2 byte pairs (code pair type) with a value that specifies the number of bytes to read.<br /><br />" +
     "The extra data field adds additional information about the file or entire, or extends values.<br /><br />";
 
     out += "<table border='1'><tr><td>Description</td><td>Hex</td><td>Value</td></tr>";
 
-    //Get the data.
-
-    try { file.seek( Offset.selectPos() ); d = new byte[ (int)(Offset.selectEnd() - file.getFilePointer()) + 1 ]; file.read(d); } catch( java.io.IOException er ) { }
-
     //Analyze the data.
 
-    int pos = 0, end = d.length - 3; int CMD = 0; String Hex = ""; long val = 0; while( pos < end )
+    /*int pos = 0, end = d.length - 3; int CMD = 0; String Hex = ""; long val = 0; while( pos < end )
     {
       CMD = ( ( d[pos + 1] & 0xFF ) << 8 ) | ( d[pos] & 0xFF );
       Hex = String.format("%1$02X", d[pos] ) + " " + String.format("%1$02X", d[pos + 1] );
@@ -468,8 +462,8 @@ format = {
 
     //Display the result.
 
-    file.Events = true; info( out + "</table></html>" );
-  }*/
+    file.Events = true;*/ info( out + "</table></html>" );
+  },
 
   //This event is called when the user clicks on an tree node.
 
@@ -610,13 +604,12 @@ format = {
     "<html>File user comment.</html>"
   ],
 
-  zipInfo: function(i)
+  zipInfo: function(i,pos)
   {
     i = i > 0 ? ( i > 10 ? i + 6 : i + 1 ) : i;
 
     if( i < 0 )
     {
-      var pos = file.offset-file.data.offset;
       this.fName.length(file.data[pos+26] | (file.data[pos+27]<<8));
       this.dFelid.length(file.data[pos+28] | (file.data[pos+29]<<8));
       
@@ -630,7 +623,7 @@ format = {
     }
     else if( i == 18 )
     {
-      info.innerHTML = "Unsupported at this time."; //this.extendedData();
+      this.extendedData();
     }
     else
     {
@@ -654,11 +647,10 @@ format = {
     }
   },
 
-  dirInfo: function(i)
+  dirInfo: function(i,pos)
   {
     if( i < 0 )
     {
-      var pos = file.offset-file.data.offset;
       this.fName.length(file.data[pos+28] | (file.data[pos+29]<<8));
       this.dFelid.length(file.data[pos+30] | (file.data[pos+31]<<8));
       this.comment.length(file.data[pos+32] | (file.data[pos+33]<<8));
@@ -670,7 +662,7 @@ format = {
     }
     else if( i == 18 )
     {
-      info.innerHTML = "Unsupported at this time."; //this.extendedData();
+      this.extendedData();
     }
     else if( i < 18 )
     {
@@ -691,11 +683,10 @@ format = {
     }
   },
 
-  end64Info: function(i)
+  end64Info: function(i,pos)
   {
     if( i < 0 )
     {
-      var pos = file.offset-file.data.offset;
       this.dFelid.length(((file.data[pos + 11] * (2**56)) + (file.data[pos + 10] * (2**48)) + (file.data[pos + 9] * (2**40)) + (file.data[pos + 8] * (2**32)) +
       (file.data[pos + 7] * (2**24)) + ((file.data[pos + 6] << 16) | (file.data[pos + 5] << 8) | file.data[pos + 4]))-44);
       info.innerHTML = "<html>The end of zip may specify more than one zip file as a disk." + this.multiPartZip;
@@ -706,11 +697,10 @@ format = {
     }
   },
 
-  endInfo: function(i)
+  endInfo: function(i,pos)
   {
     if( i < 0 )
     {
-      var pos = file.offset-file.data.offset;
       this.comment.length(file.data[pos+20] | (file.data[pos+21]<<8));
       info.innerHTML = "<html>The end of zip may specify more than one zip file as a disk." + this.multiPartZip;
     }
