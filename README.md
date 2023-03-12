@@ -25,7 +25,9 @@ JDisassembly.
 
 The web-based version uses a different file system built into javascript: <a href="https://developer.mozilla.org/en-US/docs/Web/API/FileReader">FileReader API</a>
 
-It renders the swingIO components using HTML5 canvas. It is experimental and only has the dataDescriptor left to be added.
+It renders the swingIO components using HTML5 canvas. It is experimental and only supports analyzing zip files and disassembling DOS COM applications.
+
+There are still some reading bugs and graphics issues.
 
 ------------------------------------------------------------
 
