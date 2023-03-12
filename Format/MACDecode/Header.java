@@ -108,7 +108,8 @@ public class Header extends Data
   "<tr><td>CE FA ED FE</td><td>32 bit binary application.</td></tr>" +
   "<tr><td>CF FA ED FE</td><td>64 bit binary application.</td></tr>" +
   "</table><br />" +
-  "Signature type CA FE BA BE is used for universal binaries.<br /><br />" +
+  "Note that the byte order of the signature could be stored in little endian byte order, or big endian byte order based on the byte order of the systems processor core.<br /><br />" +
+  "Signature type CA FE BA BE is used for universal binaries and is always read in big endian byte order.<br /><br />" +
   "A universal binary has more than one binary application in the file for different core types which begin with Mac Headers as well.<br /><br />" +
   "It is not useful most of the time since majority of all systems run x86 instructions, or ARM instructions natively.</html>";
 
@@ -121,7 +122,7 @@ public class Header extends Data
   "<tr><td>NS32332</td><td>05</td></tr>" +
   "<tr><td>MC680x0</td><td>06</td></tr>" +
   "<tr><td>X86</td><td>07</td></tr>" +
-  "<tr><td>VAX</td><td>08</td></tr>" +
+  "<tr><td>MIPS</td><td>08</td></tr>" +
   "<tr><td>MC98000</td><td>0A</td></tr>" +
   "<tr><td>HPPA</td><td>0B</td></tr>" +
   "<tr><td>ARM</td><td>0C</td></tr>" +
@@ -162,7 +163,7 @@ public class Header extends Data
   "Over the years Intel/AMD have added new instructions to x86 cores to perform different arithmetic operations to speed up performance.<br /><br />" +
   "The instructions used binary codes that did nothing on prior cores. This means a x86 program optimized for 486 can run on a newer core than 486.<br /><br />" +
   "Most software is compiled using no fancy instructions meaning the code is compatible to all x86 cores.<br /><br />" +
-  "It is still important to test if a particular instruction does nothing, or does said arithmetic operation before the CPU is set to the programs instruction codes.";
+  "It is still important to test if a particular instruction does said arithmetic operation before the CPU is set to the programs instruction codes.";
 
   private static final String CPU_SubARM = "The First two Hex digit is the CPU sub type.<br /><br />" +
   "The last two hex digits are used for capability settings on arm64e platforms (Experimental).<br /><br />" +
@@ -190,7 +191,7 @@ public class Header extends Data
   "Over the years ARM has grow a lot with new instructions to perform different arithmetic operations to speed up performance.<br /><br />" +
   "The instructions used binary codes that did nothing on prior cores. This means a ARM-V6 optimized program can run on a newer core like ARM-V8.<br /><br />" +
   "In the case the all type no fancy instructions are used meaning the code is compatible to all ARM cores.<br /><br />" +
-  "It is still important to test if a particular instruction does nothing, or does said arithmetic operation before the CPU is set to the programs instruction codes.";
+  "It is still important to test if a particular instruction does said arithmetic operation before the CPU is set to the programs instruction codes.";
 
   private static final String[] MacHeaderInfo = new String[]
   {
@@ -284,9 +285,9 @@ public class Header extends Data
     "<html>Number of binaries in the universal binary.</html>",
     "<html>Binary application information.</html>",
     CPU_type1 + "The last two hex digits is the CPU type.<br /><br />" +
-    "The first two hex digits are 01 for 64 bit, and 02 for 32 bit version of the core.<br /><br />" + CPU_type2,
+    "The first two hex digits are 01 for 64 bit version of the core.<br /><br />" + CPU_type2,
     "<html>The CPU sub type is used to specify features the core should have support for as the code is optimized for a particular core or newer.<br /><br />" +
-    "Meaning some earlier cores may encounter operation codes that do nothing that are usable in newer version of the core.</html>",
+    "Meaning some earlier cores may encounter illegal operation codes that do nothing, or trap that would cause the application to fail to run properly.</html>",
     "<html>File position to application.</html>",
     "<html>The size of the application in the file.</html>",
     "<html>Section alignment in power of 2.</html>"
