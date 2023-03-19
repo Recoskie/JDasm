@@ -6,7 +6,7 @@
   "name": "JD-asm",
   "orientation": "any",
   "scope": "/",
-  "short_name": "JD-asm",
+  "short_name": "JDasm",
   "start_url": "https://recoskie.github.io/JDisassembly/index.html",
   "theme_color": "#ffffff",
   "categories": [
