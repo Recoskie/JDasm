@@ -7,7 +7,7 @@
   "orientation": "any",
   "scope": "/",
   "short_name": "JD-asm",
-  "start_url": "https://recoskie.github.io/JDisassembly/App.html",
+  "start_url": "https://recoskie.github.io/JDisassembly/index.html",
   "theme_color": "#ffffff",
   "categories": [
     "education",

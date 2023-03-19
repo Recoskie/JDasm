@@ -16,9 +16,6 @@
 <script type="text/javascript" id="Format"></script>
 <script type="text/javascript" id="coreType"></script>
 <script>
-  if(navigator.serviceWorker) { navigator.serviceWorker.register('/JDisassembly/sw.js', {scope: '/JDisassembly/'} ) }
-</script>
-<script>
   /*------------------------------------------------------------
   This is a web based version of JDisassembly originally designed to run in Java.
   See https://github.com/Recoskie/JDisassembly/blob/master/app.java
@@ -335,6 +332,10 @@
   {
     document.getElementById(el).style.display = "";
   }
+
+  //Add the web application service worker.
+
+  if(navigator.serviceWorker) { navigator.serviceWorker.register('/JDisassembly/sw.js', {scope: '/JDisassembly/'} ) }
 </script>
 <input type="file" id="file" onchange="Open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};rotateSC(vertical);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
 <input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" />
