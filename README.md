@@ -1,12 +1,6 @@
 JDisassembly.
 =============================
 
-<table>
-  <tr><td>Main Page:</td><td><a href="https://recoskie.github.io/JDisassembly/index.html">Link</a></td></tr>
-</table>
-
-------------------------------------------------------------
-
 ## Help, and documentation.
 
 <table>
