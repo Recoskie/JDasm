@@ -16,6 +16,9 @@
 <script type="text/javascript" id="Format"></script>
 <script type="text/javascript" id="coreType"></script>
 <script>
+  if(navigator.serviceWorker) { navigator.serviceWorker.register('/JDisassembly/sw.js', {scope: '/JDisassembly/'} ) }
+</script>
+<script>
   /*------------------------------------------------------------
   This is a web based version of JDisassembly originally designed to run in Java.
   See https://github.com/Recoskie/JDisassembly/blob/master/app.java

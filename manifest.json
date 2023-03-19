@@ -1,7 +1,7 @@
 {
   "background_color": "#ffffff",
   "description": "Cross-platform binary format analysis tool and disassembler.",
-  "dir": "ltr",
+  "dir": "auto",
   "display": "fullscreen",
   "name": "JD-asm",
   "orientation": "any",
@@ -24,5 +24,6 @@
     }
   ],
   "shortcuts": [],
-  "lang": "en"
+  "lang": "en",
+  "iarc_rating_id": "10+"
 }
