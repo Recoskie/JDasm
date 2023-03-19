@@ -1,0 +1,25 @@
+{
+  "background_color": "#ffffff",
+  "description": "Cross-platform binary format analysis tool and disassembler.",
+  "dir": "ltr",
+  "display": "fullscreen",
+  "name": "JD-asm",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "JD-asm",
+  "start_url": "https://recoskie.github.io/JDisassembly/App.html",
+  "theme_color": "#ffffff",
+  "categories": [
+    "education",
+    "security",
+    "utilities"
+  ],
+  "screenshots": [],
+  "icons": [
+    {
+      "src": "https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1"
+    }
+  ],
+  "shortcuts": [],
+  "lang": "en"
+}
