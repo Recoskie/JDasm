@@ -1,12 +1,6 @@
 JDisassembly.
 =============================
 
-<table>
-  <tr><td>Main Page:</td><td><a href="https://recoskie.github.io/JDisassembly/index.html">Link</a></td></tr>
-</table>
-
-------------------------------------------------------------
-
 ## Help, and documentation.
 
 <table>
@@ -20,7 +14,7 @@ JDisassembly.
 ## Web Version.
 
 <table>
-  <tr><td>Web-based version:</td><td><a href="https://recoskie.github.io/JDisassembly/App.html">Link</a></td></tr>
+  <tr><td>Web-based version:</td><td><a href="https://recoskie.github.io/JDisassembly/">Link</a></td></tr>
 </table>
 
 The web-based version uses a different file system built into javascript: <a href="https://developer.mozilla.org/en-US/docs/Web/API/FileReader">FileReader API</a>
