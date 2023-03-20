@@ -32,22 +32,25 @@ The application is designed, for anyone, or for professional use.
 
 The tools are explained in help and documentation; see the applications <a href="https://github.com/Recoskie/JDisassembly/wiki">wiki</a> for details.
 
+------------------------------------------------------------
+Downloading or running web version.
+------------------------------------------------------------
+
 <table>
   <tr><td>Cross platform java application version:</td><td><a href="https://github.com/Recoskie/JDisassembly/raw/master/JD-asm.jar">Link</a></td></tr>
   <tr><td>iPhone beta version:</td><td><a href="https://testflight.apple.com/join/HL7YrtzH">Link</a></td></tr>
   <tr><td>Web beta version:</td><td><a href="https://recoskie.github.io/JDisassembly/">Link</a></td></tr>
 </table>
 
-The web and iPhone versions are in beta and will be the same as the java desktop application, except you will not be able to modify binary data in the hex editor by double-clicking cells (confirming changes) and will not be able to read memory devices from start to end directly.
+The web and mobile versions are in beta and will be the same as the java desktop application, except you will not be able to modify binary data in the hex editor by double-clicking cells (confirming changes) and will not be able to read memory devices from start to end directly.
 
-If you are recovering data on memory devices, use the java version.
-If you want to change a binary file or application, use the java version.
+If you are recovering data on memory devices or want to change a binary file or application, use the java version.
 
 ------------------------------------------------------------
 Supported formats.
 ------------------------------------------------------------
 
-This application currently supports Microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx, .com, DOS, MS-DOS.
+This application currently supports microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx, .com, DOS, MS-DOS.
 
 Supports Unix/Linux (ELF) binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod, .so
 
@@ -63,8 +66,7 @@ Android and iPhone store the applications in zip files. You need to find the mai
 
 Supports .efi boot firmware binaries and boot sector disassembly. You are able to decompile the boot process of firmware files in any os.
 
-Reading .efi and decompiling firmware files can be done on the web and mobile versions.
-The web and mobile versions can not read disk drives directly, so decompiling the operating system boot sectors is only available in the java version.
+The web and mobile versions can not read disk drives directly, so decompiling the operating system boot sectors is only available in the java version. Reading .efi and decompiling firmware files can be done on the web and mobile versions.
 
 ## Compression.
 
