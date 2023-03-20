@@ -33,7 +33,7 @@ The application is designed, for anyone, or for professional use.
 The tools are explained in help and documentation; see the applications <a href="https://github.com/Recoskie/JDisassembly/wiki">wiki</a> for details.
 
 ------------------------------------------------------------
-Downloading or running web version.
+Application versions.
 ------------------------------------------------------------
 
 <table>
