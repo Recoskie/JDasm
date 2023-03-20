@@ -1,30 +1,6 @@
 JDisassembly.
 =============================
 
-## Help, and documentation.
-
-<table>
-  <tr><td>Basics:</td><td><a href="https://recoskie.github.io/JDisassembly/docs/Basics.html">Link</a></td></tr>
-  <tr><td>Machine code:</td><td><a href="https://recoskie.github.io/JDisassembly/docs/Machine.html">Link</a></td></tr>
-  <tr><td>High Level Code:</td><td><a href="https://recoskie.github.io/JDisassembly/docs/Code.html">Link</a></td></tr>
-</table>
-
-------------------------------------------------------------
-
-## Web Version.
-
-<table>
-  <tr><td>Web-based version:</td><td><a href="https://recoskie.github.io/JDisassembly/">Link</a></td></tr>
-</table>
-
-The web-based version uses a different file system built into javascript: <a href="https://developer.mozilla.org/en-US/docs/Web/API/FileReader">FileReader API</a>
-
-It renders the swingIO components using HTML5 canvas. It is experimental and only has the dataDescriptor left to be added.
-
-------------------------------------------------------------
-
-## What is JDisassembly.
-
 <table>
   <tr>
     <td>
@@ -36,47 +12,61 @@ It renders the swingIO components using HTML5 canvas. It is experimental and onl
   </tr>
 </table>
 
-JDisassembly makes binary files and machine code visual and also, easy to understand and modify in raw binary form.
+JDisassembly makes binary files and machine code visual and easy to understand.
 
-It is designed for anyone as an easy way to learn how binary files are read. In which a processor processes standard binary types.
+Everything is detailed as you navigate through a binary application, from loading to analyzing the program instructions and what it does.
 
-We generally define these binary types as variables when writing software or doing any Arithmetic.
+You can follow the program and what it does and even recreate code for programs which you lost the source code for.
 
-Does not matter what CPU you use as all arithmetic types are the same across all cores. Otherwise, we would have a hard time processing file formats.
+It also will let you see how different binary formats are read.
 
-The tools are explained in help and documentation. Plus, both audio and graphics use a standard format as well. Which is nice to learn if you are into writing an operating system. All of this is put in detail, as well as machine code and compilation of software.
+You can navigate to any part of a binary file that interests you and analyze it, or you can go from the beginning all the way through it.
 
-------------------------------------------------------------
+This application lets you analyze files and find hidden data embedded in files.
 
-JDisassembly can visually take binary software apart to allow you to create source code.
+JDisassembly is great for anyone concerned about security, such as knowing if a program has hidden code.
 
-JDisassembly also visualizes binary data and file types. Showing you what every binary digit read is actually used for.
-
-This tool is also a hex editor and data forensics tool for binary files that is fun, visual, easy to use, and understand.
-
-You can also read disk drives sector by sector (one binary digit at a time from start to end).
+JDisassembly is also meant for educational purposes for anyone who wants to understand how to create a basic compiler or OS.
 
 The application is designed, for anyone, or for professional use.
+
+The tools are explained in help and documentation; see the applications <a href="https://github.com/Recoskie/JDisassembly/wiki">wiki</a> for details.
+
+------------------------------------------------------------
+Application versions.
+------------------------------------------------------------
+
+<table>
+  <tr><td>Cross platform java application version:</td><td><a href="https://github.com/Recoskie/JDisassembly/raw/master/JD-asm.jar">Link</a></td></tr>
+  <tr><td>iPhone beta version:</td><td><a href="https://testflight.apple.com/join/HL7YrtzH">Link</a></td></tr>
+  <tr><td>Web beta version:</td><td><a href="https://recoskie.github.io/JDisassembly/">Link</a></td></tr>
+</table>
+
+The web and mobile versions are in beta and will be the same as the java desktop application, except you will not be able to modify binary data in the hex editor by double-clicking cells (confirming changes) and will not be able to read memory devices from start to end directly.
+
+If you are recovering data on memory devices or want to change a binary file or application, use the java version.
 
 ------------------------------------------------------------
 Supported formats.
 ------------------------------------------------------------
 
-This application currently supports Microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx, .com, DOS, MS-DOS.
+This application currently supports microsoft binaries formats: .exe, .dll, .sys, .drv, .ocx, .com, DOS, MS-DOS.
 
 Supports Unix/Linux (ELF) binary formats: .axf, .bin, .elf, .o, .prx, .puff, .ko, .mod, .so
 
-Supports MacOS/iPhone (Mach-o) binaries, and also MacOS/iPhone (Mach-o) Universal binaries.
+Supports macOS/iPhone (Mach-O) binaries, and also macOS/iPhone (Mach-O) Universal binaries.
 
-Supports Decompiling Mobile Android APK application binaries.
+Supports decompiling mobile android APK application binaries.
 
-Supports Decompiling Mobile iPhone IPA application binaries.
+Supports decompiling mobile iPhone IPA application binaries.
 
-iPhone uses MacOS (Mach-o) format, and android uses ELF for libraries in the APK.
+iPhone uses macOS (Mach-O) format, and android uses ELF for libraries in the APK.
 
 Android and iPhone store the applications in zip files. You need to find the main application file to decompile it.
 
-Supports .efi boot binaries and boot sector disassembly. You are able to decompile the boot process of firmware files in any os.
+Supports .efi boot firmware binaries and boot sector disassembly. You are able to decompile the boot process of firmware files in any os.
+
+The web and mobile versions can not read disk drives directly, so decompiling the operating system boot sectors is only available in the java version. Reading .efi and decompiling firmware files can be done on the web and mobile versions.
 
 ## Compression.
 
@@ -110,12 +100,6 @@ Supports analyzing and editing XMA Audio files.
 
 Supports analyzing and editing AVI video files.
 
-## Contributing a file format.
-
-If you wish to contribute a Format. Then put it under the format folder.
-
-The following link to the <a href="https://gist.github.com/Recoskie/1c75264cb072aaf41e871ffd2a1f7370">template</a> will allow you to add new formats to JDisassembly quickly.
-
 ------------------------------------------------------------
 x86 Boot sectors.
 ------------------------------------------------------------
@@ -129,14 +113,6 @@ A Windows or Linux installation disk also has a boot sector at address 0 that be
 Thus it writes a boot sector to the disk you want to put the operating system on. However, that boot sector begins the operating system.
 
 You can analyze boot sectors and bootable media that run on blank computers with JDisassembly.
-
-------------------------------------------------------------
-Running the application.
-------------------------------------------------------------
-
-Download as zip. The file <strong>JD-asm.jar</strong> is the application.
-
-You will need Java 8 or later installed (the latest version is preferred).
 
 ------------------------------------------------------------
 IO system.
