@@ -329,6 +329,8 @@ format = {
     var out = "<html>Extra data field is a set of 2 byte pairs (code pair type) with a value that specifies the number of bytes to read.<br /><br />" +
     "The extra data field adds additional information about the file or entire, or extends values.<br /><br />";
 
+    if( this.dFelid.length() == 0 ){ info.innerHTML = out + "Nothing to decode; the data felid is zero in length.</html>"; return; }
+
     out += "<table border='1'><tr><td>Description</td><td>Hex</td><td>Value</td></tr>";
 
     //Analyze the data.
