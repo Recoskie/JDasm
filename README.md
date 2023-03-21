@@ -26,7 +26,7 @@ This application lets you analyze files and find hidden data embedded in files.
 
 JDisassembly is great for anyone concerned about security, such as knowing if a program has hidden code.
 
-JDisassembly is also meant for educational purposes for anyone who wants to understand how to create a basic compiler or OS.
+JDisassembly is also meant for educational purposes for anyone who wants to understand how software and hardware work together or to create a basic compiler or operating system.
 
 The application is designed, for anyone, or for professional use.
 
