@@ -112,13 +112,13 @@ A Windows or Linux installation disk also has a boot sector at address 0 that be
 
 Thus it writes a boot sector to the disk you want to put the operating system on. However, that boot sector begins the operating system.
 
-You can analyze boot sectors and bootable media that run on blank computers with JDisassembly.
+You can analyze boot sectors and bootable media that run on blank computers with JDasm.
 
 ------------------------------------------------------------
 IO system.
 ------------------------------------------------------------
 
-RandomAccessFileV Is an IO system that can map virtual addresses to byte positions in a file or disk.
+RandomAccessFileV Is an IO system that can map virtual addresses to byte positions in a file.
 
 It also has a new IO event system, which the swing IO components operate on.
 
@@ -127,6 +127,8 @@ The IO system can be found <a href="https://github.com/Recoskie/RandomAccessFile
 Without it. You do not have a nice virtually mapped binary application in its proper address space.
 
 Also, without it. You would not be able to accurately make changes to sections of a program or read it.
+
+<a href="https://github.com/Recoskie/RandomAccessFileV/blob/master/RandomAccessDevice.java">RandomAccessDevice</a> extends the functions of RandomAccessFileV, giving it the ability to read any memory device in raw binary format.
 
 ------------------------------------------------------------
 Window GUI components.
