@@ -16,7 +16,7 @@ JDasm makes binary files and machine code visual and easy to understand.
 
 Everything is detailed as you navigate through a binary application, from loading to analyzing the program instructions and what it does.
 
-You can follow the program and what it does and even recreate code for programs which you lost the source code for.
+As you follow the program and what it does you can recreate code for programs which you lost the source code for.
 
 It also will let you see how different binary formats are read.
 
@@ -28,7 +28,7 @@ JDasm is great for anyone concerned about security, such as knowing if a program
 
 JDasm is also meant for educational purposes for anyone who wants to understand how software and hardware work together or to create a basic compiler or operating system.
 
-The application is designed, for anyone, or for professional use.
+The application is designed, for anyone, and for professional use.
 
 The tools are explained in help and documentation; see the applications <a href="https://github.com/Recoskie/JDasm/wiki">wiki</a> for details.
 
