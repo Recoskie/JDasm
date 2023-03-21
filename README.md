@@ -16,7 +16,7 @@ JDasm makes binary files and machine code visual and easy to understand.
 
 Everything is detailed as you navigate through a binary application, from loading to analyzing the program instructions and what it does.
 
-You can follow the program and what it does and even recreate code for programs which you lost the source code for.
+As you follow the program and what it does you can recreate code for programs which you lost the source code for.
 
 It also will let you see how different binary formats are read.
 
@@ -28,7 +28,7 @@ JDasm is great for anyone concerned about security, such as knowing if a program
 
 JDasm is also meant for educational purposes for anyone who wants to understand how software and hardware work together or to create a basic compiler or operating system.
 
-The application is designed, for anyone, or for professional use.
+The application is designed, for anyone, and for professional use.
 
 The tools are explained in help and documentation; see the applications <a href="https://github.com/Recoskie/JDasm/wiki">wiki</a> for details.
 
@@ -112,13 +112,13 @@ A Windows or Linux installation disk also has a boot sector at address 0 that be
 
 Thus it writes a boot sector to the disk you want to put the operating system on. However, that boot sector begins the operating system.
 
-You can analyze boot sectors and bootable media that run on blank computers with JDisassembly.
+You can analyze boot sectors and bootable media that run on blank computers with JDasm.
 
 ------------------------------------------------------------
 IO system.
 ------------------------------------------------------------
 
-RandomAccessFileV Is an IO system that can map virtual addresses to byte positions in a file or disk.
+RandomAccessFileV Is an IO system that can map virtual addresses to byte positions in a file.
 
 It also has a new IO event system, which the swing IO components operate on.
 
@@ -127,6 +127,8 @@ The IO system can be found <a href="https://github.com/Recoskie/RandomAccessFile
 Without it. You do not have a nice virtually mapped binary application in its proper address space.
 
 Also, without it. You would not be able to accurately make changes to sections of a program or read it.
+
+<a href="https://github.com/Recoskie/RandomAccessFileV/blob/master/RandomAccessDevice.java">RandomAccessDevice</a> extends the functions of RandomAccessFileV, giving it the ability to read any memory device in raw binary format.
 
 ------------------------------------------------------------
 Window GUI components.
