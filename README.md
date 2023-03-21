@@ -1,18 +1,18 @@
-JDisassembly.
+JDasm.
 =============================
 
 <table>
   <tr>
     <td>
-      <a href="https://recoskie.github.io/JDisassembly/docs/Figs/pre1.gif" target="_blank"><img src="https://recoskie.github.io/JDisassembly/docs/Figs/pre1.gif" style="width:50%;"></a>
+      <a href="https://recoskie.github.io/JDasm/docs/Figs/pre1.gif" target="_blank"><img src="https://recoskie.github.io/JDasm/docs/Figs/pre1.gif" style="width:50%;"></a>
     </td>
     <td>
-      <a href="https://recoskie.github.io/JDisassembly/docs/Figs/pre2.gif" target="_blank"><img src="https://recoskie.github.io/JDisassembly/docs/Figs/pre2.gif" style="width:50%;"></a>
+      <a href="https://recoskie.github.io/JDasm/docs/Figs/pre2.gif" target="_blank"><img src="https://recoskie.github.io/JDasm/docs/Figs/pre2.gif" style="width:50%;"></a>
     </td>
   </tr>
 </table>
 
-JDisassembly makes binary files and machine code visual and easy to understand.
+JDasm makes binary files and machine code visual and easy to understand.
 
 Everything is detailed as you navigate through a binary application, from loading to analyzing the program instructions and what it does.
 
@@ -24,22 +24,22 @@ You can navigate to any part of a binary file that interests you and analyze it,
 
 This application lets you analyze files and find hidden data embedded in files.
 
-JDisassembly is great for anyone concerned about security, such as knowing if a program has hidden code.
+JDasm is great for anyone concerned about security, such as knowing if a program has hidden code.
 
-JDisassembly is also meant for educational purposes for anyone who wants to understand how software and hardware work together or to create a basic compiler or operating system.
+JDasm is also meant for educational purposes for anyone who wants to understand how software and hardware work together or to create a basic compiler or operating system.
 
 The application is designed, for anyone, or for professional use.
 
-The tools are explained in help and documentation; see the applications <a href="https://github.com/Recoskie/JDisassembly/wiki">wiki</a> for details.
+The tools are explained in help and documentation; see the applications <a href="https://github.com/Recoskie/JDasm/wiki">wiki</a> for details.
 
 ------------------------------------------------------------
 Application versions.
 ------------------------------------------------------------
 
 <table>
-  <tr><td>Cross platform java application version:</td><td><a href="https://github.com/Recoskie/JDisassembly/raw/master/JD-asm.jar">Link</a></td></tr>
+  <tr><td>Cross platform java application version:</td><td><a href="https://github.com/Recoskie/JDasm/raw/master/JD-asm.jar">Link</a></td></tr>
   <tr><td>iPhone beta version:</td><td><a href="https://testflight.apple.com/join/HL7YrtzH">Link</a></td></tr>
-  <tr><td>Web beta version:</td><td><a href="https://recoskie.github.io/JDisassembly/">Link</a></td></tr>
+  <tr><td>Web beta version:</td><td><a href="https://recoskie.github.io/JDasm/">Link</a></td></tr>
 </table>
 
 The web and mobile versions are in beta and will be the same as the java desktop application, except you will not be able to modify binary data in the hex editor by double-clicking cells (confirming changes) and will not be able to read memory devices from start to end directly.
