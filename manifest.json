@@ -7,7 +7,7 @@
   "orientation": "any",
   "scope": "/",
   "short_name": "JDasm",
-  "start_url": "https://recoskie.github.io/JDisassembly/index.html",
+  "start_url": "https://recoskie.github.io/JDasm/index.html",
   "theme_color": "#ffffff",
   "categories": [
     "education",
@@ -17,7 +17,7 @@
   "screenshots": [],
   "icons": [
     {
-      "src": "https://recoskie.github.io/JDisassembly/icon.png",
+      "src": "https://recoskie.github.io/JDasm/icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"

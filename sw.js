@@ -3,7 +3,10 @@ var APP_PREFIX = 'jd_';
 var VERSION = 'version_beta1';
 var URLS = [    
   `${GHPATH}/`,
+  `${GHPATH}/icon.png`,
+  `${GHPATH}/manifest.json`,
   `${GHPATH}/index.html`,
+  `${GHPATH}/RandomAccessFileV/FileReaderV.js`,
   `${GHPATH}/swingIO/UI.js`,
   `${GHPATH}/swingIO/Font/DOS.ttf`,
   `${GHPATH}/swingIO/Icons/f.gif`,
@@ -22,7 +25,6 @@ var URLS = [
   `${GHPATH}/swingIO/Icons/wav.gif`,
   `${GHPATH}/swingIO/Icons/mid.gif`,
   `${GHPATH}/swingIO/Icons/avi.gif`,
-  `${GHPATH}/RandomAccessFileV/FileReaderV.js`,
   `${GHPATH}/core/x86/dis-x86.js`,
   `${GHPATH}/Format/com.js`,
   `${GHPATH}/Format/exe.js`,
@@ -31,8 +33,7 @@ var URLS = [
   `${GHPATH}/Format/bmp.js`,
   `${GHPATH}/Format/jpeg.js`,
   `${GHPATH}/Format/riff.js`,
-  `${GHPATH}/Format/zip.js`,
-  `${GHPATH}/icon.png`,
+  `${GHPATH}/Format/zip.js`
 ]
 
 var CACHE_NAME = APP_PREFIX + VERSION
