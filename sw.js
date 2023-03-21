@@ -1,4 +1,4 @@
-var GHPATH = '/JDisassembly';
+var GHPATH = '/JDasm';
 var APP_PREFIX = 'jd_';
 var VERSION = 'version_beta1';
 var URLS = [    
