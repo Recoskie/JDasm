@@ -5,6 +5,10 @@ format = {
   //This will be used to hold the descriptors for the file format headers in this example.
   
   headers: [], strTest: new dataType("Adjustable String", Descriptor.String8),
+  arrayTest: new arrayType("Array Test", [
+    new dataType("Data 1", Descriptor.Int64),
+    new dataType("Data 2", Descriptor.LInt32),
+  ]),
 
   //Function load is always called first.
 
@@ -31,6 +35,7 @@ format = {
       new dataType("Value 15", Descriptor.Int32 ),
       new dataType("Value 16", Descriptor.Int32 ),
       new dataType("Value 17", Descriptor.Int32 ),
+      this.arrayTest,
       new dataType("Value 18", Descriptor.Int32 ),
       new dataType("Value 19", Descriptor.Int32 ),
       new dataType("Value 20", Descriptor.Int32 ),
