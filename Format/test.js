@@ -200,6 +200,7 @@ format = {
     if( index < 0 )
     {
       this.strTest.length(Math.round(Math.random()*10));
+      this.arrayTest.length(Math.round(Math.random()*10));
       
       info.innerHTML = "You just set this descriptor, but did not click on any values read in the descriptor.";
     }
