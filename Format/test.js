@@ -7,7 +7,7 @@ format = {
   headers: [], strTest: new dataType("Adjustable String", Descriptor.String8),
   arrayTest: new arrayType("Array Test", [
     new dataType("Data 1", Descriptor.Int64),
-    new dataType("Data 2", Descriptor.LInt32),
+    new dataType("Data 2", Descriptor.LInt32)
   ]),
 
   //Function load is always called first.
