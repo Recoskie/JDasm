@@ -59,6 +59,7 @@ format = {
       new dataType("Value 38", Descriptor.Int64 ),
       new dataType("Value 39", Descriptor.LInt32 ),
       new dataType("Value 40", Descriptor.Int64 ),
+      this.arrayTest,
       new dataType("Value 41", Descriptor.LInt64 ),
       new dataType("Value 42", Descriptor.Int32 ),
       new dataType("Value 43", Descriptor.Int32 ),
