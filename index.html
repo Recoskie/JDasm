@@ -37,10 +37,6 @@
 
   var formatLoad = false;
 
-  //It is important that the GUI components do not validate till everything completes.
-
-  var loadingDone = false;
-
   //Use the file signature codes instead of file extension.
 
   var signature =
@@ -127,7 +123,7 @@
     
     //Update and validate all UI components
     
-    else if( loadingDone ) { validate(); }
+    validate();
   }
 
   //Drag and drop file Support.
@@ -152,7 +148,7 @@
   
   function Open( f )
   {
-    loadingDone = false; file.setTarget( f ); offset.hide(false);
+    file.setTarget( f ); offset.hide(false);
     
     //Initialize the file buffer.
     
@@ -209,12 +205,12 @@
     if( Format.src != url )
     {
       Format.parentElement.removeChild(Format); Format = document.createElement("script"); Format.src = url;
-      Format.onerror = fmtErr; Format.onload = function(){ format.load(); loadingDone = true; if(r1.display=="none") { formatLoad = !formatLoad; rotateSC(vertical); } }; document.head.appendChild(Format);
+      Format.onerror = fmtErr; Format.onload = function(){ format.load(); if(r1.display=="none") { formatLoad = !formatLoad; rotateSC(vertical); } }; document.head.appendChild(Format);
     }
 
     //Else we just call the load operation over again.
 
-    else { try{ format.load(); loadingDone = true; if(r1.display=="none") { formatLoad = !formatLoad; rotateSC(vertical); } } catch(e) { fmtErr(); } document.head.appendChild(Format); }
+    else { try{ format.load(); if(r1.display=="none") { formatLoad = !formatLoad; rotateSC(vertical); } } catch(e) { fmtErr(); } document.head.appendChild(Format); }
   }
 
   //core loader.
@@ -232,7 +228,7 @@
 
   //Error message if there is a problem loading the format reader.
 
-  function fmtErr() { loadingDone = true; if(r1.display!="none"){ formatLoad = !formatLoad; rotateSC(vertical); } alert("Unable to load format reader for this file format!"); }
+  function fmtErr() { if(r1.display!="none"){ formatLoad = !formatLoad; rotateSC(vertical); } alert("Unable to load format reader for this file format!"); }
 
   //Error message if there is a problem loading the processor core type.
 
@@ -323,7 +319,7 @@
 
     //Update and validate all UI components
     
-    if( loadingDone ) { validate(); }
+    validate();
   }
   
   //Show hidden elements.
