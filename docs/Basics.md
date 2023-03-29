@@ -20,7 +20,7 @@ image:
     
     offset1 = new VHex("vhex1",file,false);
   
-    file.getFile("https://raw.githubusercontent.com/Recoskie/JDisassembly/master/JD-asm.jar", load);
+    file.getFile("https://raw.githubusercontent.com/Recoskie/JDasm/master/JD-asm.jar", load);
   }
   
   function load(f)
@@ -1141,4 +1141,4 @@ You know everything you need to know to design your own <strong>game system/PC/m
 
 <br />
 
-How do we select a CPU and how do we program it in machine code. In the next section on machine code I will explain how to map instruction sets by processor type and how we program them in machine code by processor type. <a href="https://recoskie.github.io/JDisassembly/docs/Machine.html">An simple introduction to processor instruction sets and coding</a>.
+How do we select a CPU and how do we program it in machine code. In the next section on machine code I will explain how to map instruction sets by processor type and how we program them in machine code by processor type. <a href="https://recoskie.github.io/JDasm/docs/Machine.html">An simple introduction to processor instruction sets and coding</a>.
