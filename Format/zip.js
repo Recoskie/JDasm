@@ -113,6 +113,7 @@ format = {
     this.endInfoData[4] = this.endInfoData[4] + this.multiPartZip;
     this.endInfoData[5] = this.endInfoData[5] + this.multiPartZip;
     this.endInfoData[6] = this.endInfoData[6] + this.multiPartZip;
+    this.zipInfoData[7] = this.crc32; this.dataInfoData[1] = this.crc32;
     
     //Setup root node.
     
@@ -498,6 +499,19 @@ format = {
   "It is recommend that we read the central directory first and locate the file signatures using the offset given to the file signature.<br /><br />" +
   "This is because if we read only the file signatures we do not know if it is a multi-part file zip, or if more than one file signature exists for the same file and only one is the latest version of the file.</html>",
 
+  //Explain how CRC32 is used.
+
+  crc32: "The CRC32 value is used to detect changes in the binary file. It extends the accuracy of a checksum check.<br /><br />\
+  A regular checksum adds the bytes together in the file. When the checksum does not match, we know a few bytes values (0 to 255) in the file have changed.<br />\
+  The checksum fails to detect errors in data in which an equal amount of change is added and subtracted to byte values across the data.<br />\
+  The probability of this happening is minimal, but there is a way we can extend this check.<br /><br />\
+  Instead, the CRC uses xor to detect changes in binary digits in the file. When we xor two binary numbers the same, we end up with zero, then any binary digits that are not the same stay.<br /><br />\
+  PK-zip uses the carefully selected binary bit pattern 1_0000_0100_1100_0001_0001_1101_1011_0111 as the CRC.<br /><br />\
+  The first binary digit that is one in the binary data is lined up with the first binary digit that is one in the CRC bit pattern. When xor, it cancels out this first binary digit. The remaining binary data is xor until we have fewer binary digits than 32 bits.<br /><br />\
+  The remaining 32 bits become the CRC32 value. When we decompress a file, we do the same thing with the decompressed data and subtract our remaining 32 bits at the end with our CRC32 value. If the result is not zero, then a change was made in the binary data.<br /><br />\
+  Unlike a checksum, the CRC can detect significant, equal changes or the tiniest change made across the file that caused the binary digits to flip and to continue a different bit pattern while performing xor across the data.<br /><br />\
+  The CRC32 can tell us if the data does not match what is expected but does not tell us where the errors in the data are or how to correct them.",
+
   //The ZIP file header.
 
   zipInfoData: [
@@ -549,9 +563,7 @@ format = {
     "<tr><td>99</td><td>AE-x encryption marker.</td></tr>" +
     "</table></html>",
     "<html>File last modification time.</html>",
-    "<html>File last modification date.</html>",
-    "<html>CRC-32 of uncompressed data. This is the number of zeros that should exist in the binary file.<br /><br />" +
-    "If the CRC does not match the count of zeros in binary in the file we know there is something wrong.</html>",
+    "<html>File last modification date.</html>",,
     "<html>Compressed size. This is the size of the data after this PK signature.<br /><br />" +
     "After the compressed data should be another PK signature.<br /><br />" +
     "If the value is FF FF FF FF hex then the value is stored using a 64 bit number under the extra data field.</html>",
@@ -571,9 +583,7 @@ format = {
   //Data descriptor.
 
   dataInfoData: [
-    "<html>This is the data descriptor signature. Marks the end of a compressed file data.</html>",
-    "<html>CRC-32 of uncompressed data. This is the number of zeros that should exist in the binary file.<br /><br />" +
-    "If the CRC does not match the count of zeros in binary in the file we know there is something wrong.</html>",
+    "<html>This is the data descriptor signature. Marks the end of a compressed file data.</html>",,
     "<html>Compressed size. This is the size of the data before this data signature.</html>",
     "<html>Uncompressed file size. This is the file size after we decompress the file.</html>"
   ],
@@ -634,7 +644,7 @@ format = {
       info.innerHTML = "<html>In the case that the data descriptor setting is set in the PK header then the size of the compressed file was not known.<br /><br />" +
       "Instead the Data descriptor signature marks the end of the files data.<br /><br />" +
       "The Data descriptor tells us how big the compressed file is which should match the number of bytes we read before encountering the data descriptor signature.<br /><br />" +
-      "The data descriptor also stores the files original size, and has an CRC count which is numbers of zero digits that should exist in the file once decompress.<br /><br />" +
+      "The data descriptor also stores the files original size, and has an CRC count.<br /><br />" +
       "The CRC is very important as it can be used to know if the decompressed file matches the original.</html>";
     }
     else
