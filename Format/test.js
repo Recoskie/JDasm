@@ -5,10 +5,6 @@ format = {
   //This will be used to hold the descriptors for the file format headers in this example.
   
   headers: [], strTest: new dataType("Adjustable String", Descriptor.String8),
-  arrayTest: new arrayType("Array Test", [
-    new dataType("Data 1", Descriptor.Int64),
-    new dataType("Data 2", Descriptor.LInt32)
-  ]),
 
   //Function load is always called first.
 
@@ -16,6 +12,11 @@ format = {
   {
     //test the data descriptor model.
 
+    this.arrayTest = new arrayType("Array Test", [
+      new dataType("Data 1", Descriptor.Int64),
+      this.strTest,
+      new dataType("Data 2", Descriptor.LInt32)
+    ]);
     this.headers[0] = new Descriptor([
       new dataType("Value 1", Descriptor.LInt64 ),
       this.strTest,
