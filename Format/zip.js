@@ -310,6 +310,10 @@ format = {
     //We no longer need the root node once set as html to the tree.
 
     this.root = this.cDir = this.cRoot = undefined; this.path = []; this.dir = 0;
+
+    //Virtual address space is unneeded.
+
+    if( virtual.visible ) { showH(true); }
       
     //basic zip info.
 
