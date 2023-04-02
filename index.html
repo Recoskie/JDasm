@@ -128,42 +128,44 @@
 
   //Drag and drop file Support.
 
-  window.addEventListener("dragover",function(e){ (e = e || event).preventDefault(); }, false );
+  var dragItem = null, setItem = null; window.addEventListener("dragover",function(e){ (e = e || event).preventDefault(); }, false );
   window.addEventListener("drop",function(e)
   {
     (e = e || event).preventDefault(); if (items = e.dataTransfer.items)
     {
       for( var i = 0; i < items.length; i++ )
       {
-        if (items[i].kind === "file") { load(items[i].getAsFile()); i = items.length; }
+        if (items[i].kind === "file") { load(items[i].getAsFile()); return; }
       }
     }
   }, false );
   
   //Transfers the loaded file to the file input.
   
-  function load( f ) { var d = new DataTransfer(); d.items.add(f); document.getElementById("file").files = d.files; Open( f ); }
-  
-  //When opening an file.
+  function load( f ) { var d = new DataTransfer(); d.items.add(f); dragItem = d.files; Open( f ); }
   
   function Open( f )
   {
-    file.setTarget( f ); offset.hide(false);
+    file.setTarget( f );
     
     //Initialize the file buffer.
     
-    file.bufRead(this, "onload"); file.seek(0); file.read( file.buf = offset.getRows() << 4 );
+    file.bufRead(this, "onload"); file.seek(0); file.read(file.buf);
   }
   
   function onload()
   {
+    //The only way onload gets called is if the file is readable.
+
+    document.getElementById("file").files = dragItem; setItem = dragItem; //Update the file that is opened.
+
     //Always reset the virtual address space when loading a new file.
 
     file.resetV();
 
     //The default controls that are enabled on loading a file.
 
-    show("c1"); show("c2"); show("c3"); show("c4");
+    offset.hide(false); show("c1"); show("c2"); show("c3"); show("c4");
     
     offset.sel = offset.sele = 0;
     
@@ -325,6 +327,19 @@
   function show( el )
   {
     document.getElementById(el).style.display = "";
+  }
+
+  //When a file fails to load.
+
+  file.onerror = function()
+  {
+    file.setTarget( setItem[0] );
+
+    //When the open file is the same as the loaded and set file, then user may have move, renamed, deleted the file on their disk drive.
+
+    if( dragItem == setItem ) { alert("The file you are reading from you disk drive may have been deleted!"); return; }
+    
+    alert("Folders can not be read as files.\r\n\r\nNote if you are on macOS applications are stored in folders.\r\nTo open the applications files right click and hit show package contents.\r\n");
   }
 
   //Add the web application service worker. Keep service worker disabled for now while doing lots of changes and updates.
