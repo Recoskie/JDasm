@@ -35,7 +35,7 @@ format = {
 
     //Set the default selected node.
 
-    tree.prototype.treeClick( Tree.getNode(0).getNode(0).parentElement ); file.seekV(0x100);
+    tree.prototype.treeClick( Tree.getNode(0).getNode(0).parentElement ); file.wait(function(){file.seekV(0x100);});
   },
 
   //Tree event handling.
