@@ -335,11 +335,11 @@
   {
     //When the open file is the same as the loaded and set file, then user may have move, renamed, deleted the file on their disk drive.
 
-    if( dragItem == setItem ) { alert("The file you are reading from you disk drive may have been deleted!"); return; }
+    if( dragItem == setItem ) { alert("The file you are reading from your disk drive may have been deleted!"); return; }
     
-    alert("Folders can not be read as files.\r\n\r\nNote if you are on macOS applications are stored in folders.\r\nTo open the applications files right click and hit show package contents.\r\n");
+    alert("Folders can not be read as files.\r\n\r\nNote if you are on macOS, applications are stored in folders.\r\nTo open the application's files right, click and hit show package contents.");
 
-    file.setTarget( setItem[0] );
+    dragItem = setItem; file.setTarget( setItem[0] );
   }
 
   //Add the web application service worker. Keep service worker disabled for now while doing lots of changes and updates.
