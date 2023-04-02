@@ -142,11 +142,11 @@
   
   //Transfers the loaded file to the file input.
   
-  function load( f ) { var d = new DataTransfer(); d.items.add(f); dragItem = d.files; Open( f ); }
+  function load( f ) { var d = new DataTransfer(); d.items.add(f); dragItem = d.files; open( f ); }
   
-  function Open( f )
+  function open( f )
   {
-    file.setTarget( f );
+    file.setTarget( f ); offset.hide(false);
     
     //Initialize the file buffer.
     
@@ -165,7 +165,7 @@
 
     //The default controls that are enabled on loading a file.
 
-    offset.hide(false); show("c1"); show("c2"); show("c3"); show("c4");
+    show("c1"); show("c2"); show("c3"); show("c4");
     
     offset.sel = offset.sele = 0;
     
@@ -333,13 +333,13 @@
 
   file.onerror = function()
   {
-    file.setTarget( setItem[0] );
-
     //When the open file is the same as the loaded and set file, then user may have move, renamed, deleted the file on their disk drive.
 
     if( dragItem == setItem ) { alert("The file you are reading from you disk drive may have been deleted!"); return; }
     
     alert("Folders can not be read as files.\r\n\r\nNote if you are on macOS applications are stored in folders.\r\nTo open the applications files right click and hit show package contents.\r\n");
+
+    file.setTarget( setItem[0] );
   }
 
   //Add the web application service worker. Keep service worker disabled for now while doing lots of changes and updates.
