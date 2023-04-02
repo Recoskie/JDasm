@@ -142,9 +142,9 @@
   
   //Transfers the loaded file to the file input.
   
-  function load( f ) { var d = new DataTransfer(); d.items.add(f); dragItem = d.files; open( f ); }
+  function load( f ) { var d = new DataTransfer(); d.items.add(f); dragItem = d.files; Open( f ); }
   
-  function open( f )
+  function Open( f )
   {
     file.setTarget( f ); offset.hide(false);
     
@@ -346,7 +346,7 @@
 
   if(navigator.serviceWorker) { navigator.serviceWorker.register('/JDasm/sw.js', {scope: '/JDasm/'} ) }
 </script>
-<input type="file" id="file" onchange="open(this.files[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};rotateSC(vertical);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
+<input type="file" id="file" onchange="Open((dragItem = this.files)[0]);" /><input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};rotateSC(vertical);" style="display:none;" /><input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" /><input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
 <input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" />
 <div id="r" style="height:100%;width:100%;">
   <div style="display:none;" id="r1"><div id="tree"></div><div id="dModel"></div><div id="info"></div></div>
