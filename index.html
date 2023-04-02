@@ -191,9 +191,7 @@
 
     for( var i = 0; i < extensions.length; i++ ) { if( ex == extensions[i] ) { loadFormat(decodeAppEX[i]); return; } }
 
-    //No matching format then load the beta testing plugin.
-
-    loadFormat("Format/test.js");
+    formatLoad = false; rotateSC(vertical);
   }
 
   //Format loader.
