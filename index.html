@@ -121,9 +121,9 @@
 
     if( vertical != h < w ) { rotateSC(h < w); }
     
-    //Update and validate all UI components
+    //Update and validate all UI components.
     
-    offset.validate(); virtual.validate(); dModel.validate();
+    resize();
   }
 
   //Drag and drop file Support.
@@ -242,7 +242,7 @@
     
     document.getElementById(v ? "c3" : "c2").value = (s ? "Show " : "Hide ") + (v ? "Virtual" : "Offset");
     
-    adjRatio();
+    resize();
   }
   
   function showD()
@@ -251,7 +251,7 @@
     
     document.getElementById("c4").value = (ds.visible ? "Hide " : "Show ") + "data types";
     
-    adjRatio();
+    resize();
   }
 
   //Experimental.
@@ -262,62 +262,114 @@
     {
       //Clear horizontal transform.
 
-      r.display = ""; ds.resetDims(); Tree.resetDims(); dModel.resetDims(); info.style.minHeight = "";
+      r.display = "";
 
       //Do vertical transform adjustments.
 
       if( formatLoad )
       {
-        r1.display = "flex"; Tree.minWidth( dModel.minWidth( offset.minWidth() ) ); info.style.minWidth = ds.minWidth();
+        r1.display = "flex";
       }
       r2.display = "flex";
-    
-      offset.minHeight(virtual.minHeight(ds.minHeight()));
     }
     else
     {
       //Clear vertical transform.
 
       if( formatLoad ) { r1.display = ""; } r2.display = "";
-      
-      offset.resetDims(); virtual.resetDims(); ds.resetDims(); Tree.resetDims(); dModel.resetDims(); info.style.minWidth = "";
 
       //Do horizontal transform adjustments.
 
       r.display = "flex";
-      
-      if( formatLoad ) { Tree.minHeight( dModel.minHeight( offset.minHeight() ) ); info.style.minHeight = ds.minHeight(); }
-      
-      ds.minWidth(offset.minWidth());
     }
-    
-    adjRatio();
+
+    resize();
   }
-  
-  //Adjust screen percentage ratio.
-  
-  function adjRatio()
+
+  //Redesign the layout. Work in progress.
+
+  function resize()
   {
-    var r = 100 / (offset.visible + virtual.visible + ds.visible);
+    //Reset everything. Note it is best to not simplify or refactor this function until a final layout is decided.
+
+    offset.resetDims(); virtual.resetDims(); ds.resetDims(); Tree.resetDims(); dModel.resetDims();
+    info.style.minWidth = info.style.minHeight = r1.minWidth = r1.maxWidth = r2.minWidth = r2.maxWidth = "";
+    
+    var re = (window.innerHeight - parseInt(document.getElementById("r").offsetTop))-16;
+    
+    document.getElementById("r").style.height = re + "px";
     
     if( vertical )
     {
-      offset.height(virtual.height(Tree.height(dModel.height(info.style.height = r1.width = r2.width = "100%")))); ds.height("0%");
+      Tree.height(dModel.height(info.style.height = r1.width = r2.width = "100%"));
+
+      //Number of visible hex editors.
       
-      ds.width(Tree.width(dModel.width(info.style.width = "33.333333336%")));
+      var h = (offset.visible + virtual.visible) & -1;
       
-      if( isFinite(r) ) { r1.height = r2.height = formatLoad ? "50%" : "100%"; offset.width( virtual.width(r+"%")); } else { r1.height = "100%"; r2.height = "0%"; }
-    }
-    else
-    {
-      offset.width(virtual.width(ds.width(Tree.width(dModel.width(info.style.width = r1.height = r2.height = "100%")))));
+      //The components in r2 have minium fixed width sizes that should match in r1.
       
-      Tree.height(dModel.height(info.style.height = "33.333333336%"));
+      Tree.minWidth(offset.minWidth()); dModel.minWidth(virtual.minWidth()); info.style.minWidth=ds.minWidth();
       
-      if( isFinite(r) ) { r1.width = r2.width = formatLoad ? "50%" : "100%"; offset.height(virtual.height(ds.height(r+"%"))); } else { r1.width = "100%"; r2.width = "0%"; }
+      //When viewing everything sideways r2 is min size for data components.
+      //The row r1 is the remaining height available.
+    
+      var minHeight = Math.max(ds.visible ? ds.minHeight().pxValue() : 0,h != 0 ? offset.minHeight().pxValue() : 0);
+      
+      offset.height(virtual.height(r2.height = r2.minHeight = minHeight));
+      
+      r1.height = (re - minHeight) + "px";
+
+      //The last component is 100% width in both rows.
+
+      ds.width(info.style.width = "100%");
     }
 
-    //Update and validate all UI components
+    //Straight up and down three components to the left in r1 (Tree view, data model, information panel) to the right r2 (offset, virtual, data type inspector).
+
+    else
+    {
+      //When viewing up and down both rows are 100% height.
+
+      r1.height = r2.height = "100%";
+
+      //The components in r1 can take any min height, but the components in r2 have minium fixed height sizes.
+      
+      Tree.minHeight(offset.minHeight()); dModel.minHeight(virtual.minHeight()); info.style.height=ds.height(ds.minHeight());
+
+      //The min/max width of the last row should be the min width of the hex editors.
+      //The first row can not be smaller than the data model min width.
+      
+      r1.minWidth = dModel.minWidth(); r1.width = "100%"; r2.width = r2.minWidth = ds.minWidth(offset.minWidth());
+
+      //Number of visible hex editors.
+      
+      var h = (offset.visible + virtual.visible) & -1;
+
+      //divide area up regularly for r1.
+      
+      var heightEnd = ds.minHeight().pxValue(), share = (re - heightEnd) / 2;
+      
+      //If there is no loaded format than rwo one does not exist.
+      
+      if( !formatLoad ) { r1.minWidth = r1.width = "0px"; r2.width = "100%"; }
+      else
+      {
+        Tree.height(dModel.height(share+"px"));
+      }
+      
+      //Add +4 pixels for each invisible component because of 2px border.
+      
+      if( h == 2 ) { h = 1; } else if( h == 1 ) { re += 4; h = 2; }
+      
+      //If there is no visible hex editors then the data inspector can be set full height
+    
+      else { re += 8; if( ds.visible ) { ds.height(re +"px"); } else { r2.minWidth = r2.width = "0px"; } }
+      
+      if( !ds.visible ) { share = re / 2; } else { share = (re - heightEnd) / 2; }
+      
+      offset.height(virtual.height((share*h)+"px"));
+    }
     
     offset.validate(); virtual.validate(); dModel.validate();
   }
@@ -341,6 +393,8 @@
 
     dragItem = setItem; file.setTarget( setItem[0] );
   }
+  
+  String.prototype.pxValue = function() { return(parseInt(this.replace("px",""))); }
 
   //Add the web application service worker. Keep service worker disabled for now while doing lots of changes and updates.
 
