@@ -5,7 +5,7 @@
   "display": "fullscreen",
   "name": "JD-asm",
   "orientation": "any",
-  "scope": "/",
+  "scope": "/JDasm/",
   "short_name": "JDasm",
   "start_url": "https://recoskie.github.io/JDasm/index.html",
   "theme_color": "#ffffff",
