@@ -416,24 +416,26 @@
     </script>
   </head>
   <body onload="init();">
-    <input type="file" id="file" onchange="Open((dragItem = this.files)[0]);" hidden>
-    <div class="toolBar">
-      <button id="toolBar" class="toolBtn">File</button>
-      <div class="toolBarI">
-        <a onclick="document.getElementById('file').click();">Open file on device.</a>
-        <a onclick="webFile();">Open file from web address.</a>
+    <div style="width:100%;background-color:#E0E0E0;">
+      <input type="file" id="file" onchange="Open((dragItem = this.files)[0]);" hidden>
+      <div class="toolBar">
+        <button id="toolBar" class="toolBtn">File</button>
+        <div class="toolBarI">
+          <a onclick="document.getElementById('file').click();">Open file on device.</a>
+          <a onclick="webFile();">Open file from web address.</a>
+        </div>
       </div>
-    </div>
-    <div style="display: inline-block;" class="toolBar">
-      <button id="toolBar" class="toolBtn">View</button>
-      <div class="toolBarI">
-        <a onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.innerHTML='Show text';}else{offset.setText(true);virtual.setText(true);this.innerHTML='Hide text';};rotateSC(vertical);">Hide text</a>
-        <a onclick="showH(false);" id="i1">Hide Offset</a>
-        <a onclick="showH(true);" id="i2">Show Virtual</a>
-        <a onclick="showD();" id="i3">Hide Data Types</a>
+      <div style="display: inline-block;" class="toolBar">
+        <button id="toolBar" class="toolBtn">View</button>
+        <div class="toolBarI">
+          <a onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.innerHTML='Show text';}else{offset.setText(true);virtual.setText(true);this.innerHTML='Hide text';};rotateSC(vertical);">Hide text</a>
+          <a onclick="showH(false);" id="i1">Hide Offset</a>
+          <a onclick="showH(true);" id="i2">Show Virtual</a>
+          <a onclick="showD();" id="i3">Hide Data Types</a>
+        </div>
       </div>
+      <div style="display: inline-block;" id="setFile"></div>
     </div>
-    <div style="display: inline-block;" id="setFile"></div>
     <div id="r" style="height:100%;width:100%;">
       <div style="display:none;" id="r1">
         <div id="tree"></div>
