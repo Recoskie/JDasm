@@ -102,7 +102,7 @@
         
         //Open an example file.
         
-        file.getFile("https://raw.githubusercontent.com/Recoskie/JDasm/master/JD-asm.jar", load);
+        file.getFile("https://raw.githubusercontent.com/Recoskie/JDasm/master/JD-asm.jar", Open);
       }
       
       //Layout change based on window dimensions, or orientation.
@@ -145,18 +145,26 @@
         {
           for( var i = 0; i < items.length; i++ )
           {
-            if (items[i].kind === "file") { load(items[i].getAsFile()); return; }
+            if (items[i].kind === "file") { Open(items[i].getAsFile()); return; }
           }
         }
       }, false );
-      
+
+      //Open a file from a web address.
+
+      function webFile()
+      {
+        var url = prompt("Enter the address to the web page or file.", "https://");
+
+        if (url != null || url != "") { file.getFile(url, Open); }
+      }
+      file.getError = function() { alert("Unable to get file from URL"); }
+
       //Transfers the loaded file to the file input.
-      
-      function load( f ) { var d = new DataTransfer(); d.items.add(f); dragItem = d.files; Open( f ); }
       
       function Open( f )
       {
-        file.setTarget( f ); offset.hide(false);
+        dragItem = f; file.setTarget( f ); offset.hide(false);
         
         //Initialize the file buffer.
         
@@ -167,15 +175,11 @@
       {
         //The only way onload gets called is if the file is readable.
       
-        document.getElementById("file").files = dragItem; setItem = dragItem; //Update the file that is opened.
+        document.getElementById("setFile").innerHTML = "Current file: " + dragItem.name; setItem = dragItem; //Update the file that is opened.
       
         //Always reset the virtual address space when loading a new file.
       
         file.resetV();
-      
-        //The default controls that are enabled on loading a file.
-      
-        show("c1"); show("c2"); show("c3"); show("c4");
         
         offset.sel = offset.sele = 0;
         
@@ -250,7 +254,7 @@
       {
         var s = 0; if( v ) { virtual.hide(s=virtual.visible); } else { offset.hide(s=offset.visible); }
         
-        document.getElementById(v ? "c3" : "c2").value = (s ? "Show " : "Hide ") + (v ? "Virtual" : "Offset");
+        document.getElementById(v ? "i2" : "i1").innerHTML = (s ? "Show " : "Hide ") + (v ? "Virtual" : "Offset");
         
         resize();
       }
@@ -259,7 +263,7 @@
       {
         ds.hide(ds.visible);
         
-        document.getElementById("c4").value = (ds.visible ? "Hide " : "Show ") + "data types";
+        document.getElementById("i3").innerHTML = (ds.visible ? "Hide " : "Show ") + "data types";
         
         resize();
       }
@@ -400,8 +404,8 @@
         if( dragItem == setItem ) { alert("The file you are reading from your disk drive may have been deleted!"); return; }
         
         alert("Folders can not be read as files.\r\n\r\nNote if you are on macOS, applications are stored in folders.\r\nTo open the application's files right click, then hit show package contents.");
-      
-        dragItem = setItem; file.setTarget( setItem[0] );
+
+        dragItem = setItem; file.setTarget( setItem );
       }
       
       String.prototype.pxValue = function() { return(parseInt(this.replace("px",""))); }
@@ -412,11 +416,24 @@
     </script>
   </head>
   <body onload="init();">
-    <input type="file" id="file" onchange="Open((dragItem = this.files)[0]);" />
-    <input type="button" id="c1" value="Hide text" onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.value='Show text';}else{offset.setText(true);virtual.setText(true);this.value='Hide text';};rotateSC(vertical);" style="display:none;" />
-    <input type="button" id="c2" value="Hide Offset" onclick="showH(false);" style="display:none;" />
-    <input type="button" id="c3" value="Show Virtual" onclick="showH(true);" style="display:none;" />
-    <input type="button" id="c4" value="Hide Data Types" onclick="showD();" style="display:none;" />
+    <input type="file" id="file" onchange="Open((dragItem = this.files)[0]);" hidden>
+    <div class="toolBar">
+      <button id="toolBar" class="toolBtn">File</button>
+      <div class="toolBarI">
+        <a onclick="document.getElementById('file').click();">Open file on device.</a>
+        <a onclick="webFile();">Open file from web address.</a>
+      </div>
+    </div>
+    <div style="display: inline-block;" class="toolBar">
+      <button id="toolBar" class="toolBtn">View</button>
+      <div class="toolBarI">
+        <a onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.innerHTML='Show text';}else{offset.setText(true);virtual.setText(true);this.innerHTML='Hide text';};rotateSC(vertical);">Hide text</a>
+        <a onclick="showH(false);" id="i1">Hide Offset</a>
+        <a onclick="showH(true);" id="i2">Show Virtual</a>
+        <a onclick="showD();" id="i3">Hide Data Types</a>
+      </div>
+    </div>
+    <div style="display: inline-block;" id="setFile"></div>
     <div id="r" style="height:100%;width:100%;">
       <div style="display:none;" id="r1">
         <div id="tree"></div>
