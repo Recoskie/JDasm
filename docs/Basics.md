@@ -614,22 +614,15 @@ Also, UTF8 is sometimes called ASCII text, and it is important to remember that 
 
 <h1 style="clear:left;">Fast binary conversion.</h1>
 
-Any number base that is a multiple of 2, such as base 4, base 8 (Octal), base 16 (hexadecimal), base 32, can be directly translated to and from binary.
+At the start I showed how hex is used to shorten a binary number and can quickly be changed between binary and hex.
 
 <br />
 
-<table border="1px">
-  <tr>
-    <td>Hex</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td>
-  </tr>
-  <tr>
-    <td>Binary</td><td>0000</td><td>0001</td><td>0010</td><td>0011</td><td>0100</td><td>0101</td><td>0110</td><td>0111</td><td>1000</td><td>1001</td><td>1010</td><td>1011</td><td>1100</td><td>1101</td><td>1110</td><td>1111</td>
-  </tr>
-</table>
+The same thing can be done with any number base that is a multiple of 2, such as base 4, base 8 (Octal), base 16 (hexadecimal), base 32, can be directly translated to and from binary.
 
 <br />
 
-A hexadecimal number uses 16 symbols. The last value, F = 15 is exactly equal to the last value of a 4-bit binary number 1111=15.
+The reason it works is that the last value, F = 15 is exactly equal to the last value of a 4-bit binary number 1111=15.
 
 <br />
 
@@ -649,11 +642,23 @@ So 9E hex is.
 
 <br />
 
-To change a really long binary number to hex-like.
+Dividing a binary number in sections of 16 per place value actually causes us to move in sections of 4 binary digits.
 
 <br />
 
-101000101010100101010100101001010
+101000101010100101010100101001010 divide by 16
+10100010101010010101010010100 divide by 16
+1010001010101001010101001 divide by 16
+101000101010100101010 divide by 16
+10100010101010010 divide by 16
+1010001010101 divide by 16
+101000101 divide by 16
+10100 divide by 16
+1 last place value in 0 to 15 digit.
+
+<br />
+
+Dividing the number by base 16 is not necessary since we can just read the number in sections of 4 bits.
 
 <br />
 
@@ -669,19 +674,11 @@ Hex=(1),(4),(5),(5),(2),(A),(9),(4),(A)
 
 <br />
 
-By matching each 4 binary digit combination in place value to each hex digit in 0 to 15, allows us to quickly change back and forth between binary or hex in one's head.
-
-<br />
-
 Thus hex characters can easily be translated from two-byte characters to a single byte. Writing the real byte value to memory.
 
 <br />
 
 Modern x86 cores have this operation built-in.
-
-<br />
-
-Thus changing back, and forth between binary and hex byte character codes instantly is universal.
 
 <br />
 
@@ -716,10 +713,6 @@ So 53 Octal is.
 
 <br />
 
-To change a really long binary number to hex-like.
-
-<br />
-
 101000101010100101010100101001010
 
 <br />
@@ -740,10 +733,6 @@ Octal = (5), (0), (5), (2), (4), (5), (2), (4), (5), (1), (2)
 
 <br />
 
-You can use division by 16 for each hex digit. Because you then are using division to divide the number up in place value in sections just as we are doing above.
-
-<br />
-
 Number bases that are not a multiple of 2 must be divided by number base, and the remainders are each place value.
 
 <br />
@@ -753,10 +742,6 @@ In our case, we divide by 10 and add the remainders to character byte codes to f
 <br />
 
 Changing a number back into an integer is just a matter of multiplying the digits by the multiple of the number base.
-
-<br />
-
-So it does not matter the number of digits you are using to display a number. You can translate a number to any groping of digits you like using division and remainder.
 
 <h1>Array.</h1>
 
