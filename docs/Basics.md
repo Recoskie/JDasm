@@ -45,7 +45,7 @@ image:
   <tr><td>System Memory: <a href="#SysMem">Link</a></td></tr>
   <tr><td>Processor data types: <a href="#dTypes">Link</a></td></tr>
   <tr><td>Overview of data types: <a href="#Overview">Link</a></td></tr>
-  <tr><td>Basic binary files, and headers: <a href="#Hfiles">Link</a></td></tr>
+  <tr><td>Binary hardware formats, and files: <a href="#Hfiles">Link</a></td></tr>
 </table>
 
 <h1 id="SysMem">Reading, and editing binary data.</h1>
@@ -851,7 +851,7 @@ Processors today even have built-in number base conversion to characters and bac
 
 Even Arrays are read the same across systems. However, x86 cores are excellent with reading matrices, and arrays, because of the address system.
 
-<h2>Video memory.</h2>
+<h1 id="Hfiles">Video memory.</h1>
 
 Displays are made of little squares that we can individually change the color of called pixels. Each pixel has a red, green, and blue value that lets us set the color of a pixel.
 
@@ -893,7 +893,7 @@ The first three bytes are the top left corner and continues across the screen pe
 
 <br />
 
-The distance across is a multiple of three. Up and down is the number of pixels each line is. The rest is your graphics function and the pair of three bytes you wish to write for color.
+The distance across is a multiple of three labeled as X. Up and down is the number of pixels each line is labelled as Y. The rest is your graphics function and the pair of three bytes you wish to write for color.
 
 <br />
 
@@ -983,7 +983,7 @@ When you click save and see your picture load in a picture program. That is the 
 
 Lastly you can get very creative in software with raw graphics format. You can compare the difference in colors and define edges and shapes and create an artificial intelligence that learns and understands its surroundings, or create video/picture enhancers, and filters. The possibilities are limitless.
 
-<h2>Audio format.</h2>
+<h1>Audio format.</h1>
 
 Audio is also another standard format. It can be a bit confusing at first. It also does not change between systems, just like video memory.
 
@@ -1051,7 +1051,7 @@ You can learn more about digital audio and the wave audio format viable <a href=
 
 Lastly you can get very creative in software with raw audio stream format. You can compare the difference in vibration and define sounds and create an artificial intelligence that learns and understands, or you can create sound enhancers, and filters. The possibilities are limitless.
 
-<h2>Closing.</h2>
+<h1>Closing.</h1>
 
 Both wave audio files, and bitmaps require very little effort to play/display, or to create/modify. As they are stored in standard hardware format for both audio, or graphics.
 
@@ -1117,7 +1117,7 @@ You know how to design audio functions, or graphics function that work on any pl
 
 <br />
 
-You understand that you can offload a lot of the work using separate processing units such as a GPU, but you need to design drivers that know how to instruct it to do things.
+You understand that you can offload a lot of the work using separate processing units such as a GPU, but you need to design drivers that know how to interact with the GPU.
 
 <br />
 
