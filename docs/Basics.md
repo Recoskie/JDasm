@@ -792,7 +792,20 @@ Programming languages all use the same primitive data types.
 <br />
 
 <table border="1px">
-  <tr><td>JavaScript</td><td>JavaScript Assumes all numbers are float64 (double). During any bitwise operation changes to int 32, and back to float64.</td></tr>
+  <tr>
+    <td>JavaScript</td>
+    <td>
+      JavaScript Assumes all numbers are float64 (double). During any bitwise operation changes to int 32, and back to float64.
+
+      <br />
+
+      Javascript is unique as we can do every number type using bitwise when we need a 32 bit int or smaller.
+
+      <br />
+
+      We can extend 32 bit int to 64 with a little bit of additional code as needed. A tool called type script changes defined number types into javascript code.
+    </td>
+  </tr>
   <tr>
     <td>Java</td>
     <td>
@@ -812,7 +825,7 @@ Programming languages all use the same primitive data types.
 
 <br />
 
-The primitive data types are the same as the CPU/ALU is what processes them, not the programming language. The binary arithmetic units in CPU processors are the same. As positional arithmetic never changes format. Even if you switch processor types, also, text data is standardized.
+The primitive data types are the same as the CPU/ALU (Arithmetic logic unit) is what processes them, not the programming language. The binary arithmetic units in CPU processors are the same. As positional arithmetic never changes format. Even if you switch processor types, also, text data is standardized.
 
 <br />
 
