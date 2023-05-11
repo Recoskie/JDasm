@@ -795,15 +795,15 @@ Programming languages all use the same primitive data types.
   <tr>
     <td>JavaScript</td>
     <td>
-      JavaScript Assumes all numbers are float64 (double). During any bitwise operation changes to int 32, and back to float64.
+      JavaScript Assumes all numbers are float64 (double). During any bitwise operation changes to int32, and back to float64.
 
       <br />
 
-      Javascript is unique as we can do every number type using bitwise when we need a 32 bit int or smaller.
+      Javascript is unique as we can do every number type using bitwise when we need a 32-bit integer or smaller.
 
       <br />
 
-      We can extend 32 bit int to 64 with a little bit of additional code as needed. A tool called type script changes defined number types into javascript code.
+      We can extend 32-bit int to 64 with a little bit of additional code as needed. A tool called type script changes defined number types into javascript code.
     </td>
   </tr>
   <tr>
@@ -851,87 +851,41 @@ Processors today even have built-in number base conversion to characters and bac
 
 Even Arrays are read the same across systems. However, x86 cores are excellent with reading matrices, and arrays, because of the address system.
 
-<br />
-
-<strong>The most we can do is encrypt an entire file. Then decrypt the file to bring it back to the raw standard formats, to have some level of security.</strong>
-
-<br />
-
-Binary files are basic structures built on primitive data types. The only thing you need to know is what each primitive is used for as it is read in the file.
-
-<br />
-
-Some old video games on PlayStation 1 will read a single byte. Then divide it into parts using CPU arithmetic. This allows the read byte to be used in sections as separate values. Such byte values are called packed bytes in binary file documentation.
-
-<br />
-
-It is rare for files to use this unless it is an old file format where memory was a scares thing. Every developer did their best to get a single byte to represent as much as they could.
-
-<br />
-
-Today such things do not matter anymore. Plus, it takes more CPU power to read such bytes and divided them up in sections. Everything in today's binary formats is in bytes, words, dwords, and qwords.
-
-<br />
-
-<h1 id="Hfiles">Binary files, and default hardware data types.</h1>
-
-All file formats have what you call headers, which are bytes that are read in series at the start of the file. They can be lengths byte 1, word 2, dword 4, or qword 8.
-
-<br />
-
-A header usually has a signature which should always be the same byte values. If the bytes do not match, then the file type we are reading is most likely corrupted.
-
-<br />
-
-A header can specify the width, and height if it is a picture and various things after the file signature.
-
-<br />
-
-Also, there are still a few different types of data stored in binary files given to external hardware devices that are also standardized.
-
-<br />
-
-Pictures can store pairs of three bytes in Red, Green, Blue per pixel in an array. After index exceeds the width, it moves to the next line of the picture, till picture height.
-
-<br />
-
-As such is how a bit map pictures work and are read <a href="https://en.wikipedia.org/wiki/BMP_file_format#:~:text=The%20BMP%20file%20format%2C%20also,and%20OS%2F2%20operating%20systems" target="_blank">Bit Map picture format</a>.
-
-<br />
-
-I use to actually write bit map pictures one byte at a time in a hex editor. It is the equivalent of doing pixel art. Also is good practice.
-
-<br />
-
-When you click save and see your picture load in a picture program. That is the moment it is magical. Considering you just wrote the picture in 1's, and 0's.
-
-<br />
-
-Also, colors of light add together, so it is not hard to visualize the added color in your head. You may want to learn what <a href="https://en.wikipedia.org/wiki/Additive_color" target="_blank">additive colors</a> of light are, and practice making red, green, blue values a little.
-
-<br />
-
-Font files generally are an array of bit map pictures that are used for which picture to draw per key on the keyboard in UTF8, and are hardware independent.
-
-<br />
-
-The bit map picture format was added onto and eventually supported defining which colors are used in the picture to number values and using less digits per color to save space.
-
 <h2>Video memory.</h2>
 
-A bitmap closely resembles video memory, which video memory is how graphics is done without a graphics card.
+Displays are made of little squares that we can individually change the color of called pixels. Each pixel has a red, green, and blue value that lets us set the color of a pixel.
 
 <br />
 
-The operating system does not set up video memory. It is the job of the converters you solder onto a system that go to a display output such as HDMI, VGA, or display port.
+Red, green, and blue colors of light add together, so it is not hard to visualize the added color in your head. You may want to learn what <a href="https://en.wikipedia.org/wiki/Additive_color" target="_blank">additive colors</a> of light are, and practice making red, green, blue values a little.
 
 <br />
 
-The video out components you put onto a modern motherboard or game console are standardized and connect to a HDMI, VGA, or display port display.
+The color of each pixel is stored in video memory, some people like to call it graphics memory.
 
 <br />
 
-The format you write to video memory is standardized, and is generally pairs of three bytes for each RGB color per pixel.
+The operating system does not set up video memory. It is the job of the converters you solder onto a system that go to a display output such as HDMI, VGA, display port, or internal display.
+
+<br />
+
+The video out components you put onto a modern motherboard or game console are standardized and connect to a HDMI, VGA, display port, or internal display.
+
+<br />
+
+You can set the number of bits that is used to define one red, green, blue color.
+
+<br />
+
+The higher the number of bits you use the more colors you can make. Typically 8 bits is used for each red, green, and blue color.
+
+<br />
+
+You can change the RAM address location you wish to use for video memory.
+
+<br />
+
+The format you write to video memory is generally pairs of three bytes for each RGB color per pixel.
 
 <br />
 
@@ -955,7 +909,7 @@ When creating an operating system we call this area of memory in address space t
 
 <br />
 
-Even handheld game consoles like the Nintendo DS has a video memory location that you can write to for setting each individual pixel color on the screens. When you reached the end of the first display in memory and go to set the next three bytes you then start at the top left corner of the touch screen. This is also how multi-screen graphics is done with one video memory.
+Even handheld game consoles like the Nintendo DS has a video memory location that you can write to for setting each individual pixel color on the screens. When you reached the end of the first display in memory and go to set the next three bytes you then start at the top left corner of the touch screen. This is also how multi-screen graphics is done with one video memory location.
 
 <br />
 
@@ -971,7 +925,15 @@ The Nintendo DS was amazing and fun to build games on if you understood the basi
 
 <br />
 
-Graphics cards have methods that can be called that run graphics methods that we would normally had put together on the CPU. Such as filling in a rectangle of pixels or calculating 3D angels. This frees up the CPU because the graphics card then does the graphics drawing functions to video memory.
+When we insert a graphics card we can disable the on board video memory location and issue commands to set a pixels color in x and y in the graphics card video memory.
+
+<br />
+
+The graphics card acts as a separate computer with it's own video memory and display output converter. A graphics card can also run our graphics function or code so the CPU does not have too.
+
+<br />
+
+Such as filling in a rectangle of pixels or calculating 3D angels. This frees up the CPU because the graphics card then does the graphics drawing functions in it's video memory, and frees up RAM memory.
 
 <br />
 
@@ -983,19 +945,43 @@ However, it is recommended to add Hardware accelerated graphics through an GPU b
 
 <br />
 
-Lastly you can get very creative in software with raw graphics format. You can compare the difference in colors and define edges and shapes and create an artificial intelligence that learns and understands its surroundings, or create video/picture enhancers, and filters. The possibilities are limitless.
-
-<br />
-
-Video memory is very standard across all consoles and mobile/PC systems, and the bitmap format is hardware independent because it is a hardware design standard.
-
-<br />
-
-You may also enjoy the following on graphics cards and video memory. <a href="https://www.techtarget.com/searchstorage/definition/video-RAM" target="_blank">techtarget.com storage Video memory.</a>
+Video memory is very standard across all consoles and mobile/PC systems. You may also enjoy the following on graphics cards and video memory. <a href="https://www.techtarget.com/searchstorage/definition/video-RAM" target="_blank">techtarget.com storage Video memory.</a>
 
 <br />
 
 Also, the Nintendo 3DS had three screens one after another in video memory. One for left eye, and one for right eye, and the touch screen.
+
+<br />
+
+The <a href="https://en.wikipedia.org/wiki/BMP_file_format#:~:text=The%20BMP%20file%20format%2C%20also,and%20OS%2F2%20operating%20systems" target="_blank">Bit Map picture format</a> is based on the raw binary forum of graphics memory and is a hardware independent picture format.
+
+<br />
+
+File formats start with what we usually call a file header. A header usually has a signature which should always be the same byte values. If the bytes do not match, then the file type we are reading is most likely corrupted.
+
+<br />
+
+A header can specify the width, and height if it is a picture and various things after the file signature.
+
+<br />
+
+Pictures generally store pairs of three bytes in Red, Green, Blue per pixel in an array. After index exceeds the width, it moves to the next line of the picture, till picture height.
+
+<br />
+
+If the picture format is stored in any other way than red, green, and blue then we would have to change it back into red, green, blue before writing it to video memory to display the picture.
+
+<br />
+
+I use to actually write bit map pictures one byte at a time in a hex editor. It is the equivalent of doing pixel art. Also is good practice.
+
+<br />
+
+When you click save and see your picture load in a picture program. That is the moment it is magical. Considering you just wrote the picture in 1's, and 0's.
+
+<br />
+
+Lastly you can get very creative in software with raw graphics format. You can compare the difference in colors and define edges and shapes and create an artificial intelligence that learns and understands its surroundings, or create video/picture enhancers, and filters. The possibilities are limitless.
 
 <h2>Audio format.</h2>
 
@@ -1011,7 +997,7 @@ An integer that is a dword (32 binary digits) gives a range of control 2^32-1. T
 
 <br />
 
-The header defines the speed at each integer is given to the PCM (Pulse-code modulation) device per second. A sample rate of 10 means 10 points per second.
+The speed at each integer (sample point) is given to the PCM (Pulse-code modulation) device per second is called the sample rate. A sample rate of 10 means 10 points per second.
 
 <br />
 
