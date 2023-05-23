@@ -647,7 +647,7 @@ In a way, ARM has a much more flexible instruction set. Thus instructions can be
 
 <br />
 
-The following <a href="https://developer.arm.com/architectures/cpu-architecture/a-profile/docs" target="_blank">link</a> is from ARM.
+The following <a href="https://developer.arm.com/documentation/ddi0487/latest" target="_blank">link</a> is from ARM.
 
 <br />
 
