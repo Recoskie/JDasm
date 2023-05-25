@@ -1,6 +1,6 @@
 var GHPATH = '/JDasm';
 var APP_PREFIX = 'jd_';
-var VERSION = 'version_beta17';
+var VERSION = 'version_beta18';
 var URLS = [    
   `${GHPATH}/`,
   `${GHPATH}/icon.png`,
