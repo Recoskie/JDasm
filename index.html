@@ -158,7 +158,17 @@
 
         if (url != null || url != "") { file.getFile(url, Open); }
       }
-      file.getError = function() { alert("Unable to get file from URL"); }
+      file.getError = function(e)
+      {
+        if( e >= 0 ) { info.innerHTML = "<h1>Sever error!</h1>Sever returned error code: " + e + ""; }
+        else
+        {
+          info.innerHTML = "<h1>CORS Error</h1>The CORS policy limits what can be read on the internet from web addresses.<br /><br />\
+The following <a href='https://simplelocalize.io/blog/posts/what-is-cors/#3-disable-browser-cors-checks' target='_blank'>link</a> explains what the CORS policy is.<br /><br />\
+JDasm can read and analyze files from other web addresses if the server is configured to allow it.<br /><br />\
+You can also disable the CORS check, but I do not recommend you to do this unless you can set it for septic apps or websites.";
+        }
+      }
 
       //Transfers the loaded file to the file input.
       
