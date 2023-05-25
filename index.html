@@ -200,12 +200,17 @@
             loadFormat( decodeAPP[i] ); return;
           }
         }
+
+        //We can not properly identify the file extension if it is a domain name with no file path separators.
+
+        var ex = file.name.indexOf("//",0)+2; if( ex == 1 || (ex > 1 && file.name.indexOf("/",ex) > 0) )
+        {
+          //Some file formats can only be identified by file extension as there is no unique signature at the start of the files data.
       
-        //For now it is easy to test the x86 disassembler with a MS-DOS com file.
+          ex = file.name.substring(file.name.lastIndexOf("."), file.name.length).toLowerCase();
       
-        var ex = file.name.substring(file.name.lastIndexOf("."), file.name.length).toLowerCase();
-      
-        for( var i = 0; i < extensions.length; i++ ) { if( ex == extensions[i] ) { loadFormat(decodeAppEX[i]); return; } }
+          for( var i = 0; i < extensions.length; i++ ) { if( ex == extensions[i] ) { loadFormat(decodeAppEX[i]); return; } }
+        }
       
         formatLoad = false; rotateSC(vertical);
       }
