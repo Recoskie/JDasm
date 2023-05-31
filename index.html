@@ -202,11 +202,11 @@
       { 
         if( formatLoad == v ) { return; } formatLoad = v; if( !vertical )
         {
-          //Everything can be made 100% width as it does not need to share space with r1.
+          //When loaded we need to use min content space.
 
           if( formatLoad ) { virtual.width(offset.width("0px")); r2.style.width = "min-content"; r1.style.display="flex"; visibilityChange(); }
 
-          //When loaded we need to use min content space.
+          //Everything can be made 100% width as it does not need to share space with r1.
 
           else { virtual.width(offset.width(r2.style.width = "100%")); r1.style.display="none"; }
         }
