@@ -9,6 +9,7 @@
     <link rel="canonical" href="https://recoskie.github.io/JDasm/" />
     <link rel="manifest" href="manifest.json">
     <style>
+      html, body { height: 100%; width:100%; }
       #r1 div, #r2 div { border-style:solid; border-color:black; border-width:2px; }
       /***********************************************************************************
       Create a menubar for application.
@@ -154,7 +155,7 @@
           r1.style="min-width:" + dModel.minWidth() + ";display:none;flex-direction:column;";
           r2.style="width:100%;display:flex;flex-direction:column;";
         
-          info.style.minHeight = ds.minHeight();
+          info.style.minHeight = ds.height(ds.minHeight());
 
           Tree.height(dModel.height(virtual.width(offset.width(offset.height(virtual.height("100%"))))));
         }
