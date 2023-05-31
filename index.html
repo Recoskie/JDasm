@@ -87,7 +87,7 @@
       
       function init()
       {
-        r = document.getElementById("r").style; r1 = document.getElementById("r1").style; r2 = document.getElementById("r2").style;
+        r = document.getElementById("r"); r1 = document.getElementById("r1"); r2 = document.getElementById("r2");
       
         offset = new VHex("vhex1", file, false); virtual = new VHex("vhex2", file, true);
         ds = new dataInspector("data", file); ds.addEditor(offset); ds.addEditor(virtual);
@@ -128,12 +128,107 @@
           if(window.matchMedia("(orientation: landscape)").matches && h > w )
           { var t = w; w = h; h = t; }
         }
+
+        //Layout needs to be reinitialized when orientation changes.
       
-        if( vertical != h < w ) { rotateSC(h < w); }
+        vertical = false; //if( vertical != h < w ) { vertical = h < w; layoutInit = false; }
         
-        //Update and validate all UI components.
+        //Update and validate UI.
         
-        resize();
+        if(layoutInit) { resize(); } else { initLayout(); }
+      }
+
+      //Layout checks.
+
+      var layoutInit = false, reCheck = 0, hCheck = 0;
+
+      //Initialize the layout. Values set here do not change until window orientation changes.
+
+      function initLayout()
+      {
+        //Initialize the layout for horizontal view.
+
+        if( !vertical )
+        {
+          r.style="width:100%;display:flex;";
+          r1.style="min-width:" + dModel.minWidth() + ";display:none;flex-direction:column;";
+          r2.style="width:100%;display:flex;flex-direction:column;";
+        
+          info.style.minHeight = ds.minHeight();
+
+          Tree.height(dModel.height(virtual.width(offset.width(offset.height(virtual.height("100%"))))));
+        }
+
+        //Initialize the layout for vertical view.
+
+        else {} //Needs to be completed.
+
+        resize(); layoutInit = true;
+      }
+
+      //Layout changes that only need occur when visibility of components change.
+      //We always try to shrink the data tools row as small as possible.
+
+      function visibilityChange()
+      {
+        //If there is no loaded format then r1 does not exist and this function can terminate.
+
+        if( !formatLoad ) { return; }
+
+        //Initialize the layout for horizontal view. We want the remaining space used for column r1 in width.
+        
+        if( !vertical )
+        {
+          //Check if change occurred.
+
+          if( (t = (offset.visible || virtual.visible) ? offset.minWidth() : (ds.visible ? ds.minWidth() : "0px")) != reCheck )
+          {
+            r1.style.width = 'calc(100% - ' + t + ')';
+        
+            //Only update components if the layout has already been initialized.
+
+            if( layoutInit ){ offset.validate(); virtual.validate(); dModel.validate(); } reCheck = t;
+          }
+        }
+
+        //Initialize the layout for vertical view. We want the remaining space used for row r1 in height.
+
+        else {} //Needs to be completed.
+      }
+
+      //Enabling or disabling format reader data model, and information output/disassembly.
+
+      function formatLoaded(v)
+      { 
+        if( formatLoad == v ) { return; } formatLoad = v; if( !vertical )
+        {
+          //Everything can be made 100% width as it does not need to share space with r1.
+
+          if( formatLoad ) { virtual.width(offset.width("0px")); r2.style.width = "min-content"; r1.style.display="flex"; visibilityChange(); }
+
+          //When loaded we need to use min content space.
+
+          else { virtual.width(offset.width(r2.style.width = "100%")); r1.style.display="none"; }
+        }
+
+        //Initialize the layout for vertical view. We want the remaining space used for row r1 in height.
+
+        else {} //Needs to be completed.
+      }
+
+      //As the window resizes the menu bar can change height and needs to be subtracted from total page height.
+      //The hex editors and data model component also need to be checked when window width and height changes.
+
+      function resize()
+      {
+        //Check if menu bar height change occurred.
+        
+        if( (t = document.getElementById("mBar").clientHeight + "px") != hCheck )
+        {
+          r.style.height = 'calc(100% - ' + t + ')'; hCheck = t;
+        }
+
+        offset.validate(); virtual.validate(); dModel.validate();
       }
       
       //Drag and drop file Support.
@@ -219,7 +314,7 @@
           for( var i = 0; i < extensions.length; i++ ) { if( ex == extensions[i] ) { loadFormat(decodeAppEX[i]); return; } }
         }
       
-        formatLoad = false; rotateSC(vertical);
+        formatLoaded(false);
       }
       
       //Format loader.
@@ -231,12 +326,12 @@
         if( Format.src != url )
         {
           Format.parentElement.removeChild(Format); Format = document.createElement("script"); Format.src = url;
-          Format.onerror = fmtErr; Format.onload = function(){ format.load(); if(r1.display=="none") { formatLoad = !formatLoad; rotateSC(vertical); } }; document.head.appendChild(Format);
+          Format.onerror = fmtErr; Format.onload = function(){ format.load(); formatLoaded(true); }; document.head.appendChild(Format);
         }
       
         //Else we just call the load operation over again.
       
-        else { try{ format.load(); if(r1.display=="none") { formatLoad = !formatLoad; rotateSC(vertical); } } catch(e) { fmtErr(); } document.head.appendChild(Format); }
+        else { try{ format.load(); formatLoaded(true); } catch(e) { fmtErr(); } document.head.appendChild(Format); }
       }
       
       //core loader.
@@ -254,7 +349,7 @@
       
       //Error message if there is a problem loading the format reader.
       
-      function fmtErr() { if(r1.display!="none"){ formatLoad = !formatLoad; rotateSC(vertical); } alert("Unable to load format reader for this file format!"); }
+      function fmtErr() { formatLoaded(false); alert("Unable to load format reader for this file format!"); }
       
       //Error message if there is a problem loading the processor core type.
       
@@ -267,8 +362,8 @@
         var s = 0; if( v ) { virtual.hide(s=virtual.visible); } else { offset.hide(s=offset.visible); }
         
         document.getElementById(v ? "i2" : "i1").innerHTML = (s ? "Show " : "Hide ") + (v ? "Virtual" : "Offset");
-        
-        resize();
+
+        visibilityChange();
       }
       
       function showD()
@@ -276,135 +371,8 @@
         ds.hide(ds.visible);
         
         document.getElementById("i3").innerHTML = (ds.visible ? "Hide " : "Show ") + "data types";
-        
-        resize();
-      }
-      
-      //Experimental.
-      
-      function rotateSC(set)
-      {
-        if( !formatLoad ) { r1.display = "none"; } if( vertical = set )
-        {
-          //Clear horizontal transform.
-      
-          r.display = "";
-      
-          //Do vertical transform adjustments.
-      
-          if( formatLoad )
-          {
-            r1.display = "flex";
-          }
-          r2.display = "flex";
-        }
-        else
-        {
-          //Clear vertical transform.
-      
-          if( formatLoad ) { r1.display = ""; } r2.display = "";
-      
-          //Do horizontal transform adjustments.
-      
-          r.display = "flex";
-        }
-      
-        resize();
-      }
-      
-      //Redesign the layout. Work in progress.
-      
-      function resize()
-      {
-        //Reset everything. Note it is best to not simplify or refactor this function until a final layout is decided.
-      
-        offset.resetDims(); virtual.resetDims(); ds.resetDims(); Tree.resetDims(); dModel.resetDims();
-        info.style.minWidth = info.style.minHeight = r1.minWidth = r1.maxWidth = r2.minWidth = r2.maxWidth = "";
-        
-        var re = (window.innerHeight - parseInt(document.getElementById("r").offsetTop))-16;
-        
-        document.getElementById("r").style.height = re + "px";
-        
-        if( vertical )
-        {
-          r1.minHeight = dModel.minHeight(); r1.width = r2.width = "100%";
-      
-          //Number of visible hex editors.
-          
-          var h = (offset.visible + virtual.visible) & -1;
-          
-          //The components in r2 have minium fixed width sizes that should match in r1.
-          
-          Tree.minWidth(offset.minWidth()); dModel.minWidth(virtual.minWidth()); info.style.minWidth=ds.minWidth();
-          
-          //When viewing everything sideways r2 is min size for data components.
-          //The row r1 is the remaining height available.
-        
-          var minHeight = Math.max(ds.visible ? ds.minHeight().pxValue() : 0,h != 0 ? offset.minHeight().pxValue() : 0);
-          
-          offset.height(virtual.height(r2.height = r2.minHeight = minHeight));
-          
-          r1.height = (re - minHeight) + "px";
-      
-          //The last component is 100% width in both rows.
-      
-          ds.width(info.style.width = "100%");
-        }
-      
-        //Straight up and down three components to the left in r1 (Tree view, data model, information panel) to the right r2 (offset, virtual, data type inspector).
-      
-        else
-        {
-          //When viewing up and down both rows are 100% height.
-      
-          r1.height = r2.height = "100%";
-      
-          //The components in r1 can take any min height, but the components in r2 have minium fixed height sizes.
-          
-          Tree.minHeight(offset.minHeight()); dModel.minHeight(virtual.minHeight()); info.style.height=ds.height(ds.minHeight());
-      
-          //The min/max width of the last row should be the min width of the hex editors.
-          //The first row can not be smaller than the data model min width.
-          
-          r1.minWidth = dModel.minWidth(); r1.width = "100%"; r2.width = r2.minWidth = ds.minWidth(offset.minWidth());
-      
-          //Number of visible hex editors.
-          
-          var h = (offset.visible + virtual.visible) & -1;
-      
-          //divide area up regularly for r1.
-          
-          var heightEnd = ds.minHeight().pxValue(), share = (re - heightEnd) / 2;
-          
-          //If there is no loaded format than rwo one does not exist.
-          
-          if( !formatLoad ) { r1.minWidth = r1.width = "0px"; r2.width = "100%"; }
-          else
-          {
-            Tree.height(dModel.height(share+"px"));
-          }
-          
-          //Add +4 pixels for each invisible component because of 2px border.
-          
-          if( h == 2 ) { h = 1; } else if( h == 1 ) { re += 4; h = 2; }
-          
-          //If there is no visible hex editors then the data inspector can be set full height
-        
-          else { re += 8; if( ds.visible ) { ds.height(re +"px"); } else { r2.minWidth = r2.width = "0px"; } }
-          
-          if( !ds.visible ) { share = re / 2; } else { share = (re - heightEnd) / 2; }
-          
-          offset.height(virtual.height((share*h)+"px"));
-        }
-        
-        offset.validate(); virtual.validate(); dModel.validate();
-      }
-      
-      //Show hidden elements.
-      
-      function show( el )
-      {
-        document.getElementById(el).style.display = "";
+
+        visibilityChange();
       }
       
       //When a file fails to load.
@@ -428,7 +396,7 @@
     </script>
   </head>
   <body onload="init();">
-    <div style="width:100%;background-color:#E0E0E0;">
+    <div id="mBar" style="width:100%;background-color:#E0E0E0;">
       <input type="file" id="file" onchange="Open((dragItem = this.files)[0]);" hidden>
       <div class="toolBar">
         <button id="toolBar" class="toolBtn">File</button>
@@ -440,7 +408,7 @@
       <div style="display: inline-block;" class="toolBar">
         <button id="toolBar" class="toolBtn">View</button>
         <div class="toolBarI">
-          <a onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.innerHTML='Show text';}else{offset.setText(true);virtual.setText(true);this.innerHTML='Hide text';};rotateSC(vertical);">Hide text</a>
+          <a onclick="if(offset.text){offset.setText(false);virtual.setText(false);this.innerHTML='Show text';}else{offset.setText(true);virtual.setText(true);this.innerHTML='Hide text';};visibilityChange();">Hide text</a>
           <a onclick="showH(false);" id="i1">Hide Offset</a>
           <a onclick="showH(true);" id="i2">Show Virtual</a>
           <a onclick="showD();" id="i3">Hide Data Types</a>
@@ -448,8 +416,8 @@
       </div>
       <div style="display: inline-block;" id="setFile"></div>
     </div>
-    <div id="r" style="height:100%;width:100%;">
-      <div style="display:none;" id="r1">
+    <div id="r">
+      <div id="r1">
         <div id="tree"></div>
         <div id="dModel"></div>
         <div id="info"></div>
