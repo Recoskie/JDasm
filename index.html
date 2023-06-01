@@ -207,7 +207,7 @@
 
       function formatLoaded(v)
       {
-        if( v != null && formatLoad == v ) { return; } formatLoad = v || formatLoad; if( !vertical )
+        if( v != null ) { if( formatLoad == v ) { return; } formatLoad = v; } if( !vertical )
         {
           //When loaded we need to use min content space.
 
