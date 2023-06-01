@@ -147,6 +147,11 @@
 
       function initLayout()
       {
+        //Reset everything.
+
+        Tree.resetDims(); dModel.resetDims(); offset.resetDims(); virtual.resetDims(); ds.resetDims();
+        info.style.minWidth = info.style.minHeight = "unset"; info.style.width = info.style.height = "unset";
+
         //Initialize the layout for horizontal view.
 
         if( !vertical )
@@ -164,7 +169,7 @@
 
         else {} //Needs to be completed.
 
-        resize(); layoutInit = true;
+        hCheck = 0; reCheck = 0; if( formatLoad ){ formatLoaded(); } resize(); layoutInit = true;
       }
 
       //Layout changes that only need occur when visibility of components change.
@@ -198,10 +203,11 @@
       }
 
       //Enabling or disabling format reader data model, and information output/disassembly.
+      //This needs to be called when switching from landscape to portrait as the column is set to display none by default.
 
       function formatLoaded(v)
-      { 
-        if( formatLoad == v ) { return; } formatLoad = v; if( !vertical )
+      {
+        if( v != null && formatLoad == v ) { return; } formatLoad = v || formatLoad; if( !vertical )
         {
           //When loaded we need to use min content space.
 
