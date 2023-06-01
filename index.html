@@ -189,7 +189,7 @@
 
           if( (t = (offset.visible || virtual.visible) ? offset.minWidth() : (ds.visible ? ds.minWidth() : "0px")) != reCheck )
           {
-            r1.style.width = 'calc(100% - ' + t + ')'; r2.style.maxWidth = t;
+            r1.style.width = 'calc(100% - ' + (parseInt(t)+4) + 'px)'; r2.style.maxWidth = t;
         
             //Only update components if the layout has already been initialized.
 
