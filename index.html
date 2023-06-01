@@ -189,7 +189,7 @@
 
           if( (t = (offset.visible || virtual.visible) ? offset.minWidth() : (ds.visible ? ds.minWidth() : "0px")) != reCheck )
           {
-            r1.style.width = 'calc(100% - ' + t + ')';
+            r1.style.width = 'calc(100% - ' + t + ')'; r2.style.maxWidth = t;
         
             //Only update components if the layout has already been initialized.
 
@@ -211,7 +211,7 @@
         {
           //When loaded we need to use min content space.
 
-          if( formatLoad ) { virtual.width(offset.width("0px")); r2.style.width = "min-content"; r1.style.display="flex"; visibilityChange(); }
+          if( formatLoad ) { virtual.width(offset.width("0px")); r1.style.display="flex"; visibilityChange(); }
 
           //Everything can be made 100% width as it does not need to share space with r1.
 
