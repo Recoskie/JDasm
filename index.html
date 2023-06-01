@@ -189,7 +189,7 @@
 
           if( (t = (offset.visible || virtual.visible) ? offset.minWidth() : (ds.visible ? ds.minWidth() : "0px")) != reCheck )
           {
-            r1.style.width = 'calc(100% - ' + (parseInt(t)+4) + 'px)'; r2.style.maxWidth = t;
+            r1.style.width = 'calc(100% - ' + (parseInt(t)+4) + 'px)'; r2.style.minWidth = r2.style.maxWidth = t;
         
             //Only update components if the layout has already been initialized.
 
@@ -215,7 +215,7 @@
 
           //Everything can be made 100% width as it does not need to share space with r1.
 
-          else { virtual.width(offset.width(r2.style.width = r2.style.maxWidth = "100%")); r1.style.display="none"; }
+          else { virtual.width(offset.width(r2.style.maxWidth = "100%")); r1.style.display="none"; }
         }
 
         //Initialize the layout for vertical view. We want the remaining space used for row r1 in height.
