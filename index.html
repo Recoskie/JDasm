@@ -195,6 +195,25 @@
 
             if( layoutInit ){ offset.validate(); virtual.validate(); dModel.validate(); } reCheck = t;
           }
+
+          //Small adjustments to align the cells.
+
+          var h = 0;
+
+          if(offset.visible && virtual.visible && ds.visible)
+          {
+            h = offset.minDims[1]; offset.minHeight(h+"px"); virtual.minHeight(h+"px"); Tree.minHeight(dModel.minHeight(h+"px"));
+          }
+          else
+          {
+            h = Tree.minDims[1] + dModel.minDims[1] + 4; offset.minHeight(virtual.minHeight(h+"px")); Tree.minHeight(Tree.minDims[1]); dModel.minHeight(dModel.minDims[1]);
+          }
+
+          if(ds.visible && (offset.visible || virtual.visible)) { info.style.minHeight = ds.minDims[1] + "px"; info.style.height = "0px;"; }
+          else if(!ds.visible && offset.visible && virtual.visible) { info.style.minHeight = "max("+h+"px,calc(50% - 4px))"; }
+          else { info.style.minHeight = "unset"; info.style.height = "100%"; }
+
+          r.style.minHeight = Math.max((offset.visible ? h : 0) + (virtual.visible ? h : 0) + (ds.visible ? ds.minDims[1] : 0) + 4, Tree.minDims[1] + dModel.minDims[1] + 4) + "px";
         }
 
         //Initialize the layout for vertical view. We want the remaining space used for row r1 in height.
