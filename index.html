@@ -198,16 +198,8 @@
 
           //Small adjustments to align the cells.
 
-          var h = 0;
-
-          if(offset.visible && virtual.visible && ds.visible)
-          {
-            h = offset.minDims[1]; offset.minHeight(h+"px"); virtual.minHeight(h+"px"); Tree.minHeight(dModel.minHeight(h+"px"));
-          }
-          else
-          {
-            h = Tree.minDims[1] + dModel.minDims[1] + 4; offset.minHeight(virtual.minHeight(h+"px")); Tree.minHeight(Tree.minDims[1]); dModel.minHeight(dModel.minDims[1]);
-          }
+          var h = 0; if(offset.visible && virtual.visible && ds.visible) { h = offset.minDims[1]; offset.minHeight(h+"px"); virtual.minHeight(h+"px"); Tree.minHeight(dModel.minHeight(h+"px")); }
+          else { h = Tree.minDims[1] + dModel.minDims[1] + 4; offset.minHeight(virtual.minHeight(h+"px")); Tree.minHeight(Tree.minDims[1]); dModel.minHeight(dModel.minDims[1]); }
 
           if(ds.visible && (offset.visible || virtual.visible)) { info.style.minHeight = ds.minDims[1] + "px"; info.style.height = "0px;"; }
           else if(!ds.visible && offset.visible && virtual.visible) { info.style.minHeight = "max("+h+"px,calc(50% - 4px))"; }
