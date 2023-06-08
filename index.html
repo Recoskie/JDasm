@@ -132,7 +132,7 @@
 
         //Layout needs to be reinitialized when orientation changes.
       
-        vertical = false; //if( vertical != h < w ) { vertical = h < w; layoutInit = false; }
+        if( vertical != h < w ) { vertical = h < w; layoutInit = false; }
         
         //Update and validate UI.
         
@@ -150,7 +150,7 @@
         //Reset everything.
 
         Tree.resetDims(); dModel.resetDims(); offset.resetDims(); virtual.resetDims(); ds.resetDims();
-        info.style.minWidth = info.style.minHeight = "unset"; info.style.width = info.style.height = "unset";
+        info.style.maxWidth = info.style.maxHeight = info.style.minWidth = info.style.minHeight = info.style.width = info.style.height = "unset";
 
         //Initialize the layout for horizontal view.
 
@@ -167,7 +167,16 @@
 
         //Initialize the layout for vertical view.
 
-        else {} //Needs to be completed.
+        else
+        {
+          r.style="width:100%;display:flex;flex-direction:column;";
+          r1.style="width:100%;height:100%;min-height:" + dModel.minHeight() + ";display:none;";
+          r2.style="width:100%;display:flex;";
+
+          virtual.height(offset.height("0px"));
+        
+          info.style.minWidth = ds.width(ds.minWidth());
+        }
 
         hCheck = 0; reCheck = 0; if( formatLoad ){ formatLoaded(); } resize(); layoutInit = true;
       }
@@ -206,7 +215,28 @@
 
         //Initialize the layout for vertical view. We want the remaining space used for row r1 in height.
 
-        else {} //Needs to be completed.
+        else
+        {
+          //Check if change occurred.
+
+          if( (t = ds.visible ? ds.minHeight() : ((offset.visible || virtual.visible) ? offset.minHeight() : "0px")) != reCheck )
+          {
+            r1.style.height = "calc(100% - " + (parseInt(t)+4) + "px)"; reCheck = t;
+          }
+
+          //Small adjustments to align the cells.
+
+          if((n = offset.visible + virtual.visible + ds.visible) == 3) { Tree.width(dModel.width(offset.width(virtual.width("0px")))); info.style.width = ds.width("100%"); Tree.minWidth(dModel.minWidth(offset.minDims[0])); }
+          else if(n == 2)
+          {
+            n -= ds.visible; Tree.minWidth(Tree.minDims[0] * (s = offset.minDims[0] / (Tree.minDims[0] + dModel.minDims[0] + 2)) + "px"); dModel.minWidth(dModel.minDims[0] * s + "px");
+            Tree.width((Tree.minDims[0] * (s = (n == 1 ? 70 : 50) / (Tree.minDims[0] + dModel.minDims[0] + 1))) + "%"); dModel.width((dModel.minDims[0] * s) + "%"); offset.width(virtual.width((n == 1 ? "70%" : "50%")));
+            ds.width(info.style.width = (n == 1 ? "30%" : "50%"));            
+          }
+          else { Tree.width(dModel.width(info.style.width="33.3333%")); offset.width(virtual.width(ds.width("100%"))); } offset.height(virtual.height( ds.visible ? ds.minDims[1] : "0px"));
+
+          r.style.minWidth = Math.max((offset.visible ? offset.minDims[0] : 0) + (virtual.visible ? virtual.minDims[0] : 0) + (ds.visible ? ds.minDims[0] : 0) + 4, Tree.minDims[0] + dModel.minDims[0] + 4) + "px";
+        }
         
         //Always validate components after changes.
         
@@ -222,16 +252,25 @@
         {
           //When loaded we need to use min content space.
 
-          if( formatLoad ) { virtual.width(offset.width("0px")); r2.style.maxWidth = reCheck; r1.style.display="flex"; visibilityChange(); }
+          if( formatLoad ) { offset.width(virtual.width("0px")); r2.style.maxWidth = reCheck + "px"; r1.style.display="flex"; visibilityChange(); }
 
           //Everything can be made 100% width as it does not need to share space with r1.
 
-          else { virtual.width(offset.width(r2.style.maxWidth = "calc(100% - 4px)")); r1.style.display="none"; }
+          else { offset.width(virtual.width(r2.style.maxWidth = "calc(100% - 4px)")); r1.style.display="none"; }
         }
 
         //Initialize the layout for vertical view. We want the remaining space used for row r1 in height.
 
-        else {} //Needs to be completed.
+        else
+        {
+          //When loaded we need to use min content space.
+
+          if( formatLoad ) { offset.width(virtual.width(r2.style.maxHeight = "0px")); r2.style.maxHeight = reCheck + "px"; r1.style.display="flex"; visibilityChange(); }
+
+          //Everything can be made 100% width as it does not need to share space with r1.
+
+          else { r2.style.maxHeight = "unset"; virtual.height(offset.height(r2.style.height =  "calc(100% - 4px)")); r1.style.display="none"; }
+        }
       }
 
       //As the window resizes the menu bar can change height and needs to be subtracted from total page height.
