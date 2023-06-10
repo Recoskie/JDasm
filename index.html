@@ -196,7 +196,7 @@
         {
           //Check if change occurred.
 
-          if((t = (offset.visible || virtual.visible) ? offset.minWidth() : (ds.visible ? ds.minWidth() : "0px")) != reCheck)
+          if((t = (offset.visible || virtual.visible) ? offset.minWidth() : (ds.visible ? ds.minWidth() : "0")) != reCheck)
           {
             r1.style.width = "calc(100% - " + (parseInt(t)+4) + "px)"; r2.style.minWidth = r2.style.maxWidth = t; reCheck = t;
           }
@@ -235,7 +235,21 @@
           }
           else { Tree.width(dModel.width(info.style.width="33.3333%")); offset.width(virtual.width(ds.width("100%"))); } offset.height(virtual.height( ds.visible ? ds.minDims[1] : "0px"));
 
-          r.style.minWidth = Math.max((offset.visible ? offset.minDims[0] : 0) + (virtual.visible ? virtual.minDims[0] : 0) + (ds.visible ? ds.minDims[0] : 0) + 4, Tree.minDims[0] + dModel.minDims[0] + 4) + "px";
+          //If user is on a mobile phone than we need to preserve the screen ratio.
+
+          if( mobile )
+          {
+            var ratio = (document.getElementById("mBar").clientHeight + Math.max(Tree.visible ? Tree.minDims[1] : 0, dModel.visible ? dModel.minDims[1] : 0) + Math.max(offset.visible ? offset.minDims[1] : 0, virtual.visible ? virtual.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6) * (window.innerWidth / window.innerHeight);
+            
+            r.style.minWidth = (ratio&-1) + "px";
+          }
+          
+          //Else min width of components can be used.
+          
+          else
+          {
+            r.style.minWidth = Math.max((offset.visible ? offset.minDims[0] : 0) + (virtual.visible ? virtual.minDims[0] : 0) + (ds.visible ? ds.minDims[0] : 0) + 4, Tree.minDims[0] + dModel.minDims[0] + 4) + "px";
+          }
         }
         
         //Always validate components after changes.
