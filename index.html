@@ -4,6 +4,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="JD-asm">
+    <meta name="viewport" content="width=device-width">
     <link rel="apple-touch-icon" href="https://recoskie.github.io/JDasm/icon.png">
     <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
     <link rel="canonical" href="https://recoskie.github.io/JDasm/" />
@@ -121,7 +122,7 @@
       
       var pageW = 0, pageH = 0; function re()
       {
-        pageW = window.innerWidth, pageH = window.innerHeight;
+        pageW = window.screen.availWidth, pageH = window.screen.availHeight;
           
         if( mobile )
         {
@@ -282,9 +283,13 @@
         {
           if(vertical)
           {
-            var ratio = (document.getElementById("mBar").clientHeight + (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6) * (pageW / pageH);
-          
-            r.style.minWidth = (ratio & -1) + "px";
+            var ratio = (h=(document.getElementById("mBar").clientHeight + (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6)) * (pageW / pageH); h = pageH / h;
+            
+            document.querySelector("meta[name=viewport]").setAttribute("content", "width=device-width; initial-scale="+h+";");
+          }
+          else
+          {
+            document.querySelector("meta[name=viewport]").setAttribute("content", "width=device-width;");
           }
         }
         
