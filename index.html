@@ -4,7 +4,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="JD-asm">
-    <meta name="viewport" content="width=device-width">
+    <meta name="viewport" id="vp" content="width=device-width" />
     <link rel="apple-touch-icon" href="https://recoskie.github.io/JDasm/icon.png">
     <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
     <link rel="canonical" href="https://recoskie.github.io/JDasm/" />
@@ -109,7 +109,7 @@
       
       //Layout change based on window dimensions, or orientation.
         
-      var vertical = null, mobile = !isNaN( window.orientation );
+      var vertical = null, mobile = !isNaN( window.orientation ), vPort = document.getElementById ("vp") || false;
       
       if( mobile )
       {
@@ -283,13 +283,14 @@
         {
           if(vertical)
           {
-            var ratio = (h=(document.getElementById("mBar").clientHeight + (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6)) * (pageW / pageH); h = pageH / h;
+            var ratio = (document.getElementById("mBar").clientHeight + (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6);
             
-            document.querySelector("meta[name=viewport]").setAttribute("content", "width=device-width; initial-scale="+h+";");
+            if(vPort){ vPort.content = "width=device-width; initial-scale="+(pageH / ratio)+";"; }
+            else { r.style.minWidth = (ratio * (pageW / pageH)) + "px"; }
           }
           else
           {
-            document.querySelector("meta[name=viewport]").setAttribute("content", "width=device-width;");
+            if(vPort){ vPort.content = "width=device-width;"; }
           }
         }
         
