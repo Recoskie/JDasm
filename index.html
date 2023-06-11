@@ -119,20 +119,19 @@
         window.onresize = re;
       }
       
-      function re()
+      var pageW = 0, pageH = 0; function re()
       {
-        var w = window.innerWidth, h = window.innerHeight;
+        pageW = window.innerWidth, pageH = window.innerHeight;
           
         if( mobile )
         {
-          w = screen.width; h = screen.height;
-          if(window.matchMedia("(orientation: landscape)").matches && h > w )
-          { var t = w; w = h; h = t; }
+          if(window.matchMedia("(orientation: landscape)").matches && pageH > pageW )
+          { var t = pageW; pageW = pageH; pageH = t; }
         }
 
         //Layout needs to be reinitialized when orientation changes.
       
-        if( vertical != h < w ) { vertical = h < w; layoutInit = false; }
+        if( vertical != pageH < pageW ) { vertical = pageH < pageW; layoutInit = false; }
         
         //Update and validate UI.
         
@@ -178,7 +177,7 @@
           info.style.minWidth = ds.width(ds.minWidth());
         }
 
-        hCheck = 0; reCheck = 0; if( formatLoad ){ formatLoaded(); } resize(); layoutInit = true;
+        hCheck = 0; reCheck = 0; if( formatLoad ){ formatLoaded(); } if(mobile){ mRatio(); } resize(); layoutInit = true;
       }
 
       //Layout changes that only need occur when visibility of components change.
@@ -188,7 +187,7 @@
       {
         //If there is no loaded format then r1 does not exist and this function can terminate.
 
-        if( !formatLoad ) { if( layoutInit ){ offset.validate(); virtual.validate(); dModel.validate(); } return; }
+        if( !formatLoad ) { r.style.minWidth = " unset"; if( layoutInit ){ offset.validate(); virtual.validate(); dModel.validate(); } return; }
 
         //Initialize the layout for horizontal view. We want the remaining space used for column r1 in width.
         
@@ -231,20 +230,15 @@
           {
             n -= ds.visible; Tree.minWidth(Tree.minDims[0] * (s = offset.minDims[0] / (Tree.minDims[0] + dModel.minDims[0] + 2)) + "px"); dModel.minWidth(dModel.minDims[0] * s + "px");
             Tree.width((Tree.minDims[0] * (s = (n == 1 ? 70 : 50) / (Tree.minDims[0] + dModel.minDims[0] + 1))) + "%"); dModel.width((dModel.minDims[0] * s) + "%"); offset.width(virtual.width((n == 1 ? "70%" : "50%")));
-            ds.width(info.style.width = (n == 1 ? "30%" : "50%"));            
+            ds.width(info.style.width = (n == 1 ? "30%" : "50%"));
           }
-          else { Tree.width(dModel.width(info.style.width="33.3333%")); offset.width(virtual.width(ds.width("100%"))); } offset.height(virtual.height( ds.visible ? ds.minDims[1] : "0px"));
-
-          //If user is on a mobile phone than we need to preserve the screen ratio.
-
-          if( mobile )
-          {
-            var ratio = (document.getElementById("mBar").clientHeight + Math.max(Tree.visible ? Tree.minDims[1] : 0, dModel.visible ? dModel.minDims[1] : 0) + Math.max(offset.visible ? offset.minDims[1] : 0, virtual.visible ? virtual.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6) * (window.innerWidth / window.innerHeight);
-            
-            r.style.minWidth = (ratio&-1) + "px";
-          }
+          else { Tree.width(dModel.width(info.style.width="33.3333%")); offset.width(virtual.width(ds.width("100%"))); }
           
-          //Else min width of components can be used.
+          //Persevere screen ratio of mobile device.
+          
+          if(mobile) { mRatio(); }
+          
+          //Min width of components in r1 and r2.
           
           else
           {
@@ -286,12 +280,28 @@
           else { r2.style.maxHeight = "unset"; virtual.height(offset.height(r2.style.height =  "calc(100% - 4px)")); r1.style.display="none"; }
         }
       }
+      
+      //Mobile devices fit the width of the page. We must adjust the width to match the minimum height of all components.
+      
+      function mRatio()
+      {
+        if(vertical)
+        {
+          var ratio = (document.getElementById("mBar").clientHeight + (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6) * (pageW / pageH);
+          
+          r.style.minWidth = (ratio & -1) + "px";
+        }
+      }
 
       //As the window resizes the menu bar can change height and needs to be subtracted from total page height.
       //The hex editors and data model component also need to be checked when window width and height changes.
 
       function resize()
       {
+        //Adjust hex editors in vertical alignment.
+        
+        if(vertical) { offset.height(virtual.height( ds.visible ? ds.minDims[1] : "0px")); }
+        
         //Check if menu bar height change occurred.
         
         if( (t = document.getElementById("mBar").clientHeight + "px") != hCheck )
