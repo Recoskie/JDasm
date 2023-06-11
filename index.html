@@ -272,6 +272,10 @@
       
       function adjRatio()
       {
+        //Adjust hex editors in vertical alignment.
+
+        if(formatLoad && vertical) { offset.height(virtual.height( ds.visible ? ds.minDims[1] : "0px")); }
+
         //Mobile devices fit the width of the page. We must adjust the width to match the minimum height of all components.
         
         if(mobile)
@@ -294,6 +298,7 @@
           }
           else
           {
+            var h = Tree.minDims[1] + dModel.minDims[1] + 4; if(offset.visible && virtual.visible && ds.visible) { h = offset.minDims[1]; }
             r.style.minHeight = Math.max((offset.visible ? h : 0) + (virtual.visible ? h : 0) + (ds.visible ? ds.minDims[1] : 0) + 4, Tree.minDims[1] + dModel.minDims[1] + 4) + "px";
           }
         }
@@ -303,11 +308,7 @@
       //The hex editors and data model component also need to be checked when window width and height changes.
 
       function resize()
-      {
-        //Adjust hex editors in vertical alignment.
-        
-        if(vertical) { offset.height(virtual.height( ds.visible ? ds.minDims[1] : "0px")); }
-        
+      { 
         //Check if menu bar height change occurred.
         
         if( (t = document.getElementById("mBar").clientHeight + "px") != hCheck )
