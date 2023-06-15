@@ -122,7 +122,7 @@
       
       var pageW = 0, pageH = 0; function re()
       {
-        pageW = window.screen.availWidth, pageH = window.screen.availHeight;
+        pageW = window.outerWidth, pageH = window.outerHeight;
           
         if( mobile )
         {
@@ -283,10 +283,16 @@
         {
           if(vertical)
           {
-            var ratio = (document.getElementById("mBar").clientHeight + (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6);
+            var mHeight = (document.getElementById("mBar").clientHeight + (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6);
             
-            if(vPort){ vPort.content = "width=device-width; initial-scale="+(pageH / ratio)+";"; }
-            else { r.style.minWidth = (ratio * (pageW / pageH)) + "px"; }
+            var mWidth = (offset.visible + virtual.visible) * offset.minDims[0] + (ds.visible ? ds.minDims[0] : 0) + 6;
+            
+            mWidth = Math.max(mWidth, (formatLoad ? (Tree.minDims[0] + dModel.minDims[0]) : 0));
+            
+            var s = (mWidth - pageW) > (mHeight - pageH);
+            
+            if(vPort){ vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+""; }
+            else { r.style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px"; }
           }
           else
           {
@@ -484,7 +490,7 @@
       
       String.prototype.pxValue = function() { return(parseInt(this.replace("px",""))); }
       
-      //Add the web application service worker. Keep service worker disabled for now while doing lots of changes and updates.
+      //Add the web application service worker.
       
       if(navigator.serviceWorker) { navigator.serviceWorker.register('/JDasm/sw.js', {scope: '/JDasm/'} ) }
     </script>
