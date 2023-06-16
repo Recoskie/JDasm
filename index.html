@@ -122,10 +122,11 @@
       
       var pageW = 0, pageH = 0; function re()
       {
-        pageW = window.outerWidth, pageH = window.outerHeight;
+        pageW = window.innerWidth; pageH = window.innerHeight;
           
         if( mobile )
         {
+          pageW = screen.width; pageH = screen.height;
           if(window.matchMedia("(orientation: landscape)").matches && pageH > pageW )
           { var t = pageW; pageW = pageH; pageH = t; }
         }
@@ -277,7 +278,7 @@
 
         if(formatLoad && vertical) { offset.height(virtual.height( ds.visible ? ds.minDims[1] : "0px")); }
 
-        //Mobile devices fit the width of the page. We must adjust the width to match the minimum height of all components.
+        //We need to specify the min width or height that best fits the mobile device.
         
         if(mobile)
         {
@@ -296,7 +297,17 @@
           }
           else
           {
-            if(vPort){ vPort.content = "width=device-width;"; }
+            var mHeight = Tree.minDims[1] + dModel.minDims[1] + 4; if(offset.visible && virtual.visible && ds.visible) { mHeight = offset.minDims[1]; }
+            mHeight = Math.max((offset.visible ? mHeight : 0) + (virtual.visible ? mHeight : 0) + (ds.visible ? ds.minDims[1] : 0) + 4, Tree.minDims[1] + dModel.minDims[1] + 4);
+            
+            var mWidth = dModel.minDims[0] + ((offset.visible || virtual.visible) ? offset.minDims[0] : ds.minDims[0]);
+            
+            var s = (mWidth - pageW) > (mHeight - pageH);
+            
+            if(vPort)
+            {
+              vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+"";
+            }
           }
         }
         
