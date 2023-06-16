@@ -286,9 +286,9 @@
           {
             var mHeight = (document.getElementById("mBar").clientHeight + (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6);
             
-            var mWidth = (offset.visible + virtual.visible) * offset.minDims[0] + (ds.visible ? ds.minDims[0] : 0) + 6;
+            var mWidth = (offset.visible + virtual.visible) * offset.minDims[0]; if(mWidth == 0 && ds.visible) { mWidth += ds.minDims[0]; }
             
-            mWidth = Math.max(mWidth, (formatLoad ? (Tree.minDims[0] + dModel.minDims[0]) : 0));
+            mWidth = Math.max(mWidth, (formatLoad ? (Tree.minDims[0] + dModel.minDims[0]) : 0)) + 6;
             
             var s = (mWidth - pageW) > (mHeight - pageH); if(vPort){ vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+""; } else { r.style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px"; }
           }
