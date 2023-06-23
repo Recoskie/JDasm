@@ -108,8 +108,9 @@
       }
       
       //Layout change based on window dimensions, or orientation.
+      //Adjusting vPort on android seems to mess with orientation change event. Works well on iOS.
         
-      var vertical = null, mobile = !isNaN( window.orientation ), vPort = document.getElementById ("vp") || false;
+      var vertical = null, mobile = !isNaN( window.orientation ), vPort = (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) ? (document.getElementById ("vp") || false) : false;
       
       if( mobile )
       {
