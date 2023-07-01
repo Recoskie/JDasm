@@ -108,7 +108,7 @@
       }
       
       //Layout change based on window dimensions, or orientation.
-      //Adjusting vPort on android seems to mess with orientation change event. Works well on iOS.
+      //Adjusting vPort on android seems to prevent orientation change event. Works well on iOS.
         
       var vertical = null, mobile = !isNaN( window.orientation ), vPort = (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) ? (document.getElementById ("vp") || false) : false;
       
@@ -285,23 +285,33 @@
         {
           if(vertical)
           {
-            var mHeight = (document.getElementById("mBar").clientHeight + (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6);
+            var mHeight = (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6;
+            
+            mHeight += document.getElementById("mBar").clientHeight;
             
             var mWidth = (offset.visible + virtual.visible) * offset.minDims[0]; if(mWidth == 0 && ds.visible) { mWidth += ds.minDims[0]; }
             
             mWidth = Math.max(mWidth, (formatLoad ? (Tree.minDims[0] + dModel.minDims[0]) : 0)) + 6;
             
             var s = (mWidth - pageW) > (mHeight - pageH); if(vPort){ vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+""; } else { r.style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px"; }
+            
+            document.getElementById("mBar").style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px";
           }
           else
           {
             var mHeight = Tree.minDims[1] + dModel.minDims[1] + 4; if(offset.visible && virtual.visible && ds.visible) { mHeight = offset.minDims[1]; }
             mHeight = Math.max((offset.visible ? mHeight : 0) + (virtual.visible ? mHeight : 0) + (ds.visible ? ds.minDims[1] : 0) + 4, Tree.minDims[1] + dModel.minDims[1] + 4);
             
+            mHeight += document.getElementById("mBar").clientHeight;
+            
             var mWidth = dModel.minDims[0] + ((offset.visible || virtual.visible) ? offset.minDims[0] : ds.minDims[0]);
             
             var s = (mWidth - pageW) > (mHeight - pageH); if(vPort){ vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+""; } else { r.style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px"; }
+            
+            document.getElementById("mBar").style.minWidth = mWidth + "px";
           }
+          
+          r.style.height = "100%";
         }
         
         //Size of page can be min width of r1 and r2 in the layout direction of the page in a web browser window.
