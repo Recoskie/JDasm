@@ -291,9 +291,7 @@
             
             mWidth = Math.max(mWidth, (formatLoad ? (Tree.minDims[0] + dModel.minDims[0]) : 0)) + 6;
             
-            var s = (mWidth - pageW) > (mHeight - pageH); if(vPort){ vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+""; } else { r.style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px"; }
-            
-            document.getElementById("mBar").style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px";
+            var s = (mWidth - pageW) > (mHeight - pageH); if(vPort){ vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+""; } else { document.getElementById("mBar").style.minWidth = r.style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px"; }
           }
           else
           {
@@ -302,9 +300,7 @@
             
             var mWidth = dModel.minDims[0] + ((offset.visible || virtual.visible) ? offset.minDims[0] : ds.minDims[0]);
             
-            var s = (mWidth - pageW) > (mHeight - pageH); if(vPort){ vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+""; } else { r.style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px"; }
-            
-            document.getElementById("mBar").style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px";
+            var s = (mWidth - pageW) > (mHeight - pageH); if(vPort){ vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+""; } else { document.getElementById("mBar").style.minWidth = r.style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px"; }
           }
           
           r.style.height = "100%";
