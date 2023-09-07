@@ -110,7 +110,7 @@
       //Layout change based on window dimensions, or orientation.
       //Adjusting vPort on android seems to prevent orientation change event. Works well on iOS.
         
-      var vertical = null, mobile = !isNaN( window.orientation ), vPort = (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) ? (document.getElementById ("vp") || false) : false;
+      var vertical = null, mobile = navigator.userAgent.indexOf("Mobile") >= 0, vPort = (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) ? (document.getElementById ("vp") || false) : false;
       
       if( mobile )
       {
@@ -269,6 +269,10 @@
 
           else { r2.style.maxHeight = "unset"; virtual.height(offset.height(r2.style.height =  "calc(100% - 4px)")); r1.style.display="none"; }
         }
+        
+        //Validate the offset and virtual buffer.
+        
+        offset.validate(); virtual.validate();
       }
       
       //Adjust the page size.
@@ -326,7 +330,7 @@
       //The hex editors and data model component also need to be checked when window width and height changes.
 
       function resize()
-      { 
+      {
         //Check if menu bar height change occurred.
         
         if( (t = document.getElementById("mBar").clientHeight + "px") != hCheck )
@@ -349,7 +353,7 @@
             if (items[i].kind === "file") { Open(items[i].getAsFile()); return; }
           }
         }
-      }, false );
+      }, false);
 
       //Open a file from a web address.
 
@@ -374,9 +378,9 @@
       {
         dragItem = f; file.setTarget( f ); offset.hide(false);
         
-        //Initialize the file buffer.
+        //Load 4 bytes to scan file signature.
         
-        file.bufRead(this, "onload"); file.seek(0); file.read(file.buf);
+        file.onRead(this, "onload"); file.seek(0); file.read(4);
       }
       
       function onload()
@@ -387,23 +391,17 @@
       
         //Always reset the virtual address space when loading a new file.
       
-        file.resetV();
-        
-        offset.sel = offset.sele = 0;
-        
-        offset.adjSize(); offset.update(file);
-        
-        ds.hide(false);
+        file.resetV(); offset.sel = offset.sele = 0; ds.hide(false);
       
         //Check format signature type.
       
         for( var i = 0, c = true; i < signature.length; i++ )
         {
-          c = true; for( var b = 0; b < signature[i].length; b++ ){ if( signature[i][b] != file.data[b] ){ c = false; } }
+          c = true; for( var b = 0; b < signature[i].length; b++ ){ if( signature[i][b] != file.tempD[b] ){ c = false; } }
       
           //Java class files have the same signature.
       
-          if( c && (i != 4 || ((file.data[4] << 24) | (file.data[5] << 16) | (file.data[6] << 8) | file.data[7]) < 45) )
+          if( c && (i != 4 || ((file.tempD[4] << 24) | (file.tempD[5] << 16) | (file.tempD[6] << 8) | file.tempD[7]) < 45) )
           {
             loadFormat( decodeAPP[i] ); return;
           }
@@ -438,6 +436,10 @@
         //Else we just call the load operation over again.
       
         else { try{ format.load(); formatLoaded(true); } catch(e) { fmtErr(); } document.head.appendChild(Format); }
+        
+        //Validate the offset and virtual buffer.
+        
+        offset.validate(); virtual.validate();
       }
       
       //core loader.
@@ -503,7 +505,7 @@
   </head>
   <body onload="init();">
     <div id="mBar" style="width:100%;background-color:#E0E0E0;">
-      <input type="file" id="file" onchange="Open((dragItem = this.files)[0]);" hidden>
+      <input type="file" id="file" onchange="Open(this.files[0]);" hidden>
       <div class="toolBar">
         <button id="toolBar" class="toolBtn">File</button>
         <div class="toolBarI">
