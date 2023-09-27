@@ -38,7 +38,6 @@ Application versions.
 
 <table>
   <tr><td>Cross platform java application version:</td><td><a href="https://github.com/Recoskie/JDasm/raw/master/JD-asm.jar">Link</a></td></tr>
-  <tr><td>iPhone beta version:</td><td><a href="https://testflight.apple.com/join/HL7YrtzH">Link</a></td></tr>
   <tr><td>Web beta version:</td><td><a href="https://recoskie.github.io/JDasm/">Link</a></td></tr>
 </table>
 
