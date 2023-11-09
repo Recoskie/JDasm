@@ -21,8 +21,12 @@ format = {
   
   //Begins setting up the zip analysis algorithm.
   
-  load: function()
+  load: function(r)
   {
+    //IO stream must be in ready state.
+
+    if(!r) { file.wait(this,"load"); return; }
+
     //Setup descriptors.
 
     this.des[0] = new Descriptor([
