@@ -182,6 +182,8 @@
           if((n = offset.visible + virtual.visible + ds.visible) == 3) { offset.width(virtual.width("0px")); ds.width("100%"); }
           else if(n == 2) { n -= ds.visible; offset.width(virtual.width((n == 1 ? "70%" : "50%"))); ds.width(n == 1 ? "30%" : "50%"); }
           else { offset.width(virtual.width(ds.width("100%"))); }
+
+          offset.minHeight(virtual.minHeight(ds.visible ? ds.minDims[1] : offset.minDims[1]));
         }
 
         hCheck = 0; reCheck = 0; formatLoaded(); if(mobile){ adjRatio(); } resize(); layoutInit = true;
@@ -199,6 +201,8 @@
           if((n = offset.visible + virtual.visible + ds.visible) == 3) { offset.width(virtual.width("0px")); ds.width("100%"); }
           else if(n == 2) { n -= ds.visible; offset.width(virtual.width((n == 1 ? "70%" : "50%"))); ds.width(n == 1 ? "30%" : "50%"); }
           else { offset.width(virtual.width(ds.width("100%"))); }
+
+          offset.minHeight(virtual.minHeight(ds.visible ? ds.minDims[1] : offset.minDims[1]));
         }
         
         //If there is no loaded format then r1 does not exist and this function can terminate.
@@ -267,7 +271,7 @@
 
           //Everything can be made 100% width as it does not need to share space with r1.
 
-          else { offset.width(virtual.width(r2.style.maxWidth = "calc(100% - 4px)")); r1.style.display="none"; }
+          else { offset.width(virtual.width("unset")); r2.style.maxWidth = "calc(100% - 4px)"; r1.style.display="none"; }
         }
 
         //Initialize the layout for vertical view. We want the remaining space used for row r1 in height.
@@ -278,9 +282,9 @@
 
           if( formatLoad ) { offset.width(virtual.width(r2.style.maxHeight = "0px")); r2.style.maxHeight = reCheck + "px"; r1.style.display="flex"; visibilityChange(); }
 
-          //Everything can be made 100% width as it does not need to share space with r1.
+          //Everything can be made 100% height as it does not need to share space with r1.
 
-          else { r2.style.maxHeight = "unset"; virtual.height(offset.height(r2.style.height =  "calc(100% - 4px)")); r1.style.display="none"; }
+          else { virtual.height(offset.height(r2.style.maxHeight = "unset")); r2.style.height = "calc(100% - 4px)"; r1.style.display="none"; }
         }
       }
       
