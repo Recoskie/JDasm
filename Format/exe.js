@@ -276,7 +276,7 @@ format = {
 
     if(cmd < 0)
     {
-      dModel.clear(); file.seekV(parseFloat(e[1])); ds.setType(15, 0, parseInt(e[2])); info.innerHTML = "No reader, for this section yet."; return;
+      dModel.clear(); file.seekV(parseFloat(e[1])); ds.setType(15, 0, parseInt(e[2]), true); info.innerHTML = "No reader, for this section yet."; return;
     }
 
     //Check if the argument is a command such as start disassembling code, or select bytes.
@@ -285,7 +285,7 @@ format = {
     {
       //CMD 1 is select bytes.
 
-      if(cmd == 1) { dModel.clear(); file.seek(parseInt(e[1])); ds.setType(15, 0, parseInt(e[2])); info.innerHTML = format.msg[des]; }
+      if(cmd == 1) { dModel.clear(); file.seek(parseInt(e[1])); ds.setType(15, 0, parseInt(e[2]), false); info.innerHTML = format.msg[des]; }
 
       //Begin disassembling ms-dos app.
 
