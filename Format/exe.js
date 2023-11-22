@@ -23,9 +23,17 @@ format = {
 
   is64bit: false,
 
+  //The processor core instruction type that the code is intended to run on.
+
+  coreType: 0,
+
   //The applications base address.
 
   baseAddress: 0,
+
+  //Disassembly virtual address.
+
+  disV: 0,
 
   //Begin loading the file format.
 
@@ -152,7 +160,9 @@ format = {
 
       //Add the PE header.
 
-      hData.add("PE Header.h",[8]); this.des[2].offset = pe; this.des[2].setEvent(this, "peHeader"); pe += 24;
+      hData.add("PE Header.h",[8]); this.des[2].offset = pe; this.des[2].setEvent(this, "peHeader");
+      
+      this.coreType = file.tempD[pe+4] | (file.tempD[pe+5]<<8); pe += 24;
 
       //The OP header has two types that are nearly identical for 32-bit or 64-bit binaries.
       //This is why the OP header is not predefined under this.des[3] like the others.
@@ -287,13 +297,21 @@ format = {
 
       if(cmd == 1) { dModel.clear(); file.seek(parseInt(e[1])); ds.setType(15, 0, parseInt(e[2]), false); info.innerHTML = format.msg[des]; }
 
-      //Begin disassembling ms-dos app.
+      //Begin disassembling ms-dos app. MS dos files are by default 16 bit x86.
 
-      else if(cmd == 2) { dModel.clear(); file.seekV(parseInt(e[1])); ds.setType(15, 0, 1); info.innerHTML = "Not implemented yet."; }
+      else if(cmd == 2) { format.disV = parseInt(e[1]); coreReady = format.disMSDos; loadCore("core/x86/dis-x86.js"); }
 
       //Begin disassembling microsoft app.
 
-      else if(cmd == 3) { dModel.clear(); file.seekV(parseInt(e[1])); ds.setType(15, 0, 1); info.innerHTML = "Not implemented yet."; }
+      else if(cmd == 3)
+      {
+        format.disV = parseInt(e[1]); coreReady = format.disEXE;
+        
+        if(format.coreType == 0x014C || format.coreType == 0x8664) { loadCore("core/x86/dis-x86.js"); } else
+        {
+          info.innerHTML = "Core type instruction set not yet supported.";
+        }
+      }
     }
 
     //Else it is a data model node.
@@ -367,5 +385,64 @@ format = {
   badSig: function(i)
   { 
     info.innerHTML = "A bad signature has been encountered, so the application is corrupted!";
+  },
+
+  //The x86 core is ready amd we can now begin ms dos disassembly.
+
+  disMSDos: function()
+  {
+    core.scan = format.dosScan; core.addressMap = true; core.resetMap(); core.bitMode = 0;
+    
+    core.setCodeSeg((Math.random()*0x2000)<<3); dModel.setCore(core); dModel.coreDisLoc(format.disV,true);
+  },
+
+  //The x86 core is ready amd we can now begin Microsoft application disassembly.
+
+  disEXE: function()
+  {
+    core.scanReset(); core.addressMap = true; core.resetMap(); core.bitMode = format.is64bit ? 2 : 1;
+      
+    dModel.setCore(core); dModel.coreDisLoc(format.disV,true);
+  },
+
+  //MSDos code scanner. Ensures proper disassembly of old 16 ms dos applications.
+
+  Dos_exit: 0, dosScan: function(crawl)
+  {
+    var i = core.instruction + " " + core.insOperands;
+    
+    if( format.Dos_exit == 0 && ( i.startsWith("MOV AX,4C") || i.startsWith("MOV AH,4C") ) ) { format.Dos_exit = 1; }
+    else if( format.Dos_exit == 1 && ( i.indexOf("AX,") > 0 || i.indexOf("AH,") > 0 ) ) { format.Dos_exit = 0; }
+    if( format.Dos_exit == 1 && i == "INT 21" ) { format.Dos_exit = 2; }
+    
+    return( format.Dos_exit == 2 || i.startsWith("RET") || i.startsWith("JMP") || i == "INT 20" );
   }
+}
+
+//The data descriptor calls this function when we go to click on an address we wish to disassemble.
+
+dModel.coreDisLoc = function(virtual,crawl)
+{
+  //Begin data check.
+
+  format.Dos_exit = 0; this.cr = crawl; core.setAddress(virtual);
+
+  //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
+
+  file.bufRead(this, "dis"); file.seekV(format.disV = virtual); file.initBufV();
+}
+
+dModel.dis = function()
+{
+  //Set binary code relative position within the buffer.
+
+  core.setBinCode(file.dataV,format.disV - file.dataV.offset);
+  
+  //Begin disassembling the code.
+  
+  info.innerHTML = "<pre>" + core.disassemble(this.cr) + "</pre>";
+
+  window.offset.slen = 1; window.virtual.slen = core.getAddress() - format.disV;
+    
+  dModel.adjSize(); dModel.update(); file.seekV(format.disV);
 }

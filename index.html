@@ -44,6 +44,10 @@
       //Used for loading in processor core types.
       
       var coreType = null;
+
+      //Function to call when core is loaded.
+
+      var coreReady = null;
       
       //Enable binary tree and data model, and info window for file format readers.
       
@@ -463,8 +467,9 @@
         if( coreType.src != url )
         {
           coreType.parentElement.removeChild(coreType); coreType = document.createElement("script"); coreType.src = url;
-          coreType.onerror = coreErr; document.head.appendChild(coreType);
+          coreType.onerror = coreErr; if(coreReady != null){coreType.onload = function(){ coreReady(); coreReady=null; } } document.head.appendChild(coreType);
         }
+        else { try{ coreReady(); coreReady = null; } catch(e) { coreErr(); } }
       }
       
       //Error message if there is a problem loading the format reader.
