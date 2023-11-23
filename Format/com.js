@@ -47,7 +47,9 @@ format = {
     if( args[0] == 0 ) { dModel.setDescriptor(format.header); }
     else
     {
-      core.addressMap = true; core.resetMap(); core.bitMode = 0;
+      core.showInstructionHex = false;
+
+      core.scanReset(); core.addressMap = true; core.resetMap(); core.bitMode = 0;
       
       core.setCodeSeg((Math.random()*0x2000)<<3); dModel.setCore(core); dModel.coreDisLoc(0x100,true);
     }
@@ -65,24 +67,6 @@ format = {
 
 dModel.coreDisLoc = function(virtual,crawl)
 {
-  //We still have to move to a section and read the data if it is not loaded.
-  //The function dis is called when the data is ready, or is already in position.
-
-  if( this.dis == null ) { this.dis = function()
-  {
-    //Set binary code relative position within the buffer.
-
-    core.setBinCode(file.dataV,this.vr - file.dataV.offset);
-  
-    //Begin disassembling the code.
-  
-    info.innerHTML = "<pre>" + core.disassemble(this.cr) + "</pre>";
-
-    window.virtual.slen = core.getAddress() - this.vr;
-    
-    dModel.adjSize(); dModel.update(); file.seekV(this.vr);
-  }}
-
   //Begin data check.
 
   this.cr = crawl; core.setAddress(virtual);
@@ -90,4 +74,19 @@ dModel.coreDisLoc = function(virtual,crawl)
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
   file.bufRead( this, "dis" ); file.seekV(this.vr = virtual); file.initBufV();
+}
+
+dModel.dis = function()
+{
+  //Set binary code relative position within the buffer.
+
+  core.setBinCode(file.dataV,this.vr - file.dataV.offset);
+  
+  //Begin disassembling the code.
+  
+  info.innerHTML = "<pre>" + core.disassemble(this.cr) + "</pre>";
+
+  window.virtual.slen = core.getAddress() - this.vr;
+    
+  dModel.adjSize(); dModel.update(); file.seekV(this.vr);
 }

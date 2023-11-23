@@ -392,6 +392,8 @@ format = {
 
   disMSDos: function()
   {
+    core.showInstructionHex = false;
+
     core.scan = format.dosScan; core.addressMap = true; core.resetMap(); core.bitMode = 0;
     
     core.setCodeSeg((Math.random()*0x2000)<<3); dModel.setCore(core); dModel.coreDisLoc(format.disV,true);
@@ -401,6 +403,8 @@ format = {
 
   disEXE: function()
   {
+    core.showInstructionHex = false;
+
     core.scanReset(); core.addressMap = true; core.resetMap(); core.bitMode = format.is64bit ? 2 : 1;
       
     dModel.setCore(core); dModel.coreDisLoc(format.disV,true);
