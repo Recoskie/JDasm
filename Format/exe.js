@@ -35,15 +35,31 @@ format = {
 
   disV: 0,
 
-  //Begin loading the file format.
+  //IO stream must be in ready state before we can Initialize the applications setup information.
 
-  load: function(r)
+  load: function(r) { if(!r) { file.wait(this,"load"); return; } file.onRead(this, "scan"); file.seek(0); file.read(4096); },
+
+  //Initialize the programs setup information.
+
+  scan: function()
   {
-    //IO stream must be in ready state.
+    //PE header location.
 
-    if(!r) { file.wait(this,"load"); return; }
+    var msDos = false, pe = file.tempD[0x3C]|(file.tempD[0x3D]<<8)|(file.tempD[0x3E]<<16)|(file.tempD[0x3F]<<24);
+
+    //Check if PE header exists by signature.
+
+    msDos = (file.tempD[pe]|(file.tempD[pe+1]<<8)|(file.tempD[pe+2]<<16)|(file.tempD[pe+3]<<24))!=0x4550;
     
-    //Start by loading in all the microsoft file signatures into des array.
+    //The root node is the binary application.
+    
+    var root = new treeNode(file.name.substring(file.name.lastIndexOf("/")+1,file.name.length),[],true);
+
+    //Header data.
+    
+    var hData = new treeNode("Header Data",[],msDos); root.add(hData);
+    
+    //The dos 2.0 header structure.
 
     this.des[0] = new Descriptor([
       this.sig, //2 bytes.
@@ -66,62 +82,11 @@ format = {
       this.r2, //20 bytes.
       new dataType("PE Header Location", Descriptor.LUInt32)
     ]);
-    this.des[1] = new Descriptor([this.dosRel = new arrayType("Rel",[
-      new dataType("Segment", Descriptor.LUInt16),
-      new dataType("Offset", Descriptor.LUInt16)
-    ])]);
-    this.des[2] = new Descriptor([
-      this.sig, //4 bytes.
-      new dataType("Machine", Descriptor.LUInt16),
-      new dataType("Number Of Sections", Descriptor.LUInt16),
-      new dataType("Time Date Stamp", Descriptor.LUInt32),
-      new dataType("Pointer To Symbol Table", Descriptor.LUInt32),
-      new dataType("Number Of Symbols", Descriptor.LUInt32),
-      new dataType("Size Of OP Header", Descriptor.LUInt16),
-      new dataType("Characteristics", Descriptor.LUInt16)
-    ]);
-    this.des[4] = new Descriptor([this.dataDir = new arrayType("Section",[
-      new dataType("Virtual offset", Descriptor.LUInt32),
-      new dataType("Size", Descriptor.LUInt32)
-    ])]);
-    this.des[5] = new Descriptor([this.sections = new arrayType("Section Array element",[
-      this.sec, //8 bytes.
-      new dataType("Section Size Loaded In Ram", Descriptor.LUInt32),
-      new dataType("Where to Store Bytes in Ram", Descriptor.LUInt32),
-      new dataType("Byte length to read from EXE file", Descriptor.LUInt32),
-      new dataType("Position to Start Reading EXE", Descriptor.LUInt32),
-      this.r1, //12 bytes.
-      new dataType("Section flags", Descriptor.LUInt32)
-    ])]);
+    var mzSize=(file.tempD[8]<<4)|(file.tempD[9]<<12);
 
-    //Scan the header information.
+    //Add the dos header information node.
 
-    file.onRead(this, "scan"); file.seek(0); file.read(4096);
-  },
-
-  //Initialize the programs setup information.
-
-  scan: function()
-  {
-    //PE header location.
-
-    var msDos = false, pe = file.tempD[0x3C]|(file.tempD[0x3D]<<8)|(file.tempD[0x3E]<<16)|(file.tempD[0x3F]<<24);
-
-    //Check if PE header exists by signature.
-
-    msDos = (file.tempD[pe]|(file.tempD[pe+1]<<8)|(file.tempD[pe+2]<<16)|(file.tempD[pe+3]<<24))!=0x4550;
-    
-    //The root node is the binary application.
-    
-    var root = new treeNode(file.name.substring(file.name.lastIndexOf("/")+1,file.name.length),[],true);
-
-    //Header data.
-    
-    var hData = new treeNode("Header Data",[],msDos); root.add(hData);
-    
-    //The mz header is already validated on loading the format reader.
-
-    var mzSize=(file.tempD[8]<<4)|(file.tempD[9]<<12), mzHeader = new treeNode("MZ Header",[1,0,mzSize],msDos); hData.add(mzHeader);
+    var mzHeader = new treeNode("MZ Header",[1,0,mzSize],msDos); hData.add(mzHeader);
     
     //Add the MS-Dos header.
     
@@ -129,20 +94,25 @@ format = {
 
     //Dos header relocations if any.
 
-    var rel = file.tempD[6] | (file.tempD[7]<<8), relOff = file.tempD[24] | (file.tempD[25]<<8);
-    
-    if(rel > 0)
+    var rel = file.tempD[6] | (file.tempD[7]<<8), relOff = file.tempD[24] | (file.tempD[25]<<8); if(rel > 0)
     {
-      mzHeader.add("DOS Relocations.h", [4]); this.des[1].setEvent(this, "mzRel");
+      //Dos 2.0 relocation structure.
 
-      this.dosRel.length(rel); this.des[1].offset = relOff;
+      this.des[1] = new Descriptor([this.dosRel = new arrayType("Rel",[
+        new dataType("Segment", Descriptor.LUInt16),
+        new dataType("Offset", Descriptor.LUInt16)
+      ])]);
+
+      //Add dos relocation node to dos header information.
+
+      mzHeader.add("DOS Relocations.h", [4]); this.des[1].setEvent(this, "mzRel"); this.dosRel.length(rel); this.des[1].offset = relOff;
     }
 
     //Add ms-dos application entry point for disassembly.
 
     mzHeader.add("Program Start (Machine Code).h", [2,(file.tempD[20]|(file.tempD[21]<<8))+((file.tempD[22]<<4)|(file.tempD[23]<<12))]);
 
-    //If it is an ms dos application the rest of the file is dumped into RAM memory after the Dos header.
+    //If it is an ms dos application the rest of the file is mapped into RAM memory after the Dos header.
 
     if(msDos){ pe = mzSize; file.addV(mzSize,file.size-mzSize,0,file.size-mzSize); }
 
@@ -150,24 +120,32 @@ format = {
 
     else
     {
-      //We skip the dos header and dump what remains before the PE header.
+      //We skip the dos header and map what remains before the PE header.
 
       file.addV(mzSize,pe-mzSize,0,pe-mzSize);
 
-      //Number of mappable sections.
+      //The PE header structure.
 
-      var sections = file.tempD[pe+6]|(file.tempD[pe+7]<<8);
+      this.des[2] = new Descriptor([
+        this.sig, //4 bytes.
+        new dataType("Machine", Descriptor.LUInt16),
+        new dataType("Number Of Sections", Descriptor.LUInt16),
+        new dataType("Time Date Stamp", Descriptor.LUInt32),
+        new dataType("Pointer To Symbol Table", Descriptor.LUInt32),
+        new dataType("Number Of Symbols", Descriptor.LUInt32),
+        new dataType("Size Of OP Header", Descriptor.LUInt16),
+        new dataType("Characteristics", Descriptor.LUInt16)
+      ]);
 
-      //Add the PE header.
+      //Add the PE header node.
 
       hData.add("PE Header.h",[8]); this.des[2].offset = pe; this.des[2].setEvent(this, "peHeader");
-      
-      this.coreType = file.tempD[pe+4] | (file.tempD[pe+5]<<8); pe += 24;
+
+      //Core type and mappable sections to ram.
+
+      var sections = file.tempD[pe+6]|(file.tempD[pe+7]<<8); this.coreType = file.tempD[pe+4]|(file.tempD[pe+5]<<8); pe += 24;
 
       //The OP header has two types that are nearly identical for 32-bit or 64-bit binaries.
-      //This is why the OP header is not predefined under this.des[3] like the others.
-
-      hData.add("OP Header.h",[12]);
 
       var op = file.tempD[pe]|(file.tempD[pe+1]<<8); if(op == 267 || (this.is64bit = op == 523))
       {
@@ -203,42 +181,65 @@ format = {
           new dataType("Loader Flags", Descriptor.LUInt32),
           new dataType("Data Directory Array Size", Descriptor.LUInt32),
         ]; if(this.is64bit){ desOp.splice(8,1); }
+        
+        //Add the OP header node.
+
+        hData.add("OP Header.h",[12]); this.des[3] = new Descriptor(desOp); this.des[3].offset = pe; this.des[3].setEvent(this, "opHeader");
+
+        //Add the applications entry point.
 
         if(this.is64bit) { this.baseAddress = (file.data[pe+24] | (file.data[pe+25] << 8) | (file.data[pe+26] << 16)) + (file.data[pe+27] << 24) + ((file.data[pe+28] * (2**32)) + (file.data[pe+29] * (2**40)) + (file.data[pe+30] * (2**48)) + (file.data[pe+31] * (2**56))); }
         else { this.baseAddress = (file.data[pe+28] | (file.data[pe+29] << 8) | (file.data[pe+30] << 16)) + (file.data[pe+31] << 24); }
 
-        //Add the applications entry point.
-
         root.add("Program Start (Machine Code).h", [3,this.baseAddress + ((file.data[pe+16] | (file.data[pe+17] << 8) | (file.data[pe+18] << 16)) + (file.data[pe+19] << 24))]);
-        
-        //Create op header.
 
-        this.des[3] = new Descriptor(desOp); this.des[3].offset = pe; this.des[3].setEvent(this, "opHeader"); pe += this.is64bit ? 112 : 96;
+        //The data directory array size is the last 4 bytes of the OP header.
 
-        //Data directory array.
+        pe += this.is64bit ? 112 : 96; var ddrSize = file.tempD[pe-4]|(file.tempD[pe-3]<<8)|(file.tempD[pe-2]<<16)|(file.tempD[pe-1]<<24);
 
-        var ddrSize = file.tempD[pe-4]|(file.tempD[pe-3]<<8)|(file.tempD[pe-2]<<16)|(file.tempD[pe-1]<<24);
+        //Data directory array structure.
+
+        this.des[4] = new Descriptor([this.dataDir = new arrayType("Section",[
+          new dataType("Virtual offset", Descriptor.LUInt32),
+          new dataType("Size", Descriptor.LUInt32)
+        ])]);
+
+        //Add the data directory array node.
 
         hData.add("Data Directory Array.h",[16]); this.dataDir.length(ddrSize); this.des[4].offset = pe; this.des[4].setEvent(this, "dirArray");
-        
+
         //Scan the data directory array.
 
         var types = ["function Export Table.h", "DLL Import Table.h", "Resource Files.h", "Exception Table.h", "Security Level Settings.h",
         "Relocations.h", "DEBUG TABLE.h", "Description/Architecture.h", "Machine Value.h", "Thread Storage Location.h", "Load System Configuration.h",
         "Import Table of Functions inside program.h", "Import Address Setup Table.h", "Delayed Import Table.h", "COM Runtime Descriptor.h"];
-
+        
         for(var e = pe + (ddrSize << 3), i = 0, size = 0, loc = 0; pe < e; pe += 8, i++)
         {
           loc = file.tempD[pe]|(file.tempD[pe+1]<<8)|(file.tempD[pe+2]<<16)|(file.tempD[pe+3]<<24);
           size = file.tempD[pe+4]|(file.tempD[pe+5]<<8)|(file.tempD[pe+6]<<16)|(file.tempD[pe+7]<<24);
           if( size > 0 ) { root.add(types[i],[-(i+1),loc + this.baseAddress,size]); }
         }
-
+        
         types = undefined;
 
-        //Mapped sections to virtual address space.
+        //Application section map to virtual address space structure.
+
+        this.des[5] = new Descriptor([this.sections = new arrayType("Section Array element",[
+          this.sec, //8 bytes.
+          new dataType("Section Size Loaded In Ram", Descriptor.LUInt32),
+          new dataType("Where to Store Bytes in Ram", Descriptor.LUInt32),
+          new dataType("Byte length to read from EXE file", Descriptor.LUInt32),
+          new dataType("Position to Start Reading EXE", Descriptor.LUInt32),
+          this.r1, //12 bytes.
+          new dataType("Section flags", Descriptor.LUInt32)
+        ])]);
+
+        //Add the section array node.
 
         hData.add("Mapped SECTIONS TO RAM.h",[20]); this.sec.length(8); this.sections.length(sections); this.des[5].offset = pe; this.des[5].setEvent(this, "secArray");
+
+        //Read and map the applications sections into virtual address space.
         
         for(var e = pe + (sections * 40), vSize = 0, vOff = 0, size = 0, off = 0, i = 0; pe < e; pe += 40, i++)
         {
@@ -286,7 +287,7 @@ format = {
 
     if(cmd < 0)
     {
-      dModel.clear(); file.seekV(parseFloat(e[1])); ds.setType(15, 0, parseInt(e[2]), true); info.innerHTML = "No reader, for this section yet."; return;
+      dModel.clear(); file.seekV(parseFloat(e[1])); ds.setType(15, 0, parseInt(e[2]), true); info.innerHTML = "No reader, for this section yet (web version)."; return;
     }
 
     //Check if the argument is a command such as start disassembling code, or select bytes.
@@ -305,7 +306,7 @@ format = {
 
       else if(cmd == 3)
       {
-        format.disV = parseInt(e[1]); coreReady = format.disEXE;
+        format.disV = parseFloat(e[1]); coreReady = format.disEXE;
         
         if(format.coreType == 0x014C || format.coreType == 0x8664) { loadCore("core/x86/dis-x86.js"); } else
         {
@@ -324,7 +325,7 @@ format = {
 
   //Message output for byte selection command.
 
-  msg: [""],
+  msg: ["Detailed information is not added yet to the Microsoft plugin (web version)."],
 
   //MZ header information.
 
@@ -332,7 +333,7 @@ format = {
   {
     if( i < 0 ) { this.sig.length(2); this.r1.length(8); this.r2.length(20); }
 
-    info.innerHTML = "The microsoft application plugin is not built for the web version yet.";
+    info.innerHTML = format.msg[0];
   },
 
   //MS-dos relocations information.
@@ -341,7 +342,7 @@ format = {
   {
     if( i < 0 ) { this.sig.length(2); this.r1.length(8); this.r2.length(20); }
   
-    info.innerHTML = "The microsoft application plugin is not built for the web version yet.";
+    info.innerHTML = format.msg[0];
   },
 
   //PE header information.
@@ -350,7 +351,7 @@ format = {
   {
     if( i < 0 ) { this.sig.length(4); }
   
-    info.innerHTML = "The microsoft application plugin is not built for the web version yet.";
+    info.innerHTML = format.msg[0];
   },
 
   //OP header information.
@@ -359,7 +360,7 @@ format = {
   {
     if( i < 0 ) { this.sig.length(2); }
   
-    info.innerHTML = "The microsoft application plugin is not built for the web version yet.";
+    info.innerHTML = format.msg[0];
   },
 
   //Data directory array information.
@@ -368,7 +369,7 @@ format = {
   {
     if( i < 0 ) { }
   
-    info.innerHTML = "The microsoft application plugin is not built for the web version yet.";
+    info.innerHTML = format.msg[0];
   },
 
   //Section array information.
@@ -377,7 +378,7 @@ format = {
   {
     if( i < 0 ) { this.r1.length(12); }
   
-    info.innerHTML = "The microsoft application plugin is not built for the web version yet.";
+    info.innerHTML = format.msg[0];
   },
 
   //Used to identify bad file signatures in the case of a corrupted application.
@@ -387,7 +388,7 @@ format = {
     info.innerHTML = "A bad signature has been encountered, so the application is corrupted!";
   },
 
-  //The x86 core is ready amd we can now begin ms dos disassembly.
+  //The x86 core is ready and we can now begin ms dos disassembly.
 
   disMSDos: function()
   {
@@ -396,7 +397,7 @@ format = {
     core.setCodeSeg((Math.random()*0x2000)<<3); dModel.setCore(core); dModel.coreDisLoc(format.disV,true);
   },
 
-  //The x86 core is ready amd we can now begin Microsoft application disassembly.
+  //The x86 core is ready and we can now begin Microsoft application disassembly.
 
   disEXE: function()
   {
