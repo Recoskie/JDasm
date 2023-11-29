@@ -327,7 +327,7 @@ format = {
       "Java uses the zip format to store application files as a single file as a runnable file called an java jar.<br /><br />" +
       "Android APK applications are stored in zip files to save space, and to keep applications organized.<br /><br />" +
       "Apple iPhone IPA applications are stored in zip files to also save space and to keep applications organized.<br /><br />" +
-      "Disassembling android and iPhone apps is supported by JDisassembly, but you will first need to decompress the application file as a zip, then find the application file in the IPA, or APK to open the application binary in JDisassembly.<br /><br />" +
+      "Disassembling android and iPhone apps is supported by JDasm, but you will first need to decompress the application file as a zip, then find the application file in the IPA, or APK to open the application binary in JDasm.<br /><br />" +
       "Microsoft stores office document files into compressed zip files to save space and to keep pictures and models used in the office document organized as one file.</html>";
   },
 

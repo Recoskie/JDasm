@@ -14,6 +14,14 @@ format = {
 
   sec: new dataType("Section Name", Descriptor.String8),
 
+  //DLL, or driver name.
+
+  dllName: new dataType("DLL Name", Descriptor.String8),
+
+  //DLL, or driver function name.
+
+  funcName: new dataType("Method name", Descriptor.String8),
+
   //Reserved data Fields.
 
   r1: new dataType("Reserved", Descriptor.Other),
@@ -39,7 +47,9 @@ format = {
 
   load: function(r) { if(!r) { file.wait(this,"load"); return; } file.onRead(this, "scan"); file.seek(0); file.read(4096); },
 
-  //Initialize the programs setup information.
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Initialize the programs setup information.
+  -------------------------------------------------------------------------------------------------------------------------*/
 
   scan: function()
   {
@@ -221,7 +231,11 @@ format = {
           if( size > 0 ) { root.add(types[i],[-(i+1),loc + this.baseAddress,size]); }
         }
         
-        types = undefined;
+        types = undefined; this.readSec =
+        [
+          this.noReader,this.readDLL,this.noReader,this.noReader,this.noReader,this.noReader,this.noReader,this.noReader,
+          this.noReader,this.noReader,this.noReader,this.noReader,this.noReader,this.noReader,this.noReader,this.noReader
+        ];
 
         //Application section map to virtual address space structure.
 
@@ -275,20 +289,194 @@ format = {
     tree.prototype.treeClick( (!msDos ? Tree.getNode(0).getNode(0) : Tree.getNode(0).getNode(0).getNode(0).getNode(0)).parentElement );
   },
 
-  //Tree event handling.
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Scan DLL import table.
+  -------------------------------------------------------------------------------------------------------------------------*/
 
-  open: function(e)
+  tempNode: null, readDLL: function(vPos, size)
   {
-    e = e.getArgs(); if(e[0] == ""){ return; }
+    //DLL import table array.
 
-    var cmd = parseInt(e[0]);
+    format.vPos = vPos; format.des[6] = new Descriptor([format.dArray = new arrayType("Array Element ",[
+      new dataType("DLL Array Functions Location 1", Descriptor.LUInt32),
+      new dataType("Time Date Stamp", Descriptor.LUInt32),
+      new dataType("Forward Chain", Descriptor.LUInt32),
+      new dataType("DLL Name Location", Descriptor.LUInt32),
+      new dataType("DLL Array Functions Location 2", Descriptor.LUInt32),
+    ])]); format.des[6].offset = vPos;
+
+    //DLL Name.
+
+    format.des[7] = new Descriptor([format.dllName]);
+
+    //DLL function array.
+
+    format.des[8] = new Descriptor([format.funcArray = new arrayType("Array Element ",[
+      new dataType("Import Name Location, or Index", format.is64bit ? Descriptor.LUInt64 : Descriptor.LUInt32),
+    ])]);
+
+    //DLL method name.
+
+    format.des[9] = new Descriptor([format.funcName]);
+
+    //Data is in virtual address space.
+
+    format.des[6].virtual = format.des[7].virtual = format.des[8].virtual = format.des[9].virtual = true;
+
+    //Temporary data statures used for loading the dll import data.
+
+    format.dllEl = function(n,f1,f2){this.nLoc=n;this.name="";this.f1=f1;this.f2=f2;this.fn1=[""];this.fn2=[""];};
+    format.dllArray = [new format.dllEl(0,0,0)]; format.curEl = 0; format.curFn = 0;
+
+    //Begin reading dll array.
+
+    format.callBack=format.scanDLL; file.onRead(format, "scanDLL"); file.seekV(vPos); file.readV(size+20);
+  },
+
+  //Scan the dll array. 
+
+  scanDLL: function(name)
+  {
+    //When Dll array end is reached we load the function lists and names.
+
+    if(format.dllArray[0].name == "f1")
+    {
+      //Load in function names.
+
+      if(format.dllArray[format.curEl].fn1[0] == "end")
+      {
+
+      }
+
+      //Else load the function array.
+
+      else
+      {
+
+      }
+
+      //Scan complete up until here.
+
+      format.dllScanDone(); return;
+    }
+    else if(format.dllArray[0].name == "f2")
+    {
+      //Load in function names.
+
+      if(format.dllArray[format.curEl].fn1[0] == "end")
+      {
+
+      }
+
+      //Else load the function array.
+
+      else
+      {
+        
+      }
+    }
+
+    //When Dll array is loaded we can locate the dll names.
+
+    else if(format.dllArray[0].name == "end")
+    {
+      //Set dll name and increment dll name scan.
+
+      if(name) { format.dllArray[format.curEl++].name=name; }
+
+      //Scan next dll name.
+
+      if(format.curEl<format.dllArray.length)
+      {
+        file.onRead(format, "stringZ"); file.seekV(format.dllArray[format.curEl].nLoc); file.readV(128);
+      }
+      else
+      {
+        format.dllArray[0].name="f1"; format.curEl=1;format.scanDLL();
+      }
+    }
+
+    //Else load the dll array.
+
+    else
+    {
+      var n = -1, f1 = 0, f2 = 0, pos = 0, end = false; while(!(end=((n|f1|f2)==0)) && (file.tempD.length-20)>pos)
+      {
+        f1 = file.tempD[pos]|(file.tempD[pos+1]<<8)|(file.tempD[pos+2]<<16)|(file.tempD[pos+3]<<24);
+        n = file.tempD[pos+12]|(file.tempD[pos+13]<<8)|(file.tempD[pos+14]<<16)|(file.tempD[pos+15]<<24);
+        f2 = file.tempD[pos+16]|(file.tempD[pos+17]<<8)|(file.tempD[pos+18]<<16)|(file.tempD[pos+19]<<24);
+        format.dllArray.push(new format.dllEl(format.baseAddress+n,format.baseAddress+f1,format.baseAddress+f2)); pos += 20;
+      }
+
+      if(end)
+      {
+        format.dllArray[0].name="end";format.curEl=1;format.dllArray.pop();format.scanDLL();
+      }
+      else
+      {
+        file.onRead(format,"scanDLL");file.seekV(pos+file.tempD.offset);file.readV(60);
+      }
+    }
+  },
+
+  //Create the tree nodes and setup the function map and clear the temporary data structures.
+
+  dllScanDone: function()
+  {
+    var n = new treeNode("DLL Import Table",[24],true); format.dArray.length(format.dllArray.length);
+
+    for(var i1=1;i1<format.dllArray.length;i1++)
+    {
+      n.add(new treeNode(format.dllArray[i1].name+".dll",[28,format.dllArray[i1].nLoc,format.dllArray[i1].name.length+1]));
+    }
+
+    format.node.setNode(n); dModel.setDescriptor(format.des[6]);
+
+    //Clear temporary data.
+
+    format.dllArray = format.dllEl = format.curEl = format.curFn = undefined;
+  },
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Section readers that are not yet implemented.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  noReader: function(vPos, size)
+  {
+    dModel.clear(); file.seekV(vPos); ds.setType(15, 0, size, true);
+    
+    info.innerHTML = "No reader, for this section yet in the web version.";
+  },
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Read a zero terminated string and call back function.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  callBack: function(){}, stringZ: function(str)
+  {
+    for(var i=0,str=str||"";i<file.tempD.length;i++)
+    {
+      if(file.tempD[i]==0){format.callBack(str);return;}
+
+      str+=String.fromCharCode(file.tempD[i]);
+    }
+
+    //Read additional 32 bytes if the end of the string has not been reached.
+
+    file.onRead(format,"stringZ");file.seekV(file.tempD.length+file.tempD.offset);file.readV(32);
+  },
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Tree event handling.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
+  open: function(n)
+  {
+    var e = (format.node = n).getArgs(), cmd = parseInt(e[0]); if(e[0] == ""){ return; }
 
     //Check if negative value which are used to load in sections.
 
-    if(cmd < 0)
-    {
-      dModel.clear(); file.seekV(parseFloat(e[1])); ds.setType(15, 0, parseInt(e[2]), true); info.innerHTML = "No reader, for this section yet (web version)."; return;
-    }
+    if(cmd < 0) { format.readSec[-(cmd+1)](parseFloat(e[1]),parseInt(e[2])); return; }
 
     //Check if the argument is a command such as start disassembling code, or select bytes.
 
@@ -319,13 +507,30 @@ format = {
 
     else
     {
-      if(e.length > 1){ format.des[des].offset = parseInt(e[1]); } dModel.setDescriptor(format.des[des]);
+      if(e.length > 1){ format.des[des].offset = parseInt(e[1]); }
+      
+      //In special cases the length of a data can be included.
+
+      if(e.length > 2)
+      {
+        //DLL variable length strings amd function lists.
+
+        if(des == 7){ format.dllName.length(parseInt(e[2])); }
+        if(des == 8){ format.funcArray.length(parseInt(e[2])); }
+        if(des == 9){ format.funcName.length(parseInt(e[2])); }
+      }
+      
+      dModel.setDescriptor(format.des[des]);
     }
   },
 
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Detailed information output goes bellow this comment.
+  -------------------------------------------------------------------------------------------------------------------------*/
+
   //Message output for byte selection command.
 
-  msg: ["Detailed information is not added yet to the Microsoft plugin (web version)."],
+  msg: ["Detailed information is not added yet to the Microsoft plugin on the web version."],
 
   //MZ header information.
 
@@ -387,6 +592,10 @@ format = {
   { 
     info.innerHTML = "A bad signature has been encountered, so the application is corrupted!";
   },
+
+  /*-------------------------------------------------------------------------------------------------------------------------
+  Disassembly methods goes bellow this comment. Note it is possible to add am scanner that translates code to C/C++.
+  -------------------------------------------------------------------------------------------------------------------------*/
 
   //The x86 core is ready and we can now begin ms dos disassembly.
 
