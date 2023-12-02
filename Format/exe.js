@@ -43,6 +43,10 @@ format = {
 
   disV: 0,
 
+  //Multipliers used to load 64 bit values.
+
+  s24:2**24,s32:2**32,s40:2**40,s48:2**48,s56:2**56,
+
   //IO stream must be in ready state before we can Initialize the applications setup information.
 
   load: function(r) { if(!r) { file.wait(this,"load"); return; } file.onRead(this, "scan"); file.seek(0); file.read(4096); },
@@ -198,10 +202,10 @@ format = {
 
         //Add the applications entry point.
 
-        if(this.is64bit) { this.baseAddress = (file.data[pe+24] | (file.data[pe+25] << 8) | (file.data[pe+26] << 16)) + (file.data[pe+27] << 24) + ((file.data[pe+28] * (2**32)) + (file.data[pe+29] * (2**40)) + (file.data[pe+30] * (2**48)) + (file.data[pe+31] * (2**56))); }
-        else { this.baseAddress = (file.data[pe+28] | (file.data[pe+29] << 8) | (file.data[pe+30] << 16)) + (file.data[pe+31] << 24); }
+        if(this.is64bit) { this.baseAddress = (file.data[pe+24]|(file.data[pe+25]<<8)|(file.data[pe+26]<<16))+(file.data[pe+27]*format.s24)+(file.data[pe+28]*format.s32)+(file.data[pe+29]*format.s40)+(file.data[pe+30]*format.s48)+(file.data[pe+31]*format.s56); }
+        else { this.baseAddress = (file.data[pe+28]|(file.data[pe+29]<<8)|(file.data[pe+30]<<16))+(file.data[pe+31]<<24); }
 
-        root.add("Program Start (Machine Code).h", [3,this.baseAddress + ((file.data[pe+16] | (file.data[pe+17] << 8) | (file.data[pe+18] << 16)) + (file.data[pe+19] << 24))]);
+        root.add("Program Start (Machine Code).h", [3,this.baseAddress + ((file.data[pe+16]|(file.data[pe+17]<<8)|(file.data[pe+18]<<16))+(file.data[pe+19]<<24))]);
 
         //The data directory array size is the last 4 bytes of the OP header.
 
@@ -293,7 +297,7 @@ format = {
   Scan DLL import table.
   -------------------------------------------------------------------------------------------------------------------------*/
 
-  tempNode: null, readDLL: function(vPos, size)
+  readDLL: function(vPos, size)
   {
     //DLL import table array.
 
@@ -317,7 +321,7 @@ format = {
 
     //DLL method name.
 
-    format.des[9] = new Descriptor([format.funcName]);
+    format.des[9] = new Descriptor([new dataType("Address list index", Descriptor.LUInt16),format.funcName]);
 
     //Data is in virtual address space.
 
@@ -325,8 +329,8 @@ format = {
 
     //Temporary data statures used for loading the dll import data.
 
-    format.dllEl = function(n,f1,f2){this.nLoc=n;this.name="";this.f1=f1;this.f2=f2;this.fn1=[""];this.fn2=[""];};
-    format.dllArray = [new format.dllEl(0,0,0)]; format.curEl = 0; format.curFn = 0;
+    format.dllEl = function(n,f1,f2){this.nLoc=n;this.name="";this.f1=f1;this.f2=f2;this.fn1=[""];this.fn2=[""];this.fName=[];};
+    format.dllArray = [new format.dllEl(0,0,0)];format.dllArray[0].fn1=format.dllArray[0].fn2="";format.curEl = 0;format.curFn = 0;
 
     //Begin reading dll array.
 
@@ -335,44 +339,72 @@ format = {
 
   //Scan the dll array. 
 
-  scanDLL: function(name)
+  fnPos:[], fnName:[], fnScan:false, scanDLL: function(name)
   {
     //When Dll array end is reached we load the function lists and names.
 
-    if(format.dllArray[0].name == "f1")
+    var fnCheck = format.dllArray[0].name == "f1"; if(fnCheck || format.dllArray[0].name == "f2")
     {
-      //Load in function names.
+      var curFn = fnCheck ? format.dllArray[format.curEl].fn1 : format.dllArray[format.curEl].fn2;
+      
+      //The second function list is meant to be the main array that we read. We use the first function list to write the method locations.
 
-      if(format.dllArray[format.curEl].fn1[0] == "end")
+      if(format.dllArray[0].fn2 == "end")
       {
+        //Set function name and increment function name scan.
 
+        if(name) { format.dllArray[format.curEl].fName[format.curFn++]=name; }
+
+        //Scan next function name.
+
+        if(format.curFn<curFn.length) { file.onRead(format, "stringZ"); file.seekV(curFn[format.curFn]+2); file.readV(128); }
+        else
+        {
+          //Next DLL function list.
+
+          format.curFn=0;format.curEl+=1; if(format.curEl<format.dllArray.length){format.scanDLL();}
+          
+          //Scanning the import table is complete.
+          
+          else { format.dllScanDone(); return; }
+        }
       }
 
-      //Else load the function array.
+      //Else load the two function lists.
 
       else
       {
+        var pos=0,size=!format.is64bit?4:8,loc=-1,end=false;while(!end && pos<(file.tempD.length-size))
+        {
+          if(!format.is64bit) { loc=file.tempD[pos]|(file.tempD[pos+1]<<8)|(file.tempD[pos+2]<<16)|(file.tempD[pos+3]<<24); }
+          else { loc=(file.tempD[pos]|(file.tempD[pos+1]<<8)|(file.tempD[pos+2]<<16))+(file.tempD[pos+3]*format.s24)+(file.tempD[pos+4]*format.s32)+(file.tempD[pos+5]*format.s40)+(file.tempD[pos+6]*format.s48)+(file.tempD[pos+7]*format.s56); }
+          
+          if(!(end=loc==0)){curFn.push(format.baseAddress+loc);pos+=size;}
+        }
 
-      }
+        //When the end is reached we move to the next function list.
 
-      //Scan complete up until here.
+        if(end)
+        {
+          if(format.curEl<(format.dllArray.length-1))
+          {
+            file.onRead(format,"scanDLL");file.seekV(fnCheck ? format.dllArray[format.curEl+=1].f1 : format.dllArray[format.curEl+=1].f2);file.readV(64);
+          }
+          else
+          {
+            //Switch to the second function list when done.
 
-      format.dllScanDone(); return;
-    }
-    else if(format.dllArray[0].name == "f2")
-    {
-      //Load in function names.
+            if(fnCheck) { format.dllArray[0].fn1="end";format.dllArray[0].name="f2";file.onRead(format,"scanDLL");file.seekV(format.dllArray[format.curEl=1].f2);file.readV(64); }
+            
+            //Both lists are scanned and we can begin loading the method names.
+            
+            else{format.dllArray[0].fn2="end";format.curEl=1;format.scanDLL();}
+          }
+        }
 
-      if(format.dllArray[format.curEl].fn1[0] == "end")
-      {
+        //Else end has not been reached and we need more data.
 
-      }
-
-      //Else load the function array.
-
-      else
-      {
-        
+        else { file.onRead(format,"scanDLL");file.seekV(file.tempD.offset+pos);file.readV(64); }
       }
     }
 
@@ -392,7 +424,7 @@ format = {
       }
       else
       {
-        format.dllArray[0].name="f1"; format.curEl=1;format.scanDLL();
+        format.dllArray[0].name="f1"; file.onRead(format,"scanDLL");file.seekV(format.dllArray[format.curEl=1].f1);file.readV(64);
       }
     }
 
@@ -400,17 +432,17 @@ format = {
 
     else
     {
-      var n = -1, f1 = 0, f2 = 0, pos = 0, end = false; while(!(end=((n|f1|f2)==0)) && (file.tempD.length-20)>pos)
+      var n = -1, f1 = 0, f2 = 0, pos = 0, end = false; while(!end && (file.tempD.length-20)>pos)
       {
         f1 = file.tempD[pos]|(file.tempD[pos+1]<<8)|(file.tempD[pos+2]<<16)|(file.tempD[pos+3]<<24);
         n = file.tempD[pos+12]|(file.tempD[pos+13]<<8)|(file.tempD[pos+14]<<16)|(file.tempD[pos+15]<<24);
         f2 = file.tempD[pos+16]|(file.tempD[pos+17]<<8)|(file.tempD[pos+18]<<16)|(file.tempD[pos+19]<<24);
-        format.dllArray.push(new format.dllEl(format.baseAddress+n,format.baseAddress+f1,format.baseAddress+f2)); pos += 20;
+        if(!(end=((n|f1|f2)==0))){format.dllArray.push(new format.dllEl(format.baseAddress+n,format.baseAddress+f1,format.baseAddress+f2));pos+=20;}
       }
 
       if(end)
       {
-        format.dllArray[0].name="end";format.curEl=1;format.dllArray.pop();format.scanDLL();
+        format.dllArray[0].name="end";format.curEl=1;format.scanDLL();
       }
       else
       {
@@ -425,12 +457,24 @@ format = {
   {
     var n = new treeNode("DLL Import Table",[24],true); format.dArray.length(format.dllArray.length);
 
-    for(var i1=1;i1<format.dllArray.length;i1++)
+    var dll=null, fnPos = 0, addrsSize = !format.is64bit ? 4 : 8, fnName = ""; for(var i1=1;i1<format.dllArray.length;i1++)
     {
-      n.add(new treeNode(format.dllArray[i1].name+".dll",[28,format.dllArray[i1].nLoc,format.dllArray[i1].name.length+1]));
+      dll=new treeNode(format.dllArray[i1].name,[28,format.dllArray[i1].nLoc,format.dllArray[i1].name.length+1]);
+
+      dll.add(new treeNode("Function array 1.h",[32,format.dllArray[i1].f1,format.dllArray[i1].fn1.length]));
+      dll.add(new treeNode("Function array 2.h",[32,format.dllArray[i1].f2,format.dllArray[i1].fn2.length]));
+
+      fnPos = format.dllArray[i1].f2;for(var i2=1;i2<format.dllArray[i1].fn2.length;i2++)
+      {
+        fnName=format.dllArray[i1].fName[i2];format.fnPos.push(fnPos);format.fnPos.push(fnPos+=addrsSize);format.fnName.push(fnName);
+
+        dll.add(new treeNode(fnName+"().dll",[36,format.dllArray[i1].fn2[i2],fnName.length+1]));
+      }
+      
+      n.add(dll);
     }
 
-    format.node.setNode(n); dModel.setDescriptor(format.des[6]);
+    format.node.setNode(n); if(!format.fnScan) { dModel.setDescriptor(format.des[6]); } else { format.disEXE(); } format.fnScan = true;
 
     //Clear temporary data.
 
@@ -612,11 +656,17 @@ format = {
 
   disEXE: function()
   {
+    //Only begin disassembly if the import table is read and function calls are mapped.
+
+    if(!format.fnScan){format.fnScan=true;for(var e=Tree.getNode(0),s=null,i=0;i<e.length();i++){if((s=e.getNode(i)).getArgs()[0]==-2){format.open(s);return;}}}
+
     core.showInstructionHex = false;
 
     core.scanReset(); core.addressMap = true; core.resetMap(); core.bitMode = format.is64bit ? 2 : 1;
-      
-    dModel.setCore(core); dModel.coreDisLoc(format.disV,true);
+
+    //Set function call address list and data to core.
+
+    core.set(format.fnPos,format.fnName); dModel.setCore(core); dModel.coreDisLoc(format.disV,true);
   },
 
   //MSDos code scanner. Ensures proper disassembly of old 16 ms dos applications.
