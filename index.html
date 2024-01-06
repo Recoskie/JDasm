@@ -202,7 +202,7 @@
 
       function visibilityChange()
       {
-        //Landscape mode needs some adjustment for the width of components.
+        //Landscape mode needs some adjustment for the width of components on visibility change.
 
         if( vertical )
         { 
@@ -312,7 +312,7 @@
           {
             var mHeight = (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6;
             
-            var mWidth = (offset.visible + virtual.visible) * offset.minDims[0]; if(mWidth == 0 && ds.visible) { mWidth += ds.minDims[0]; }
+            var mWidth = (offset.visible + virtual.visible) * offset.minDims[0]; if(ds.visible) { mWidth += ds.minDims[0]; }
             
             mWidth = Math.max(mWidth, (formatLoad ? (Tree.minDims[0] + dModel.minDims[0]) : 0)) + 6;
             
