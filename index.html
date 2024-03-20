@@ -4,7 +4,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="JD-asm">
-    <meta name="viewport" id="vp" content="" />
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
     <link rel="apple-touch-icon" href="https://recoskie.github.io/JDasm/icon.png">
     <meta property="og:image" content="https://repository-images.githubusercontent.com/24021024/5e678080-0cfe-11eb-9edf-294da025f0c1" />
     <link rel="canonical" href="https://recoskie.github.io/JDasm/" />
@@ -36,6 +36,10 @@
       var file = new FileReaderV(), r = null, r1 = null, r2 = null;
       var Tree = null, dModel = null, info = null;
       var offset = null, virtual = null, ds = null;
+
+      //Only updated when component visibilities change. Used for page aspect ratio when resizing.
+
+      var mWidth = 0, mHeight = 0, pageW = 0, pageH = 0;
       
       //The currently loaded format reader.
       
@@ -93,6 +97,8 @@
       
       function init()
       {
+        pageW = document.documentElement.clientWidth; pageH = document.documentElement.clientHeight;
+
         r = document.getElementById("r"); r1 = document.getElementById("r1"); r2 = document.getElementById("r2");
       
         offset = new VHex("vhex1", file, false); virtual = new VHex("vhex2", file, true);
@@ -116,30 +122,11 @@
       }
       
       //Layout change based on window dimensions, or orientation.
-      //Adjusting vPort on android seems to prevent orientation change event. Works well on iOS.
         
-      var vertical = null, mobile = navigator.userAgent.indexOf("Mobile") >= 0, vPort = (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) ? (document.getElementById ("vp") || false) : false;
+      var vertical = null;
       
-      if( mobile )
+      function re()
       {
-        window.matchMedia("(orientation: portrait)").onchange = function(){ re(); }
-      }
-      else
-      {
-        window.onresize = re;
-      }
-      
-      var pageW = 0, pageH = 0; function re()
-      {
-        pageW = window.innerWidth; pageH = window.innerHeight;
-          
-        if( mobile )
-        {
-          pageW = screen.width; pageH = screen.height;
-          if(window.matchMedia("(orientation: landscape)").matches && pageH > pageW )
-          { var t = pageW; pageW = pageH; pageH = t; }
-        }
-
         //Layout needs to be reinitialized when orientation changes.
       
         if( vertical != pageH < pageW ) { vertical = pageH < pageW; layoutInit = false; }
@@ -148,10 +135,12 @@
         
         if(layoutInit) { resize(); } else { initLayout(); }
       }
+      
+      window.onresize = function() { if(pageW == document.documentElement.clientWidth && pageH == document.documentElement.clientHeight){ return; } pageW = document.documentElement.clientWidth; pageH = document.documentElement.clientHeight; re(); }
 
       //Layout checks.
 
-      var layoutInit = false, reCheck = 0, hCheck = 0;
+      var layoutInit = false, reCheck = 0;
 
       //Initialize the layout. Values set here do not change until window orientation changes.
 
@@ -166,7 +155,7 @@
 
         if( !vertical )
         {
-          r.style="width:100%;display:flex;";
+          r.style="display:flex;";
           r1.style="min-width:" + dModel.minWidth() + ";display:none;flex-direction:column;";
           r2.style="width:100%;display:flex;flex-direction:column;";
         
@@ -179,7 +168,7 @@
 
         else
         {
-          r.style="width:100%;display:flex;flex-direction:column;";
+          r.style="flex-direction:column;";
           r1.style="width:100%;height:100%;min-height:" + dModel.minHeight() + ";display:none;";
           r2.style="width:100%;display:flex;";
 
@@ -194,7 +183,7 @@
           offset.minHeight(virtual.minHeight(ds.visible ? ds.minDims[1] : offset.minDims[1]));
         }
 
-        hCheck = 0; reCheck = 0; formatLoaded(); if(mobile){ adjRatio(); } resize(); layoutInit = true;
+        reCheck = 0; formatLoaded(); resize(); layoutInit = true;
       }
 
       //Layout changes that only need occur when visibility of components change.
@@ -215,7 +204,7 @@
         
         //If there is no loaded format then r1 does not exist and this function can terminate.
         
-        if( !formatLoad ) { if(mobile){ adjRatio(); } return; }
+        if( !formatLoad ) { adjRatio(); return; }
 
         //Initialize the layout for horizontal view. We want the remaining space used for column r1 in width.
         
@@ -236,6 +225,12 @@
           if(ds.visible && (offset.visible || virtual.visible)) { info.style.maxHeight = info.style.minHeight = ds.minDims[1] + "px"; info.style.height = "0px;"; }
           else if(!ds.visible && offset.visible && virtual.visible) { info.style.minHeight = "max("+h+"px,calc(50% - 4px))"; }
           else { info.style.maxHeight = info.style.minHeight = "unset"; info.style.height = "100%"; }
+
+          //Page min width and height.
+
+          mHeight = Tree.minDims[1] + dModel.minDims[1] + 4; if(offset.visible && virtual.visible && ds.visible) { mHeight = offset.minDims[1]; }
+          mHeight = Math.max((offset.visible ? mHeight : 0) + (virtual.visible ? mHeight : 0) + (ds.visible ? ds.minDims[1] : 0) + 4, Tree.minDims[1] + dModel.minDims[1] + 4);
+          mWidth = dModel.minDims[0] + ((offset.visible || virtual.visible) ? offset.minDims[0] : ds.minDims[0]);
         }
 
         //Initialize the layout for vertical view. We want the remaining space used for row r1 in height.
@@ -259,7 +254,15 @@
             info.style.width = (n == 1 ? "30%" : "50%");
           }
           else { Tree.width(dModel.width(info.style.width="33.3333%")); }
+
+          //Page min width and height.
+
+          mHeight = (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6;
+          mWidth = (offset.visible + virtual.visible) * offset.minDims[0]; if(ds.visible) { mWidth += ds.minDims[0]; }            
+          mWidth = Math.max(mWidth, (formatLoad ? (Tree.minDims[0] + dModel.minDims[0]) : 0)) + 6;
         }
+
+        r.style.height="100%";
         
         //Always validate components after changes.
         
@@ -304,47 +307,16 @@
 
         if(formatLoad && vertical) { offset.height(virtual.height( ds.visible ? ds.minDims[1] : "0px")); }
 
-        //We need to specify the min width or height that best fits the mobile device.
+        //Scale page to fit window, and maintain page aspect ratio.
         
-        if(mobile)
-        {
-          if(vertical)
-          {
-            var mHeight = (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6;
-            
-            var mWidth = (offset.visible + virtual.visible) * offset.minDims[0]; if(ds.visible) { mWidth += ds.minDims[0]; }
-            
-            mWidth = Math.max(mWidth, (formatLoad ? (Tree.minDims[0] + dModel.minDims[0]) : 0)) + 6;
-            
-            var s = (mWidth - pageW) > (mHeight - pageH); if(vPort){ vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+""; } else { document.getElementById("mBar").style.minWidth = r.style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px"; }
-          }
-          else
-          {
-            var mHeight = Tree.minDims[1] + dModel.minDims[1] + 4; if(offset.visible && virtual.visible && ds.visible) { mHeight = offset.minDims[1]; }
-            mHeight = Math.max((offset.visible ? mHeight : 0) + (virtual.visible ? mHeight : 0) + (ds.visible ? ds.minDims[1] : 0) + 4, Tree.minDims[1] + dModel.minDims[1] + 4);
-            
-            var mWidth = dModel.minDims[0] + ((offset.visible || virtual.visible) ? offset.minDims[0] : ds.minDims[0]);
-            
-            var s = (mWidth - pageW) > (mHeight - pageH); if(vPort){ vPort.content = s ? "width="+mWidth+"" : "height="+mHeight+""; } else { document.getElementById("mBar").style.minWidth = r.style.minWidth = (s ? mWidth : (mHeight * (pageW / pageH))) + "px"; }
-          }
-          
-          r.style.height = "100%";
-        }
-        
-        //Size of page can be min width of r1 and r2 in the layout direction of the page in a web browser window.
-        
-        else
-        {
-          if(vertical)
-          {
-            r.style.minWidth = Math.max((offset.visible ? offset.minDims[0] : 0) + (virtual.visible ? virtual.minDims[0] : 0) + (ds.visible ? ds.minDims[0] : 0) + 4, Tree.minDims[0] + dModel.minDims[0] + 4) + "px";
-          }
-          else
-          {
-            var h = Tree.minDims[1] + dModel.minDims[1] + 4; if(offset.visible && virtual.visible && ds.visible) { h = offset.minDims[1]; }
-            r.style.minHeight = Math.max((offset.visible ? h : 0) + (virtual.visible ? h : 0) + (ds.visible ? ds.minDims[1] : 0) + 4, Tree.minDims[1] + dModel.minDims[1] + 4) + "px";
-          }
-        }
+        mHeight+=r.getBoundingClientRect().y;
+
+        swingIO.scale(s = ((pageW/mWidth)<(pageH/mHeight)) ? (pageW/mWidth)**0.5 : (pageH/mHeight)**0.5);
+
+        document.getElementById("mBar").style.minWidth = r.style.minWidth = Math.floor(pageW/s/s) + "px";
+        r.style.minHeight = Math.floor((pageH/s/s)-r.getBoundingClientRect().y) + "px";
+
+        mHeight-=r.getBoundingClientRect().y;
       }
 
       //As the window resizes the menu bar can change height and needs to be subtracted from total page height.
@@ -352,14 +324,7 @@
 
       function resize()
       {
-        //Check if menu bar height change occurred.
-        
-        if( (t = document.getElementById("mBar").clientHeight + "px") != hCheck )
-        {
-          r.style.height = 'calc(100% - ' + t + ')'; hCheck = t;
-        }
-
-        offset.validate(); virtual.validate(); dModel.validate();
+        adjRatio(); offset.validate(); virtual.validate(); dModel.validate();
       }
       
       //Drag and drop file Support.
@@ -513,8 +478,6 @@
 
         dragItem = setItem; file.setTarget( setItem );
       }
-      
-      String.prototype.pxValue = function() { return(parseInt(this.replace("px",""))); }
       
       //Add the web application service worker.
       
