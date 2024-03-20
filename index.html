@@ -22,6 +22,7 @@
       .toolBarI a:hover {background-color: #f1f1f1}
       .toolBar:hover .toolBarI { display: block; }
       .toolBar:hover .toolBtn { box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); }
+      :root { overflow: hidden; }
     </style>
     <script type="text/javascript" src="swingIO/UI.js"></script>
     <script type="text/javascript" src="RandomAccessFileV/FileReaderV.js"></script>
@@ -311,7 +312,7 @@
         
         mHeight+=r.getBoundingClientRect().y;
 
-        swingIO.scale(s = ((pageW/mWidth)<(pageH/mHeight)) ? (pageW/mWidth)**0.5 : (pageH/mHeight)**0.5);
+        var s = ((pageW/mWidth)<(pageH/mHeight)) ? (pageW/mWidth)**0.5 : (pageH/mHeight)**0.5; swingIO.scale(s < 1 ? s : 1);
 
         document.getElementById("mBar").style.minWidth = r.style.minWidth = Math.floor(pageW/s/s) + "px";
         r.style.minHeight = Math.floor((pageH/s/s)-r.getBoundingClientRect().y) + "px";
