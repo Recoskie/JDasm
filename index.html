@@ -37,6 +37,7 @@
       var file = new FileReaderV(), r = null, r1 = null, r2 = null;
       var Tree = null, dModel = null, info = null;
       var offset = null, virtual = null, ds = null;
+      var mBar = null;
 
       //Only updated when component visibilities change. Used for page aspect ratio when resizing.
 
@@ -105,7 +106,9 @@
         offset = new VHex("vhex1", file, false); virtual = new VHex("vhex2", file, true);
         ds = new dataInspector("data", file); ds.addEditor(offset); ds.addEditor(virtual);
       
-        Tree = new tree("tree"); dModel = new dataDescriptor("dModel", file); dModel.setInspector(ds); info = document.getElementById("info");
+        Tree = new tree("tree"); dModel = new dataDescriptor("dModel", file); dModel.setInspector(ds);
+        
+        info = document.getElementById("info"); mBar = document.getElementById("mBar");
       
         info.style.overflow = "auto"; info.innerHTML = "File format Information is displayed here, and machine code disassembly.";
         
@@ -229,7 +232,8 @@
 
           mWidth = (formatLoad*(parseInt(dModel.minWidth())+4))+Math.max((offset.visible|virtual.visible)?(parseInt(offset.minWidth())+4):0,ds.visible?(parseInt(ds.minWidth())+4):0);
           mHeight = (offset.visible*(parseInt(offset.minHeight())+4))+(virtual.visible*(parseInt(virtual.minHeight())+4))+(ds.visible*(parseInt(ds.minHeight())+4));
-          if(formatLoad) { mHeight = Math.max(mHeight,(parseInt(Tree.minHeight())+4)+(parseInt(dModel.minHeight())+4)+(((parseInt(info.style.minHeight)||0)+4))); }
+          if(formatLoad) { mHeight = Math.max(mHeight,(parseInt(Tree.minHeight())+4)+(parseInt(dModel.minHeight())+4)+(((parseInt(info.style.minHeight)||parseInt(dModel.minHeight()))+4))); }
+          mWidth-=4;
         }
 
         //Initialize the layout for vertical view. We want the remaining space used for row r1 in height.
@@ -259,6 +263,7 @@
           mHeight = (formatLoad?parseInt(dModel.minHeight())+4:0)+Math.max((offset.visible||virtual.visible)?parseInt(offset.minHeight())+4:0,ds.visible?parseInt(ds.minHeight())+4:0);
           mWidth = (offset.visible*(parseInt(offset.minWidth())+4))+(virtual.visible*(parseInt(virtual.minWidth())+4))+(ds.visible*(parseInt(ds.minWidth())+4));
           if(formatLoad) { mWidth = Math.max(mWidth,(parseInt(Tree.minWidth())+4)+(parseInt(dModel.minWidth())+4)+(parseInt(info.style.minWidth)+4)); }
+          mHeight-=4;
         }
 
         r.style.width = "100%";
@@ -308,16 +313,14 @@
 
         //Menu bar is variable in height depending on how long the file path is.
 
-        var t = document.getElementById("mBar").clientHeight;
+        var t = mBar.clientHeight, s = ((pageW/mWidth)<(pageH/(mHeight+t))) ? (pageW/mWidth) : (pageH/(mHeight+t));
 
         //Scale page to fit window, and maintain page aspect ratio.
 
-        r.style.height = "calc(100% - "+t+"px)";
+        r.style.height = "calc(100% - "+t+"px)"; swingIO.scale(s<1?s**0.5:1);
 
-        var s = ((pageW/mWidth)<(pageH/(mHeight+t))) ? (pageW/mWidth) : (pageH/(mHeight+t)); swingIO.scale(s<1?s**0.5:1);
-
-        document.getElementById("mBar").style.minWidth = r.style.minWidth = Math.floor(pageW/s) + "px";
-        r.style.minHeight = (Math.floor(pageH/s)-(t+10)) + "px";
+        mBar.style.minWidth = r.style.minWidth = Math.floor(pageW/s) + "px";
+        r.style.minHeight = (Math.floor(pageH/s)-t) + "px";
       }
 
       //As the window resizes the menu bar can change height and needs to be subtracted from total page height.
