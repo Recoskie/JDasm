@@ -22,7 +22,6 @@
       .toolBarI a:hover {background-color: #f1f1f1}
       .toolBar:hover .toolBarI { display: block; }
       .toolBar:hover .toolBtn { box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); }
-      :root { overflow: hidden; }
     </style>
     <script type="text/javascript" src="swingIO/UI.js"></script>
     <script type="text/javascript" src="RandomAccessFileV/FileReaderV.js"></script>
@@ -33,7 +32,7 @@
       This is a web based version of JDasm originally designed to run in Java.
       See https://github.com/Recoskie/JDasm/blob/master/app.java
       ------------------------------------------------------------*/
-      
+
       var file = new FileReaderV(), r = null, r1 = null, r2 = null;
       var Tree = null, dModel = null, info = null;
       var offset = null, virtual = null, ds = null;
@@ -124,9 +123,7 @@
       
       //Layout change based on window dimensions, or orientation.
         
-      var vertical = null;
-      
-      function re()
+      var vertical = null; function re()
       {
         //Layout needs to be reinitialized when orientation changes.
       
@@ -169,7 +166,7 @@
 
         else
         {
-          r.style="flex-direction:column;";
+          r.style="display:flex;flex-direction:column;";
           r1.style="width:100%;height:100%;min-height:" + dModel.minHeight() + ";display:none;";
           r2.style="width:100%;display:flex;";
 
@@ -229,9 +226,9 @@
 
           //Page min width and height.
 
-          mHeight = Tree.minDims[1] + dModel.minDims[1] + 4; if(offset.visible && virtual.visible && ds.visible) { mHeight = offset.minDims[1]; }
-          mHeight = Math.max((offset.visible ? mHeight : 0) + (virtual.visible ? mHeight : 0) + (ds.visible ? ds.minDims[1] : 0) + 4, Tree.minDims[1] + dModel.minDims[1] + 4);
-          mWidth = dModel.minDims[0] + ((offset.visible || virtual.visible) ? offset.minDims[0] : ds.minDims[0]);
+          mWidth = (formatLoad*(parseInt(dModel.minWidth())+4))+Math.max((offset.visible|virtual.visible)?(parseInt(offset.minWidth())+4):0,ds.visible?(parseInt(ds.minWidth())+4):0);
+          mHeight = (offset.visible*(parseInt(offset.minHeight())+4))+(virtual.visible*(parseInt(virtual.minHeight())+4))+(ds.visible*(parseInt(ds.minHeight())+4));
+          if(formatLoad) { mHeight = Math.max(mHeight,(parseInt(Tree.minHeight())+4)+(parseInt(dModel.minHeight())+4)+(((parseInt(info.style.minHeight)||0)+4))); }
         }
 
         //Initialize the layout for vertical view. We want the remaining space used for row r1 in height.
@@ -258,12 +255,12 @@
 
           //Page min width and height.
 
-          mHeight = (formatLoad ? dModel.minDims[1] : 0) + Math.max((offset.visible || virtual.visible) ? offset.minDims[1] : 0, ds.visible ? ds.minDims[1] : 0) + 6;
-          mWidth = (offset.visible + virtual.visible) * offset.minDims[0]; if(ds.visible) { mWidth += ds.minDims[0]; }            
-          mWidth = Math.max(mWidth, (formatLoad ? (Tree.minDims[0] + dModel.minDims[0]) : 0)) + 6;
+          mHeight = (formatLoad?parseInt(dModel.minHeight())+4:0)+Math.max((offset.visible||virtual.visible)?parseInt(offset.minHeight())+4:0,ds.visible?parseInt(ds.minHeight())+4:0);
+          mWidth = (offset.visible*(parseInt(offset.minWidth())+4))+(virtual.visible*(parseInt(virtual.minWidth())+4))+(ds.visible*(parseInt(ds.minWidth())+4));
+          if(formatLoad) { mWidth = Math.max(mWidth,(parseInt(Tree.minWidth())+4)+(parseInt(dModel.minWidth())+4)+(parseInt(info.style.minWidth)+4)); }
         }
 
-        r.style.height="100%";
+        mHeight += document.getElementById("mBar").clientHeight; r.style.height = "calc("+(r.style.width = "100%")+" - "+document.getElementById("mBar").clientHeight+"px)";
         
         //Always validate components after changes.
         
@@ -309,15 +306,11 @@
         if(formatLoad && vertical) { offset.height(virtual.height( ds.visible ? ds.minDims[1] : "0px")); }
 
         //Scale page to fit window, and maintain page aspect ratio.
-        
-        mHeight+=r.getBoundingClientRect().y;
 
         var s = ((pageW/mWidth)<(pageH/mHeight)) ? (pageW/mWidth)**0.5 : (pageH/mHeight)**0.5; swingIO.scale(s < 1 ? s : 1);
 
         document.getElementById("mBar").style.minWidth = r.style.minWidth = Math.floor(pageW/s/s) + "px";
-        r.style.minHeight = Math.floor((pageH/s/s)-r.getBoundingClientRect().y) + "px";
-
-        mHeight-=r.getBoundingClientRect().y;
+        r.style.minHeight = Math.floor((pageH/s/s)-document.getElementById("mBar").clientHeight) + "px";
       }
 
       //As the window resizes the menu bar can change height and needs to be subtracted from total page height.
