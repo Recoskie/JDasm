@@ -22,7 +22,7 @@
       .toolBarI a:hover {background-color: #f1f1f1}
       .toolBar:hover .toolBarI { display: block; }
       .toolBar:hover .toolBtn { box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); }
-      :root{ overflow: hidden; }
+      :root { overflow: hidden; }
     </style>
     <script type="text/javascript" src="swingIO/UI.js"></script>
     <script type="text/javascript" src="RandomAccessFileV/FileReaderV.js"></script>
@@ -182,7 +182,7 @@
           offset.minHeight(virtual.minHeight(ds.visible ? ds.minDims[1] : offset.minDims[1]));
         }
 
-        reCheck = 0; formatLoaded(); resize(); layoutInit = true;
+        reCheck = -1; formatLoaded(); resize(); layoutInit = true;
       }
 
       //Layout changes that only need occur when visibility of components change.
@@ -261,7 +261,7 @@
           if(formatLoad) { mWidth = Math.max(mWidth,(parseInt(Tree.minWidth())+4)+(parseInt(dModel.minWidth())+4)+(parseInt(info.style.minWidth)+4)); }
         }
 
-        mHeight += document.getElementById("mBar").clientHeight; r.style.height = "calc("+(r.style.width = "100%")+" - "+document.getElementById("mBar").clientHeight+"px)";
+        r.style.width = "100%";
         
         //Always validate components after changes.
         
@@ -306,21 +306,24 @@
 
         if(formatLoad && vertical) { offset.height(virtual.height( ds.visible ? ds.minDims[1] : "0px")); }
 
+        //Menu bar is variable in height depending on how long the file path is.
+
+        var t = document.getElementById("mBar").clientHeight;
+
         //Scale page to fit window, and maintain page aspect ratio.
 
-        var s = ((pageW/mWidth)<(pageH/mHeight)) ? (pageW/mWidth)**0.5 : (pageH/mHeight)**0.5; swingIO.scale(s < 1 ? s : 1);
+        r.style.height = "calc(100% - "+t+"px)";
 
-        document.getElementById("mBar").style.minWidth = r.style.minWidth = Math.floor(pageW/s/s) + "px";
-        r.style.minHeight = Math.floor((pageH/s/s)-document.getElementById("mBar").clientHeight) + "px";
+        var s = ((pageW/mWidth)<(pageH/(mHeight+t))) ? (pageW/mWidth) : (pageH/(mHeight+t)); swingIO.scale(s<1?s**0.5:1);
+
+        document.getElementById("mBar").style.minWidth = r.style.minWidth = Math.floor(pageW/s) + "px";
+        r.style.minHeight = (Math.floor(pageH/s)-(t+10)) + "px";
       }
 
       //As the window resizes the menu bar can change height and needs to be subtracted from total page height.
       //The hex editors and data model component also need to be checked when window width and height changes.
 
-      function resize()
-      {
-        adjRatio(); offset.validate(); virtual.validate(); dModel.validate();
-      }
+      function resize() { adjRatio(); offset.validate(); virtual.validate(); dModel.validate(); }
       
       //Drag and drop file Support.
       
