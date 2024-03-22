@@ -202,10 +202,10 @@ format = {
 
         //Add the applications entry point.
 
-        if(this.is64bit) { this.baseAddress = (file.data[pe+24]|(file.data[pe+25]<<8)|(file.data[pe+26]<<16))+(file.data[pe+27]*format.s24)+(file.data[pe+28]*format.s32)+(file.data[pe+29]*format.s40)+(file.data[pe+30]*format.s48)+(file.data[pe+31]*format.s56); }
-        else { this.baseAddress = (file.data[pe+28]|(file.data[pe+29]<<8)|(file.data[pe+30]<<16))+(file.data[pe+31]<<24); }
+        if(this.is64bit) { this.baseAddress = (file.tempD[pe+24]|(file.tempD[pe+25]<<8)|(file.tempD[pe+26]<<16))+(file.tempD[pe+27]*format.s24)+(file.tempD[pe+28]*format.s32)+(file.tempD[pe+29]*format.s40)+(file.tempD[pe+30]*format.s48)+(file.tempD[pe+31]*format.s56); }
+        else { this.baseAddress = (file.tempD[pe+28]|(file.tempD[pe+29]<<8)|(file.tempD[pe+30]<<16))+(file.tempD[pe+31]<<24); }
 
-        root.add("Program Start (Machine Code).h", [3,this.baseAddress + ((file.data[pe+16]|(file.data[pe+17]<<8)|(file.data[pe+18]<<16))+(file.data[pe+19]<<24))]);
+        root.add("Program Start (Machine Code).h", [3,this.baseAddress + ((file.tempD[pe+16]|(file.tempD[pe+17]<<8)|(file.tempD[pe+18]<<16))+(file.tempD[pe+19]<<24))]);
 
         //The data directory array size is the last 4 bytes of the OP header.
 
