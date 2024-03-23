@@ -160,8 +160,6 @@
           r.style="display:flex;";
           r1.style="min-width:" + dModel.minWidth() + ";display:none;flex-direction:column;";
           r2.style="width:100%;display:flex;flex-direction:column;";
-        
-          info.style.minHeight = ds.height(ds.minHeight());
 
           Tree.height(dModel.height(virtual.width(offset.width(offset.height(virtual.height("100%"))))));
         }
@@ -174,9 +172,7 @@
           r1.style="width:100%;height:100%;min-height:" + dModel.minHeight() + ";display:none;";
           r2.style="width:100%;display:flex;";
 
-          virtual.height(offset.height("0px"));
-        
-          info.style.minWidth = ds.width(ds.minWidth());
+          virtual.height(offset.height("0px")); info.style.minWidth = ds.width(ds.minWidth());
 
           if((n = offset.visible + virtual.visible + ds.visible) == 3) { offset.width(virtual.width("0px")); ds.width("100%"); }
           else if(n == 2) { n -= ds.visible; offset.width(virtual.width((n == 1 ? "70%" : "50%"))); ds.width(n == 1 ? "30%" : "50%"); }
@@ -214,9 +210,9 @@
         {
           //Check if change occurred.
 
-          if((t = (offset.visible || virtual.visible) ? offset.minWidth() : (ds.visible ? ds.minWidth() : "0")) != reCheck)
+          if((t = (offset.visible || virtual.visible) ? offset.minWidth() : (ds.visible ? ds.minWidth() : "0px")) != reCheck)
           {
-            r1.style.width = "calc(100% - " + (parseInt(t)+4) + "px)"; r2.style.minWidth = r2.style.maxWidth = t; reCheck = t;
+            r1.style.width = t=="0px"?"100%":"calc(100% - " + (parseInt(t)+4) + "px)"; r2.style.minWidth = r2.style.maxWidth = t; reCheck = t;
           }
 
           //Small adjustments to align the cells.
@@ -226,13 +222,13 @@
 
           if(ds.visible && (offset.visible || virtual.visible)) { info.style.maxHeight = info.style.minHeight = ds.minDims[1] + "px"; info.style.height = "0px;"; }
           else if(!ds.visible && offset.visible && virtual.visible) { info.style.minHeight = "max("+h+"px,calc(50% - 4px))"; }
-          else { info.style.maxHeight = info.style.minHeight = "unset"; info.style.height = "100%"; }
+          else { info.style.maxHeight = "unset"; info.style.minHeight = dModel.minHeight(); info.style.height = "100%"; }
 
           //Page min width and height.
 
           mWidth = (formatLoad*(parseInt(dModel.minWidth())+4))+Math.max((offset.visible|virtual.visible)?(parseInt(offset.minWidth())+4):0,ds.visible?(parseInt(ds.minWidth())+4):0);
           mHeight = (offset.visible*(parseInt(offset.minHeight())+4))+(virtual.visible*(parseInt(virtual.minHeight())+4))+(ds.visible*(parseInt(ds.minHeight())+4));
-          if(formatLoad) { mHeight = Math.max(mHeight,(parseInt(Tree.minHeight())+4)+(parseInt(dModel.minHeight())+4)+(((parseInt(info.style.minHeight)||parseInt(dModel.minHeight()))+4))); }
+          if(formatLoad) { mHeight = Math.max(mHeight,(parseInt(Tree.minHeight())+4)+(parseInt(dModel.minHeight())+4)+(((parseInt(info.style.minHeight))+4))); }
           mWidth-=4;
         }
 
@@ -244,7 +240,7 @@
 
           if( (t = ds.visible ? ds.minHeight() : ((offset.visible || virtual.visible) ? offset.minHeight() : "0px")) != reCheck )
           {
-            r1.style.height = "calc(100% - " + (parseInt(t)+4) + "px)"; reCheck = t;
+            r1.style.height = t=="0px"?"100%":"calc(100% - " + (parseInt(t)+4) + "px)"; reCheck = t;
           }
 
           //Small adjustments to align the cells.
