@@ -688,15 +688,15 @@ format = {
 
       //Begin disassembling ms-dos app. MS dos files are by default 16 bit x86.
 
-      else if(cmd == 2) { format.disV = parseInt(e[1]); coreReady = format.disMSDos; loadCore("core/x86/dis-x86.js"); }
+      else if(cmd == 2) { format.disV = parseInt(e[1]); core.x86(format.disMSDos,coreErr); }
 
       //Begin disassembling microsoft app.
 
       else if(cmd == 3)
       {
-        format.disV = parseFloat(e[1]); coreReady = format.disEXE;
+        format.disV = parseFloat(e[1]);
         
-        if(format.coreType == 0x014C || format.coreType == 0x8664) { loadCore("core/x86/dis-x86.js"); } else
+        if(format.coreType == 0x014C || format.coreType == 0x8664) { core.x86(format.disEXE,coreErr); } else
         {
           info.innerHTML = "Core type instruction set not yet supported.";
         }

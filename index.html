@@ -27,7 +27,7 @@
     <script type="text/javascript" src="swingIO/UI.js"></script>
     <script type="text/javascript" src="RandomAccessFileV/FileReaderV.js"></script>
     <script type="text/javascript" id="Format"></script>
-    <script type="text/javascript" id="coreType"></script>
+    <script type="text/javascript" src="core/core.js"></script>
     <script>
       /*------------------------------------------------------------
       This is a web based version of JDasm originally designed to run in Java.
@@ -46,14 +46,6 @@
       //The currently loaded format reader.
       
       var Format = null;
-      
-      //Used for loading in processor core types.
-      
-      var coreType = null;
-
-      //Function to call when core is loaded.
-
-      var coreReady = null;
       
       //Enable binary tree and data model, and info window for file format readers.
       
@@ -114,7 +106,7 @@
         
         virtual.adjSize(); virtual.hide(true); re(); offset.hide(true); ds.hide(true);
       
-        Format = document.getElementById("Format"); coreType = document.getElementById("coreType");
+        Format = document.getElementById("Format");
         
         //Open an example file.
 
@@ -418,20 +410,6 @@
         //Else it is already loaded so we just call the load operation over again.
       
         else { try{ format.load(); formatLoaded(true); } catch(e) { fmtErr(); } document.head.appendChild(Format); }
-      }
-      
-      //core loader.
-      
-      function loadCore(url)
-      {
-        //If we already have the core loaded there is no need to reload the script.
-      
-        if( coreType.src != url )
-        {
-          coreType.parentElement.removeChild(coreType); coreType = document.createElement("script"); coreType.src = url;
-          coreType.onerror = coreErr; if(coreReady != null){coreType.onload = function(){ coreReady(); coreReady=null; } } document.head.appendChild(coreType);
-        }
-        else { try{ coreReady(); coreReady = null; } catch(e) { coreErr(); } }
       }
       
       //Error message if there is a problem loading the format reader.

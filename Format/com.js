@@ -16,7 +16,7 @@ format = {
 
     //Dos com files are by default x86-16 bit programs.
 
-    loadCore("core/x86/dis-x86.js");
+    core.x86();
 
     //Dos com files are loaded at 0x100 by default in virtual address space.
 
