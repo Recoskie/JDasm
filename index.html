@@ -392,7 +392,7 @@
           for( var i = 0; i < extensions.length; i++ ) { if( ex == extensions[i] ) { loadFormat(decodeAppEX[i]); return; } }
         }
       
-        formatLoaded(false);
+        if(virtual.visible){ showH(true); } formatLoaded(false);
       }
       
       //Format loader.

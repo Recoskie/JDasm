@@ -51,6 +51,10 @@ format = {
 
   s24:2**24,s32:2**32,s40:2**40,s48:2**48,s56:2**56,
 
+  //An microsoft binary can contain a 16-bit dos application along side the main application.
+
+  coreMap: [[[],[],[]],[[],[],[]]],
+
   //IO stream must be in ready state before we can Initialize the applications setup information.
 
   load: function(r) { if(!r) { file.wait(this,"load"); return; } file.onRead(this, "scan"); file.seek(0); file.read(4096); },
@@ -1272,7 +1276,7 @@ format = {
 
     core.scan = format.dosScan; core.addressMap = true; core.resetMap(); core.bitMode = 0;
     
-    core.setCodeSeg((Math.random()*0x2000)<<3); dModel.setCore(core); dModel.coreDisLoc(format.disV,true);
+    core.setCodeSeg((Math.random()*0x2000)<<3); dModel.setCore(core); core.setMap(format.coreMap[0]); dModel.coreDisLoc(format.disV,true);
   },
 
   //The x86 core is ready and we can now begin Microsoft application disassembly.
@@ -1289,7 +1293,7 @@ format = {
 
     //Set function call address list and data to core.
 
-    core.set(format.fnMap); dModel.setCore(core); dModel.coreDisLoc(format.disV,true);
+    core.set(format.fnMap); core.setMap(format.coreMap[1]); dModel.setCore(core); dModel.coreDisLoc(format.disV,true);
   },
 
   //MSDos code scanner. Ensures proper disassembly of old 16 ms dos applications.
@@ -1332,4 +1336,6 @@ dModel.dis = function()
   window.offset.slen = 1; window.virtual.slen = core.getAddress() - format.disV;
     
   dModel.adjSize(); dModel.update(); file.seekV(format.disV);
+  
+  format.coreMap[core.scan == format.dosScan ? 0 : 1] = core.getMap();
 }
