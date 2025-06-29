@@ -4,7 +4,7 @@
 format = {
   //DOS com files have a blank header.
 
-  header: new Descriptor([]),
+  header: new Descriptor([]), coreMap: [[],[],[]],
 
   //Function load is always called first.
 
@@ -35,8 +35,9 @@ format = {
 
     //Set the default selected node.
 
-    tree.prototype.treeClick( Tree.getNode(0).getNode(0).parentElement ); file.wait(function(){file.seekV(0x100);});
+    tree.prototype.treeClick( Tree.getNode(0).getNode(0).parentElement ); file.wait(this,"baseLoc");
   },
+  baseLoc: function(){file.seekV(0x100);},
 
   //Tree event handling.
 
@@ -49,7 +50,7 @@ format = {
     {
       core.showInstructionHex = false;
 
-      core.scanReset(); core.addressMap = true; core.resetMap(); core.bitMode = 0;
+      core.scanReset(); core.addressMap = true; core.resetMap(); core.bitMode = 0; core.setMap(format.coreMap);
       
       core.setCodeSeg((Math.random()*0x2000)<<3); dModel.setCore(core); dModel.coreDisLoc(0x100,true);
     }
@@ -73,20 +74,36 @@ dModel.coreDisLoc = function(virtual,crawl)
 
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
-  file.bufRead( this, "dis" ); file.seekV(this.vr = virtual); file.initBufV();
+  file.bufRead(this, "dis", ""); file.seekV(format.vr = virtual); file.initBufV();
 }
 
-dModel.dis = function()
+dModel.dis = function(code)
 {
   //Set binary code relative position within the buffer.
 
-  core.setBinCode(file.dataV,this.vr - file.dataV.offset);
+  if(code==""){core.setBinCode(file.dataV,format.vr - file.dataV.offset);}
+  else{core.setBinCode(file.dataV,0);}
   
   //Begin disassembling the code.
   
-  info.innerHTML = "<pre>" + core.disassemble(this.cr) + "</pre>";
+  code += core.disassemble(this.cr);
 
-  window.virtual.slen = core.getAddress() - this.vr;
+  if(!core.dEnd) //If not of bounds in data.
+  {
+    info.innerHTML = "<pre>" + code + "</pre>";
+  
+    window.offset.slen = 1; window.virtual.slen = core.getAddress() - format.vr;
     
-  dModel.adjSize(); dModel.update(); file.seekV(this.vr);
+    dModel.adjSize(); dModel.update(); file.seekV(format.vr);
+  
+    format.coreMap = core.getMap(); return;
+  }
+
+  //Else read next buf at last instruction.
+
+  file.bufRead(this, "dis", code); core.setBasePosition(core.instructionPos);
+
+  console.log("Last pos = " + core.instructionPos);
+
+  file.seekV(core.getAddress()); file.readV(file.buf);
 }

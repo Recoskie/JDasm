@@ -1320,22 +1320,33 @@ dModel.coreDisLoc = function(virtual,crawl)
 
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
-  file.bufRead(this, "dis"); file.seekV(format.disV = virtual); file.initBufV();
+  file.bufRead(this, "dis", ""); file.seekV(format.disV = virtual); file.initBufV();
 }
 
-dModel.dis = function()
+dModel.dis = function(code)
 {
   //Set binary code relative position within the buffer.
 
-  core.setBinCode(file.dataV,format.disV - file.dataV.offset);
+  if(code==""){core.setBinCode(file.dataV,format.disV - file.dataV.offset);}
+  else{core.setBinCode(file.dataV,0);}
   
   //Begin disassembling the code.
   
-  info.innerHTML = "<pre>" + core.disassemble(this.cr) + "</pre>";
+  code += core.disassemble(this.cr);
 
-  window.offset.slen = 1; window.virtual.slen = core.getAddress() - format.disV;
-    
-  dModel.adjSize(); dModel.update(); file.seekV(format.disV);
+  if(!core.dEnd) //If not of bounds in data.
+  {
+    info.innerHTML = "<pre>" + code + "</pre>";
   
-  format.coreMap[core.scan == format.dosScan ? 0 : 1] = core.getMap();
+    window.offset.slen = 1; window.virtual.slen = core.getAddress() - format.disV;
+    
+    dModel.adjSize(); dModel.update(); file.seekV(format.disV);
+  
+    format.coreMap[core.scan == format.dosScan ? 0 : 1] = core.getMap(); return;
+  }
+
+  //Else read next buf at last instruction.
+
+  file.bufRead(this, "dis", code); core.setBasePosition(core.instructionPos);
+  file.seekV(core.getAddress()); file.readV(file.buf);
 }
