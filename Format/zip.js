@@ -127,7 +127,7 @@ format = {
 
     //Begin scanning the zip.
 
-    file.onRead(this, "scan"); file.seek(this.fpos); file.read(4096);
+    file.onRead(this, this.scan); file.seek(this.fpos); file.read(4096);
   },
 
   //Scan the zip.
@@ -148,7 +148,7 @@ format = {
 
         //If buffer pos is grater than 4062 then there is not enough data to read the file header properly.
 
-        if( this.bpos >= 4062 ){ file.onRead(this, "scan"); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
+        if( this.bpos >= 4062 ){ file.onRead(this, this.scan); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
 
         //The file path is needed to generate the tree structure of the zip. The extra data is needed in case of extended size if existent for zip64.
 
@@ -156,7 +156,7 @@ format = {
 
         //If there is not enough data to read the variable length fields at the end of the file header then we must start over with more data.
 
-        if( this.bpos >= (4062-(strLen+extData)) ){ file.onRead(this, "scan"); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
+        if( this.bpos >= (4062-(strLen+extData)) ){ file.onRead(this, this.scan); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
 
         //Read the compressed file size.
 
@@ -213,7 +213,7 @@ format = {
 
         //Is there enough data to read the variable in length data felids.
       
-        if( this.bpos >= 4062 ){ file.onRead(this, "scan"); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
+        if( this.bpos >= 4062 ){ file.onRead(this, this.scan); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
       
         strLen = (file.tempD[this.bpos + 29] << 8) | file.tempD[this.bpos + 28];
         extData = (file.tempD[this.bpos + 31] << 8) | file.tempD[this.bpos + 30];
@@ -227,7 +227,7 @@ format = {
       {
         //Is there enough data to read the variable in length data felids.
 
-        if( this.bpos >= 4084 ){ file.onRead(this, "scan"); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
+        if( this.bpos >= 4084 ){ file.onRead(this, this.scan); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
       
         extData = (file.tempD[this.bpos + 11] * (2**56)) + (file.tempD[this.bpos + 10] * (2**48)) + (file.tempD[this.bpos + 9] * (2**40)) + (file.tempD[this.bpos + 8] * (2**32)) +
         (file.tempD[this.bpos + 7] * (2**24)) + ((file.tempD[this.bpos + 6] << 16) | (file.tempD[this.bpos + 5] << 8) | file.tempD[this.bpos + 4]);
@@ -242,7 +242,7 @@ format = {
       {
         //Is there enough data to read the variable in length data felids.
 
-        if( this.bpos >= 4074 ){ file.onRead(this, "scan"); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
+        if( this.bpos >= 4074 ){ file.onRead(this, this.scan); file.seek(this.fpos); this.bpos = 0; file.read(4096); return; }
       
         cLen = (file.tempD[this.bpos + 21] << 8) | file.tempD[this.bpos + 20];
       
@@ -258,7 +258,7 @@ format = {
       else { this.bpos += 1; this.fpos += 1; this.fdata += 1; }
     }
     
-    if( this.fpos < file.size ) { file.onRead(this, "scan"); this.bpos = 0; file.seek(this.fpos); file.read(4096); } else { this.bpos = this.fpos = this.fdata = 0; this.done(); }
+    if( this.fpos < file.size ) { file.onRead(this, this.scan); this.bpos = 0; file.seek(this.fpos); file.read(4096); } else { this.bpos = this.fpos = this.fdata = 0; this.done(); }
   },
 
   //Algorithm for adding tree nodes. It is optimized based on how zip organizes paths.

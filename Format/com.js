@@ -74,7 +74,7 @@ dModel.coreDisLoc = function(virtual,crawl)
 
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
-  file.bufRead(this, "dis", ""); file.seekV(format.vr = virtual); file.initBufV();
+  file.bufRead(this, this.dis, ""); file.seekV(format.vr = virtual); file.initBufV();
 }
 
 dModel.dis = function(code)
@@ -101,7 +101,7 @@ dModel.dis = function(code)
 
   //Else read next buf at last instruction.
 
-  file.bufRead(this, "dis", code); core.setBasePosition(core.instructionPos);
+  file.bufRead(this, this.dis, code); core.setBasePosition(core.instructionPos);
 
   console.log("Last pos = " + core.instructionPos);
 

@@ -350,7 +350,7 @@
       
       function Open( f )
       {
-        file.onRead(this, "onload"); dragItem = f; file.setTarget( f ); offset.hide(false);
+        file.onRead(window, window.onload); dragItem = f; file.setTarget( f ); offset.hide(false);
         
         //Load 4 bytes to scan file signature.
         

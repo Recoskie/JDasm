@@ -57,7 +57,7 @@ format = {
 
   //IO stream must be in ready state before we can Initialize the applications setup information.
 
-  load: function(r) { if(!r) { file.wait(this,"load"); return; } file.onRead(this, "scan"); file.seek(0); file.read(4096); },
+  load: function(r) { if(!r) { file.wait(this,"load"); return; } file.onRead(this, this.scan); file.seek(0); file.read(4096); },
 
   /*-------------------------------------------------------------------------------------------------------------------------
   Initialize the programs setup information.
@@ -374,7 +374,7 @@ format = {
 
       //Begin reading dll array. Note we use the remaining length of the virtual address as the dll import len only covers the dll array size.
 
-      file.onRead(format, "readDLL", vPos); file.seekV(vPos); file.read(file.lengthV()); return;
+      file.onRead(format, format.readDLL, vPos); file.seekV(vPos); file.read(file.lengthV()); return;
     }
 
     //Create root node.
@@ -469,8 +469,8 @@ format = {
       ]);
       format.des[10].virtual = format.des[11].virtual = format.des[12].virtual = true; format.des[10].setEvent(format, "rDInfo"); format.des[11].setEvent(format, "rFInfo"); format.des[12].setEvent(format, "rNInfo");
     }
-    format.rDir = vPos < 0; if(format.rDir) { vPos+=2147483648; } vPos += format.rBase; file.onRead(format, "dirData", vPos); file.seekV(vPos); file.readV(16);
-  }, dirData: function(vPos) { file.onRead(format, "scanRes", vPos); if(format.rDir) { file.seekV(vPos+16); file.readV(((file.tempD[12]|(file.tempD[13]<<8))+(file.tempD[14]|(file.tempD[15]<<8)))<<3); }
+    format.rDir = vPos < 0; if(format.rDir) { vPos+=2147483648; } vPos += format.rBase; file.onRead(format, format.dirData, vPos); file.seekV(vPos); file.readV(16);
+  }, dirData: function(vPos) { file.onRead(format, format.scanRes, vPos); if(format.rDir) { file.seekV(vPos+16); file.readV(((file.tempD[12]|(file.tempD[13]<<8))+(file.tempD[14]|(file.tempD[15]<<8)))<<3); }
   else { file.seekV(vPos); file.readV(16); } }, scanRes: function(vPos)
   {
     //Load in the directory array.
@@ -493,7 +493,7 @@ format = {
   {
     //Load in any dir/file names.
 
-    if(name != undefined){ format.rTemp[i].name = name; i+=2; } for(;i<format.rTemp.length;i+=2) { if(format.rTemp[i] < 0){ file.onRead(format, "rGetNameLen", i); file.seekV((format.rTemp[i] + 2147483648)+format.rBase); file.readV(2); return; } else { format.rTemp[i].name = format.rTemp[i] + ""; } }
+    if(name != undefined){ format.rTemp[i].name = name; i+=2; } for(;i<format.rTemp.length;i+=2) { if(format.rTemp[i] < 0){ file.onRead(format, format.rGetNameLen, i); file.seekV((format.rTemp[i] + 2147483648)+format.rBase); file.readV(2); return; } else { format.rTemp[i].name = format.rTemp[i] + ""; } }
     
     //Create directory nodes.
     
@@ -508,7 +508,7 @@ format = {
 
     format.scanNode = false; format.node.setNode(n); format.open(a1); format.rTemp = [];
   },
-  rGetNameLen: function(i) { file.onRead(format, "rGetName", i); file.seekV((format.rTemp[i] + 2147483650)+format.rBase); file.readV((file.tempD[0]<<1)|(file.tempD[1]<<9)); }, rGetName: function(i) { for(var o = "", t = 0;t<(file.tempD.length-1);o+=String.fromCharCode((file.tempD[t]|(file.tempD[t+1]<<8))),t+=2); format.rScanDir(i,o); },
+  rGetNameLen: function(i) { file.onRead(format, format.rGetName, i); file.seekV((format.rTemp[i] + 2147483650)+format.rBase); file.readV((file.tempD[0]<<1)|(file.tempD[1]<<9)); }, rGetName: function(i) { for(var o = "", t = 0;t<(file.tempD.length-1);o+=String.fromCharCode((file.tempD[t]|(file.tempD[t+1]<<8))),t+=2); format.rScanDir(i,o); },
 
   /*-------------------------------------------------------------------------------------------------------------------------
   Read the exportable methods and data lists. Allow disassembly of callable methods and driver functions in the windows system.
@@ -539,7 +539,7 @@ format = {
       format.des[13].virtual = format.des[14].virtual = format.des[15].virtual = format.des[16].virtual = format.des[17].virtual = format.des[18].virtual = true;
       format.des[13].setEvent(format, "eInfo"); format.des[14].setEvent(format, "eAInfo"); format.des[15].setEvent(format, "eNInfo");
       format.des[16].setEvent(format, "eOInfo");format.des[17].setEvent(format, "eRInfo"); format.des[18].setEvent(format, "eNameInfo");
-      format.des[13].offset = vPos; file.onRead(format,"readExport",vPos);file.seekV(vPos);file.read(len); return;
+      format.des[13].offset = vPos; file.onRead(format,format.readExport,vPos);file.seekV(vPos);file.read(len); return;
     }
 
     //Parse binary data.
@@ -653,7 +653,7 @@ format = {
 
     //Read additional 32 bytes if the end of the string has not been reached.
 
-    file.onRead(format,"stringZ");file.seekV(file.tempD.length+file.tempD.offset);file.readV(32);
+    file.onRead(format,format.stringZ);file.seekV(file.tempD.length+file.tempD.offset);file.readV(32);
   },
 
   /*-------------------------------------------------------------------------------------------------------------------------
@@ -1320,7 +1320,7 @@ dModel.coreDisLoc = function(virtual,crawl)
 
   //If the address we wish to disassemble is within the current memory buffer then we do not have to read any data.
 
-  file.bufRead(this, "dis", ""); file.seekV(format.disV = virtual); file.initBufV();
+  file.bufRead(this, this.dis, ""); file.seekV(format.disV = virtual); file.initBufV();
 }
 
 dModel.dis = function(code)
@@ -1347,6 +1347,6 @@ dModel.dis = function(code)
 
   //Else read next buf at last instruction.
 
-  file.bufRead(this, "dis", code); core.setBasePosition(core.instructionPos);
+  file.bufRead(this, this.dis, code); core.setBasePosition(core.instructionPos);
   file.seekV(core.getAddress()); file.readV(file.buf);
 }
