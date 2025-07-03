@@ -1,7 +1,7 @@
 var GHPATH = '/JDasm';
 var APP_PREFIX = 'jd_';
-var VERSION = 'version_beta107';
-var URLS = [    
+var VERSION = 'version_beta108';
+var URLS = [
   `${GHPATH}/`,
   `${GHPATH}/icon.png`,
   `${GHPATH}/manifest.json`,
@@ -34,7 +34,7 @@ var URLS = [
   `${GHPATH}/Format/jpeg.js`,
   `${GHPATH}/Format/riff.js`,
   `${GHPATH}/Format/zip.js`
-]
+];
 
 var CACHE_NAME = APP_PREFIX + VERSION
 self.addEventListener('fetch', function (e) {
@@ -50,7 +50,7 @@ self.addEventListener('fetch', function (e) {
       }
     })
   )
-})
+});
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
@@ -59,7 +59,7 @@ self.addEventListener('install', function (e) {
       return cache.addAll(URLS)
     })
   )
-})
+});
 
 self.addEventListener('activate', function (e) {
   e.waitUntil(
@@ -76,4 +76,4 @@ self.addEventListener('activate', function (e) {
       }))
     })
   )
-})
+});
