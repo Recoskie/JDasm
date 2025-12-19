@@ -539,7 +539,7 @@ Even though it is an AMD core, it still runs the same x86 machine code as an Int
 
 <br />
 
-There is not much left to teach you here about x86 encoded instructions. You can, however test out your coding skills with <a href="https://recoskie.github.io/X86-64-Disassembler-JS/Basic%20Live%20View.html" target="_blank">Web x86 code disassembler</a>.
+There is not much left to teach you here about x86 encoded instructions. You can, however test out your coding skills with <a href="https://recoskie.github.io/core/x86%20Live%20View.html" target="_blank">Web x86 code disassembler</a>.
 
 <br />
 
@@ -591,7 +591,7 @@ The internal circuits can change. However, the instruction encodings do not even
 
 <br />
 
-The following is straight from ARM and provides a good introduction to how ARM instructions are structured and mapped. See <a href="https://developer.arm.com/documentation/107829/0201/What-is-assembly-language-/How-assembly-code-works">ARM machine code and assembly</a>.
+The following is straight from ARM and provides a good introduction to how ARM instructions are structured and mapped. See <a href="https://developer.arm.com/documentation/107829/0201/What-is-assembly-language-/How-assembly-code-works" target="_blank">ARM machine code and assembly</a>.
 
 <br />
 
