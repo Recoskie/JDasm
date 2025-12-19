@@ -19,7 +19,7 @@ In this document, we will discuss basic machine code and what we mean by system 
 
 <br />
 
-When comparing an x86 core from the '80s like the 16 bit Intel 8086 to a modern AMD ryzen, the first thought that will most likely run through your head is that they might run entirely different machine code, but it is not true.
+When comparing an x86 core from the '80s like the 16 bit Intel 8086 to a modern AMD or Intel x86 core, the first thought that will most likely run through your head is that they might run entirely different machine code, but it is not true.
 
 <br />
 
@@ -69,7 +69,7 @@ For now, let's start with a few sample codes.
 
 <br />
 
-A processor has variables called registers which operations are completed with. In this example, we use the ADD operation code 02.
+A processor has variables called registers which operations are completed with. In this example, we use the ADD operation code 02 hex.
 
 <br />
 
@@ -185,7 +185,7 @@ So you can key in this entire binary code yourself on an AMD or Intel x86 core i
 
 <h2>32 bit x86.</h2>
 
-With the introduction of 32 bit, the 16-bit operations are made 32 bit's long. Thus two-byte add also became 4 byte add. The 8-bit operations remain 8 bit's in length.
+With the introduction of 32-bit, the 16-bit operations are made 32-bit's long. Thus two-byte add also became 4 byte add. The 8-bit operations remain 8-bit's in length.
 
 <br />
 
@@ -205,15 +205,15 @@ This way, both 16-bit operations and 32-bit operations can be mixed in 32-bit mo
 
 <br />
 
-In 16 bit mode, all 32-bit operations are their original 16-bit size without using the operand override prefix 66 hex before every operation.
+In 16-bit mode, all 32-bit operations are their original 16-bit size without using the operand override prefix 66 hex before every operation.
 
 <br />
 
-This allowed 16 bit 8086 to be directly run as it would on a 16-bit core. Plus with the prefix code 66 in 32 bit allowed both 16 bit and 32 bit to be mixed.
+This allowed 16-bit 8086 to be directly run as it would on a 16-bit core. Plus with the prefix code 66 in 32-bit allowed both 16-bit and 32-bit to be mixed.
 
 <h2>64 bit x86.</h2>
 
-With the introduction of 64 bit by AMD, all instructions stayed 32 bit. So using 66 before a 32-bit operation allowed the operation to go 16 bit.
+With the introduction of 64-bit by AMD, all instructions stayed 32-bit. So using 66 before a 32-bit operation allowed the operation to go 16 bit.
 
 <br />  
 
@@ -221,11 +221,11 @@ A new code was added that could only be used in 64-bit mode. The REX prefix uses
 
 <br />
 
-The REX Prefix allowed us to set 64 bits before the next operation and 3 additional settings.
+The REX Prefix allowed us to set 64-bits before the next operation and 3 additional settings.
 
 <br />
 
-<strong>When we set bit mode 32 bit. The instructions 40 to 4F are usable again, as the REX prefix is disabled.</strong>
+<strong>When we set bit mode 32-bit. The instructions 40 to 4F are usable again, as the REX prefix is disabled.</strong>
 
 <br />
 
@@ -233,11 +233,11 @@ Meaning 32-bit machine code has full backward compatibility without any software
 
 <br />
 
-Thus Intel uses AMD's 64-bit REX prefix as it is a good system. It does not affect compatibility to the original 16 bit 8086 instruction to 32 bit.
+Thus Intel uses AMD's 64-bit REX prefix as it is a good system. It does not affect compatibility to the original 16-bit 8086 instruction to 32-bit.
 
 <br />
 
-So even today, the most modern x86 cores still run the same operation codes with prefixes that change the size of the next operation code.
+So even today, the most updated modern x86 cores still run the same operation codes with prefixes that change the size of the next operation code.
 
 <h2>Two byte instruction codes.</h2>
 
@@ -376,11 +376,11 @@ This is still the 16 bit ADD operation 03 in 8086.
 <br />
 
 However, in 64-bit mode, it is 32 in length by default. The register that is used as the memory location becomes 64 in length.<br />
-In 32 bit code or 32-bit mode, the register RDI in the address would be EDI as 32 in length.
+In 32-bit code or 32-bit mode, the register RDI in the address would be EDI as 32 in length.
 
 <br />
 
-48 hex is used before the operation code 03 to make it 64 bit in size. Lastly, 66 hex is used before operation code 03 to make it 16 bit.
+48 hex is used before the operation code 03 to make it 64-bit in size. Lastly, 66 hex is used before operation code 03 to make it 16 bit.
 
 <br />
 
@@ -398,7 +398,7 @@ The value 07 after the operation code is 00000111 binary. The binary splits apar
 
 <br />
 
-This is called a ModR/M byte. This is used with every register and memory operation in x86. When the first two-mode bits are set 11, then the address is switched to a register.
+This is called a ModR/M byte. This is used with every register and memory operation in x86. When the first two mode bits are set 11, then the address is switched to a register.
 
 <br />
 
@@ -410,7 +410,7 @@ So 11, 101, 011 = EB.
 
 <br />
 
-Thus register code 101 is RBP, and code 011 is registered RBX. Do not forget that the registers change names based on the length of the register being used.
+Thus register code 101 is RBP, and code 011 is registered RBX. Do not forget that the registers change names based on the size of the operation being done to the registers 16/32/64-bits.
 
 <br />
 
@@ -424,7 +424,7 @@ The ModR/M encoding is what makes x86 operations flexible. Switch mode to 00 wit
 
 <br />
 
-The selected register moves into the memory address as a location. The other two-mode setting 01 and 10, add a byte after the ModR/M to the address.
+The selected register moves into the memory address as a location. The other two mode setting 01 and 10, add a byte after the ModR/M to the address.
 
 <br />
 
@@ -475,7 +475,7 @@ When register code 100 is used. The next value becomes two register selections a
 <br />
 
 So 00, 101, 100 = 2C. ModR/M byte.
-Then 00, 001, 100 = 0C. SIB byte.
+Then 00, 001, 100 = 0C. Optional SIB byte.
 
 <br />
 
@@ -490,7 +490,7 @@ The second byte is called the SIB address. We can choose any two registers we wi
 <br />
 
 So 00, 101, 100 = 2C. ModR/M byte.
-Then 10, 001, 100 = 8C. SIB byte.
+Then 10, 001, 100 = 8C. Optional SIB byte.
 
 <br />
 
@@ -505,7 +505,7 @@ Lastly, the displacement mode in the ModR/M is added after the SIB byte.
 <br />
 
 So 00, 101, 100 = 2C. ModR/M byte.
-Then 10, 001, 100 = 8C. SIB byte.
+Then 10, 001, 100 = 8C. Optional SIB byte.
 
 <br />
 
@@ -527,11 +527,11 @@ This makes the total instruction encoding for all operations as follows.
 
 <br />
 
-This is the instruction format that is used with all binary instructions. Even to 8086. From <a href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-2a-manual.pdf#page=35" target="_blank">64 ia 32 architectures software developer</a>.
+This is the instruction format that is used with all binary instructions. Even to 8086. From <a href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-2a-manual.pdf#page=35" target="_blank">64 ia 32 architectures software developer</a>. On page 35.
 
 <br />
 
-You can also use the Intel x86 architecture reference, for AMD x86 cores. As x86 is the instruction set architecture. See <a href="https://www.felixcloutier.com/x86/" target="_blank">AMD Instruction list.</a> Derived by Intel architecture manual.
+You can also use the Intel x86 architecture reference, for AMD x86 cores. As x86 is a maped instruction set architecture. See <a href="https://www.felixcloutier.com/x86/" target="_blank">AMD Instruction list.</a> Derived by Intel architecture manual.
 
 <br />
 
@@ -567,15 +567,11 @@ My advice to you is to test the encodings yourself and to learn from the Intel d
 
 <br />
 
-You may also like <a href="http://www.mlsite.net/blog/?p=55" target="_blank">Things that were not immediately obvious to me</a>. Preview bellow.
-
-<br />
-
 <img src="Figs/x86-fig2.gif" />
 
 <h1>ARM architecture.</h1>
 
-Now, let's switch to different processor architecture. Companies that create ARM cores also have to keep instruction maps as well as the company has to find unused instructions not used by other companies to add new instructions in ARM.
+Now, let's switch to different processor architecture. Companies that create ARM cores also have to keep instruction maps to find unused instructions not used by other companies to add new instructions in ARM.
 
 <br />
 
@@ -583,7 +579,7 @@ Even though it is a snapdragon ARM core, it still runs the same ARM machine code
 
 <br />
 
-People have fun with ARM in iPhone. Creating emulators that recompiled code into ARM instruction codes for iPhone. It's not hard to do as the machine code is not a big secret.
+ARM is simple and people have fun with ARM in iPhone. Creating emulators that recompiled code into ARM instruction codes for iPhone. It's not hard to do as the machine code is not a big secret.
 
 <br />
 
@@ -595,7 +591,11 @@ The internal circuits can change. However, the instruction encodings do not even
 
 <br />
 
-Apple does not like people building emulators. They made it that code generated by the binary invoking the operating system to run the code will cause the operating system to refuse to run the code (unless it is code singed as an separate application).
+The following is straight from ARM and provides a good introduction to how ARM instructions are structured and mapped. See <a href="https://developer.arm.com/documentation/107829/0201/What-is-assembly-language-/How-assembly-code-works">ARM machine code and assembly</a>.
+
+<br />
+
+ARM is a lot more fun in many ways than x86. Apple uses the ARM instruction architecture in the iPhone. However apple has made it so that code generated by a binary invoking the operating system to run the code will cause the operating system to refuse to run the code (unless it is code signed as a separate application).
 
 <br />
 
@@ -603,7 +603,11 @@ Currently developers can allow iPhone to run generated machine code called JIT c
 
 <br />
 
-Nothing is stopping anyone from looking at any part of the iOS system. You can decode any part to what it does in iOS. Suppose you wish to spend the time to disassemble ARM core codes from the ARM code map or use an ARM disassembler.
+New updates to the Apple Store do allow emulators; however, we are still not allowed to run code directly from bytes written to memory. Instead, we compare the code and use a relative instruction; interpreting it is much slower than running the code directly on the CPU. So we may not see a fast-running Wii and GameCube emulator on the Apple App Store any time soon without JIT. Things like nintendo 64 amd nintendo DS may be able to run using interpretation and older without being able to directly run the code.
+
+<br />
+
+Additionally, the average user may find it interesting that there is nothing preventing anyone from viewing any part of the iOS system. You can decode any part of what it does in iOS. Suppose you wish to spend the time to disassemble ARM core codes from the ARM code map or use an ARM disassembler.
 
 <br />
 
@@ -636,10 +640,6 @@ ARM cores may not have a bunch of operations codes, however, can be clocked much
 <br />
 
 All ARM instruction codes are 32 bits long in the memory, unlike x86, which has variable-length instructions.
-
-<br />
-
-The following link is a simple introduction to ARM technology. Used in cell phones, and other mobile devices: <a href="http://www.csbio.unc.edu/mcmillan/Comp411F18/Lecture06.pdf" target="_blank">Link</a>.
 
 <br />
 
@@ -707,7 +707,7 @@ No matter how good of a detection model we make, it is not full proof to those t
 
 <br />
 
-This is why detection software must be updated constantly, as it is not hard to make stuff pass through the scanner undetected.
+This is why detection software must be updated constantly, as it is not that hard to make stuff pass through the scanner undetected.
 
 <h1>Moving on to code.</h1>
 

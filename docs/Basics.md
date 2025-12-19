@@ -326,7 +326,7 @@ You can make any number system you like using any grouping of numbers you like s
 
 <br />
 
-It just is that using two symbols as off and on for a transistor makes it easy to implement in a digital system. See <a href="https://www.cs.nmsu.edu/~hdp/cs273/notes/binary.html" target="_blank">binary, and radix.</a>
+Binary logic uses only two digits, 1 and 0, to represent information in digital systems. This is similar to a switch being either fully on or fully off, as in a transistor. The sharp distinction between on and off results in lower error rates, making digital systems accurate and reliable. In contrast, analog computers used all values between on and off, much like adjusting a tap, which made them less accurate and more vulnerable to small environmental changes. By using only two extremes-1 and 0-digital systems nearly eliminate errors. Additionally, 1 and 0 are the minimal set needed to represent any value.
 
 <h2>Negative, and positive numbers.</h2>
 
@@ -412,11 +412,11 @@ It is how we display the value that changes.
 
 <br />
 
-In reality, your source code can have singed numbers, but by disassembling its machine operations. You, then could recreate the code as all unsigned numbers without error.
+In reality, your code can have singed numbers, but by disassembling its operations. You, then could recreate the code as all unsigned numbers without errors.
 
 <br />
 
-You will actually see this in code when translating machine code. You actually have to make the determination of the number type based on how it is used.
+You will actually see this in code when translating code. You actually have to make the determination of the number type based on how it is used.
 
 <h2 style="clear:left;">Floating point numbers.</h2>
 
@@ -538,7 +538,7 @@ A Char is short for charterer. Each key code on your keyboard sends a byte, whic
 
 <br />
 
-This format stays the same between systems. Otherwise, documents would fail to load and would end up printing out gibberish.
+This format stays the same between systems. Otherwise, documents would fail to load and would end up printing out gibberish across systems.
 
 <br />
 
@@ -953,7 +953,7 @@ Also, the Nintendo 3DS had three screens one after another in video memory. One 
 
 <br />
 
-The <a href="https://en.wikipedia.org/wiki/BMP_file_format#:~:text=The%20BMP%20file%20format%2C%20also,and%20OS%2F2%20operating%20systems" target="_blank">Bit Map picture format</a> is based on the raw binary forum of graphics memory and is a hardware independent picture format.
+The <a href="https://en.wikipedia.org/wiki/BMP_file_format" target="_blank">Bit Map picture format</a> is based on the raw binary forum of graphics memory and is a hardware independent picture format.
 
 <br />
 
